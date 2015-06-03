@@ -1,0 +1,4 @@
+1) vytvorit resource
+2) cmd.exe -> brc32 -r c:\UsersData\Vlak\Delphi\PanelEditor\DelphiFiles\Resource.rc
+3) Vytvori se soubor .res
+4) V unite, kde je pouzito pod implementation: {$R Resource.res}
