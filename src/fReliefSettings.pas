@@ -1,4 +1,4 @@
-unit ReliefSettingsForm;
+unit fReliefSettings;
 
 interface
 
@@ -41,7 +41,7 @@ var
 
 implementation
 
-uses Main;
+uses fMain;
 
 {$R *.dfm}
 

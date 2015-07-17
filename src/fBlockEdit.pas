@@ -1,4 +1,4 @@
-unit BlockEdit;
+unit fBlockEdit;
 
 interface
 
@@ -95,7 +95,7 @@ var
 
 implementation
 
-uses Main, OblastRizeni;
+uses fMain, OblastRizeni;
 
 {$R *.dfm}
 

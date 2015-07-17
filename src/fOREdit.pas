@@ -1,4 +1,4 @@
-unit OREdit;
+unit fOREdit;
 
 interface
 
@@ -58,7 +58,7 @@ var
 
 implementation
 
-uses Main;
+uses fMain;
 
 {$R *.dfm}
 

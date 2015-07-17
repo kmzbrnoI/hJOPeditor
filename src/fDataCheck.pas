@@ -1,4 +1,4 @@
-unit frmDataCheck;
+unit fDataCheck;
 
 interface
 
@@ -25,7 +25,7 @@ var
 
 implementation
 
-uses Main;
+uses fMain;
 
 {$R *.dfm}
 

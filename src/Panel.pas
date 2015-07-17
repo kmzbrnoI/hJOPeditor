@@ -212,7 +212,7 @@ type
 implementation
 {$R Resource.res}
 
-uses OREdit, main;
+uses fOREdit, fMain;
 
 constructor TRelief.Create(DDRaw:TDXDraw;aParentForm:TForm);
 begin

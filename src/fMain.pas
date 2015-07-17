@@ -1,4 +1,4 @@
-unit Main;
+unit fMain;
 
 interface
 
@@ -6,7 +6,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, Menus, ReliefObjects, Buttons, ToolWin, ComCtrls, ExtCtrls, Panel,
   ImgList, DXDraws, StdCtrls, AppEvnts, StrUtils, ReliefBitmap, Global,
-  ReliefSettings, BlockEdit, DXSprite, DIB;
+  ReliefSettings, fBlockEdit, DXSprite, DIB;
 
 const
   _open_file_errors: array [1..5] of string =
@@ -179,8 +179,8 @@ var
 
 implementation
 
-uses NewRelief, ChangeRelief, ReliefSettingsForm, PopiskekForm, OblastRizeni,
-  OREdit, frmDataCheck;
+uses fNewRelief, fChangeRelief, fReliefSettings, fPopiskek, OblastRizeni,
+  fOREdit, fDataCheck;
 
 {$R *.dfm}
 

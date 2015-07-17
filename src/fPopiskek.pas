@@ -1,10 +1,10 @@
-unit PopiskekForm;
+unit fPopiskek;
 
 interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, Main, ReliefText;
+  Dialogs, StdCtrls, ExtCtrls, fMain, ReliefText;
 
 type
   TF_Popisek = class(TForm)

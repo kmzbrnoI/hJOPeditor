@@ -1,4 +1,4 @@
-unit NewRelief;
+unit fNewRelief;
 
 interface
 
@@ -62,7 +62,7 @@ var
 
 implementation
 
-uses Main, ReliefObjects, ReliefBitmap;
+uses fMain, ReliefObjects, ReliefBitmap;
 
 {$R *.dfm}
 

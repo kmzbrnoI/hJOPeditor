@@ -46,40 +46,42 @@
 			<DelphiCompile Include="PanelEditor.dpr">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="Main.pas">
+			<DCCReference Include="fMain.pas">
 				<Form>F_Hlavni</Form>
 			</DCCReference>
 			<DCCReference Include="ReliefObjects.pas">
-				<Form>F_NewRelief</Form>
+				<Form>,
+  Panel in &apos;Panel.pas&apos;,
+  fNewRelief in &apos;fNewRelief.pas&apos; {F_NewRelief</Form>
 			</DCCReference>
 			<DCCReference Include="Panel.pas"/>
-			<DCCReference Include="NewRelief.pas">
+			<DCCReference Include="fNewRelief.pas">
 				<Form>F_NewRelief</Form>
 			</DCCReference>
 			<DCCReference Include="ReliefBitmap.pas"/>
-			<DCCReference Include="ChangeRelief.pas">
+			<DCCReference Include="fChangeRelief.pas">
 				<Form>F_ReliefProperties</Form>
 			</DCCReference>
 			<DCCReference Include="Global.pas"/>
 			<DCCReference Include="ReliefSettings.pas"/>
-			<DCCReference Include="ReliefSettingsForm.pas">
+			<DCCReference Include="fReliefSettings.pas">
 				<Form>F_ReliefOptions</Form>
 			</DCCReference>
 			<DCCReference Include="ReliefText.pas"/>
-			<DCCReference Include="PopiskekForm.pas">
+			<DCCReference Include="fPopiskek.pas">
 				<Form>F_Popisek</Form>
 			</DCCReference>
 			<DCCReference Include="VektorBasedObject.pas"/>
 			<DCCReference Include="ReliefBitmapSymbols.pas"/>
 			<DCCReference Include="BitmapToObj.pas"/>
-			<DCCReference Include="BlockEdit.pas">
+			<DCCReference Include="fBlockEdit.pas">
 				<Form>F_BlockEdit</Form>
 			</DCCReference>
 			<DCCReference Include="OblastRizeni.pas"/>
-			<DCCReference Include="OREdit.pas">
+			<DCCReference Include="fOREdit.pas">
 				<Form>F_OREdit</Form>
 			</DCCReference>
-			<DCCReference Include="frmDataCheck.pas">
+			<DCCReference Include="fDataCheck.pas">
 				<Form>F_DataCheck</Form>
 			</DCCReference>
 			<DCCReference Include="ReliefZT.pas"/>

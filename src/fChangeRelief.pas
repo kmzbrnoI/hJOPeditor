@@ -1,10 +1,10 @@
-unit ChangeRelief;
+unit fChangeRelief;
 
 interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, Main, Panel, ReliefBitmap;
+  Dialogs, StdCtrls, fMain, Panel, ReliefBitmap;
 
 type
   TF_ReliefProperties = class(TForm)
