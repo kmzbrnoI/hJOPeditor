@@ -141,7 +141,7 @@ type
    const
     _PanelErrors: array [0..4] of string = ('Vybírat lze pouze zleva doprava a zhora dolù','Prázdné pole (není s èím operovat)',
                                             'Chyba externí funkce','Cílové pole obsazeno','Pøekroèeny maximální limity');
-    _Caption = 'Panel editor';
+    _Caption = 'hJOPeditor';
     _Config_File = 'Config.ini';
 
     procedure ActivateSymbol(index:Integer);
@@ -577,7 +577,7 @@ end;
 
 procedure TF_Hlavni.PM_AboutClick(Sender: TObject);
 begin
- Application.MessageBox(PChar('-- Panel editor --'+#13#10+'v'+GetVersion(Application.ExeName)+#13#10+'(c) Jan Horáèek 2011-2014'),'Info',MB_OK OR MB_ICONINFORMATION);
+ Application.MessageBox(PChar('-- hJOPeditor --'+#13#10+'v'+GetVersion(Application.ExeName)+#13#10+'(c) Jan Horáèek 2011-2014'),'Info',MB_OK OR MB_ICONINFORMATION);
 end;//procedure
 
 procedure TF_Hlavni.PM_BitmapClick(Sender: TObject);

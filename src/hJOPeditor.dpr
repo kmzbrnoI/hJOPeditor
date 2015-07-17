@@ -1,4 +1,4 @@
-program PanelEditor;
+program hJOPeditor;
 
 uses
   Forms,
@@ -30,7 +30,7 @@ uses
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  Application.Title := 'Panel editor';
+  Application.Title := 'hJOPeditor';
   Application.CreateForm(TF_Hlavni, F_Hlavni);
   Application.CreateForm(TF_NewRelief, F_NewRelief);
   Application.CreateForm(TF_ReliefProperties, F_ReliefProperties);

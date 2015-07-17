@@ -1,7 +1,7 @@
 object F_Hlavni: TF_Hlavni
   Left = 0
   Top = 0
-  Caption = 'Panel editor'
+  Caption = 'hJOPeditor'
   ClientHeight = 585
   ClientWidth = 1098
   Color = clBtnFace
