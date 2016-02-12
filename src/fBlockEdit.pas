@@ -74,7 +74,6 @@ type
 
     LB_BlocksIndexes:array [0.._MAX_BLK] of Integer;     // indexaci pole pro ListBox, zde jsou ulozeny inedxy bloku (nikoliv id!!)
 
-    function GetBlokIndex(id:integer):integer;
     procedure LoadOR();
     procedure SaveData();
 
@@ -385,15 +384,6 @@ begin
  if (key = #13) then Self.B_ApplyClick(Self);
 end;
 
-function TF_BlockEdit.GetBlokIndex(id:integer):integer;
-var i:Integer;
-begin
- for i := 0 to Self.Bloky.Count-1 do
-   if (Self.Bloky.Bloky[i].id = id) then
-     Exit(i);
- Result := -1;
-end;//function
-
 procedure TF_BlockEdit.LoadOR();
 var ORs:TORList;
     i:Integer;
@@ -422,7 +412,10 @@ begin
  index := 0;
  for i := 0 to Self.Bloky.Count-1 do
   begin
-   if ((LeftStr(Self.Bloky.Bloky[i].Nazev, Length(text)) = text) and ((Self.Bloky.Bloky[i].typ = Self.GetTechBlokType(Self.OpenBlok.typ)) or (Self.GetTechBlokType(Self.OpenBlok.typ) = -1))) then
+   if ((LeftStr(Self.Bloky.Bloky[i].Nazev, Length(text)) = text) and
+      ((Self.Bloky.Bloky[i].typ = Self.GetTechBlokType(Self.OpenBlok.typ)) or
+       ((Self.GetTechBlokType(Self.OpenBlok.typ) = 1) and (Self.Bloky.Bloky[i].typ = 9)) or
+        (Self.GetTechBlokType(Self.OpenBlok.typ) = -1))) then
     begin
      Self.LB_BlocksIndexes[Self.LB_Blocks.Items.Count] := i;
      Self.LB_Blocks.Items.Add(Self.Bloky.Bloky[i].Nazev);

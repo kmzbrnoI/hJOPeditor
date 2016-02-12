@@ -40,7 +40,7 @@ const
 
 type
 
-TBlkType = (usek, navestidlo, vyhybka, prejezd, popisek, pomocny_obj, uvazka, uvazka_spr, zamek, vykol, rozp);
+TBlkType = (usek, navestidlo, vyhybka, prejezd, popisek, pomocny_obj, uvazka, uvazka_spr, zamek, vykol, rozp, TU);
 
 // abstraktni trida, ze ktere dedi konkretni graficke bloky
 TGraphBlok = class
@@ -438,7 +438,7 @@ begin
  //vymazani dat
  for i := 0 to Self.Bloky.Count-1 do
   begin
-   if (Self.Bloky[i].typ = TBlkType.usek) then
+   if ((Self.Bloky[i].typ = TBlkType.usek) or (Self.Bloky[i].typ = TBlkType.TU)) then
     begin
      (Self.Bloky[i] as TUsek).Symbols.Free();
      (Self.Bloky[i] as TUsek).JCClick.Free();
