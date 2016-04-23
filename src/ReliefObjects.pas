@@ -583,32 +583,37 @@ begin
      (blok as TUsek).Vetve := TList<TVetev>.Create();
 
      //nacitani vetvi:
-     count2 := inifile.ReadInteger('U'+IntToStr(i), 'VC', 0);
-     for j := 0 to count2-1 do
+     if (Self.vetve_computed) then
       begin
-       obj := inifile.ReadString('U'+IntToStr(i), 'V'+IntToStr(j), '');
-
-       vetev.node1.vyh        := StrToIntDef(copy(obj, 0, 3), 0);
-       vetev.node1.ref_plus   := StrToIntDef(copy(obj, 4, 2), 0);
-       vetev.node1.ref_minus  := StrToIntDef(copy(obj, 6, 2), 0);
-
-       vetev.node2.vyh        := StrToIntDef(copy(obj, 8, 3), 0);
-       vetev.node2.ref_plus   := StrToIntDef(copy(obj, 11, 2), 0);
-       vetev.node2.ref_minus  := StrToIntDef(copy(obj, 13, 2), 0);
-
-       obj := RightStr(obj, Length(obj)-14);
-
-       SetLength(vetev.Symbols, Length(obj) div 9);
-
-       for k := 0 to Length(vetev.Symbols)-1 do
+       // vetve nacitame jen pokud jsou spocitane
+       // ... abychom rucnim nastavenim VC=0 smazali vsechny vetve
+       count2 := inifile.ReadInteger('U'+IntToStr(i), 'VC', 0);
+       for j := 0 to count2-1 do
         begin
-         vetev.Symbols[k].Position.X := StrToIntDef(copy(obj, 9*k + 1, 3), 0);
-         vetev.Symbols[k].Position.Y := StrToIntDef(copy(obj, (9*k + 4), 3), 0);
-         vetev.Symbols[k].SymbolID   := StrToIntDef(copy(obj, (9*k + 7), 3), 0);
-        end;
+         obj := inifile.ReadString('U'+IntToStr(i), 'V'+IntToStr(j), '');
 
-       (blok as TUsek).Vetve.Add(vetev);
-      end;//for j
+         vetev.node1.vyh        := StrToIntDef(copy(obj, 0, 3), 0);
+         vetev.node1.ref_plus   := StrToIntDef(copy(obj, 4, 2), 0);
+         vetev.node1.ref_minus  := StrToIntDef(copy(obj, 6, 2), 0);
+
+         vetev.node2.vyh        := StrToIntDef(copy(obj, 8, 3), 0);
+         vetev.node2.ref_plus   := StrToIntDef(copy(obj, 11, 2), 0);
+         vetev.node2.ref_minus  := StrToIntDef(copy(obj, 13, 2), 0);
+
+         obj := RightStr(obj, Length(obj)-14);
+
+         SetLength(vetev.Symbols, Length(obj) div 9);
+
+         for k := 0 to Length(vetev.Symbols)-1 do
+          begin
+           vetev.Symbols[k].Position.X := StrToIntDef(copy(obj, 9*k + 1, 3), 0);
+           vetev.Symbols[k].Position.Y := StrToIntDef(copy(obj, (9*k + 4), 3), 0);
+           vetev.Symbols[k].SymbolID   := StrToIntDef(copy(obj, (9*k + 7), 3), 0);
+          end;
+
+         (blok as TUsek).Vetve.Add(vetev);
+        end;//for j
+       end;// if self.vetve_computed
 
      Self.Bloky.Add(blok);
    except
