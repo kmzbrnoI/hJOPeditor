@@ -989,6 +989,7 @@ begin
    if (Button <> mbLeft) then Exit;
 
    tmp_or := Self.GetORGraf(Position);
+   if (Self.PanelObjects.selected_obj = nil) then Exit;
    if (tmp_or.MovingOR < 0) then Exit;   
    if (tmp_or.MovingSymbol <> 0) then Exit;
    Self.PanelObjects.SetOR(tmp_or.MovingOR);
