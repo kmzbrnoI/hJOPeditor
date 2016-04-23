@@ -478,13 +478,16 @@ end;//function
 
 procedure TF_Hlavni.PM_OpenClick(Sender: TObject);
 begin
+ if (Assigned(Relief)) then
+   if (Application.MessageBox('Otevøením nového projektu ztratíte všechna pøedešlá data, pokraèovat?','Pokraèovat?',MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
+     Exit();
+
  if (Self.OD_Open.Execute(Self.Handle)) then
   begin
    if (Assigned(Relief)) then
     begin
      if (Relief.FileStav <> 0) then
-      if (Application.MessageBox('Otevøením nového projektu ztratíte všechna pøedešlá data, pokraèovat?','Pokraèovat?',MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
-        Exit else FreeAndNil(Relief);
+     FreeAndNil(Relief);
     end;//if Assigned(Relief)
 
    Self.OpenFile(Self.OD_Open.FileName);
