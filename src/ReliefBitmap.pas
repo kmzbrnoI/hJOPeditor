@@ -155,6 +155,7 @@ uses ReliefObjects;
 function TPanelBitmap.FLoad(aFile:string;var ORs:string):Byte;
 var myFile:File;
     Buffer:array [0..1023] of Byte;
+    bytesBuf:TBytes;
     i,len:Integer;
     aCount:Integer;
     VBOData:TVBOData;
@@ -292,20 +293,9 @@ begin
 
  len := (Buffer[0] shl 8)+Buffer[1];
 
- while (len > 0) do
-  begin
-   if (len > 1024) then
-    begin
-     BlockRead(myFile,Buffer,1024,aCount);
-    end else begin
-     BlockRead(myFile,Buffer,len,aCount);
-    end;
-   len := len - aCount;
-
-   for i := 0 to aCount-1 do ORs := ORs + chr(Buffer[i]);
-  end;//while (len > 0)
-
- for i := 0 to len-1 do
+ SetLength(bytesBuf, len);
+ BlockRead(myFile, bytesBuf[0], len, aCount);
+ ORs := TEncoding.UTF8.GetString(bytesBuf, 0, aCount);
 
  CloseFile(myFile);
  Result := 0;
@@ -314,10 +304,11 @@ end;//function
 function TPanelBitmap.FSave(aFile:string;const ORs:string):Byte;
 var myFile:File;
     Buffer:array [0..1023] of Byte;
+    bytesBuf:TBytes;
     VBOData:TVBOData;
     PopiskyData:TPopiskyFileData;
     BitmapData:TBSData;
-    i,j:Integer;
+    len:Cardinal;
 begin
  Self.FStav   := 2;
  Self.FSoubor := aFile;
@@ -399,20 +390,16 @@ begin
  BlockWrite(myFile,Buffer,2);
  //-------------------------------------------
 
+ len := TEncoding.UTF8.GetByteCount(ORs);
+ SetLength(bytesBuf, len);
 
- j := 0;
- for i := 0 to Length(ORs) do
-  begin
-   Buffer[j] := ord(ORs[i+1]);
-   j := j + 1;
-   if (j >= 1024) then
-    begin
-     BlockWrite(myFile,Buffer,1024);
-     j := 0;
-    end;
-  end;
+ // delka zpravy
+ Buffer[0] := hi(len);
+ Buffer[1] := lo(len);
+ BlockWrite(myFile, Buffer, 2);
 
- BlockWrite(myFile,Buffer,j);
+ bytesBuf := TEncoding.UTF8.GetBytes(ORs);
+ BlockWrite(myFile, bytesBuf[0], len);
 
  //ukonceni bloku
  Buffer[0] := 255;

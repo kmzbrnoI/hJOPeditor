@@ -869,7 +869,7 @@ begin
 
  // oblasti rizeni
  str_list := TStringList.Create();
- ExtractStrings([#13],[],PChar(RightStr(LeftStr(ORs,Length(ORs)-1),Length(ORs)-3)),str_list);
+ ExtractStrings([#13],[],PChar(LeftStr(ORs,Length(ORs)-1)),str_list);
  for i := 0 to str_list.Count-1 do inifile.WriteString('OR',IntToStr(i),str_list[i]);
  str_list.Free;
 

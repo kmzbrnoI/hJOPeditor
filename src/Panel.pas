@@ -1108,7 +1108,6 @@ end;//procedure
 function TRelief.ORSave:string;
 var i,j:Integer;
 begin
- Result := '  ';    //2 byty jsou vyhrazene pro delku zpravy
  for i := 0 to Self.ORs.Cnt-1 do
   begin
    Result := Result + Self.ORs.Data[i].Name+';'+Self.ORs.Data[i].ShortName+';'+Self.ORs.Data[i].id+';'+
@@ -1125,8 +1124,6 @@ begin
   end;//for i
 
  Result := Result + #13;
- Result[1] := chr(hi(Length(Result)-2));
- Result[2] := chr(lo(Length(Result)-2));
 end;//function
 
 //na kazdem radku je ulozena jedna oblast rizeni ve formatu:
