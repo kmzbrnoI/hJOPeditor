@@ -109,7 +109,7 @@ begin
   end;
 
  str := TStringList.Create();
- Self.iniFile := TMemIniFile.Create(FileName);
+ Self.iniFile := TMemIniFile.Create(FileName, TEncoding.UTF8);
 
  Self.iniFile.ReadSections(str);
  Self.Count := str.Count;

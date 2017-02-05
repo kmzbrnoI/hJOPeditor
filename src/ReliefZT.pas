@@ -339,7 +339,7 @@ begin
   end;
 
  //samotne nacitani dat
- inifile := TMemIniFile.Create(aFile);
+ inifile := TMemIniFile.Create(aFile, TEncoding.UTF8);
 
  //kontrola verze
  ver := inifile.ReadString('G','ver',_ZT_FileVersion);
@@ -487,7 +487,7 @@ begin
 
  DeleteFile(aFile);
 
- inifile := TMemIniFile.Create(aFile);
+ inifile := TMemIniFile.Create(aFile, TEncoding.UTF8);
 
  inifile.WriteString('G', 'ver', _ZT_FileVersion);
 
@@ -597,7 +597,7 @@ begin
    Exit;
   end;
 
- mem := TMemIniFile.Create(aFile);
+ mem := TMemIniFile.Create(aFile, TEncoding.UTF8);
  Result := Self.ZTLoad(mem);
  mem.Free();
 end;//function
@@ -606,7 +606,7 @@ end;//function
 procedure TPanelZT.ZTSave(aFIle:string);
 var mem:TMemIniFile;
 begin
- mem := TMemIniFile.Create(aFile);
+ mem := TMemIniFile.Create(aFile, TEncoding.UTF8);
  Self.ZTSave(mem);
  mem.UpdateFile();
  mem.Free();

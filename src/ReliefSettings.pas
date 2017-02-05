@@ -49,7 +49,7 @@ implementation
 
 procedure TReliefOptions.LoadData(FileName:string);
 begin
- Self.Files.IniFile := TMemIniFile.Create(FileName);
+ Self.Files.IniFile := TMemIniFile.Create(FileName, TEncoding.UTF8);
 
  Self.Colors.Mrizka           := StringToColor(Self.Files.IniFile.ReadString('Colors','Mrizka',ColorToString(_Def_Color_Mrizka)));
  Self.Colors.Pozadi           := StringToColor(Self.Files.IniFile.ReadString('Colors','Pozadi',ColorToString(_Def_Color_Pozadi)));
@@ -64,7 +64,7 @@ end;//function
 
 procedure TReliefOptions.SaveData(FileName:string);
 begin
- Self.Files.IniFile := TMemIniFile.Create(FileName);
+ Self.Files.IniFile := TMemIniFile.Create(FileName, TEncoding.UTF8);
 
  Self.Files.IniFile.WriteString('Colors','Mrizka',ColorToString(Self.Colors.Mrizka));
  Self.Files.IniFile.WriteString('Colors','Pozadi',ColorToString(Self.Colors.Pozadi));
