@@ -39,10 +39,11 @@ procedure TF_DataCheck.LV_ErrorsCustomDrawItem(Sender: TCustomListView;
 begin
  Self.LV_Errors.Canvas.Brush.Color := $FFFFFF;
 
- if (LeftStr(Item.SubItems.Strings[0],3) = 'ERR') then
-   Self.LV_Errors.Canvas.Brush.Color := $CCCCFF;
-
- if (LeftStr(Item.SubItems.Strings[0],2) = 'OK') then
+ if (LeftStr(Item.SubItems.Strings[0],4) = 'WARN') then
+   Self.LV_Errors.Canvas.Brush.Color := $AAFFFF
+ else if (LeftStr(Item.SubItems.Strings[0],3) = 'ERR') then
+   Self.LV_Errors.Canvas.Brush.Color := $CCCCFF
+ else if (LeftStr(Item.SubItems.Strings[0],2) = 'OK') then
    Self.LV_Errors.Canvas.Brush.Color := $CCFFCC;
 end;//procedure
 

@@ -180,7 +180,6 @@ TPanelObjects=class
    FStav:ShortInt;
    FMode:TMode;
    Graphics:TPanelGraphics;
-   vetve_computed:boolean;
 
    PopUpPos:TPoint;
 
@@ -509,8 +508,6 @@ begin
  Self.DrawObject.Height := inifile.ReadInteger('P','H',0);
  Self.DrawObject.Width  := inifile.ReadInteger('P','W',0);
 
- Self.vetve_computed := inifile.ReadBool('P', 'vc', false);
-
  // oblati rizeni
  // tato silena metoda vytvoreni binarniho souboru opravdu zjednodusuje cely program
  sect_str := TStringList.Create();
@@ -582,38 +579,33 @@ begin
      (blok as TUsek).KpopisekStr := inifile.ReadString('U'+IntToStr(i),'N','');
      (blok as TUsek).Vetve := TList<TVetev>.Create();
 
-     //nacitani vetvi:
-     if (Self.vetve_computed) then
+     // vetve
+     count2 := inifile.ReadInteger('U'+IntToStr(i), 'VC', 0);
+     for j := 0 to count2-1 do
       begin
-       // vetve nacitame jen pokud jsou spocitane
-       // ... abychom rucnim nastavenim VC=0 smazali vsechny vetve
-       count2 := inifile.ReadInteger('U'+IntToStr(i), 'VC', 0);
-       for j := 0 to count2-1 do
+       obj := inifile.ReadString('U'+IntToStr(i), 'V'+IntToStr(j), '');
+
+       vetev.node1.vyh        := StrToIntDef(copy(obj, 0, 3), 0);
+       vetev.node1.ref_plus   := StrToIntDef(copy(obj, 4, 2), 0);
+       vetev.node1.ref_minus  := StrToIntDef(copy(obj, 6, 2), 0);
+
+       vetev.node2.vyh        := StrToIntDef(copy(obj, 8, 3), 0);
+       vetev.node2.ref_plus   := StrToIntDef(copy(obj, 11, 2), 0);
+       vetev.node2.ref_minus  := StrToIntDef(copy(obj, 13, 2), 0);
+
+       obj := RightStr(obj, Length(obj)-14);
+
+       SetLength(vetev.Symbols, Length(obj) div 9);
+
+       for k := 0 to Length(vetev.Symbols)-1 do
         begin
-         obj := inifile.ReadString('U'+IntToStr(i), 'V'+IntToStr(j), '');
+         vetev.Symbols[k].Position.X := StrToIntDef(copy(obj, 9*k + 1, 3), 0);
+         vetev.Symbols[k].Position.Y := StrToIntDef(copy(obj, (9*k + 4), 3), 0);
+         vetev.Symbols[k].SymbolID   := StrToIntDef(copy(obj, (9*k + 7), 3), 0);
+        end;
 
-         vetev.node1.vyh        := StrToIntDef(copy(obj, 0, 3), 0);
-         vetev.node1.ref_plus   := StrToIntDef(copy(obj, 4, 2), 0);
-         vetev.node1.ref_minus  := StrToIntDef(copy(obj, 6, 2), 0);
-
-         vetev.node2.vyh        := StrToIntDef(copy(obj, 8, 3), 0);
-         vetev.node2.ref_plus   := StrToIntDef(copy(obj, 11, 2), 0);
-         vetev.node2.ref_minus  := StrToIntDef(copy(obj, 13, 2), 0);
-
-         obj := RightStr(obj, Length(obj)-14);
-
-         SetLength(vetev.Symbols, Length(obj) div 9);
-
-         for k := 0 to Length(vetev.Symbols)-1 do
-          begin
-           vetev.Symbols[k].Position.X := StrToIntDef(copy(obj, 9*k + 1, 3), 0);
-           vetev.Symbols[k].Position.Y := StrToIntDef(copy(obj, (9*k + 4), 3), 0);
-           vetev.Symbols[k].SymbolID   := StrToIntDef(copy(obj, (9*k + 7), 3), 0);
-          end;
-
-         (blok as TUsek).Vetve.Add(vetev);
-        end;//for j
-       end;// if self.vetve_computed
+       (blok as TUsek).Vetve.Add(vetev);
+      end;//for j
 
      Self.Bloky.Add(blok);
    except
@@ -843,8 +835,7 @@ begin
  Self.FStav := 2;
 
  Self.ComputeVyhybkaFlag();
- if (not Self.vetve_computed) then
-   Self.ComputeVetve();
+ Self.ComputeVetve();
 
  DeleteFile(aFile);
 
@@ -862,8 +853,6 @@ begin
 
  inifile.WriteInteger('P', 'H', Self.DrawObject.Height);
  inifile.WriteInteger('P', 'W', Self.DrawObject.Width);
-
- inifile.WriteBool('P', 'vc', Self.vetve_computed);
 
  Self.ComputePrjTechUsek();
 
@@ -908,13 +897,39 @@ begin
      for j := 0 to (Self.Bloky[i] as TUsek).Vetve.Count-1 do
       begin
        if ((Self.Bloky[i] as TUsek).Vetve[j].node1.vyh < 0) then
-         Obj := Format('%.2d%.2d%.2d',[(Self.Bloky[i] as TUsek).Vetve[j].node1.vyh, (Self.Bloky[i] as TUsek).Vetve[j].node1.ref_plus, (Self.Bloky[i] as TUsek).Vetve[j].node1.ref_minus])
+         Obj := Format('%.2d',[(Self.Bloky[i] as TUsek).Vetve[j].node1.vyh])
         else
-         Obj := Format('%.3d%.2d%.2d',[(Self.Bloky[i] as TUsek).Vetve[j].node1.vyh, (Self.Bloky[i] as TUsek).Vetve[j].node1.ref_plus, (Self.Bloky[i] as TUsek).Vetve[j].node1.ref_minus]);
+         Obj := Format('%.3d',[(Self.Bloky[i] as TUsek).Vetve[j].node1.vyh]);
+
+       if ((Self.Bloky[i] as TUsek).Vetve[j].node1.ref_plus < 0) then
+         Obj := Obj + Format('%.1d',[(Self.Bloky[i] as TUsek).Vetve[j].node1.ref_plus])
+        else
+         Obj := Obj + Format('%.2d',[(Self.Bloky[i] as TUsek).Vetve[j].node1.ref_plus]);
+
+       if ((Self.Bloky[i] as TUsek).Vetve[j].node1.ref_minus < 0) then
+         Obj := Obj + Format('%.1d',[(Self.Bloky[i] as TUsek).Vetve[j].node1.ref_minus])
+        else
+         Obj := Obj + Format('%.2d',[(Self.Bloky[i] as TUsek).Vetve[j].node1.ref_minus]);
+
+       ////////
+
        if ((Self.Bloky[i] as TUsek).Vetve[j].node2.vyh < 0) then
-         Obj := Obj + Format('%.2d%.2d%.2d',[(Self.Bloky[i] as TUsek).Vetve[j].node2.vyh, (Self.Bloky[i] as TUsek).Vetve[j].node2.ref_plus, (Self.Bloky[i] as TUsek).Vetve[j].node2.ref_minus])
+         Obj := Obj + Format('%.2d',[(Self.Bloky[i] as TUsek).Vetve[j].node2.vyh])
         else
-         Obj := Obj + Format('%.3d%.2d%.2d',[(Self.Bloky[i] as TUsek).Vetve[j].node2.vyh, (Self.Bloky[i] as TUsek).Vetve[j].node2.ref_plus, (Self.Bloky[i] as TUsek).Vetve[j].node2.ref_minus]);
+         Obj := Obj + Format('%.3d',[(Self.Bloky[i] as TUsek).Vetve[j].node2.vyh]);
+
+       if ((Self.Bloky[i] as TUsek).Vetve[j].node2.ref_plus < 0) then
+         Obj := Obj + Format('%.1d',[(Self.Bloky[i] as TUsek).Vetve[j].node2.ref_plus])
+        else
+         Obj := Obj + Format('%.2d',[(Self.Bloky[i] as TUsek).Vetve[j].node2.ref_plus]);
+
+       if ((Self.Bloky[i] as TUsek).Vetve[j].node2.ref_minus < 0) then
+         Obj := Obj + Format('%.1d',[(Self.Bloky[i] as TUsek).Vetve[j].node2.ref_minus])
+        else
+         Obj := Obj + Format('%.2d',[(Self.Bloky[i] as TUsek).Vetve[j].node2.ref_minus]);
+
+       ////////
+
        for k := 0 to Length((Self.Bloky[i] as TUsek).Vetve[j].Symbols)-1 do
          Obj := Obj + Format('%.3d%.3d%.3d',[(Self.Bloky[i] as TUsek).Vetve[j].Symbols[k].Position.X, (Self.Bloky[i] as TUsek).Vetve[j].Symbols[k].Position.Y, (Self.Bloky[i] as TUsek).Vetve[j].Symbols[k].SymbolID]);
        inifile.WriteString('U'+IntToStr(i), 'V'+IntToStr(j), Obj);
@@ -1509,6 +1524,7 @@ end;//function
 function TPanelObjects.CheckValid(var error_cnt:Byte):TStrings;
 var str:string;
     i:Integer;
+    vetev:TVetev;
 begin
  Result := TStringList.Create();
 
@@ -1549,6 +1565,12 @@ begin
        error_cnt := error_cnt + 1;
       end;
 
+     for vetev in (Self.Bloky[i] as TUsek).Vetve do
+      begin
+       if (((vetev.node1.vyh >= 0) and ((vetev.node1.ref_plus = -1) or (vetev.node1.ref_minus = -1))) or
+          ((vetev.node2.vyh >= 0) and ((vetev.node2.ref_plus = -1) or (vetev.node2.ref_minus = -1)))) then
+         Result.Add('WARN: blok '+IntToStr(i)+' (usek) : vetev ma navaznost na vyhybku, presto za vyhybkou nikam nepokracuje');
+      end;
     end;
 
     //////////////////////////////////
@@ -1575,7 +1597,6 @@ procedure TPanelObjects.SetMode(mode:TMode);
 begin
  Self.FMode := mode;
  Self.Selected := nil;
- Self.vetve_computed := false;
  if (mode = TMode.dmRoots) then
    Self.ComputeVyhybkaFlag();
 end;//procedure
@@ -1665,23 +1686,15 @@ begin
    for row := 0 to Self.PanelHeight-1 do
      data[col, row] := -1;
 
- Self.vetve_computed := true;
-
  for i := 0 to Self.Bloky.Count-1 do
   begin
    if (Self.Bloky[i].typ <> TBlkType.usek) then continue;
 
-   if (not (Self.Bloky[i] as TUsek).IsVyhybka) then
-    begin
-     (Self.Bloky[i] as TUsek).Vetve.Clear();
-     continue;
-    end;
+   (Self.Bloky[i] as TUsek).Vetve.Clear();
+   if (not (Self.Bloky[i] as TUsek).IsVyhybka) then continue;
 
    if ((Self.Bloky[i] as TUsek).Root.X < 0) then
-    begin
-     Self.vetve_computed := false;
      continue;
-    end;
 
    // inicializujeme pole symboly bloku
    for j := 0 to (Self.Bloky[i] as TUsek).Symbols.Count-1 do
@@ -1715,7 +1728,7 @@ end;//procedure
 // tato funkce pocita vetve jednoho bloku
 //   provadi prohledavani do sirky
 //   ve fronte je vzdy ulozena startovni pozice, jedna iterace ji expanduje az do vyhybky (nebo prazdneho pole)
-//   pokud algortimus narazi na vyhybky, do fronty prida 2 deti reprezentujici 2 cesty, kam kde kolej
+//   pokud algortimus narazi na vyhybky, do fronty prida 2 deti reprezentujici 2 cesty, kam jde kolej
 //   v tomto momente lze ziskat index deti v poli vetve jako Vetve.Count + Queue.Count (2. vetev +1) z predpokladu zachovani poradi:
 //      1) kolej do rovna
 //      2) kolej do odbocky
@@ -1790,25 +1803,29 @@ begin
          (Self.Bloky[Self.GetObject(new)] as TVykol).vetev := queue.Count;
          data[new.X, new.Y] := _UsekS_Start;
         end;
+
+       // podivame se na prvni ze dvou vedlejsich policek
        temp.X := new.X + _Usek_Navaznost[((data[new.X, new.Y]-_UsekS_Start)*4) + 0];
        temp.Y := new.Y + _Usek_Navaznost[((data[new.X, new.Y]-_UsekS_Start)*4) + 1];
 
-       // je na vedlejsim poli symbol symbol?
+       // je na vedlejsim poli symbol?
        if (data[temp.X, temp.Y] > -1) and ((temp.X <> first.X) or (temp.Y <> first.Y)) then
         begin
          // ano, na prvnim vedlejsim poli je symbol -> resetuji aktualni pole a do noveho pole priradim pole vedlejsi
         end else begin
+         // ne, na vedlejsim poli neni symbol -> toto policko jsme asi uz prosli, nebo tam proste nic neni
+         // zkusime druhe vedlejsi policko
          temp.X := new.X + _Usek_Navaznost[((data[new.X, new.Y]-_UsekS_Start)*4) + 2];
          temp.Y := new.Y + _Usek_Navaznost[((data[new.X, new.Y]-_UsekS_Start)*4) + 3];
-         // pokud je na druhem vedlejsim poli symbol, expanduji ho; pokud tam neni, while cyklus prochazeni utne
         end;
 
+       // pokud je na druhem vedlejsim poli symbol, expanduji ho; pokud tam neni, while cyklus prochazeni utne
        if (((new.X <> first.X) or (new.Y <> first.Y)) or (j = 1)) then
          data[new.X, new.Y] := -1;
        new := temp;
       end;//while
 
-     // skoncilo prochaeni jednoho smeru aktualni vetve
+     // skoncilo prochazeni jednoho smeru aktualni vetve
      if (data[new.X, new.Y] >= _VyhybkaS_Start) and (data[new.X, new.Y] <= _VyhybkaS_End) then
       begin
        // na aktualnim poli je vyhybka -> nova vetev
@@ -1823,6 +1840,8 @@ begin
 
        // zjistim index vyhybky a pridam dalsi vetve, pokud za vyhybkou existuji useky
        node^.vyh := Self.Bloky[Self.GetObject(new)].index;
+       node^.ref_plus := -1;
+       node^.ref_minus := -1;
 
        // projdu 2 smery, do kterych muze vyhybka (je jasne, ze barvici cesta musela prijit z te strany, kde se koleje spojuji)
        for i := 0 to 1 do

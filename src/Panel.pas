@@ -408,6 +408,9 @@ end;//procedure
 //hlavni zobrazeni celeho reliefu
 procedure TRelief.Show(CursorPos:TPoint);
 begin
+ if (not Assigned(Self.DrawObject)) then Exit(); 
+ if (not Self.DrawObject.CanDraw) then Exit();
+
  Self.DrawObject.Surface.Canvas.Release();
  Self.DrawObject.BeginScene;
 

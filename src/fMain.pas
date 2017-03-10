@@ -776,9 +776,9 @@ begin
 
  if (Assigned(ReliefOptions)) then ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName))+_Config_File);
 
- Self.DestroyReliefClasses;
-
  Self.DesignClose;
+
+ Self.DestroyReliefClasses;
 end;
 
 procedure TF_Hlavni.MI_ExportServerClick(Sender: TObject);

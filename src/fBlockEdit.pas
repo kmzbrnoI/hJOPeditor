@@ -396,7 +396,8 @@ end;
 
 procedure TF_BlockEdit.SaveData();
 begin
- F_Hlavni.Relief.Show(Point(-1,-1));
+ if (Assigned(F_Hlavni.Relief)) then
+   F_Hlavni.Relief.Show(Point(-1,-1));
 end;//procedure
 
 procedure TF_BlockEdit.UpdateLB(text:string);
