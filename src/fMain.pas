@@ -101,11 +101,11 @@ type
     TB_Uvazka: TToolButton;
     IL_Trat: TImageList;
     TB_UvazkaSpr: TToolButton;
-    ToolButton4: TToolButton;
+    ToolButton48: TToolButton;
     TB_Vykolejka: TToolBar;
-    ToolButton5: TToolButton;
-    ToolButton6: TToolButton;
-    ToolButton7: TToolButton;
+    ToolButton49: TToolButton;
+    ToolButton50: TToolButton;
+    ToolButton55: TToolButton;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure PM_NewClick(Sender: TObject);
@@ -340,10 +340,10 @@ begin
     index := Self.pushedButton.Tag;   // index of the symbol
 
     case (index) of
-      0..4:begin
+      0..3:begin
         // vyhybky
         index := index + 1;
-        if (index > 4) then index := 0;
+        if (index > 3) then index := 0;
         Self.ActivateSymbol(index);
       end;
 
@@ -380,6 +380,10 @@ begin
         Self.ActivateSymbol(index);
       end;
 
+      // vykolejka
+      49: Self.ActivateSymbol(50);
+      50: Self.ActivateSymbol(49);
+
     end;
   end;
 
@@ -393,13 +397,16 @@ begin
     else index := -1;
 
     case (index) of
-     0..4  : Self.ActivateSymbol(12);
+     0..3  : Self.ActivateSymbol(12);
      12..17: Self.ActivateSymbol(18);
      18..23: Self.ActivateSymbol(24);
      24..25: Self.ActivateSymbol(28);
-     28..29: Self.ActivateSymbol(30);
+     28..29: Self.ActivateSymbol(49);
      30..31: Self.ActivateSymbol(32);
      32..34: Self.ActivateSymbol(35);
+     40:     Self.ActivateSymbol(48);
+     48:     Self.ActivateSymbol(55);
+     49..50: Self.ActivateSymbol(30);
      35    : Self.ActivateSymbol(30);
     else
      Self.ActivateSymbol(0);
@@ -918,6 +925,15 @@ begin
   33: Self.ToolButton33.OnClick(Self.ToolButton33);
   34: Self.ToolButton34.OnClick(Self.ToolButton34);
   35: Self.ToolButton35.OnClick(Self.ToolButton35);
+
+  41: Self.ToolButton34.OnClick(Self.ToolButton41);
+  42: Self.ToolButton35.OnClick(Self.ToolButton42);
+
+  48: Self.ToolButton48.OnClick(Self.ToolButton48);
+  55: Self.ToolButton55.OnClick(Self.ToolButton55);
+
+  49: Self.ToolButton49.OnClick(Self.ToolButton49);
+  50: Self.ToolButton50.OnClick(Self.ToolButton50);
  end;
 end;//procedure
 

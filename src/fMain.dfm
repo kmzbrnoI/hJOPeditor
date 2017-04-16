@@ -3549,19 +3549,19 @@ object F_Hlavni: TF_Hlavni
         ImageIndex = 29
         OnClick = ToolButton0Click
       end
-      object ToolButton4: TToolButton
+      object ToolButton48: TToolButton
         Tag = 48
         Left = 138
         Top = 0
-        Caption = 'ToolButton4'
+        Caption = 'ToolButton48'
         ImageIndex = 30
         OnClick = ToolButton0Click
       end
-      object ToolButton7: TToolButton
+      object ToolButton55: TToolButton
         Tag = 55
         Left = 161
         Top = 0
-        Caption = 'ToolButton7'
+        Caption = 'ToolButton55'
         ImageIndex = 33
         OnClick = ToolButton0Click
       end
@@ -3587,6 +3587,7 @@ object F_Hlavni: TF_Hlavni
         OnClick = ToolButton40Click
       end
       object ToolButton41: TToolButton
+        Tag = 41
         Left = 23
         Top = 0
         Hint = 'Konec j'#237'zdn'#237' cesty'
@@ -3597,6 +3598,7 @@ object F_Hlavni: TF_Hlavni
         OnClick = ToolButton41Click
       end
       object ToolButton42: TToolButton
+        Tag = 42
         Left = 46
         Top = 0
         Hint = 'Popisek koleje (n'#225'zev pop'#345'. '#269#237'slo vlaku)'
@@ -3648,7 +3650,7 @@ object F_Hlavni: TF_Hlavni
       TabOrder = 8
       Transparent = False
       Visible = False
-      object ToolButton5: TToolButton
+      object ToolButton49: TToolButton
         Tag = 49
         Left = 0
         Top = 0
@@ -3659,7 +3661,7 @@ object F_Hlavni: TF_Hlavni
         ShowHint = True
         OnClick = ToolButton0Click
       end
-      object ToolButton6: TToolButton
+      object ToolButton50: TToolButton
         Tag = 50
         Left = 23
         Top = 0
