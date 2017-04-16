@@ -818,6 +818,7 @@ begin
  Self.TB_BitmapOstatni.Visible  := false;
  Self.TB_Other.Visible          := false;
  Self.TB_Trat.Visible           := false;
+ Self.TB_Vykolejka.Visible      := false;
 
  if (Assigned(Self.pushedButton)) then
   Self.pushedButton.Down := false;
