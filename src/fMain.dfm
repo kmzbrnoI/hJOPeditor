@@ -3743,24 +3743,23 @@ object F_Hlavni: TF_Hlavni
       end
     end
     object MI_Zobrazit: TMenuItem
-      Caption = 'Zobrazit'
-      Visible = False
+      Caption = 'Nastaven'#237
       object MI_Mrizka: TMenuItem
-        Caption = 'M'#345#237#382'ka'
+        Caption = 'Zobrazit m'#345#237#382'ku'
         Checked = True
         OnClick = MI_MrizkaClick
       end
       object PM_ReliefOptions: TMenuItem
-        Caption = 'Nastaven'#237' zobrazen'#237' reli'#233'fu'
+        Caption = 'Nastaven'#237
         OnClick = PM_ReliefOptionsClick
       end
       object MI_SaveShowOptions: TMenuItem
-        Caption = 'Ulo'#382'it nastaven'#237' zobrazen'#237
+        Caption = 'Ulo'#382'it nastaven'#237
         OnClick = MI_SaveShowOptionsClick
       end
     end
     object MI_Draw: TMenuItem
-      Caption = 'Kreslen'#237
+      Caption = 'Re'#382'im'
       Visible = False
       object PM_Bitmap: TMenuItem
         Caption = 'Symboly'
@@ -3844,7 +3843,7 @@ object F_Hlavni: TF_Hlavni
     Left = 200
     Top = 504
     Bitmap = {
-      494C0101220044025C0208000C00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010122004402600208000C00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000200000006C00000001002000000000000036
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -4306,7 +4305,7 @@ object F_Hlavni: TF_Hlavni
     Left = 312
     Top = 504
     Bitmap = {
-      494C010104000800580010000C00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101040008005C0010000C00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001800000001002000000000000018
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

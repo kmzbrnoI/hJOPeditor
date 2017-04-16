@@ -19,9 +19,9 @@ object F_ReliefOptions: TF_ReliefOptions
   object Label6: TLabel
     Left = 8
     Top = 167
-    Width = 77
+    Width = 74
     Height = 13
-    Caption = 'Soubor s bloky :'
+    Caption = 'Soubor s bloky:'
   end
   object GB_Colors: TGroupBox
     Left = 8
@@ -144,6 +144,17 @@ object F_ReliefOptions: TF_ReliefOptions
     Caption = 'Proch'#225'zet'
     TabOrder = 4
     OnClick = B_ProchazetClick
+  end
+  object CHB_RelativePath: TCheckBox
+    Left = 8
+    Top = 213
+    Width = 97
+    Height = 17
+    Caption = 'Relativn'#237' cesty'
+    Checked = True
+    State = cbChecked
+    TabOrder = 5
+    OnClick = CHB_RelativePathClick
   end
   object OD_Open: TOpenDialog
     Filter = 'Soubory bloku (*.ini)|*.ini'

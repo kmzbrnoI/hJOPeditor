@@ -25,9 +25,11 @@ type
     E_BlocksFileName: TEdit;
     B_Prochazet: TButton;
     OD_Open: TOpenDialog;
+    CHB_RelativePath: TCheckBox;
     procedure B_ApplyClick(Sender: TObject);
     procedure B_StornoClick(Sender: TObject);
     procedure B_ProchazetClick(Sender: TObject);
+    procedure CHB_RelativePathClick(Sender: TObject);
   private
     { Private declarations }
    const
@@ -55,23 +57,39 @@ begin
  ReliefOptions.BlockFile            := Self.E_BlocksFileName.Text;
 
  ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName))+_Config_File);
- ReliefOptions.UseData(F_Hlavni.Relief);
+
+ if (Assigned(F_Hlavni.Relief)) then
+   ReliefOptions.UseData(F_Hlavni.Relief);
 
  Self.Close;
 end;//procedure
 
 procedure TF_ReliefOptions.B_ProchazetClick(Sender: TObject);
 begin
+ Self.OD_Open.InitialDir := ExtractFilePath(Self.E_BlocksFileName.Text);
  if (Self.OD_Open.Execute(Self.Handle)) then
   begin
-   Self.E_BlocksFileName.Text := ExtractRelativePath(ExtractFilePath(Application.ExeName), Self.OD_Open.FileName);
+   if (Self.CHB_RelativePath.Checked) then
+    Self.E_BlocksFileName.Text := ExtractRelativePath(ExtractFilePath(Application.ExeName), Self.OD_Open.FileName)
+   else
+    Self.E_BlocksFileName.Text := Self.OD_Open.FileName;
   end;//(Self.OD_Open.Execute(Self.Handle))
 end;//procedure
 
 procedure TF_ReliefOptions.B_StornoClick(Sender: TObject);
 begin
  Self.Close;
-end;//procedure
+end;
+
+procedure TF_ReliefOptions.CHB_RelativePathClick(Sender: TObject);
+begin
+ if (Self.CHB_RelativePath.Checked) then
+  Self.E_BlocksFileName.Text := ExtractRelativePath(ExtractFilePath(Application.ExeName), Self.E_BlocksFileName.Text)
+ else
+  Self.E_BlocksFileName.Text := ExpandFileName(Self.E_BlocksFileName.Text);
+end;
+
+//procedure
 
 procedure TF_ReliefOptions.OpenForm;
 begin

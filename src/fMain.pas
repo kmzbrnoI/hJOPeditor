@@ -580,7 +580,7 @@ end;
 
 procedure TF_Hlavni.PM_AboutClick(Sender: TObject);
 begin
- Application.MessageBox(PChar('-- hJOPeditor --'+#13#10+'v'+GetVersion(Application.ExeName)+#13#10+'(c) Jan Horáèek 2011-2014'),'Info',MB_OK OR MB_ICONINFORMATION);
+ Application.MessageBox(PChar('hJOPeditor'+#13#10+'v'+GetVersion(Application.ExeName)+#13#10+'(c) Jan Horáèek 2011-2017'),'Info',MB_OK OR MB_ICONINFORMATION);
 end;//procedure
 
 procedure TF_Hlavni.PM_BitmapClick(Sender: TObject);
@@ -720,7 +720,9 @@ begin
 
  ReliefOptions.Mrizka := (Sender as TMenuItem).Checked;
  ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName))+'Config.ini');
- ReliefOptions.UseData(F_Hlavni.Relief);
+
+ if (Assigned(Relief)) then
+   ReliefOptions.UseData(F_Hlavni.Relief);
 end;//ppocedure
 
 procedure TF_Hlavni.MI_SaveShowOptionsClick(Sender: TObject);
@@ -791,7 +793,6 @@ begin
  Self.PM_Save.Enabled      := true;
  Self.PM_SaveAs.Enabled    := true;
  Self.MI_Draw.Visible      := true;
- Self.MI_Zobrazit.Visible  := true;
  Self.MI_Mrizka.Checked    := ReliefOptions.Mrizka;
  Self.MI_CloseFile.Enabled := true;
  Self.SB_Main.Panels.Items[0].Text := 'Soubor otevøen';
@@ -806,7 +807,6 @@ begin
  Self.PM_SaveAs.Enabled    := false;
  Self.MI_Draw.Visible      := false;
  Self.MI_Relief.Visible    := false;
- Self.MI_Zobrazit.Visible  := false;
  Self.MI_CloseFile.Enabled := false;
  Self.MI_Data.Visible      := false;
 
