@@ -877,23 +877,29 @@ begin
      //objekty
      obj := '';
      for j := 0 to (Self.Bloky[i] as TUsek).Symbols.Count-1 do obj := obj + Format('%.3d%.3d%.2d',[(Self.Bloky[i] as TUsek).Symbols[j].Position.X, (Self.Bloky[i] as TUsek).Symbols[j].Position.Y, (Self.Bloky[i] as TUsek).Symbols[j].SymbolID]);
-     inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index),'S',obj);
+     if (obj <> '') then
+       inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index),'S',obj);
 
      //JCClick
      obj := '';
      for j := 0 to (Self.Bloky[i] as TUsek).JCClick.Count-1 do obj := obj + Format('%.3d%.3d',[(Self.Bloky[i] as TUsek).JCClick[j].X, (Self.Bloky[i] as TUsek).JCClick[j].Y]);
-     inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index),'C',obj);
+     if (obj <> '') then
+       inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index),'C',obj);
 
      //KPopisek
      obj := '';
      for j := 0 to (Self.Bloky[i] as TUsek).KPopisek.Count-1 do obj := obj + Format('%.3d%.3d',[(Self.Bloky[i] as TUsek).KPopisek[j].X, (Self.Bloky[i] as TUsek).KPopisek[j].Y]);
-     inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index),'P',obj);
+     if (obj <> '') then
+       inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index),'P',obj);
 
      //Nazev
-     inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index),'N',(Self.Bloky[i] as TUsek).KpopisekStr);
+     if ((Self.Bloky[i] as TUsek).KpopisekStr <> '') then
+       inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index),'N',(Self.Bloky[i] as TUsek).KpopisekStr);
 
      //vetve
-     inifile.WriteInteger('U'+IntToStr(i), 'VC', (Self.Bloky[i] as TUsek).Vetve.Count);
+     if ((Self.Bloky[i] as TUsek).Vetve.Count > 0) then
+       inifile.WriteInteger('U'+IntToStr(i), 'VC', (Self.Bloky[i] as TUsek).Vetve.Count);
+
      for j := 0 to (Self.Bloky[i] as TUsek).Vetve.Count-1 do
       begin
        if ((Self.Bloky[i] as TUsek).Vetve[j].node1.vyh < 0) then
