@@ -72,7 +72,7 @@ type
   private
     OpenBlok:TGraphBlok;
 
-    LB_BlocksIndexes:array [0.._MAX_BLK] of Integer;     // indexaci pole pro ListBox, zde jsou ulozeny inedxy bloku (nikoliv id!!)
+    LB_BlocksIndexes:array [0.._MAX_BLK+1] of Integer;     // indexaci pole pro ListBox, zde jsou ulozeny inedxy bloku (nikoliv id!!)
 
     procedure LoadOR();
     procedure SaveData();
@@ -362,7 +362,7 @@ procedure TF_BlockEdit.LB_BlocksClick(Sender: TObject);
 var id:Integer;
 begin
  if (((Sender as TListBox).ItemIndex < 0) or (Self.LB_BlocksIndexes[(Sender as TListBox).ItemIndex] < 0)) then
-  id := -1
+  id := Self.LB_BlocksIndexes[(Sender as TListBox).ItemIndex]
  else
   id := Self.Bloky.Bloky[Self.LB_BlocksIndexes[(Sender as TListBox).ItemIndex]].id;
 
@@ -408,9 +408,15 @@ begin
  if (Self.OpenBlok = nil) then Exit();
 
  Self.LB_Blocks.Items.Add('--- Žádný blok ---');
+ Self.LB_Blocks.Items.Add('--- Žádný blok zámìrnì ---');
  Self.LB_BlocksIndexes[0] := -1;
+ Self.LB_BlocksIndexes[1] := -2;
 
- index := 0;
+ if (Self.OpenBlok.Blok = -2) then
+   index := 1
+ else
+   index := 0;
+
  for i := 0 to Self.Bloky.Count-1 do
   begin
    if ((LeftStr(Self.Bloky.Bloky[i].Nazev, Length(text)) = text) and

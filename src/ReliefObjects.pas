@@ -11,9 +11,10 @@ uses
 const
 
 
- _Def_Color_Selected = 2;
- _Def_Color_Normal   = 1;
- _Def_Color_Alert    = 5;
+ _Def_Color_Selected      = 2;
+ _Def_Color_Normal        = 1;
+ _Def_Color_Alert         = 5;
+ _Def_Color_IntUnassigned = 4;
 
  _Usek_Start    = 0;
  _Usek_End      = 23;
@@ -189,7 +190,7 @@ TPanelObjects=class
     Width,Height:Integer;
    end;
    Colors:record
-    Selected,Normal,Alert:Byte;
+    Selected,Normal,Alert,IntUnassigned:Byte;
    end;
 
    Selected:TGraphBlok;
@@ -249,6 +250,7 @@ TPanelObjects=class
     property ColorSelected:Byte read Colors.Selected write Colors.Selected;
     property ColorNormal:Byte read Colors.Normal write Colors.Normal;
     property ColorAlert:Byte read Colors.Alert write Colors.Alert;
+    property ColorIntUnassigned:Byte read Colors.IntUnassigned write Colors.IntUnassigned;
     property selected_obj:TGraphBlok read Selected;
 
     property OnBlokEdit: TBlokAskEvent read FOnBlokEdit write FOnBlokEdit;
@@ -405,9 +407,10 @@ begin
  Self.Graphics := Graphics;
 
  //vychozi barvy
- Self.Colors.Selected := _Def_Color_Selected;
- Self.Colors.Normal   := _Def_Color_Normal;
- Self.Colors.Alert    := _Def_Color_Alert;
+ Self.Colors.Selected      := _Def_Color_Selected;
+ Self.Colors.Normal        := _Def_Color_Normal;
+ Self.Colors.Alert         := _Def_Color_Alert;
+ Self.Colors.IntUnassigned := _Def_Color_IntUnassigned;
 
  Self.Selected := nil;
 
@@ -1100,14 +1103,22 @@ begin
          for j := 0 to (Self.Bloky[i] as TUsek).JCClick.Count-1 do Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).JCClick[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).JCClick[j].Y*_Symbol_Vyska, _JCPopisek_Index);
          for j := 0 to (Self.Bloky[i] as TUsek).KPopisek.Count-1 do Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).KPopisek[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).KPopisek[j].Y*_Symbol_Vyska, _KPopisek_Index);
 
-         if (((Self.Bloky[i].Blok = -1) and (Self.Mode = TMode.dmBloky)) or
-             ((Self.Mode = TMode.dmRoots) and ((Self.Bloky[i] as TUsek).IsVyhybka) and ((Self.Bloky[i] as TUsek).Root.X = -1))) then
+         if (Self.Mode = TMode.dmBloky) then
           begin
-           for j := 0 to (Self.Bloky[i] as TUsek).Symbols.Count-1 do Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Symbols[j].Position.X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Symbols[j].Position.Y*_Symbol_Vyska,((Self.Bloky[i] as TUsek).Symbols[j].SymbolID*10)+Self.Colors.Alert);
+           case (Self.Bloky[i].Blok) of
+            -1: color := Self.Colors.Alert;
+            -2: color := Self.Colors.IntUnassigned;
+           else
+             color := Self.Colors.Normal;
+           end;
           end else begin
-           for j := 0 to (Self.Bloky[i] as TUsek).Symbols.Count-1 do Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Symbols[j].Position.X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Symbols[j].Position.Y*_Symbol_Vyska,((Self.Bloky[i] as TUsek).Symbols[j].SymbolID*10)+Self.Colors.Normal);
-          end;//else ...Blok = -1
+           if (((Self.Bloky[i] as TUsek).IsVyhybka) and ((Self.Bloky[i] as TUsek).Root.X = -1)) then
+             color := Self.Colors.Alert
+           else
+             color := Self.Colors.Normal;
+          end;
 
+         for j := 0 to (Self.Bloky[i] as TUsek).Symbols.Count-1 do Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Symbols[j].Position.X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Symbols[j].Position.Y*_Symbol_Vyska,((Self.Bloky[i] as TUsek).Symbols[j].SymbolID*10)+color);
          Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Root.X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Root.Y*_Symbol_Vyska, (_Root_Index*10) + _Root_Color);
         end;//else Selected = i
     end;
@@ -1119,12 +1130,12 @@ begin
         begin
          Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TNavestidlo).Position.X*_Symbol_Sirka, (Self.Bloky[i] as TNavestidlo).Position.Y*_Symbol_Vyska, ((_SCom_Start+(Self.Bloky[i] as TNavestidlo).SymbolID)*10)+Self.Colors.Selected);
         end else begin
-         if (Self.Bloky[i].Blok = -1) then
-          begin
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TNavestidlo).Position.X*_Symbol_Sirka, (Self.Bloky[i] as TNavestidlo).Position.Y*_Symbol_Vyska,((_SCom_Start+(Self.Bloky[i] as TNavestidlo).SymbolID)*10)+Self.Colors.Alert);
-          end else begin
+         case (Self.Bloky[i].Blok) of
+           -1: Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TNavestidlo).Position.X*_Symbol_Sirka, (Self.Bloky[i] as TNavestidlo).Position.Y*_Symbol_Vyska,((_SCom_Start+(Self.Bloky[i] as TNavestidlo).SymbolID)*10)+Self.Colors.Alert);
+           -2: Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TNavestidlo).Position.X*_Symbol_Sirka, (Self.Bloky[i] as TNavestidlo).Position.Y*_Symbol_Vyska,((_SCom_Start+(Self.Bloky[i] as TNavestidlo).SymbolID)*10)+Self.Colors.IntUnassigned);
+         else
            Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TNavestidlo).Position.X*_Symbol_Sirka, (Self.Bloky[i] as TNavestidlo).Position.Y*_Symbol_Vyska,((_SCom_Start+(Self.Bloky[i] as TNavestidlo).SymbolID)*10)+Self.Colors.Normal);
-          end;//else (Self.Navestidla[i].Blok = -1)
+         end;
         end;//else (Self.Selected > 255)
     end;
 
@@ -1135,12 +1146,12 @@ begin
         begin
          Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TVyhybka).Position.X*_Symbol_Sirka, (Self.Bloky[i] as TVyhybka).Position.Y*_Symbol_Vyska, (((Self.Bloky[i] as TVyhybka).SymbolID)*10)+Self.Colors.Selected);
         end else begin
-         if (Self.Bloky[i].Blok = -1) then
-          begin
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TVyhybka).Position.X*_Symbol_Sirka, (Self.Bloky[i] as TVyhybka).Position.Y*_Symbol_Vyska, (((Self.Bloky[i] as TVyhybka).SymbolID)*10)+Self.Colors.Alert);
-          end else begin
+         case (Self.Bloky[i].Blok) of
+           -1: Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TVyhybka).Position.X*_Symbol_Sirka, (Self.Bloky[i] as TVyhybka).Position.Y*_Symbol_Vyska, (((Self.Bloky[i] as TVyhybka).SymbolID)*10)+Self.Colors.Alert);
+           -2: Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TVyhybka).Position.X*_Symbol_Sirka, (Self.Bloky[i] as TVyhybka).Position.Y*_Symbol_Vyska, (((Self.Bloky[i] as TVyhybka).SymbolID)*10)+Self.Colors.IntUnassigned);
+         else
            Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TVyhybka).Position.X*_Symbol_Sirka, (Self.Bloky[i] as TVyhybka).Position.Y*_Symbol_Vyska, (((Self.Bloky[i] as TVyhybka).SymbolID)*10)+Self.Colors.Normal);
-          end;//else (Self.Navestidla.Data[i].Blok = -1)
+         end;
         end;//else (Self.Selected > 255)
     end;
 
@@ -1151,12 +1162,12 @@ begin
         begin
          color := Self.Colors.Selected;
         end else begin
-         if (Self.Bloky[i].Blok = -1) then
-          begin
-           color := Self.Colors.Alert;
-          end else begin
+         case (Self.Bloky[i].Blok) of
+          -1: color := Self.Colors.Alert;
+          -2: color := Self.Colors.IntUnassigned;
+         else
            color := Self.Colors.Normal;
-          end;//else (Self.Navestidla.Data[i].Blok = -1)
+         end;
         end;//else (Self.Selected > 255)
 
        for j := 0 to (Self.Bloky[i] as TPrejezd).StaticPositions.Count-1 do
@@ -1175,12 +1186,12 @@ begin
           begin
            color := Self.Colors.Selected;
           end else begin
-           if (Self.Bloky[i].Blok = -1) then
-            begin
-             color := Self.Colors.Alert;
-            end else begin
-             color := (Self.Bloky[i] as TPopisek).Color;
-            end;//else (Self.Navestidla[i].Blok = -1)
+           case (Self.Bloky[i].Blok) of
+            -1: color := Self.Colors.Alert;
+            -2: color := Self.Colors.IntUnassigned;
+           else
+             color := Self.Colors.Normal;
+           end;
           end;//else (Self.Selected > 255)
         end else begin
           color := (Self.Bloky[i] as TPopisek).Color;
@@ -1206,10 +1217,12 @@ begin
       begin
        color := Self.Colors.Selected;
       end else begin
-       if (Self.Bloky[i].Blok = -1) then
-         color := Self.Colors.Alert
-        else
+       case (Self.Bloky[i].Blok) of
+        -1: color := Self.Colors.Alert;
+        -2: color := Self.Colors.IntUnassigned;
+       else
          color := Self.Colors.Normal;
+       end;
       end;//else (Self.Selected > 255)
 
      Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUvazka).Pos.X*_Symbol_Sirka, (Self.Bloky[i] as TUvazka).Pos.Y*_Symbol_Vyska, (_Uvazka_Start*10)+color);
@@ -1224,14 +1237,19 @@ begin
          Self.DrawObject.Canvas.Pen.Color := clRed;
          color := Self.Colors.Selected;
         end else begin
-         if (Self.Bloky[i].Blok = -1) then
-          begin
-           color := Self.Colors.Alert;
-           Self.DrawObject.Canvas.Pen.Color := clAqua;
-          end else begin
+         case (Self.Bloky[i].Blok) of
+          -1: begin
+            color := Self.Colors.Alert;
+            Self.DrawObject.Canvas.Pen.Color := clAqua;
+          end;
+          -2: begin
+            color := Self.Colors.IntUnassigned;
+            Self.DrawObject.Canvas.Pen.Color := clWhite;
+          end
+         else
            color := 7;
            Self.DrawObject.Canvas.Pen.Color := clYellow;
-          end;
+         end;
         end;//else (Self.Selected > 255)
 
        Self.DrawObject.Canvas.Brush.Color := clBlack;
@@ -1264,15 +1282,16 @@ begin
       begin
        color := Self.Colors.Selected;
       end else begin
-       if (Self.Bloky[i].Blok = -1) then
-         color := Self.Colors.Alert
-        else
+       case (Self.Bloky[i].Blok) of
+        -1: color := Self.Colors.Alert;
+        -2: color := Self.Colors.IntUnassigned;
+       else
          color := Self.Colors.Normal;
+       end;
       end;//else (Self.Selected > 255)
 
      Self.DrawObject.Canvas.Brush.Color := clBlack;
      Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TZamek).Pos.X*_Symbol_Sirka, (Self.Bloky[i] as TZamek).Pos.Y*_Symbol_Vyska, (_Zamek*10)+color);
-//     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, ((Self.Bloky[i] as TZamek).Pos.X+1)*_Symbol_Sirka, (Self.Bloky[i] as TZamek).Pos.Y*_Symbol_Vyska, ((_Zamek+1)*10)+color);
     end;
 
     /////////////////////////////////////////////////
@@ -1282,10 +1301,12 @@ begin
       begin
        color := Self.Colors.Selected;
       end else begin
-       if (Self.Bloky[i].Blok = -1) then
-         color := Self.Colors.Alert
-        else
+       case (Self.Bloky[i].Blok) of
+        -1: color := Self.Colors.Alert;
+        -2: color := Self.Colors.IntUnassigned;
+       else
          color := Self.Colors.Normal;
+       end;
       end;//else (Self.Selected > 255)
 
      Self.DrawObject.Canvas.Brush.Color := clBlack;
@@ -1299,10 +1320,12 @@ begin
       begin
        color := Self.Colors.Selected;
       end else begin
-       if (Self.Bloky[i].Blok = -1) then
-         color := Self.Colors.Alert
-        else
+       case (Self.Bloky[i].Blok) of
+        -1: color := Self.Colors.Alert;
+        -2: color := Self.Colors.IntUnassigned;
+       else
          color := Self.Colors.Normal;
+       end;
       end;//else (Self.Selected > 255)
 
      Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TRozp).Pos.X*_Symbol_Sirka, (Self.Bloky[i] as TRozp).Pos.Y*_Symbol_Vyska, ((_Rozp_Start+1)*10)+color);
@@ -1544,7 +1567,7 @@ begin
 
  for i := 0 to Self.Bloky.Count-1 do
   begin
-   if ((Self.Bloky[i].Blok < 0) and (Self.Bloky[i].typ <> TBlkType.pomocny_obj) and ((Self.Bloky[i].typ <> TBlkType.popisek) or (Length((Self.Bloky[i] as TPopisek).Text) = 1))) then
+   if ((Self.Bloky[i].Blok = -1) and (Self.Bloky[i].typ <> TBlkType.pomocny_obj) and ((Self.Bloky[i].typ <> TBlkType.popisek) or (Length((Self.Bloky[i] as TPopisek).Text) = 1))) then
     begin
      Result.Add('ERR: blok '+IntToStr(i)+': neni navaznost na technologicky blok');
      error_cnt := error_cnt + 1;
