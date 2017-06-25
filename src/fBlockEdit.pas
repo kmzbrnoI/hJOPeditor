@@ -122,8 +122,8 @@ begin
 
  for i := 0 to str.Count-1 do
   begin
+   Self.Bloky[i].id    := StrToInt(str[i]);
    Self.Bloky[i].Nazev := Self.iniFile.ReadString(str[i], 'nazev','Blok '+IntToStr(i));
-   Self.Bloky[i].id    := Self.iniFile.ReadInteger(str[i], 'id',-1);
    Self.Bloky[i].typ   := Self.iniFile.ReadInteger(str[i], 'typ', -1);
   end;//for i
 
