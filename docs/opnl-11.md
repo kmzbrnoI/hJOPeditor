@@ -71,6 +71,8 @@ Skládá se z několika sekcí.
       - 10-12: souřadnice Y
       - 13-15: číslo symbolu
 
+ Čtěte také poznámky níže o dvojité kolejové spojce.
+
 ## Návěstidla `[N0]`-`[Nn-1]`
  - B= [asociovany blok technologie]
  - X= [pozice X]
@@ -141,3 +143,28 @@ Skládá se z několika sekcí.
  - X= [pozice X]
  - Y= [pozice Y]
  - OR= [oblast rizeni] integer 0-n
+
+---
+
+## Dvojitá kolejová spojka
+
+Dvojitá kolejová spojka je největším nepřitelem při vykreslování reliéfu.
+Proto je pro ni definován speciální způsob uložení dat.
+
+DKS je tvořena dvěma úseky, jeden v horní části DKS a jeden ve sdpodní části DSK.
+Tyto úseky jsou autonomní, zabývejme se tedy jen způsobem uložení dolní (resp.
+horní) poloviny DKS.
+
+Kořen kreslení se do DKS umisťuje na kříž, na tomto úseku jsou pevně definované
+větve:
+
+ 0. větev: obsahuje část od kříže (bez kříže) až po nejbližší levou výhybku.
+    1. výhybka v této větvi je levá výhybka DKS.
+ 1. větev: obsahuje část od kříže (bez kříže) až po nejbližší pravou výhybku.
+    1. výhybka v této větvi je pravá výhybka DKS.
+ 2. větev obsahuje kolej spojující obě krajní výhybky DKS.
+ 3. větev obsahuje počátek kreslení od levé výhybky dál
+ 4. větev obsahuje počátek kreslení od pravé výhybky dál
+
+Další sekce mohou obsahovat strom pro kreslení zbylých částí úseků (navazující
+za jednou z krajních výhybek).
