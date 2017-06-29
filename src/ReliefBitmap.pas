@@ -103,45 +103,6 @@ TPanelBitmap=class
     property OnORAsk: TORAskEvent read FORAskEvent write FORAskEvent;
 end;//class
 
-//Format bitmapoveho souboru reliefu:
-//vzhledem k malym rozmerum neni pouzita zadna komprimace
-//binarni soubor :
-//hlavicka:
-// Index  Velikost  Vyznam
-//-------------------------
-//      0        2  identifikace souboru - zde znaky 'br' (bitmap relief)
-//      2        1  verze souboru - 4 bity zleva = major;4 bity zprava = minor
-//      3        1  sirka reliefu (0..255)
-//      4        1  vyska reliefu (0..255)
-//      5        2  #255 #255 (ukonceni bloku)
-//nasleduji bitmapova data symbolu
-// format: cisla symbolu ulozena binarne (0..255) - ID symbolu posunuto o +1 vuci vnitrni strukture programu
-// data jsou zapsana v tabulce, kde 1 radek odpovida 1 radku reliefu - je ukoncen #13#10 (cr,lf)
-//nasleduje 2x 255 (ukonceni bloku)
-//nasleduji vektorova data popisky
-// nasleduje 1 byte, ktery vyjadruje pocet oddelovacu
-// format: na jednom radku ulozena opakujici se data ve formatu XYCT0
-//  X - pozice X
-//  Y - pozice Y
-//  C - barva
-//  T - text
-//    - ma vzdy sirku 32 bytu (max 32 znaku)\
-//    - retezec je ukoncen \0 (chr(0))
-//  kazdy text zabere v souboru 35 bytu
-//nasleduji vektorova data oddelovacu
-// nasleduje 1 byte, ktery vyjadruje pocet oddelovacu
-// format: na jednom radku ulozena opakujici se data ve formatu XY
-//  pricemz X a Y zabira kazde 1 byte (oddelovace jsou oproti symbolum prekryty v kazdem rozmeru o 0.5 sirky prvku)
-//nasleduje 2x 255 (ukonceni bloku)
-//nasleduji vektorova data KPopisky (format separatoru)
-//nasleduje 2x 255 (ukonceni bloku)
-//nasleduji vektorova data JCClick  (format separatoru)
-//nasleduje 2x 255 (ukonceni bloku)
-//nasleduji oblasti rizeni
-//na kazdem dalsim radku je ulozena jedna oblast rizeni ve formatu:
-//  nazev;nazev_zkratka;id;lichy_smer(0,1);orientace_DK(0,1);ModCasStart(0,1);ModCasStop(0,1);ModCasSet(0,1);dkposx;dkposy;qposx;qposy;timeposx;timeposy;osv_mtb|osv_port|osv_name;
-//blok je ukonec 2*#13
-
 //FileSystemStav:
  //0 - soubor zavren
  //1 - soubor neulozen
