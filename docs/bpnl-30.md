@@ -29,11 +29,11 @@ Soubor se skládá z několika sekcí, každá sekce je ukončena byty `0xFF, 0x
 
  3. Popisky
 
- 4. Horizontální oddělovače
+ 4. Vertikální oddělovače
     Formát: 1. byte je počet oddělovačů, pak následují dvojice pozic [X, Y]
     Každá dvojice zabíra 2 byty, jedna souřadnice tedy zabírá jeden byte.
 
- 5. Vertikální oddělovače
+ 5. Horizontální oddělovače
 
  6. Symboly popisků kolejí
     Formát stejný jako formát oddělovačů.
