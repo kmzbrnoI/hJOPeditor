@@ -11,7 +11,7 @@ poměrně vysoké úspory.
 
 Soubor se skládá z několika sekcí, každá sekce je ukončena byty `0xFF, 0xFF`
 
- 1. Hlavička.
+ 1. Hlavička
     Obsahuje několik prvků, z nichž každý má pevný offset a pevnou délku.
 
     * offset:0, délka:2 : identifikace souboru: znaky 'br'
@@ -21,23 +21,23 @@ Soubor se skládá z několika sekcí, každá sekce je ukončena byty `0xFF, 0x
     * offset:3, délka:1 : šířka reliéfu
     * offset:4, délka:1 : výška reliéfu
 
- 2. Bitmapová data reliéfu.
+ 2. Bitmapová data reliéfu
     Vlastní symbly reliéfu. Obsahuje čísla symbolů uspořádaná po řádcích.
     Každý řádek je ukončen dvojicí znaků CR,LF (#13,#10)
 
- 4. Popisky
+ 3. Popisky
 
- 6. Oddělovače
+ 4. Oddělovače
     Formát: 1. byte je počet oddělovačů, pak následují dvojice pozic [X, Y]
     Každá dvojice zabíra 2 byty, jedna souřadnice tedy zabírá jeden byte.
 
- 7. Symboly popisků kolejí.
+ 5. Symboly popisků kolejí
     Formát stejný jako formát oddělovačů.
 
- 8. Symboly konce jízdní cesty.
+ 6. Symboly konce jízdní cesty
     Formát stejný jako formát oddělovačů.
 
- 9. Oblasti řízení
+ 7. Oblasti řízení
 
     První 2 byty udávají počet oblastí řízení. Pak následují samotné oblasti
     řízení.
