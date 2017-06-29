@@ -318,6 +318,7 @@ var usek:TUsek;
     TempPos:TPoint;
     vyhybka:TVyhybka;
     vykol:TVykol;
+    vertSep, horSep: SmallInt;
 begin
  //vytvoreni objektu a vlozeni do nej 1. symbolu
  usek           := TUsek.Create();
@@ -349,7 +350,8 @@ begin
    //prochazeni jednotlivych pozici
    for i := 0 to Self.Positions.Count-1 do
     begin
-     if (Self.Bitmap.SeparatorsVert.GetObject(Point(Self.Positions.Pos[i].X,Self.Positions.Pos[i].Y)) = -1) then
+     if ((Self.Bitmap.SeparatorsVert.GetObject(Point(Self.Positions.Pos[i].X, Self.Positions.Pos[i].Y)) = -1) and
+         (Self.Bitmap.SeparatorsHor.GetObject(Point(Self.Positions.Pos[i].X, Self.Positions.Pos[i].Y)) = -1)) then
       begin
        //pokud neni separator
 
@@ -407,8 +409,15 @@ begin
                 begin
                  //ted vime, ze i navaznost z TempPos vede na Self.Positions.Pos[i].Pos - muzeme pridat Symbol2 do bloku
 
-                 //pri pohybu doleva je zapotrebi overovat separator uz tady, protoze jenom tady vime, ze se pohybujeme doleva
-                 if ((TempPos.X > Self.Positions.Pos[i].X) or (Self.Bitmap.SeparatorsVert.GetObject(TempPos) = -1) or (TempPos.Y <> Self.Positions.Pos[i].Y)) then
+                 // pri pohybu vlevo a nahoru je zapotrebi overovat separator uz tady, protoze jenom tady vime, ze se pohybujeme doleva nebo nahoru
+                 // pohyb doprava a dolu resi podminka vyse
+
+                 vertSep := Self.Bitmap.SeparatorsVert.GetObject(TempPos);
+                 horSep := Self.Bitmap.SeparatorsHor.GetObject(TempPos);
+
+                 if (((vertSep = -1) and (horSep = -1)) or
+                    ((horSep = -1) and ((TempPos.X > Self.Positions.Pos[i].X) or (TempPos.Y <> Self.Positions.Pos[i].Y))) or
+                    ((vertSep = -1) and ((TempPos.Y > Self.Positions.Pos[i].Y) or (TempPos.X <> Self.Positions.Pos[i].X)))) then
                   begin
                    sym.SymbolID := Symbol2;
                    sym.Position := TempPos;
