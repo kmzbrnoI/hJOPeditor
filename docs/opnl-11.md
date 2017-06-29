@@ -47,6 +47,10 @@ Skládá se z několika sekcí.
  - R=(pozice kořene pro barvení)
    - 0-2: souřadnice X
    - 3-5: souřadnice Y
+ - DKS=
+   - 0: není DKS
+   - 1: DKS směrem nahoru
+   - 2: DKS směrem dolů
 
  -- Následujici data reprezentují rozdělení úseku na větve. Né každý úsek musí
     být rozdělen na větve, v takovém případě se vykresluje na základě toho, co

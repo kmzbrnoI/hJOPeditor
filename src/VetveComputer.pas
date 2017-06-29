@@ -68,9 +68,15 @@ begin
           (po.Bloky[j] as TVyhybka).Position.Y] := (po.Bloky[j] as TVyhybka).SymbolID;
     end;
 
+   if (data[TUsek(po.Bloky[i]).Root.X, TUsek(po.Bloky[i]).Root.Y] = _DKS_Top) then
+     (po.Bloky[i] as TUsek).DKStype := dksTop
+   else if (data[TUsek(po.Bloky[i]).Root.X, TUsek(po.Bloky[i]).Root.Y] = _DKS_Bot) then
+     (po.Bloky[i] as TUsek).DKStype := dksBottom
+   else
+     (po.Bloky[i] as TUsek).DKStype := dksNone;
+
    // provedeme algoritmus
-   if ((data[TUsek(po.Bloky[i]).Root.X, TUsek(po.Bloky[i]).Root.Y] = _DKS_Top) or
-       (data[TUsek(po.Bloky[i]).Root.X, TUsek(po.Bloky[i]).Root.Y] = _DKS_Bot)) then
+   if ((po.Bloky[i] as TUsek).DKStype <> dksNone) then
      ComputeDKSBlokVetve(po, data, (po.Bloky[i] as TUsek).Root,
                           (po.Bloky[i] as TUsek).Vetve)
    else

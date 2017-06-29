@@ -24,6 +24,7 @@ const
 type
 
 TBlkType = (usek, navestidlo, vyhybka, prejezd, popisek, pomocny_obj, uvazka, uvazka_spr, zamek, vykol, rozp, TU);
+TDKSType = (dksNone = 0, dksTop = 1, dksBottom = 2);
 
 // abstraktni trida, ze ktere dedi konkretni graficke bloky
 TGraphBlok = class
@@ -50,6 +51,7 @@ TUsek = class(TGraphBlok)
  JCClick:TList<TPoint>;
  KPopisek:TList<TPoint>;
  KpopisekStr:string;
+ DKStype:TDKSType;
 
  Vetve:TList<TVetev>;               // vetve useku
    //vetev 0 je vzdy koren
@@ -364,6 +366,7 @@ begin
 
      //root
      (blok as TUsek).Root := GetPos(inifile.ReadString('U'+IntToStr(i), 'R', '-1;-1'));
+     (blok as TUsek).DKStype := TDKSType(inifile.ReadInteger('U'+IntToStr(i), 'DKS', Integer(dksNone)));
 
      //Symbols
      (blok as TUsek).Symbols := TList<TReliefSym>.Create();
@@ -706,6 +709,9 @@ begin
      //root
      if ((Self.Bloky[i] as TUsek).IsVyhybka) then
        inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index), 'R', GetPos((Self.Bloky[i] as TUsek).Root));
+
+     if ((Self.Bloky[i] as TUsek).DKStype <> dksNone) then
+       inifile.WriteInteger('U'+IntToStr(i), 'DKS', Integer((Self.Bloky[i] as TUsek).DKStype));
 
      //objekty
      obj := '';
