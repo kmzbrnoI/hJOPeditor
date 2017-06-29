@@ -25,44 +25,51 @@ Skládá se z několika sekcí.
  - vc=0/1 (flag napočítaných větví)
 
 ## Úseky `[U0]`-`[Un-1]`
- - B= [blok technologie, jemuz je symbol prirazen]
- - S= [symboly] ulozeno textove
-      pevne delky:
-       - 0-2..souradnice X
-       - 3-5..souradnice Y
-       - 6-7..symbol
- - C= [JCClick] ulozeno textove
-      pevne delky:
-       - 0-2: souradnice X
-       - 3-5: souradnice Y
- - P= [KPopisek] ulozeno textove
-      pevne delky:
-       - 0-2: souradnice X
-       - 3-5. souradnice Y
- - N= [nazev koleje] ulozeno textove
- - OR= [oblast rizeni] integer 0-n
- - R= [root, koren]
-       - 0-2: souradnice X
-       - 3-5: souradnice Y
+ - B=(id technologického bloku)
+ - S=(seznam symbolů, které tvoří úsek)
+    Seznam obsahuje variabilní počet polí délky 8 znaků (bytů), přičemž v každém
+    poli je uloženo na konkrétních pozicích.
+     - 0-2: souřadnice X
+     - 3-5: souřadnice Y
+     - 6-7: číslo symbolu
 
-  -- nasledujici data jsou v souboru ulozena jen, pokud jsou k dispozici vetve: --
+ - C=(seznam polí, které se zobrazují při výběru konce jízdní cesty na úseku)
+    Seznam obsahuje variabilní počet polí délky 6 znaků (bytů), přičemž v každém
+    poli je uloženo na konkrétních pozicích.
+     - 0-2: souřadnice X
+     - 3-5: souřadnice Y
 
-  - VC= vetve count = [pocet vetvi]
-  - V0...V(N-1)= [vetve] ulozeno textove
-      pevne delky:
+ - P=(seznam polí, na kterých se zobrazí číslo koleje)
+    Obdobně, jako předchozí.
 
-      - 0-2: 1. vyhybka - index v poli vyhybek (nikoliv technologicky blok!)
-      - 3-4: 1. vyhybka : index dalsi vetve pro polohu "vodorovne"
-      - 5-6: 1. vyhybka: index dalsi vetve pro polohu "sikmo"
+ - N=(název koleje jako text)
+ - OR=(index oblasti řízení)
+ - R=(pozice kořene pro barvení)
+   - 0-2: souřadnice X
+   - 3-5: souřadnice Y
 
-      - 7-9: 2. vyhybka - index v poli vyhybek (nikoliv technologicky blok!)
-      - 10-11: 2. vyhybka : index dalsi vetve pro polohu "vodorovne"
-      - 12-13: 2. vyhybka: index dalsi vetve pro polohu "sikmo"
+ -- Následujici data reprezentují rozdělení úseku na větve. Né každý úsek musí
+    být rozdělen na větve, v takovém případě se vykresluje na základě toho, co
+    je uloženo v `S=`. Pokud je uložen úsek včetně větví, `S=` se stále ukládá. --
 
-      Následující sekce se opakuje:
-      - 7-9: souradnice X
-      - 10-12: souradnice Y
-      - 13-15: symbol
+ - VC=(počet vetví)
+ - V0...V(N-1)=(konkrétní větev)
+    Formát větve: konkrétní hodnoty na konkrétních índexech:
+
+     - 0-2: index 1. výhybky
+     - 3-4: 1. výhybka: index další větve pro polohu "vodorovně"
+     - 5-6: 1. výhybka: index dalši vetve pro polohu "šikmo"
+
+     - 7-9: index 2. výhybky
+     - 10-11: 2. výhybka: index další větve pro polohu "vodorovně"
+     - 12-13: 2. výhybka: index dalši vetve pro polohu "šikmo"
+
+     Následuje seznam symbolů ve větvi. To je seznam, ve kterém má každý prvek
+     tento formát:
+
+      - 7-9: souřadnice X
+      - 10-12: souřadnice Y
+      - 13-15: číslo symbolu
 
 ## Návěstidla `[N0]`-`[Nn-1]`
  - B= [asociovany blok technologie]
