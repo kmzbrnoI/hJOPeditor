@@ -6,33 +6,13 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
   StrUtils, Global, Menus, Forms, DXDraws, OblastRizeni, PGraphics, RPConst,
-  Generics.Collections;
+  Generics.Collections, symbolHelper, vetev;
 
 const
-
-
  _Def_Color_Selected      = 2;
  _Def_Color_Normal        = 1;
  _Def_Color_Alert         = 5;
  _Def_Color_IntUnassigned = 4;
-
- _Usek_Start    = 0;
- _Usek_End      = 23;
- _Vyhybka_End   = 3;
- _SCom_Start    = 24;
- _SCom_End      = 29;
-
- _KPopisek_Index   = 377;
- _JCPopisek_Index  = 360;
- _Prj_Index        = 400;
- _Root_Index       = 42;
- _Root_Color       = 3;
- _Uvazka_Start     = 43;
- _Uvazka_Spr_Index = 45;
- _Zamek            = 48;
- _Vykol_Start      = 49;
- _Vykol_End        = 54;
- _Rozp_Start       = 55;
 
  //zde je definovano, jaky symbol se ma vykreslovat jakou barvou (mimo separatoru)
   _Bitmap_DrawColors:array [0..60] of Byte = (1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -61,32 +41,6 @@ TVyhybka = class(TGraphBlok)
  SymbolID:Integer;
  obj:integer;               //index useku, na kterem vyhybka je
 end;//Vyhybka
-
-// po rozdeleni useku je na vetve je usek reprezentovan takto:
-
-// ukoncovaci element vetve = vyhybka
-TVetevEnd = record
-  vyh:Integer;                     // pokud usek nema vyhybky -> vyh1 = -1, vyh2 = -1 (nastava u useku bez vyhybky a u koncovych vetvi)
-                                   // referuje na index v poli vyhybek (nikoliv na technologicke ID vyhybky!)
-                                   // kazda vetev je ukoncena maximalne 2-ma vyhybkama - koren muze byt ukoncen 2-ma vyhybkama, pak jen jedna
-  ref_plus,ref_minus:Integer;      // reference  na vetev, kterou se pokracuje, pokud je vyh v poloze + resp. poloze -
-                                   // posledni vetev resp. usek bez vyhybky ma obe reference = -1
-end;
-
-//vetev useku
-TVetev=record             //vetev useku
-
- node1:TVetevEnd;           // reference na 1. vyhybku, ktera ukoncuje tuto vetev
- node2:TVetevEnd;           // reference na 2. vyhybku, ktera ukoncuje tuto vetev
-
-
-
- Symbols:array of TReliefSym;
-                            // s timto dynamicky alokovanym polem je potreba zachazet opradu opatrne
-                            // realokace trva strasne dlouho !
-                            // presto si myslim, ze se jedna o vyhodne reseni: pole se bude plnit jen jednou
-                            // pokud je v useku vykolejka, jednoduse sem ulozime symbol vykolejky
-end;
 
 // usek
 TUsek = class(TGraphBlok)

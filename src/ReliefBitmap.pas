@@ -6,7 +6,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
   StrUtils, ReliefText, VektorBasedObject, ReliefBitmapSymbols, Global, Forms,
-  OblastRizeni, PGraphics;
+  OblastRizeni, PGraphics, symbolHelper;
 
 const
  _MAX_WIDTH   = 256;
@@ -17,10 +17,6 @@ type
 
 TPanelBitmap=class
   private const
-   _KPopisek_Index  = 377;
-   _JCPopisek_Index = 360;
-   _Separ_Vert_Index = 352;
-   _Separ_Hor_Index = 572;
 
   private
    FPanelWidth,FPanelHeight:Integer;

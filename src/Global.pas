@@ -7,11 +7,6 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
   StrUtils;
 
-function GetVersion(const FileName: string): string;//cteni verze z nastaveni
-
-function GetPos(data:string):TPoint; overload;              //format: -1;-1, 5;10 = x;y
-function GetPos(data:TPoint):string; overload;
-
 type
  TNEvent = procedure of object;
  TPosAskEvent = function(Pos:TPoint):boolean of object;
@@ -27,13 +22,13 @@ type
    Pos1,Pos2:TPoint;
  end;
 
- TReliefSym=record
-  Position:TPoint;
-  SymbolID:Integer;
- end;
-
+function GetVersion(const FileName: string): string;//cteni verze z nastaveni
+function GetPos(data:string):TPoint; overload;              //format: -1;-1, 5;10 = x;y
+function GetPos(data:TPoint):string; overload;
 
 implementation
+
+////////////////////////////////////////////////////////////////////////////////
 
 function GetVersion(const FileName: string): string;//cteni verze z nastaveni
 var

@@ -7,7 +7,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
-  StrUtils, Global, Menus, Forms, DXDraws;
+  StrUtils, symbolHelper, Menus, Forms, DXDraws, Global;
 
 const
  _MAX_USEK          = 256;       //maximalni pocet useku
