@@ -31,31 +31,38 @@ Skládá se z několika sekcí.
        - 0-2..souradnice X
        - 3-5..souradnice Y
        - 6-7..symbol
-
-    nasledujici data jsou v souboru ulzoena jen, pokud jsou k dispozici vetve:
-      VC= vetve count = [pocet vetvi]
-      V0...V(N-1)= [vetve] ulozeno textove
-        pevne delky: 0-2..1. vyhybka - index v poli vyhybek (nikoliv technologicky blok!)
-                     3-4..1. vyhybka : index dalsi vetve pro polohu "vodorovne"
-                     5-6..1. vyhybka: index dalsi vetve pro polohu "sikmo"
-
-                     7-9..2. vyhybka - index v poli vyhybek (nikoliv technologicky blok!)
-                   10-11..2. vyhybka : index dalsi vetve pro polohu "vodorovne"
-                   12-13..2. vyhybka: index dalsi vetve pro polohu "sikmo"
-
-        [-           7-9..souradnice X
-                   10-12..souradnice Y
-                   13-15..symbol  -]  <- tato cast se opakuje
  - C= [JCClick] ulozeno textove
-      pevne delky: 0-2..souradnice X
-                   3-5..souradnice Y
+      pevne delky:
+       - 0-2: souradnice X
+       - 3-5: souradnice Y
  - P= [KPopisek] ulozeno textove
-      pevne delky: 0-2..souradnice X
-                   3-5..souradnice Y
+      pevne delky:
+       - 0-2: souradnice X
+       - 3-5. souradnice Y
  - N= [nazev koleje] ulozeno textove
  - OR= [oblast rizeni] integer 0-n
- - R= [root, koren] 0-2..souradnice X
-                   3-5..souradnice Y
+ - R= [root, koren]
+       - 0-2: souradnice X
+       - 3-5: souradnice Y
+
+  -- nasledujici data jsou v souboru ulozena jen, pokud jsou k dispozici vetve: --
+
+  - VC= vetve count = [pocet vetvi]
+  - V0...V(N-1)= [vetve] ulozeno textove
+      pevne delky:
+
+      - 0-2: 1. vyhybka - index v poli vyhybek (nikoliv technologicky blok!)
+      - 3-4: 1. vyhybka : index dalsi vetve pro polohu "vodorovne"
+      - 5-6: 1. vyhybka: index dalsi vetve pro polohu "sikmo"
+
+      - 7-9: 2. vyhybka - index v poli vyhybek (nikoliv technologicky blok!)
+      - 10-11: 2. vyhybka : index dalsi vetve pro polohu "vodorovne"
+      - 12-13: 2. vyhybka: index dalsi vetve pro polohu "sikmo"
+
+      Následující sekce se opakuje:
+      - 7-9: souradnice X
+      - 10-12: souradnice Y
+      - 13-15: symbol
 
 ## Návěstidla `[N0]`-`[Nn-1]`
  - B= [asociovany blok technologie]
