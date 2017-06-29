@@ -13,6 +13,8 @@ const
 
 type
 
+ TSeparType = (stNone, stVert, stHor);
+
  TVBOData=record
   Count:Integer;
   Data:array [0..(_MAX_DATA*2)] of Byte;
@@ -36,7 +38,7 @@ type
      FDeleteKrok:Byte;
     end;
 
-    Separ:Boolean;
+    Separ:TSeparType;
 
     function AddToStructure(Position:TPoint):Byte;
     function DeleteFromStructure(Position:TPoint):Byte;
@@ -52,7 +54,7 @@ type
    FDeleteActivate : TNEvent;
    FOPAsk : TOpAskEvent;
 
-    constructor Create(DrawCanvas:TCanvas;SymbolIL:TImageList;SymbolIndex:Integer;Separ:Boolean);
+    constructor Create(DrawCanvas:TCanvas;SymbolIL:TImageList;SymbolIndex:Integer;Separ:TSeparType = stNone);
 
     function GetObject(Position:TPoint):SmallInt;
 
@@ -88,7 +90,7 @@ type
 
 implementation
 
-constructor TVBO.Create(DrawCanvas:TCanvas;SymbolIL:TImageList;SymbolIndex:Integer;Separ:Boolean);
+constructor TVBO.Create(DrawCanvas:TCanvas;SymbolIL:TImageList;SymbolIndex:Integer;Separ:TSeparType);
 begin
  Self.DrawObject.Canvas       := DrawCanvas;
  Self.DrawObject.SymbolIL     := SymbolIL;
@@ -209,12 +211,16 @@ begin
 end;//procedure
 
 procedure TVBO.Paint;
-var i,posun:Integer;
+var i:Integer;
+    posun:TPoint;
 begin
- if (Self.Separ) then posun := (_Symbol_Sirka div 2) else posun := 0;
+ if (Self.Separ = stVert) then posun := Point(_Symbol_Sirka div 2, 0)
+ else if (Self.Separ = stHor) then posun := Point(0, _Symbol_Vyska div 2)
+ else posun := Point(0, 0);
  
  for i := 0 to Self.Data.Count-1 do
-   Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas,((Self.Data.Data[i].X)*_Symbol_Sirka)+posun,Self.Data.Data[i].Y*_Symbol_Vyska,Self.DrawObject.SymbolIndex);
+   Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas,(Self.Data.Data[i].X * _Symbol_Sirka) + posun.X,
+   (Self.Data.Data[i].Y * _Symbol_Vyska) + posun.Y, Self.DrawObject.SymbolIndex);
 end;//procedure
 
 function TVBO.Adding(Position:TPoint):Byte;
@@ -312,7 +318,7 @@ begin
        FOnShow;
        Sleep(50);
       end;
-     if (not Self.Separ) then
+     if (Self.Separ = stNone) then
       begin if (Assigned(Self.FMoveActivate)) then Self.FMoveActivate;
       end else begin Self.Move; end;
     end;//case 3
@@ -348,7 +354,7 @@ begin
    Sleep(50);
   end;
 
- if (not Self.Separ) then
+ if (Self.Separ = stNone) then
   begin if (Assigned(Self.FDeleteActivate)) then Self.FDeleteActivate;
   end else begin Self.Delete; end;
 
@@ -437,14 +443,19 @@ end;//procedure
 
 //zabyva se vykreslovanim posouvanych objektu v oddelovacich
 procedure TVBO.PaintMove(KurzorPos:TPoint);
-var posun:Integer;
+var posun:TPoint;
 begin
- if (Self.Separ) then posun := (_Symbol_Sirka div 2) else posun := 0;
+ if (Self.Separ = stVert) then posun := Point(_Symbol_Sirka div 2, 0)
+ else if (Self.Separ = stHor) then posun := Point(0, _Symbol_Vyska div 2)
+ else posun := Point(0, 0);
 
  //pridavani, posouvani
  if ((Self.Operations.FAddKrok = 1) or (Self.Operations.FMoveKrok = 2)) then
   begin
-   Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas,KurzorPos.X*_Symbol_Sirka+posun,KurzorPos.Y*_Symbol_Vyska,Self.DrawObject.SymbolIndex);
+   Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas,
+      KurzorPos.X * _Symbol_Sirka + posun.X,
+      KurzorPos.Y * _Symbol_Vyska + posun.Y,
+      Self.DrawObject.SymbolIndex);
   end;//if (Self.Oddelovace.AddKrok = 1)
 end;//procedure
 

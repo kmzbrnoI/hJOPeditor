@@ -11,8 +11,6 @@ type
   SymbolID,ObjID:Integer;
  end;
 
-// TMode=(dmBitmap,dmOddelovace,dmBloky);     presunuto do Global.pas
-
  //error ID:
   //0 - pretahovat lze pouze zleva doprava a zhora dolu
   //1 - prazdne pole (neni s cim operovat)
@@ -163,7 +161,8 @@ type
    function AddSymbol(SymbolID:Integer):Byte;
    function AddText(Text:string;Color:Integer):Byte;
    function AddJCClick:Byte;
-   function AddSeparator:Byte;
+   function AddSeparatorVert:Byte;
+   function AddSeparatorHor:Byte;
    function AddKPopisek:Byte;
 
    procedure MoveBitmapSymbol;
@@ -418,13 +417,13 @@ begin
  Self.DrawObject.Surface.Fill(Self.Colors.Pozadi);
 
  case (Self.DrawMode) of
-  dmBitmap,dmOddelovace:Self.PanelBitmap.PaintMove(CursorPos);
+  dmBitmap, dmSepHor, dmSepVert:Self.PanelBitmap.PaintMove(CursorPos);
  end;//case
 
  //vykresleni objektu s ohledem na DrawMode
  case (Self.DrawMode) of
-   dmBitmap,dmOddelovace : Self.PanelBitmap.Paint;
-   dmBloky,dmRoots       : Self.PanelObjects.Paint;
+   dmBitmap, dmSepHor, dmSepVert : Self.PanelBitmap.Paint;
+   dmBloky, dmRoots : Self.PanelObjects.Paint;
  end;
  Self.PaintOR();
  if (Self.Zobrazeni.Mrizka) then Self.PaintMrizka(Self.Colors.Mrizka);
@@ -434,8 +433,8 @@ begin
   begin
    //vykreslovani kurzoru a specialnich barev vzhledem k modum a operacim
    case (Self.DrawMode) of
-     dmBitmap,dmOddelovace : Self.PaintKurzor(Self.PanelBitmap.PaintCursor(CursorPos));
-     dmBloky,dmRoots       : Self.PaintKurzor(Self.PanelObjects.PaintCursor(CursorPos));
+     dmBitmap, dmSepHor, dmSepVert : Self.PaintKurzor(Self.PanelBitmap.PaintCursor(CursorPos));
+     dmBloky, dmRoots : Self.PaintKurzor(Self.PanelObjects.PaintCursor(CursorPos));
    end;//case
   end;
 
@@ -524,8 +523,8 @@ begin
  if (Self.ORMouseUp(LastPos, Button) = 0) then
   begin
    case (Self.DrawMode) of
-    dmBitmap,dmOddelovace : Self.BitmapMouseUp(LastPos, Button);
-    dmBloky,dmRoots       : Self.ObjectMouseUp(LastPos, Button);
+    dmBitmap, dmSepHor, dmSepVert : Self.BitmapMouseUp(LastPos, Button);
+    dmBloky, dmRoots : Self.ObjectMouseUp(LastPos, Button);
    end;//case
   end;//ORMouseUp = 0
 
@@ -551,8 +550,8 @@ end;//procedure
 procedure TRelief.DXDDoubleClick(Sender: TObject);
 begin
  case (Self.DrawMode) of
-  dmBitmap,dmOddelovace : Self.BitmapDblClick(LastPos);
-  dmBloky,dmRoots       : Self.ObjectDblClick(LastPos);
+  dmBitmap, dmSepHor, dmSepVert : Self.BitmapDblClick(LastPos);
+  dmBloky, dmRoots : Self.ObjectDblClick(LastPos);
  end;//case
 
  Self.Show(LastPos);
@@ -586,8 +585,10 @@ begin
  Result := 0;
 
  case (Self.DrawMode) of
-  dmBitmap,dmOddelovace : if (Assigned(Self.PanelBitmap)) then Self.PanelBitmap.Escape(Group) else Result := 1;
-  dmBloky,dmRoots       : if (Assigned(Self.PanelObjects)) then Self.PanelObjects.Escape else Result := 1;
+  dmBitmap, dmSepVert, dmSepHor:
+    if (Assigned(Self.PanelBitmap)) then Self.PanelBitmap.Escape(Group) else Result := 1;
+  dmBloky, dmRoots:
+    if (Assigned(Self.PanelObjects)) then Self.PanelObjects.Escape else Result := 1;
  end;
 
  Self.FMove := false;
@@ -597,7 +598,8 @@ end;//function
 
 function TRelief.SwitchMode(aMode:TMode):Byte;
 begin
- if (((Self.DrawMode = dmBitmap) or (Self.DrawMode = dmOddelovace)) and (aMode = dmBloky)) then
+ if (((Self.DrawMode = dmBitmap) or (Self.DrawMode = dmSepHor) or
+      (Self.DrawMode = dmSepVert)) and (aMode = dmBloky)) then
   begin
    //konverze z Bitmap na Objects
 
@@ -614,16 +616,16 @@ begin
    FreeAndNil(Self.PanelBitmap);
 
    Self.Panel.FileStav := 1;
-  end;//if (((Self.DrawMode = dmBitmap) or (Self.DrawMode = dmOddelovace)) and (aMode = dmBloky))
+  end else
 
- //konverze Bitmap <-> oddelovace
- if (((Self.DrawMode = dmBitmap) and (aMode = dmOddelovace)) or ((Self.DrawMode = dmOddelovace) and (aMode = dmBitmap))) then Self.PanelBitmap.Mode := aMode;
+ //konverze Bitmap <-> oddelovac hor <-> oddelovac vert
+ if (((Self.DrawMode = dmBitmap) or (Self.DrawMode = dmSepHor) or (Self.DrawMode = dmSepVert))
+      and ((aMode = dmBitmap) or (aMode = dmSepHor) or (aMode = dmSepVert))) then
+      Self.PanelBitmap.Mode := aMode
 
  //konverze Bloky <-> Koreny
- if (((Self.DrawMode = dmBloky) and (aMode = dmRoots)) or ((Self.DrawMode = dmRoots) and (aMode = dmBloky))) then
-  begin
+ else if (((Self.DrawMode = dmBloky) and (aMode = dmRoots)) or ((Self.DrawMode = dmRoots) and (aMode = dmBloky))) then
    Self.PanelObjects.Mode := aMode;
-  end;
 
  DrawMode := aMode;
 
@@ -700,37 +702,37 @@ function TRelief.FLoad(aFile:string):Byte;
 var ORs:string;
 begin
  case (Self.DrawMode) of
-  dmBitmap,dmOddelovace:begin
-                         if (Self.PanelBitmap.FLoad(aFile, ORs) <> 0) then
-                          begin
-                           Result := 1;
-                           Exit;
-                          end;// <> 0
-                         if (Self.ORLoad(ORs) <> 0) then
-                          begin
-                           Result := 2;
-                           Exit;
-                          end;
-                         Self.Panel.FileStav  := Self.PanelBitmap.FileStav;
-                         Self.Zobrazeni.PanelWidth   := Self.PanelBitmap.PanelWidth;
-                         Self.Zobrazeni.PanelHeight  := Self.PanelBitmap.PanelHeight;
-                        end;//dmBitmap
-  dmBloky,dmRoots:begin
-           if (Self.PanelObjects.FLoad(aFile,ORs) <> 0) then
-            begin
-             Result := 1;
-             Exit;
-            end;// <> 0
-           if (Self.ORLoad(ORs) <> 0) then
-            begin
-             Result := 2;
-             Exit;
-            end;
+  dmBitmap, dmSepHor, dmSepVert:begin
+     if (Self.PanelBitmap.FLoad(aFile, ORs) <> 0) then
+      begin
+       Result := 1;
+       Exit;
+      end;// <> 0
+     if (Self.ORLoad(ORs) <> 0) then
+      begin
+       Result := 2;
+       Exit;
+      end;
+     Self.Panel.FileStav  := Self.PanelBitmap.FileStav;
+     Self.Zobrazeni.PanelWidth   := Self.PanelBitmap.PanelWidth;
+     Self.Zobrazeni.PanelHeight  := Self.PanelBitmap.PanelHeight;
+    end;//dmBitmap
+  dmBloky, dmRoots:begin
+     if (Self.PanelObjects.FLoad(aFile,ORs) <> 0) then
+      begin
+       Result := 1;
+       Exit;
+      end;// <> 0
+     if (Self.ORLoad(ORs) <> 0) then
+      begin
+       Result := 2;
+       Exit;
+      end;
 
-           Self.Panel.FileStav  := Self.PanelObjects.FileStav;
-           Self.Zobrazeni.PanelWidth   := Self.PanelObjects.PanelWidth;
-           Self.Zobrazeni.PanelHeight  := Self.PanelObjects.PanelHeight;
-          end;//dmBloky
+     Self.Panel.FileStav  := Self.PanelObjects.FileStav;
+     Self.Zobrazeni.PanelWidth   := Self.PanelObjects.PanelWidth;
+     Self.Zobrazeni.PanelHeight  := Self.PanelObjects.PanelHeight;
+    end;//dmBloky
  end;//case
 
 
@@ -746,13 +748,13 @@ begin
  Result := 0;
 
  case (Self.DrawMode) of
-  dmBitmap,dmOddelovace:begin
+  dmBitmap, dmSepHor, dmSepVert:begin
      Result := Self.PanelBitmap.FSave(aFile, Self.ORSave());
      if (Result <> 0) then Exit;
      Self.Panel.FileStav := Self.PanelBitmap.FileStav;
     end;//dmBitmap
 
-  dmBloky,dmRoots:begin
+  dmBloky, dmRoots:begin
      Result := Self.PanelObjects.FSave(aFile,Self.ORSave());
      if (Result <> 0) then Exit;
      Self.Panel.FileStav := Self.PanelObjects.FileStav;
@@ -814,11 +816,20 @@ begin
  if (Assigned(Self.PanelBitmap)) then Result := Self.PanelBitmap.JCClick.Add;
 end;//procedure
 
-function TRelief.AddSeparator:Byte;
+function TRelief.AddSeparatorVert:Byte;
 begin
  Result := 255;
 
- if (Assigned(Self.PanelBitmap)) then Result := Self.PanelBitmap.Separators.Add;
+ if (Self.Mode <> dmSepVert) then Self.SwitchMode(dmSepVert);
+ if (Assigned(Self.PanelBitmap)) then Result := Self.PanelBitmap.SeparatorsVert.Add;
+end;//procedure
+
+function TRelief.AddSeparatorHor:Byte;
+begin
+ Result := 255;
+
+ if (Self.Mode <> dmSepHor) then Self.SwitchMode(dmSepHor);
+ if (Assigned(Self.PanelBitmap)) then Result := Self.PanelBitmap.SeparatorsHor.Add;
 end;//procedure
 
 function TRelief.AddKPopisek:Byte;

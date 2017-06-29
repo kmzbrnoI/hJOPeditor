@@ -260,7 +260,6 @@ TPanelObjects=class
     property OnFormBlkClose: TGlobalEvent read FFormBlkClose write FFormBlkClose;
 end;//TPanelObjects
 
-
 //FileSystemStav:
  //0 - soubor zavren
  //1 - soubor neulozen

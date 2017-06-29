@@ -60,7 +60,7 @@ type
     AE_Main: TApplicationEvents;
     MI_Draw: TMenuItem;
     PM_Bitmap: TMenuItem;
-    PM_Oddelovac: TMenuItem;
+    PM_Sep_Vert: TMenuItem;
     PM_Bloky: TMenuItem;
     P_Menu: TPanel;
     TB_BitmapTools: TToolBar;
@@ -70,7 +70,7 @@ type
     ToolButton51: TToolButton;
     SB_Main: TStatusBar;
     TB_Oddelovac: TToolBar;
-    TBt_Separator: TToolButton;
+    TB_Separator_Vert: TToolButton;
     MI_Relief: TMenuItem;
     PM_ChangeRozmery: TMenuItem;
     TB_BitmapOstatni: TToolBar;
@@ -106,6 +106,8 @@ type
     ToolButton49: TToolButton;
     ToolButton50: TToolButton;
     ToolButton55: TToolButton;
+    TB_Separator_Horiz: TToolButton;
+    PM_Sep_Hor: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure PM_NewClick(Sender: TObject);
@@ -119,7 +121,7 @@ type
     procedure CHB_GroupClick(Sender: TObject);
     procedure B_MoveClick(Sender: TObject);
     procedure PM_ChangeRozmeryClick(Sender: TObject);
-    procedure TBt_SeparatorClick(Sender: TObject);
+    procedure TB_Separator_VertClick(Sender: TObject);
     procedure MI_MrizkaClick(Sender: TObject);
     procedure MI_CloseFileClick(Sender: TObject);
     procedure PM_CloseAppClick(Sender: TObject);
@@ -135,6 +137,7 @@ type
     procedure MI_CheckDataClick(Sender: TObject);
     procedure MI_ExportServerClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure TB_Separator_HorizClick(Sender: TObject);
   private
     pushedButton:TToolButton;                   // last pushed button
 
@@ -215,7 +218,7 @@ begin
   Self.pushedButton.Down := false;
 
  case (Relief.Mode) of
-  dmBitmap,dmOddelovace:Relief.DeleteBitmapSymbol;
+  dmBitmap, dmSepVert, dmSepHor: Relief.DeleteBitmapSymbol;
  end;//case
 end;//procedure
 
@@ -228,7 +231,7 @@ begin
   Self.pushedButton.Down := false;
 
  case (Relief.Mode) of
-  dmBitmap,dmOddelovace:Relief.MoveBitmapSymbol;
+  dmBitmap, dmSepVert, dmSepHor: Relief.MoveBitmapSymbol;
  end;//case
 end;//procedure
 
@@ -240,7 +243,6 @@ end;//procedure
 procedure TF_Hlavni.CreateClasses;
 begin
  Self.DXD_main := TDXDraw.Create(Self);
-// Self.DXD_main.AutoInitialize := true;
  Self.DXD_main.Parent  := Self;
  Self.DXD_main.Left    := 8;
  Self.DXD_main.Top     := 80;
@@ -321,17 +323,15 @@ begin
   'd':begin
     // delete
     if (not Assigned(Self.Relief)) then Exit;
-    if ((Self.Relief.Mode <> dmBitmap) and (Self.Relief.Mode <> dmOddelovace)) then Exit;
-
-    Self.B_DeleteClick(Self);
+    if (Self.Relief.Mode = dmBitmap) then
+      Self.B_DeleteClick(Self);
   end;
 
   'm':begin
     // move
     if (not Assigned(Self.Relief)) then Exit;
-    if ((Self.Relief.Mode <> dmBitmap) and (Self.Relief.Mode <> dmOddelovace)) then Exit;
-
-    Self.B_MoveClick(Self);
+    if (Self.Relief.Mode = dmBitmap) then Exit;
+      Self.B_MoveClick(Self);
   end;
 
   'r':begin
@@ -462,20 +462,17 @@ begin
   dmBitmap:begin
    Self.PM_BitmapClick(Self.PM_Bitmap);
    Self.PM_ORAdd.Enabled := true;
-  end;//dmBitmap
+  end;
 
-  dmOddelovace:begin
-   Self.PM_BitmapClick(Self.PM_Oddelovac);
-  end;//dmBitmap
+  dmSepVert: Self.PM_BitmapClick(Self.PM_Sep_Vert);
+  dmSepHor: Self.PM_BitmapClick(Self.PM_Sep_Hor);
 
   dmBloky:begin
    Self.PM_ORAdd.Enabled := false;
    Self.PM_BitmapClick(Self.PM_Bloky);
-  end;//dmBitmap
+  end;
 
-  dmRoots:begin
-   Self.PM_BitmapClick(Self.PM_Roots);
-  end;//dmBitmap
+  dmRoots: Self.PM_BitmapClick(Self.PM_Roots);
  end;
 
  ReliefOptions.UseData(F_Hlavni.Relief);
@@ -523,7 +520,7 @@ end;//procedure
 //ukladani souboru jako
 procedure TF_Hlavni.PM_SaveAsClick(Sender: TObject);
 begin
- if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmOddelovace)) then
+ if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
   begin
    Self.SD_Save.Filter := 'Bitmapove soubory panelu (*.bpnl)|*.bpnl';
 
@@ -549,7 +546,7 @@ var return:Byte;
 begin
  return := 0;
 
- if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmOddelovace)) then
+ if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
   begin
    Self.SD_Save.Filter := 'Bitmapove soubory panelu (*.bpnl)|*.bpnl';
 
@@ -642,7 +639,8 @@ begin
      Self.MI_Relief.Visible         := true;
      Self.TB_Vykolejka.Visible      := true;
     end;//case 0
-  1:begin
+
+  1, 2:begin
      if (Relief.Mode = dmBloky) then
       begin
        Application.MessageBox('Tato funkce zatím není dostupná', 'Nelze pøevést', MB_OK OR MB_ICONERROR);
@@ -651,7 +649,10 @@ begin
       end;
 
      Return := 0;
-     if (Relief.Mode <> dmOddelovace) then Return := Relief.SwitchMode(dmOddelovace);
+     if ((TMenuItem(Sender).Tag = 1) and (Relief.Mode <> dmSepVert)) then
+       Return := Relief.SwitchMode(dmSepVert)
+     else if ((TMenuItem(Sender).Tag = 2) and (Relief.Mode <> dmSepHor)) then
+       Return := Relief.SwitchMode(dmSepHor);
 
      if (Return <> 0) then
       begin
@@ -663,7 +664,8 @@ begin
      Self.TB_BitmapTools.Visible := true;
      Self.MI_Relief.Visible      := true;
     end;//case 1
-  2:begin
+
+  3:begin
      Return := 0;
      if (Relief.Mode <> dmBloky) then Return := Relief.SwitchMode(dmBloky);
 
@@ -675,7 +677,8 @@ begin
 
      Self.MI_Data.Visible := true;
     end;//case 2
-  3:begin
+
+  4:begin
      Return := 0;
      if (Relief.Mode <> dmRoots) then Return := Relief.SwitchMode(dmRoots);
 
@@ -737,10 +740,20 @@ begin
  ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName))+_Config_File);
 end;//ppocedure
 
-procedure TF_Hlavni.TBt_SeparatorClick(Sender: TObject);
+procedure TF_Hlavni.TB_Separator_HorizClick(Sender: TObject);
 begin
+ if (Relief.Mode <> dmSepHor) then Self.PM_BitmapClick(Self.PM_Sep_Hor);
+
  Relief.Escape(false);
- if (Relief.AddSeparator <> 0) then Application.MessageBox('Chyba pri pridavani objektu','Chyba',MB_OK OR MB_ICONWARNING);
+ if (Relief.AddSeparatorHor <> 0) then Application.MessageBox('Chyba pri pridavani objektu','Chyba',MB_OK OR MB_ICONWARNING);
+end;
+
+procedure TF_Hlavni.TB_Separator_VertClick(Sender: TObject);
+begin
+ if (Relief.Mode <> dmSepVert) then Self.PM_BitmapClick(Self.PM_Sep_Vert);
+
+ Relief.Escape(false);
+ if (Relief.AddSeparatorVert <> 0) then Application.MessageBox('Chyba pri pridavani objektu','Chyba',MB_OK OR MB_ICONWARNING);
 end;
 
 procedure TF_Hlavni.ToolButton0Click(Sender: TObject);
@@ -873,16 +886,18 @@ end;//procedure
 procedure TF_Hlavni.RepaintModes(cur:TMode);
 begin
  case (cur) of
-   dmBitmap, dmOddelovace:begin
+   dmBitmap, dmSepVert, dmSepHor:begin
     Self.PM_Bitmap.Enabled    := true;
-    Self.PM_Oddelovac.Enabled := true;
+    Self.PM_Sep_Vert.Enabled  := true;
+    Self.PM_Sep_Hor.Enabled   := true;
     Self.PM_Bloky.Enabled     := true;
     Self.PM_Roots.Enabled     := false;
    end;
 
    dmBloky, dmRoots:begin
     Self.PM_Bitmap.Enabled    := false;
-    Self.PM_Oddelovac.Enabled := false;
+    Self.PM_Sep_Vert.Enabled  := false;
+    Self.PM_Sep_Hor.Enabled   := false;
     Self.PM_Bloky.Enabled     := true;
     Self.PM_Roots.Enabled     := true;
    end;

@@ -19,7 +19,7 @@ type
 
  TGlobalEvent = procedure(Sender:TObject) of object;
 
- TMode=(dmBitmap = 0, dmOddelovace = 1, dmBloky = 2, dmRoots = 3);
+ TMode=(dmBitmap = 0, dmSepVert = 1, dmSepHor = 2, dmBloky = 3, dmRoots = 4);
 
  TCursorDraw=record
    Color:ShortInt;

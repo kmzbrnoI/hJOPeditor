@@ -3458,22 +3458,29 @@ object F_Hlavni: TF_Hlavni
     object TB_Oddelovac: TToolBar
       Left = 8
       Top = 10
-      Width = 23
+      Width = 46
       Height = 22
       Align = alNone
       Images = IL_Menu
       TabOrder = 4
       Transparent = False
       Visible = False
-      object TBt_Separator: TToolButton
+      object TB_Separator_Vert: TToolButton
         Left = 0
         Top = 0
         Hint = 'Odd'#283'lova'#269' '#250'sek'#367
-        Caption = 'TBt_Separator'
+        Caption = 'TB_Separator_Vert'
         ImageIndex = 25
         ParentShowHint = False
         ShowHint = True
-        OnClick = TBt_SeparatorClick
+        OnClick = TB_Separator_VertClick
+      end
+      object TB_Separator_Horiz: TToolButton
+        Left = 23
+        Top = 0
+        Caption = 'TB_Separator_Horiz'
+        ImageIndex = 34
+        OnClick = TB_Separator_HorizClick
       end
     end
     object TB_BitmapOstatni: TToolBar
@@ -3769,22 +3776,29 @@ object F_Hlavni: TF_Hlavni
         RadioItem = True
         OnClick = PM_BitmapClick
       end
-      object PM_Oddelovac: TMenuItem
+      object PM_Sep_Vert: TMenuItem
         Tag = 1
-        Caption = 'Odd'#283'lova'#269'e '#250'sek'#367
+        Caption = 'Vertik'#225'ln'#237' odd'#283'lova'#269'e '#250'sek'#367
+        GroupIndex = 1
+        RadioItem = True
+        OnClick = PM_BitmapClick
+      end
+      object PM_Sep_Hor: TMenuItem
+        Tag = 2
+        Caption = 'Horizont'#225'ln'#237' odd'#283'lova'#269'e '#250'sek'#367
         GroupIndex = 1
         RadioItem = True
         OnClick = PM_BitmapClick
       end
       object PM_Bloky: TMenuItem
-        Tag = 2
+        Tag = 3
         Caption = 'Bloky'
         GroupIndex = 1
         RadioItem = True
         OnClick = PM_BitmapClick
       end
       object PM_Roots: TMenuItem
-        Tag = 3
+        Tag = 4
         Caption = 'Ko'#345'eny'
         GroupIndex = 1
         RadioItem = True
@@ -3845,7 +3859,7 @@ object F_Hlavni: TF_Hlavni
     Left = 200
     Top = 504
     Bitmap = {
-      494C01012300AC02B40208000C00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C01012300AC02B80208000C00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000200000006C00000001002000000000000036
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -4307,7 +4321,7 @@ object F_Hlavni: TF_Hlavni
     Left = 312
     Top = 504
     Bitmap = {
-      494C010104000800600010000C00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010104000800640010000C00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001800000001002000000000000018
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

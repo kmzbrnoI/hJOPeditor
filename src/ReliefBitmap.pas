@@ -17,11 +17,10 @@ type
 
 TPanelBitmap=class
   private const
-   _File_Version = $21;
-
    _KPopisek_Index  = 377;
    _JCPopisek_Index = 360;
-   _Separator_Index = 352;
+   _Separ_Vert_Index = 352;
+   _Separ_Hor_Index = 572;
 
   private
    FPanelWidth,FPanelHeight:Integer;
@@ -47,7 +46,8 @@ TPanelBitmap=class
 
     procedure ShowEvent;
     function IsSymbolSymbolTextEvent(Pos:TPoint):boolean;
-    function IsSymbolSeparEvent(Pos:TPoint):boolean;
+    function IsSymbolSeparVertEvent(Pos:TPoint):boolean;
+    function IsSymbolSeparHorEvent(Pos:TPoint):boolean;
     function IsSymbolKPopiskyJCClickEvent(Pos:TPoint):boolean;
     procedure NullOperationsEvent;
     procedure MoveActivateEvent;
@@ -59,11 +59,12 @@ TPanelBitmap=class
 
   public
 
-   Symbols   : TBitmapSymbols;
-   Separators: TVBO;
-   KPopisky  : TVBO;
-   JCClick   : TVBO;
-   Popisky   : TPopisky;
+   Symbols        :  TBitmapSymbols;
+   SeparatorsVert : TVBO;
+   SeparatorsHor  : TVBO;
+   KPopisky       : TVBO;
+   JCClick        : TVBO;
+   Popisky        : TPopisky;
 
    Bitmap:array [0.._MAX_WIDTH-1, 0.._MAX_HEIGHT-1] of ShortInt;
 
@@ -122,12 +123,14 @@ var myFile:File;
     VBOData:TVBOData;
     PopiskyData:TPopiskyFileData;
     BitmapData:TBSData;
+    version:Byte;
 begin
  Self.FStav   := 2;
  Self.FSoubor := aFile;
 
  Self.Symbols.Reset;
- Self.Separators.Reset;
+ Self.SeparatorsVert.Reset;
+ Self.SeparatorsHor.Reset;
  Self.Popisky.Reset;
 
  //kontrola existence
@@ -149,8 +152,9 @@ begin
  if ((Buffer[0] <> ord('b')) or (Buffer[1] <> ord('r'))) then Exit(3);
 
  //kontrola verze
- if (Buffer[2] <> _File_Version) then
-   Application.MessageBox(PChar('Otevíráte soubor s verzí '+IntToStr(Buffer[2])+', aplikace podporuje verzi '+IntToStr(_File_Version)), 'Varování', MB_OK OR MB_ICONWARNING);
+ version := Buffer[2];
+ if ((version <> $21) and (version <> $30)) then
+   Application.MessageBox(PChar('Otevíráte soubor s verzí '+IntToStr(Buffer[2])+', která není aplikací plnì podporována!'), 'Varování', MB_OK OR MB_ICONWARNING);
 
  BitmapData.Width  := Buffer[3];
  BitmapData.Height := Buffer[4];
@@ -191,21 +195,44 @@ begin
  if (Buffer[0] <> 255) or (Buffer[1] <> 255) then Exit(10);
  //-------------------------------------------
 
- //nacteni poctu separatoru
+ //nacteni poctu vertikalnich separatoru
  BlockRead(myFile,Buffer,1,aCount);
 
- //nacitani separatoru
+ //nacitani vertikalnich separatoru
  BlockRead(myFile,Buffer,(Buffer[0]*2),aCount);
 
  VBOData.Count := aCount;
  for i := 0 to aCount-1 do VBOData.Data[i] := Buffer[i];
 
- Self.Separators.SetLoadedData(VBOData);
+ Self.SeparatorsVert.SetLoadedData(VBOData);
 
  //prazdny radek
  BlockRead(myFile,Buffer,2,aCount);
  if (aCount < 2) then Exit(11);
  if (Buffer[0] <> 255) or (Buffer[1] <> 255) then Exit(12);
+ //-------------------------------------------
+
+ if (version >= $30) then
+  begin
+   //nacteni poctu horizontalnich separatoru
+   BlockRead(myFile,Buffer,1,aCount);
+
+   //nacitani horizontalnich separatoru
+   BlockRead(myFile,Buffer,(Buffer[0]*2),aCount);
+
+   VBOData.Count := aCount;
+   for i := 0 to aCount-1 do VBOData.Data[i] := Buffer[i];
+
+   Self.SeparatorsHor.SetLoadedData(VBOData);
+
+   //prazdny radek
+   BlockRead(myFile,Buffer,2,aCount);
+   if (aCount < 2) then Exit(11);
+   if (Buffer[0] <> 255) or (Buffer[1] <> 255) then Exit(12);
+  end else begin
+   Self.SeparatorsHor.Reset();
+  end;
+
  //-------------------------------------------
 
  //nacteni poctu KPopisky
@@ -287,7 +314,7 @@ begin
  Buffer[0] := ord('b');
  Buffer[1] := ord('r');
  //verze
- Buffer[2] := _File_Version;
+ Buffer[2] := $30;
  //vyska a sirka
  BitmapData := Self.Symbols.GetSaveData;
 
@@ -321,8 +348,18 @@ begin
  Buffer[1] := 255;
  BlockWrite(myFile,Buffer,2);
  //-------------------------------------------
- //oddelovace
- VBOData := Self.Separators.GetSaveData;
+ //vertikalni oddelovace
+ VBOData := Self.SeparatorsVert.GetSaveData;
+ BlockWrite(myFile,VBOData.Data,VBOData.Count);
+
+ //ukonceni bloku
+ Buffer[0] := 255;
+ Buffer[1] := 255;
+ BlockWrite(myFile,Buffer,2);
+
+ //-------------------------------------------
+ //horizontalni oddelovace
+ VBOData := Self.SeparatorsHor.GetSaveData;
  BlockWrite(myFile,VBOData.Data,VBOData.Count);
 
  //ukonceni bloku
@@ -404,15 +441,23 @@ begin
  Self.Symbols.FDeleteActivate := Self.DeleteActivateEvent;
  Self.Symbols.FOPAsk          := Self.IsOperationEvent;
 
- Self.Separators := TVBO.Create(DrawCanvas,SymbolIL, _Separator_Index, true);
- Self.Separators.FOnShow         := Self.ShowEvent;
- Self.Separators.FIsSymbol       := Self.IsSymbolSeparEvent;
- Self.Separators.FNullOperations := Self.NullOperationsEvent;
- Self.Separators.FMoveActivate   := Self.MoveActivateEvent;
- Self.Separators.FDeleteActivate := Self.DeleteActivateEvent;
- Self.Separators.FOPAsk          := Self.IsOperationEvent;
+ Self.SeparatorsVert := TVBO.Create(DrawCanvas,SymbolIL, _Separ_Vert_Index, stVert);
+ Self.SeparatorsVert.FOnShow         := Self.ShowEvent;
+ Self.SeparatorsVert.FIsSymbol       := Self.IsSymbolSeparVertEvent;
+ Self.SeparatorsVert.FNullOperations := Self.NullOperationsEvent;
+ Self.SeparatorsVert.FMoveActivate   := Self.MoveActivateEvent;
+ Self.SeparatorsVert.FDeleteActivate := Self.DeleteActivateEvent;
+ Self.SeparatorsVert.FOPAsk          := Self.IsOperationEvent;
 
- Self.KPopisky   := TVBO.Create(DrawCanvas,SymbolIL, _KPopisek_Index, false);
+ Self.SeparatorsHor := TVBO.Create(DrawCanvas,SymbolIL, _Separ_Hor_Index, stHor);
+ Self.SeparatorsHor.FOnShow         := Self.ShowEvent;
+ Self.SeparatorsHor.FIsSymbol       := Self.IsSymbolSeparHorEvent;
+ Self.SeparatorsHor.FNullOperations := Self.NullOperationsEvent;
+ Self.SeparatorsHor.FMoveActivate   := Self.MoveActivateEvent;
+ Self.SeparatorsHor.FDeleteActivate := Self.DeleteActivateEvent;
+ Self.SeparatorsHor.FOPAsk          := Self.IsOperationEvent;
+
+ Self.KPopisky   := TVBO.Create(DrawCanvas,SymbolIL, _KPopisek_Index);
  Self.KPopisky.FOnShow         := Self.ShowEvent;
  Self.KPopisky.FIsSymbol       := Self.IsSymbolKPopiskyJCClickEvent;
  Self.KPopisky.FNullOperations := Self.NullOperationsEvent;
@@ -420,7 +465,7 @@ begin
  Self.KPopisky.FDeleteActivate := Self.DeleteActivateEvent;
  Self.KPopisky.FOPAsk          := Self.IsOperationEvent;
 
- Self.JCClick    := TVBO.Create(DrawCanvas,SymbolIL, _JCPopisek_Index,false);
+ Self.JCClick    := TVBO.Create(DrawCanvas,SymbolIL, _JCPopisek_Index);
  Self.JCClick.FOnShow         := Self.ShowEvent;
  Self.JCClick.FIsSymbol       := Self.IsSymbolKPopiskyJCClickEvent;
  Self.JCClick.FNullOperations := Self.NullOperationsEvent;
@@ -442,22 +487,14 @@ end;//contructor
 
 destructor TPanelBitmap.Destroy;
 begin
- Self.Symbols.Destroy;
- Self.Symbols := nil;
+ FreeAndNil(Self.Symbols);
+ FreeAndNil(Self.SeparatorsVert);
+ FreeAndNIl(Self.SeparatorsHor);
+ FreeAndNil(Self.KPopisky);
+ FreeAndNil(Self.JCClick);
+ FreeAndNil(Self.Popisky);
 
- Self.Separators.Destroy;
- Self.Separators := nil;
-
- Self.KPopisky.Destroy;
- Self.KPopisky := nil;
-
- Self.JCClick.Destroy;
- Self.JCClick := nil;
-
- Self.Popisky.Destroy;
- Self.Popisky := nil;
-
- inherited Destroy;
+ inherited;
 end;//contructor
 
 //vykresleni vseho
@@ -466,7 +503,8 @@ begin
  Self.JCClick.Paint;
  Self.KPopisky.Paint;
  Self.Symbols.Paint;
- Self.Separators.Paint;
+ Self.SeparatorsVert.Paint;
+ Self.SeparatorsHor.Paint;
  Self.Popisky.Paint;
 end;//procedure
 
@@ -506,7 +544,9 @@ begin
                end;//if Result = 0
              end;//if not AllStav
            end;//dmBitmap
-   dmOddelovace:Result := Self.Separators.MouseUp(Position,Button);
+
+   dmSepHor:Result := Self.SeparatorsHor.MouseUp(Position,Button);
+   dmSepVert:Result := Self.SeparatorsVert.MouseUp(Position,Button);
   end;//case
 
  Self.Operations.Disable := false;
@@ -532,11 +572,14 @@ begin
  if (Assigned(Self.FORAskEvent)) then Exit(Self.FORAskEvent(Pos));
 end;//function
 
-function TPanelBitmap.IsSymbolSeparEvent(Pos:TPoint):boolean;
+function TPanelBitmap.IsSymbolSeparVertEvent(Pos:TPoint):boolean;
 begin
- Result := false;
+ Result := (Self.SeparatorsVert.GetObject(Pos) <> -1);
+end;//function
 
- if (Self.Separators.GetObject(Pos) <> -1) then Result := true;
+function TPanelBitmap.IsSymbolSeparHorEvent(Pos:TPoint):boolean;
+begin
+ Result := (Self.SeparatorsHor.GetObject(Pos) <> -1);
 end;//function
 
 function TPanelBitmap.IsSymbolKPopiskyJCClickEvent(Pos:TPoint):boolean;
@@ -582,7 +625,8 @@ end;//fucntion
 procedure TPanelBitmap.Escape(Group:Boolean);
 begin
  if (Assigned(Self.Symbols)) then Self.Symbols.Escape(Group);
- if (Assigned(Self.Separators)) then Self.Separators.Escape;
+ if (Assigned(Self.SeparatorsVert)) then Self.SeparatorsVert.Escape;
+ if (Assigned(Self.SeparatorsHor)) then Self.SeparatorsHor.Escape;
  if (Assigned(Self.KPopisky)) then Self.KPopisky.Escape;
  if (Assigned(Self.JCClick)) then Self.JCClick.Escape;
  if (Assigned(Self.Popisky)) then Self.Popisky.Escape;
@@ -591,39 +635,47 @@ end;//procedure
 procedure TPanelBitmap.ResetPanel;
 begin
  if (Assigned(Self.Symbols)) then Self.Symbols.Reset;
- if (Assigned(Self.Separators)) then Self.Separators.Reset;
+ if (Assigned(Self.SeparatorsVert)) then Self.SeparatorsVert.Reset;
+ if (Assigned(Self.SeparatorsHor)) then Self.SeparatorsHor.Reset;
  if (Assigned(Self.KPopisky)) then Self.KPopisky.Reset;
  if (Assigned(Self.JCClick)) then Self.JCClick.Reset;
  if (Assigned(Self.Popisky)) then Self.Popisky.Reset;
 end;//procedure
 
 function TPanelBitmap.PaintCursor(CursorPos:TPoint):TCursorDraw;
-var Return:array [0..4] of TCursorDraw;
+var Return:array [0..5] of TCursorDraw;
     i:Integer;
     AllSame:Boolean;
     Same:TCursorDraw;
 begin
  Return[0] := Self.Symbols.PaintCursor(CursorPos);
- Return[1] := Self.Separators.PaintCursor(CursorPos);
- Return[2] := Self.KPopisky.PaintCursor(CursorPos);
- Return[3] := Self.JCClick.PaintCursor(CursorPos);
- Return[4] := Self.Popisky.PaintCursor(CursorPos);
+ Return[1] := Self.SeparatorsVert.PaintCursor(CursorPos);
+ Return[2] := Self.SeparatorsHor.PaintCursor(CursorPos);
+ Return[3] := Self.KPopisky.PaintCursor(CursorPos);
+ Return[4] := Self.JCClick.PaintCursor(CursorPos);
+ Return[5] := Self.Popisky.PaintCursor(CursorPos);
 
- if (Self.Mode = dmOddelovace) then
+ if (Self.Mode = dmSepVert) then
   begin
-   for i := 0 to 4 do
+   for i := 0 to 5 do
     begin
      Return[i].Pos1.X := Return[i].Pos1.X + (_Symbol_Sirka div 2);
      Return[i].Pos2.X := Return[i].Pos2.X + (_Symbol_Sirka div 2);
     end;//for i
-  end;//if (Self.Mode = dmOddelovace)
+  end else begin if (Self.Mode = dmSepHor) then
+   for i := 0 to 5 do
+    begin
+     Return[i].Pos1.Y := Return[i].Pos1.Y + (_Symbol_Vyska div 2);
+     Return[i].Pos2.Y := Return[i].Pos2.Y + (_Symbol_Vyska div 2);
+    end;//for i
+  end;
 
  //zde se zajistuje vytvoreni 1 barvy a pozice kurzoru z celkem 5 pozic a barev - osetreni priorit
 
  //pokud jsou vsechny stejne
  Same := Return[0];
  AllSame := true;
- for i := 1 to 4 do
+ for i := 1 to 5 do
   begin
    if ((Return[i].Color <> Same.Color) or (Return[i].Pos1.X <> Same.Pos1.X) or (Return[i].Pos1.Y <> Same.Pos1.Y) or
        (Return[i].Pos2.X <> Same.Pos2.X) or (Return[i].Pos2.Y <> Same.Pos2.Y)) then
@@ -635,12 +687,12 @@ begin
  if (AllSame) then Exit(Same);
 
  //pokud je 1 OnObject
- for i := 0 to 4 do
+ for i := 0 to 5 do
    if (Return[i].Color = 2) then
      Exit(Return[i]);
 
  //pokud je 1 Operation
- for i := 0 to 4 do
+ for i := 0 to 5 do
    if (Return[i].Color = 1) then
      Exit(Return[i]);
 end;//function
@@ -648,7 +700,8 @@ end;//function
 function TPanelBitmap.IsOperation:Boolean;
 begin
  if ((Self.Symbols.AddKrok <> 0) or (Self.Symbols.MoveKrok > 1) or (Self.Symbols.DeleteKrok > 1) or
-     (Self.Separators.AddKrok <> 0) or (Self.Separators.MoveKrok > 1) or (Self.Separators.DeleteKrok > 1) or
+     (Self.SeparatorsVert.AddKrok <> 0) or (Self.SeparatorsVert.MoveKrok > 1) or (Self.SeparatorsVert.DeleteKrok > 1) or
+     (Self.SeparatorsHor.AddKrok <> 0) or (Self.SeparatorsHor.MoveKrok > 1) or (Self.SeparatorsHor.DeleteKrok > 1) or
      (Self.KPopisky.AddKrok <> 0) or (Self.KPopisky.MoveKrok > 1) or (Self.KPopisky.DeleteKrok > 1) or
      (Self.JCClick.AddKrok <> 0) or (Self.JCClick.MoveKrok > 1) or (Self.JCClick.DeleteKrok > 1) or
      (Self.Popisky.AddKrok <> 0) or (Self.Popisky.MoveKrok > 1) or (Self.Popisky.DeleteKrok > 1)) then Result := true else Result := false;
@@ -663,7 +716,9 @@ begin
             if (Assigned(Self.JCClick)) then Self.JCClick.Move;
             if (Assigned(Self.Popisky)) then Self.Popisky.Move;
            end;
-  dmOddelovace:if (Assigned(Self.Separators)) then Self.Separators.Move;
+
+  dmSepHor: if (Assigned(Self.SeparatorsHor)) then Self.SeparatorsHor.Move;
+  dmSepVert: if (Assigned(Self.SeparatorsVert)) then Self.SeparatorsVert.Move;
  end;
 end;//procedure
 
@@ -676,14 +731,16 @@ begin
             if (Assigned(Self.JCClick)) then Self.JCClick.Delete;
             if (Assigned(Self.Popisky)) then Self.Popisky.Delete;
            end;
-  dmOddelovace:if (Assigned(Self.Separators)) then Self.Separators.Delete;
+  dmSepHor: if (Assigned(Self.SeparatorsHor)) then Self.SeparatorsHor.Delete;
+  dmSepVert: if (Assigned(Self.SeparatorsVert)) then Self.SeparatorsVert.Delete;
  end;
 end;//procedure
 
 procedure TPanelBitmap.PaintMove(CursorPos:TPoint);
 begin
  if (Assigned(Self.Symbols)) then Self.Symbols.PaintBitmapMove(CursorPos);
- if (Assigned(Self.Separators)) then Self.Separators.PaintMove(CursorPos);
+ if (Assigned(Self.SeparatorsVert)) then Self.SeparatorsVert.PaintMove(CursorPos);
+ if (Assigned(Self.SeparatorsHor)) then Self.SeparatorsHor.PaintMove(CursorPos);
  if (Assigned(Self.KPopisky)) then Self.KPopisky.PaintMove(CursorPos);
  if (Assigned(Self.JCClick)) then Self.JCClick.PaintMove(CursorPos);
  if (Assigned(Self.Popisky)) then Self.Popisky.PaintTextMove(CursorPos);
