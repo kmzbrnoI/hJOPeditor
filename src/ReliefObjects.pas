@@ -35,7 +35,9 @@ const
  _Rozp_Start       = 55;
 
  //zde je definovano, jaky symbol se ma vykreslovat jakou barvou (mimo separatoru)
- _Bitmap_DrawColors:array [0..35] of Byte = (1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,6,6,6,1);
+  _Bitmap_DrawColors:array [0..60] of Byte = (1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,6,6,6,1,1,1,1,1,1,1,1,1,1,7,1,1,1,1,1,1,1,1,1,
+    1,1,1,1,1,1);
 
  _FileVersion = '1.1';
 

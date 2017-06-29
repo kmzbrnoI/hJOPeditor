@@ -121,7 +121,7 @@
 						<VersionInfo Name="MajorVer">2</VersionInfo>
 						<VersionInfo Name="MinorVer">6</VersionInfo>
 						<VersionInfo Name="Release">1</VersionInfo>
-						<VersionInfo Name="Build">0</VersionInfo>
+						<VersionInfo Name="Build">4</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -133,7 +133,7 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName"/>
 						<VersionInfoKeys Name="FileDescription"/>
-						<VersionInfoKeys Name="FileVersion">2.6.1.0</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">2.6.1.4</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName">hJOPeditor</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalCopyright">Jan Horacek 2011-2015</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks">Jan Horacek 2011-2015</VersionInfoKeys>

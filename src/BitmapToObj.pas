@@ -7,6 +7,8 @@ uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
      Global, Generics.Collections;
 
 type
+ TNavDir = (ndPositive = 0, ndNegative = 1);
+
  TBitmapToObj=class
   private const
     _MAX_WIDTH     = 256;
@@ -21,9 +23,16 @@ type
     _Uvazka        = 43;
     _Uvazka_Spr    = 45;
     _Zamek         = 48;
+    _Krizeni_Start = 58;
+    _Krizeni_End   = 59;
 
-    _Usek_Navzanost: array [0..47] of ShortInt = (-1,0,1,0,0,-1,0,1,0,1,1,0,-1,0,0,-1,-1,0,0,1,0,-1,1,0,-1,0,1,0,0,-1,0,1,0,1,1,0,-1,0,0,-1,-1,0,0,1,0,-1,1,0);
-    _Vyh_Navaznost : array [0..23]  of ShortInt = (-1,0,0,-1,1,0,-1,0,0,1,1,0,-1,0,0,-1,1,0,-1,0,0,1,1,0);
+    _Usek_Navaznost: array [0..47] of ShortInt =
+      (-1,0,1,0,0,-1,0,1,0,1,1,0,-1,0,0,-1,-1,0,0,1,0,-1,1,0,-1,0,1,0,0,-1,0,1,
+      0,1,1,0,-1,0,0,-1,-1,0,0,1,0,-1,1,0);
+    _Krizeni_Navaznost: array [0..7] of ShortInt =
+      (-1,0,1,0,-1,0,1,0);
+    _Vyh_Navaznost : array [0..23]  of ShortInt =
+      (-1,0,0,-1,1,0,-1,0,0,1,1,0,-1,0,0,-1,1,0,-1,0,0,1,1,0);
 
     _Max_Pos = 32;
 
@@ -46,6 +55,9 @@ type
     procedure AddPos(Pos:TPoint);
     procedure CheckPos;
     procedure AddPrj(Pos:TPoint; index:Integer);
+
+    function GetUsekNavaznost(symbol:Integer; dir:TNavDir):TPoint;
+
   public
     function BitmapToObjects(BitmapData:TPanelBitmap;ObjectData:TPanelObjects):Byte;
  end;//TConvert
@@ -100,7 +112,9 @@ begin
      Symbol := Self.Bitmap.Symbols.GetSymbol(Point(i,j));
      if (Symbol <> -1) then
       begin
-       if ((not Self.Zahrnuto[i,j]) and (Symbol >= _UsekS_Start) and (Symbol <= _UsekS_End)) then
+       if ((not Self.Zahrnuto[i,j]) and
+           (((Symbol >= _UsekS_Start) and (Symbol <= _UsekS_End)) or
+            ((Symbol >= _Krizeni_Start) and (Symbol <= _Krizeni_End)))) then
         begin
          Result := Self.ZpracujObject(Point(i,j), index, vyh_index, vykol_index);
          if (Result <> 0) then Exit;
@@ -359,6 +373,7 @@ begin
 
        //pokud je symbol usek
        if (((Symbol >= _UsekS_Start) and (Symbol <= _UsekS_End)) or
+          ((Symbol >= _Krizeni_Start) and (Symbol <= _Krizeni_End)) or
           ((Symbol >= _Vykol_Start) and (Symbol <= _Vykol_End))) then
         begin
          //cyklus je kvuli dvou smerum navazosti
@@ -369,8 +384,9 @@ begin
              Self.Bitmap.Symbols.Bitmap[Self.Positions.Pos[i].X, Self.Positions.Pos[i].Y] := _UsekS_Start;
 
            //TempPos = pozice teoreticky navaznych objektu
-           TempPos.X := Self.Positions.Pos[i].X + _Usek_Navzanost[((Self.Bitmap.Symbols.GetSymbol(Self.Positions.Pos[i])-_UsekS_Start)*4) + (j*2)];
-           TempPos.Y := Self.Positions.Pos[i].Y + _Usek_Navzanost[((Self.Bitmap.Symbols.GetSymbol(Self.Positions.Pos[i])-_UsekS_Start)*4) + (j*2) + 1];
+
+           TempPos.X := Self.Positions.Pos[i].X + GetUsekNavaznost(Self.Bitmap.Symbols.GetSymbol(Self.Positions.Pos[i]), TNavDir(j)).X;
+           TempPos.Y := Self.Positions.Pos[i].Y + GetUsekNavaznost(Self.Bitmap.Symbols.GetSymbol(Self.Positions.Pos[i]), TNavDir(j)).Y;
 
            Symbol2 := Self.Bitmap.Symbols.GetSymbol(TempPos);
 
@@ -401,11 +417,15 @@ begin
               end;
 
              //vedlejsi Symbol2 = usek
-             if ((Symbol2 >= _UsekS_Start) and (Symbol2 <= _UsekS_End)) then
+             if (((Symbol2 >= _UsekS_Start) and (Symbol2 <= _UsekS_End)) or
+                 ((Symbol2 >= _Krizeni_Start) and (Symbol2 <= _Krizeni_End))) then
               begin
                //ted vime, ze na NavaznostPos je usek
-               if ((((TempPos.X + _Usek_Navzanost[((Symbol2 - _UsekS_Start)*4)]) = Self.Positions.Pos[i].X) and ((TempPos.Y + _Usek_Navzanost[((Symbol2 - _UsekS_Start)*4)+1]) = Self.Positions.Pos[i].Y)) or
-                (((TempPos.X + _Usek_Navzanost[((Symbol2 - _UsekS_Start)*4)+2]) = Self.Positions.Pos[i].X) and ((TempPos.Y + _Usek_Navzanost[((Symbol2 - _UsekS_Start)*4)+3]) = Self.Positions.Pos[i].Y))) then
+
+               if (((TempPos.X + GetUsekNavaznost(Symbol2, ndPositive).X = Self.Positions.Pos[i].X) and
+                    (TempPos.Y + GetUsekNavaznost(Symbol2, ndPositive).Y = Self.Positions.Pos[i].Y)) or
+                   ((TempPos.X + GetUsekNavaznost(Symbol2, ndNegative).X = Self.Positions.Pos[i].X) and
+                    (TempPos.Y + GetUsekNavaznost(Symbol2, ndNegative).Y = Self.Positions.Pos[i].Y))) then
                 begin
                  //ted vime, ze i navaznost z TempPos vede na Self.Positions.Pos[i].Pos - muzeme pridat Symbol2 do bloku
 
@@ -475,11 +495,14 @@ begin
            if (not Self.Zahrnuto[TempPos.X,TempPos.Y]) then
             begin
              //vedlejsi Symbol2 = usek
-             if ((Symbol2 >= _UsekS_Start) and (Symbol2 <= _UsekS_End)) then
+             if (((Symbol2 >= _UsekS_Start) and (Symbol2 <= _UsekS_End) or
+                 ((Symbol2 >= _Krizeni_Start) and (Symbol2 <= _Krizeni_End)))) then
               begin
                //ted vime, ze na NavaznostPos je usek
-               if ((((TempPos.X + _Usek_Navzanost[((Symbol2 - _UsekS_Start)*4)]) = Self.Positions.Pos[i].X) and ((TempPos.Y + _Usek_Navzanost[((Symbol2 - _UsekS_Start)*4)+1]) = Self.Positions.Pos[i].Y)) or
-                (((TempPos.X + _Usek_Navzanost[((Symbol2 - _UsekS_Start)*4)+2]) = Self.Positions.Pos[i].X) and ((TempPos.Y + _Usek_Navzanost[((Symbol2 - _UsekS_Start)*4)+3]) = Self.Positions.Pos[i].Y))) then
+               if (((TempPos.X + GetUsekNavaznost(Symbol2, ndPositive).X = Self.Positions.Pos[i].X) and
+                     (TempPos.Y + GetUsekNavaznost(Symbol2, ndPositive).Y = Self.Positions.Pos[i].Y)) or
+                   ((TempPos.X + GetUsekNavaznost(Symbol2, ndNegative).X = Self.Positions.Pos[i].X) and
+                     (TempPos.Y + GetUsekNavaznost(Symbol2, ndNegative).Y = Self.Positions.Pos[i].Y))) then
                 begin
                  //ted vime, ze i navaznost z TempPos vede na Self.Positions.Pos[i].Pos - muzeme pridat Symbol2 do bloku
                  sym.SymbolID := Symbol2;
@@ -552,5 +575,16 @@ begin
 
  Self.Objects.Bloky.Add(blk);
 end;//procedure
+
+function TBitmapToObj.GetUsekNavaznost(symbol:Integer; dir:TNavDir):TPoint;
+begin
+ if ((symbol >= _UsekS_Start) and (symbol <= _UsekS_End)) then
+   Result := Point( _Usek_Navaznost[(symbol - _UsekS_Start) * 4 + (2*Integer(dir))],
+                    _Usek_Navaznost[(symbol - _UsekS_Start) * 4 + (2*Integer(dir)) + 1] )
+ else if ((symbol >= _Krizeni_Start) and (symbol <= _Krizeni_End)) then
+   Result := Point( _Krizeni_Navaznost[(symbol - _Krizeni_Start) * 4 + (2*Integer(dir))],
+                    _Krizeni_Navaznost[(symbol - _Krizeni_Start) * 4 + (2*Integer(dir)) + 1] )
+ else Result := Point(0, 0);
+end;
 
 end.//unit
