@@ -20,7 +20,7 @@ type
 
 procedure ComputeVetve(po:TPanelObjects);
 procedure ComputeNormalBlokVetve(po:TPanelObjects; var data:TVetveData; start:TPoint; Vetve:TList<TVetev>);
-function GetUsekTillVyhybka(var data:TVetveData; start:TPoint; initDir:TNavDir):TVetevReturner;
+procedure GetUsekTillVyhybka(var data:TVetveData; start:TPoint; initDir:TNavDir; var res:TVetevReturner);
 procedure ComputeDKSBlokVetve(po:TPanelObjects; var data:TVetveData; start:TPoint; vetve:TList<TVetev>);
 
 implementation
@@ -241,18 +241,18 @@ end;//procedure
 }
 procedure ComputeDKSBlokVetve(po:TPanelObjects; var data:TVetveData; start:TPoint; vetve:TList<TVetev>);
 var vetev:TVetev;
-    symbols:TList<TReliefSym>;
     r:TVetevReturner;
     i:Integer;
     vlPos, vrPos:TPoint;
+    symbol:Integer;
 begin
- symbols := TList<TReliefSym>.Create();
+ r.symbols := TList<TReliefSym>.Create();
  vlPos := Point(-1, -1);
  vrPos := Point(-1, -1);
 
  try
    // 1) nejprve hledame usek k nejblizsi leve vyhybce
-   r := GetUsekTillVyhybka(data, Point(start.X-1, start.Y), ndPositive);
+   GetUsekTillVyhybka(data, Point(start.X-1, start.Y), ndPositive, r);
 
    vetev := DefaultVetev();
    SetLength(vetev.Symbols, r.symbols.Count);
@@ -267,7 +267,8 @@ begin
    vetve.Add(vetev);
 
    // 2) hledame usek k nejblizsi prave vyhybce
-   r := GetUsekTillVyhybka(data, Point(start.X+1, start.Y), ndNegative);
+   r.symbols.Clear();
+   GetUsekTillVyhybka(data, Point(start.X+1, start.Y), ndNegative, r);
 
    vetev := DefaultVetev();
    SetLength(vetev.Symbols, r.symbols.Count);
@@ -289,7 +290,16 @@ begin
     end;
 
    // 3) hledame spojovaci usek obou vyhybek
-   r := GetUsekTillVyhybka(data, Point(vlPos.X+1, vlPos.Y), ndPositive);
+   //    musime expandovat v obbou smerech
+   r.symbols.Clear();
+   symbol := data[vlPos.X+1, vlPos.Y];
+   GetUsekTillVyhybka(data, Point(vlPos.X+1, vlPos.Y), ndPositive, r);
+
+   data[vlPos.X+1, vlPos.Y] := symbol;
+   GetUsekTillVyhybka(data, Point(vlPos.X+1, vlPos.Y), ndNegative, r);
+
+   // symbol na pozici [vlPos.X+1, vlPos.Y] dvakrat -> vymazat
+   r.symbols.Delete(0);
 
    vetev := DefaultVetev();
    SetLength(vetev.Symbols, r.symbols.Count);
@@ -303,7 +313,7 @@ begin
    ComputeNormalBlokVetve(po, data, Point(vrPos.X+1, vrPos.Y), vetve);
 
  finally
-   symbols.Free();
+   r.symbols.Free();
  end;
 end;
 
@@ -316,21 +326,21 @@ end;
   Pozor: tato funkce neni pouzitelna obecne (nepocita treba s vykolejkami).
   Je uzitecna predevsim pro potreby DKS.
 }
-function GetUsekTillVyhybka(var data:TVetveData; start:TPoint; initDir:TNavDir):TVetevReturner;
+procedure GetUsekTillVyhybka(var data:TVetveData; start:TPoint; initDir:TNavDir; var res:TVetevReturner);
 var temp, new:TPoint;
     symbol:TReliefSym;
     first:boolean;
 begin
- Result.symbols := TList<TReliefSym>.Create();
  new := start;
  first := true;
+ res.next := Point(-1, -1);
 
  while ((data[new.X, new.Y] >= _Usek_Start) and (data[new.X, new.Y] <=_Usek_End)) do
   begin
    // pridam symbol do seznamu symbolu
    symbol.Position := new;
    symbol.SymbolID := data[new.X, new.Y];
-   Result.symbols.Add(symbol);
+   res.symbols.Add(symbol);
 
    if (first) then
     begin
@@ -356,7 +366,7 @@ begin
    data[new.X, new.Y] := -1;
    new := temp;
    first := false;
-   Result.next := new;
+   res.next := new;
   end;//while
 end;
 
