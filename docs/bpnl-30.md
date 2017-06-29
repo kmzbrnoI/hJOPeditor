@@ -41,7 +41,7 @@ Soubor se skládá z několika sekcí, každá sekce je ukončena byty `0xFF, 0x
  9. Symboly konce jízdní cesty.
     Formát stejný jako formát oddělovačů.
 
- 10.Oblasti řízení
+ 10. Oblasti řízení
 
     První 2 byty udávají počet oblastí řízení. Pak následují samotné oblasti
     řízení.
