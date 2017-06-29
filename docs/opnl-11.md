@@ -155,8 +155,8 @@ DKS je tvořena dvěma úseky, jeden v horní části DKS a jeden ve sdpodní č
 Tyto úseky jsou autonomní, zabývejme se tedy jen způsobem uložení dolní (resp.
 horní) poloviny DKS.
 
-Kořen kreslení se do DKS umisťuje na kříž, na tomto úseku jsou pevně definované
-větve:
+Kořen kreslení se do DKS umisťuje na kříž, podle toho lze poznat DKS,
+na tomto úseku jsou pevně definované větve:
 
  0. větev: obsahuje část od kříže (bez kříže) až po nejbližší levou výhybku.
     1. výhybka v této větvi je levá výhybka DKS.
