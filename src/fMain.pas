@@ -108,6 +108,9 @@ type
     ToolButton55: TToolButton;
     TB_Separator_Horiz: TToolButton;
     PM_Sep_Hor: TMenuItem;
+    TB_Krizeni: TToolBar;
+    ToolButton4: TToolButton;
+    ToolButton5: TToolButton;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure PM_NewClick(Sender: TObject);
@@ -605,6 +608,7 @@ begin
  Self.TB_BitmapOstatni.Visible  := false;
  Self.TB_Trat.Visible           := false;
  Self.TB_Vykolejka.Visible      := false;
+ Self.TB_Krizeni.Visible        := false;
  Self.CHB_Group.Enabled         := false;
  Self.TB_Other.Visible          := false;
  Self.MI_Relief.Visible         := false;
@@ -634,6 +638,7 @@ begin
      Self.TB_BitmapTools.Visible    := true;
      Self.TB_BitmapOstatni.Visible  := true;
      Self.TB_Trat.Visible           := true;
+     Self.TB_Krizeni.Visible        := true;
      Self.CHB_Group.Enabled         := true;
      Self.TB_Other.Visible          := true;
      Self.MI_Relief.Visible         := true;
@@ -838,7 +843,8 @@ begin
  Self.TB_BitmapOstatni.Visible  := false;
  Self.TB_Other.Visible          := false;
  Self.TB_Trat.Visible           := false;
- Self.TB_Vykolejka.Visible      := false;
+ Self.TB_Usek.Visible           := false;
+ Self.TB_Krizeni.Visible        := false;
 
  if (Assigned(Self.pushedButton)) then
   Self.pushedButton.Down := false;
