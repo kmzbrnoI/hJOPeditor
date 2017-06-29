@@ -4,7 +4,9 @@ program hJOPeditor;
 uses
   Forms,
   fMain in 'fMain.pas' {F_Hlavni},
-  ReliefObjects in 'ReliefObjects.pas',
+  ReliefObjects in 'ReliefObjects.pas' {,
+  Panel in 'Panel.pas',
+  fNewRelief in 'fNewRelief.pas' {F_NewRelief},
   Panel in 'Panel.pas',
   fNewRelief in 'fNewRelief.pas' {F_NewRelief},
   ReliefBitmap in 'ReliefBitmap.pas',
@@ -24,7 +26,10 @@ uses
   ReliefZT in 'ReliefZT.pas',
   ObjToZT in 'ObjToZT.pas',
   PGraphics in 'PGraphics.pas',
-  RPConst in 'RPConst.pas';
+  RPConst in 'RPConst.pas',
+  VetveComputer in 'VetveComputer.pas',
+  symbolHelper in 'symbolHelper.pas',
+  vetev in 'vetev.pas';
 
 {$R *.res}
 

@@ -162,8 +162,6 @@ TPanelObjects=class
     procedure SetMode(mode:TMode);
 
     procedure ComputeVyhybkaFlag();                                   //volano pri prechodu z Bloky do Koreny
-    procedure ComputeVetve();
-    procedure ComputeBlokVetve(data:TVetveData; start:TPoint; Vetve:TList<TVetev>);
 
   public
    Bloky:TList<TGraphBlok>;
@@ -223,7 +221,7 @@ end;//TPanelObjects
 
 implementation
 
-uses ReliefBitmap, BItmapToObj;   // kvuli importu dat
+uses ReliefBitmap, BItmapToObj, VetveComputer;
 
 //vytvoreni objektu
 constructor TPanelObjects.Create(SymbolIL,TextIL:TImageList;DrawCanvas:TCanvas;Width,Height:Integer;Parent:TDXDraw; Graphics:TPanelGraphics);
@@ -670,7 +668,7 @@ begin
  Self.FStav := 2;
 
  Self.ComputeVyhybkaFlag();
- Self.ComputeVetve();
+ ComputeVetve(Self);
 
  DeleteFile(aFile);
 
@@ -1529,211 +1527,6 @@ begin
      (Self.Bloky[i] as TPrejezd).BlikPositions[j] := blik_point;
     end;//for j
   end;//for i
-end;//procedure
-
-////////////////////////////////////////////////////////////////////////////////
-
-// tato metoda pocita rozvetveni useku na jednotlive vetve
-procedure TPanelObjects.ComputeVetve();
-var i, row, col, j:Integer;
-    data:TVetveData;     // = Array of Array of Integer; toto pole je pro algoritmus nize zdrojem vsech dat
-                         // jedna s o dvourozmerne pole reprezentujici cely panel, na kazdem poli je cislo bitmapoveho
-                         // metoda pro zpracovani jednoho bloku dostane na vstup vzdy toto pole s tim, ze jsou v nem jen body, ktere patri prislusnemu bloku
-                         // vsude jinde je (-1)
-begin
- // inicializace pole data
- SetLength(data, Self.PanelWidth, Self.PanelHeight);
- for col := 0 to Self.PanelWidth-1 do
-   for row := 0 to Self.PanelHeight-1 do
-     data[col, row] := -1;
-
- for i := 0 to Self.Bloky.Count-1 do
-  begin
-   if (Self.Bloky[i].typ <> TBlkType.usek) then continue;
-
-   (Self.Bloky[i] as TUsek).Vetve.Clear();
-   if (not (Self.Bloky[i] as TUsek).IsVyhybka) then continue;
-
-   if ((Self.Bloky[i] as TUsek).Root.X < 0) then
-     continue;
-
-   // inicializujeme pole symboly bloku
-   for j := 0 to (Self.Bloky[i] as TUsek).Symbols.Count-1 do
-    data[(Self.Bloky[i] as TUsek).Symbols[j].Position.X, (Self.Bloky[i] as TUsek).Symbols[j].Position.Y] := (Self.Bloky[i] as TUsek).Symbols[j].SymbolID;
-
-   // do tohoto pole take musime ulozit vyhybky
-   for j := 0 to Self.Bloky.Count-1 do
-    begin
-     if ((Self.Bloky[j].typ <> TBlkType.vyhybka) or ((Self.Bloky[j] as TVyhybka).obj <> Self.Bloky[i].index)) then continue;
-     data[(Self.Bloky[j] as TVyhybka).Position.X, (Self.Bloky[j] as TVyhybka).Position.Y] := (Self.Bloky[j] as TVyhybka).SymbolID;
-    end;
-
-   // provedeme algoritmus
-   Self.ComputeBlokVetve(data, (Self.Bloky[i] as TUsek).Root, (Self.Bloky[i] as TUsek).Vetve);
-
-   // nastavime pole data opet na -1 (algortimus by to mel udelat sam, ale pro jistotu)
-   for j := 0 to (Self.Bloky[i] as TUsek).Symbols.Count-1 do
-    data[(Self.Bloky[i] as TUsek).Symbols[j].Position.X, (Self.Bloky[i] as TUsek).Symbols[j].Position.Y] := -1;
-
-   // odstranit vyhybky
-   for j := 0 to Self.Bloky.Count-1 do
-    begin
-     if ((Self.Bloky[i].typ <> TBlkType.vyhybka) or ((Self.Bloky[i] as TVyhybka).obj <> i)) then continue;
-     data[(Self.Bloky[i] as TVyhybka).Position.X, (Self.Bloky[i] as TVyhybka).Position.Y] := -1;
-    end;
-  end;//for i
-end;//procedure
-
-////////////////////////////////////////////////////////////////////////////////
-
-// tato funkce pocita vetve jednoho bloku
-//   provadi prohledavani do sirky
-//   ve fronte je vzdy ulozena startovni pozice, jedna iterace ji expanduje az do vyhybky (nebo prazdneho pole)
-//   pokud algortimus narazi na vyhybky, do fronty prida 2 deti reprezentujici 2 cesty, kam jde kolej
-//   v tomto momente lze ziskat index deti v poli vetve jako Vetve.Count + Queue.Count (2. vetev +1) z predpokladu zachovani poradi:
-//      1) kolej do rovna
-//      2) kolej do odbocky
-//    pozor: deti pridavame jen v pripade, ze existuji (muze se taky stat, ze za vyhybkou nic neni) !!!
-procedure TPanelObjects.ComputeBlokVetve(data:TVetveData; start:TPoint; Vetve:TList<TVetev>);
-const
-    _Usek_Navaznost: array [0..47] of ShortInt = (-1,0,1,0,0,-1,0,1,0,1,1,0,-1,0,0,-1,-1,0,0,1,0,-1,1,0,-1,0,1,0,0,-1,0,1,0,1,1,0,-1,0,0,-1,-1,0,0,1,0,-1,1,0);
-    _Vyh_Navaznost : array [0..15]  of ShortInt = (1,0,0,-1, 1,0,0,1, -1,0,0,-1, -1,0,0,1);        // vedjesi symboly vyhybek ulozeny ve formatu: rovna_x,rovna_y,odbocka_x,odbocka,y, ...
-
-    _UsekS_Start   = 12;
-    _UsekS_End     = 23;
-
-    _VyhybkaS_Start = 0;
-    _VyhybkaS_End   = 3;
-
-var queue:TQueue<TPoint>;
-    first, temp, new:TPoint;
-    i, j:Integer;
-    vetev:TVetev;
-
-    symbols:TList<TReliefSym>;
-    symbol:TReliefSym;
-    node:^TVetevEnd;
-begin
- queue := TQueue<TPoint>.Create();
- queue.Enqueue(start);
-
- symbols := TList<TReliefSym>.Create();
-
- while (queue.Count > 0) do
-  begin
-   // expanduji jeden vrchol: pozor:  musim expandovat doleva i doprava
-
-   // resetuji vetev:
-   vetev.node1.vyh        := -1;
-   vetev.node1.ref_plus   := 0;
-   vetev.node1.ref_minus  := 0;
-
-   vetev.node2.vyh        := -1;
-   vetev.node2.ref_plus   := 0;
-   vetev.node2.ref_minus  := 0;
-
-   // vezmu aktualni vrchol z fronty
-   first := queue.Dequeue();
-
-   // dodelat kontrolu toho, jestli nahodou nejsem na vyhybce
-
-   // do pole symbols si ulzoim useku aktualni vetve a pak je pouze predelam do dynamickeho pole vetev.symbols
-   symbols.Clear();
-
-   // expanduji oba smery z prvniho symbolu, dalsi symboly maji vzdy jen jeden smer k expanzi
-   for j := 0 to 1 do
-    begin
-     new := first;
-     // projizdim usek jednim smerem pro jedno 'j'
-     while (((data[new.X, new.Y] >= _UsekS_Start) and (data[new.X, new.Y] <=_UsekS_End)) or
-          ((data[new.X, new.Y] >= _Vykol_Start) and (data[new.X, new.Y] <=_Vykol_End))) do
-      begin
-       // pridam symbol do seznamu symbolu
-       if (((new.X <> first.X) or (new.Y <> first.Y)) or (j = 1)) then
-        begin
-         symbol.Position := new;
-         symbol.SymbolID := data[new.X, new.Y];
-         symbols.Add(symbol);
-        end;
-
-       temp := new;
-
-       // vypocitam prvni vedlejsi pole
-       if ((data[new.X, new.Y] >= _Vykol_Start) and (data[new.X, new.Y] <=_Vykol_End)) then
-        begin
-         (Self.Bloky[Self.GetObject(new)] as TVykol).vetev := queue.Count;
-         data[new.X, new.Y] := _UsekS_Start;
-        end;
-
-       // podivame se na prvni ze dvou vedlejsich policek
-       temp.X := new.X + _Usek_Navaznost[((data[new.X, new.Y]-_UsekS_Start)*4) + 0];
-       temp.Y := new.Y + _Usek_Navaznost[((data[new.X, new.Y]-_UsekS_Start)*4) + 1];
-
-       // je na vedlejsim poli symbol?
-       if (data[temp.X, temp.Y] > -1) and ((temp.X <> first.X) or (temp.Y <> first.Y)) then
-        begin
-         // ano, na prvnim vedlejsim poli je symbol -> resetuji aktualni pole a do noveho pole priradim pole vedlejsi
-        end else begin
-         // ne, na vedlejsim poli neni symbol -> toto policko jsme asi uz prosli, nebo tam proste nic neni
-         // zkusime druhe vedlejsi policko
-         temp.X := new.X + _Usek_Navaznost[((data[new.X, new.Y]-_UsekS_Start)*4) + 2];
-         temp.Y := new.Y + _Usek_Navaznost[((data[new.X, new.Y]-_UsekS_Start)*4) + 3];
-        end;
-
-       // pokud je na druhem vedlejsim poli symbol, expanduji ho; pokud tam neni, while cyklus prochazeni utne
-       if (((new.X <> first.X) or (new.Y <> first.Y)) or (j = 1)) then
-         data[new.X, new.Y] := -1;
-       new := temp;
-      end;//while
-
-     // skoncilo prochazeni jednoho smeru aktualni vetve
-     if (data[new.X, new.Y] >= _VyhybkaS_Start) and (data[new.X, new.Y] <= _VyhybkaS_End) then
-      begin
-       // na aktualnim poli je vyhybka -> nova vetev
-       if (vetev.node1.vyh > -1) then
-        begin
-         // 1. vyhybka uz existuje -> vytvorim 2. vyhybku
-         node := @vetev.node2;
-        end else begin
-         // 1. vyhybka neexstuje -> vytvorim 1. vyhybku
-         node := @vetev.node1;
-        end;
-
-       // zjistim index vyhybky a pridam dalsi vetve, pokud za vyhybkou existuji useky
-       node^.vyh := Self.Bloky[Self.GetObject(new)].index;
-       node^.ref_plus := -1;
-       node^.ref_minus := -1;
-
-       // projdu 2 smery, do kterych muze vyhybka (je jasne, ze barvici cesta musela prijit z te strany, kde se koleje spojuji)
-       for i := 0 to 1 do
-        begin
-         temp.X := new.X + _Vyh_Navaznost[((data[new.X, new.Y]-_VyhybkaS_Start)*4) + (i*2)];
-         temp.Y := new.Y + _Vyh_Navaznost[((data[new.X, new.Y]-_VyhybkaS_Start)*4) + (i*2)+1];
-
-         if (data[temp.X, temp.Y] > -1) then
-          begin
-           // na dalsi pozici za vyhybkou je symbol -> novy zaznam do fronty
-           queue.Enqueue(temp);
-
-           case (i) of
-            0 : node^.ref_plus  := Vetve.Count + queue.Count;
-            1 : node^.ref_minus := Vetve.Count + queue.Count;
-           end;//case
-          end;
-        end;//for 2_smery_do_kterych_muze_expandovat_vyhybka
-       data[new.X, new.Y] := -1;      // vyhybku jsem zpracoval
-      end;//if vetev_skoncila_vyhybkou
-    end;//for j
-
-   // prochazeni vetve je kompletni vcetne pripadnych koncovych vyhybek -> priradim do vetve symboly a vytvorim vetev
-   SetLength(vetev.Symbols, symbols.Count);
-   for i := 0 to symbols.Count-1 do
-    vetev.Symbols[i] := symbols[i]; 
-   Vetve.Add(vetev);
-  end;//while
-
- symbols.Free();
- queue.Free();
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////
