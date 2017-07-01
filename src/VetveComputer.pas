@@ -77,9 +77,16 @@ begin
 
    // provedeme algoritmus
    if ((po.Bloky[i] as TUsek).DKStype <> dksNone) then
+    begin
      ComputeDKSBlokVetve(po, data, (po.Bloky[i] as TUsek).Root,
-                          (po.Bloky[i] as TUsek).Vetve)
-   else
+                          (po.Bloky[i] as TUsek).Vetve);
+     if (TUsek(po.Bloky[i]).Vetve.Count < 3) then
+      begin
+       (po.Bloky[i] as TUsek).DKStype := dksNone;
+       ComputeNormalBlokVetve(po, data, (po.Bloky[i] as TUsek).Root,
+                               (po.Bloky[i] as TUsek).Vetve);
+      end;
+    end else
      ComputeNormalBlokVetve(po, data, (po.Bloky[i] as TUsek).Root,
                              (po.Bloky[i] as TUsek).Vetve);
 
@@ -147,7 +154,8 @@ begin
        new := first;
        // projizdim usek jednim smerem pro jedno 'j'
        while (((data[new.X, new.Y] >= _Usek_Start) and (data[new.X, new.Y] <=_Usek_End)) or
-            ((data[new.X, new.Y] >= _Vykol_Start) and (data[new.X, new.Y] <=_Vykol_End))) do
+            ((data[new.X, new.Y] >= _Vykol_Start) and (data[new.X, new.Y] <=_Vykol_End)) or
+            ((data[new.X, new.Y] >= _Krizeni_Start) and (data[new.X, new.Y] <=_Krizeni_End))) do
         begin
          // pridam symbol do seznamu symbolu
          if (((new.X <> first.X) or (new.Y <> first.Y)) or (j = 1)) then
@@ -259,6 +267,7 @@ begin
  try
    // 1) nejprve hledame usek k nejblizsi leve vyhybce
    GetUsekTillVyhybka(data, Point(start.X-1, start.Y), ndPositive, r);
+   if (r.next.X < 0) then Exit();   
 
    vetev := DefaultVetev();
    SetLength(vetev.Symbols, r.symbols.Count);
@@ -275,6 +284,11 @@ begin
    // 2) hledame usek k nejblizsi prave vyhybce
    r.symbols.Clear();
    GetUsekTillVyhybka(data, Point(start.X+1, start.Y), ndNegative, r);
+   if (r.next.X < 0) then
+    begin
+     vetve.Clear();
+     Exit();
+    end;
 
    vetev := DefaultVetev();
    SetLength(vetev.Symbols, r.symbols.Count);
