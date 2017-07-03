@@ -21,6 +21,8 @@ const
   _Vyhybka_End      = 3;
   _Usek_Start       = 12;
   _Usek_End         = 23;
+  _Nedetek_Start    = 18;
+  _Nedetek_End      = 23;
   _SCom_Start       = 24;
   _SCom_End         = 29;
   _Prj              = 40;

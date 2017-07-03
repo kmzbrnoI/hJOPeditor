@@ -70,7 +70,16 @@ begin
        blk.OblRizeni := 0;
        (blk as TRozp).Pos  := Point(i, j);
        Self.Objects.Bloky.Add(blk);
-       Self.Bitmap.Symbols.Bitmap[i, j] := _Usek_Start;  // na toto misto dame rovnou kolej
+
+       // na misto [i, j] dame rovnou kolej (bud detekovanou nebo nedetekovanou)
+       if (((i > 0) and (Self.Bitmap.Symbols.Bitmap[i-1, j] >= _Nedetek_Start) and
+                       (Self.Bitmap.Symbols.Bitmap[i-1, j] <= _Nedetek_End))
+            or ((i < Self.Bitmap.PanelWidth-1) and (Self.Bitmap.Symbols.Bitmap[i+1, j] >= _Nedetek_Start) and
+                       (Self.Bitmap.Symbols.Bitmap[i+1, j] <= _Nedetek_End))) then
+         Self.Bitmap.Symbols.Bitmap[i, j] := _Nedetek_Start
+       else
+         Self.Bitmap.Symbols.Bitmap[i, j] := _Usek_Start;
+
        Inc(Index);
       end;//if
     end;//for j
