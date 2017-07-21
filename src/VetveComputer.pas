@@ -175,8 +175,8 @@ begin
           end;
 
          // podivame se na prvni ze dvou vedlejsich policek
-         temp.X := new.X + GetUsekNavaznost(data[new.X, new.Y], ndNegative).X;
-         temp.Y := new.Y + GetUsekNavaznost(data[new.X, new.Y], ndNegative).Y;
+         temp.X := new.X + GetUsekNavaznost(data[new.X, new.Y], ndPositive).X;
+         temp.Y := new.Y + GetUsekNavaznost(data[new.X, new.Y], ndPositive).Y;
 
          // je na vedlejsim poli symbol?
          if (data[temp.X, temp.Y] > -1) and ((temp.X <> first.X) or (temp.Y <> first.Y)) then
