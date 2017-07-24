@@ -361,7 +361,7 @@ begin
           ((Symbol >= _Krizeni_Start) and (Symbol <= _Krizeni_End)) or
           ((Symbol >= _Vykol_Start) and (Symbol <= _Vykol_End))) then
         begin
-         //cyklus je kvuli dvou smerum navazosti
+         //cyklus je kvuli dvou smerum navaznosti
          for j := 0 to 1 do
           begin
            // vykolejka je pro nase potreby rovna kolej

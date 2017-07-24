@@ -170,7 +170,7 @@ begin
          // vypocitam prvni vedlejsi pole
          if ((data[new.X, new.Y] >= _Vykol_Start) and (data[new.X, new.Y] <=_Vykol_End)) then
           begin
-           (po.Bloky[po.GetObject(new)] as TVykol).vetev := queue.Count;
+           (po.Bloky[po.GetObject(new)] as TVykol).vetev := Vetve.Count;
            data[new.X, new.Y] := _Usek_Start;
           end;
 

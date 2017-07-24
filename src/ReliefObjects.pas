@@ -633,6 +633,7 @@ begin
    (blok as TVykol).Pos.Y := inifile.ReadInteger('Vyk'+IntToStr(i), 'Y', 0);
    (blok as TVykol).symbol:= inifile.ReadInteger('Vyk'+IntToStr(i), 'T', 0);
    (blok as TVykol).obj   := inifile.ReadInteger('Vyk'+IntToStr(i), 'O', 0);
+   (blok as TVykol).vetev := inifile.ReadInteger('Vyk'+IntToStr(i), 'V', -1);
 
    Self.Bloky.Add(blok);
   end;
@@ -876,6 +877,7 @@ begin
      inifile.WriteInteger('Vyk'+IntToStr(Self.Bloky[i].Index), 'Y', (Self.Bloky[i] as TVykol).Pos.Y);
      inifile.WriteInteger('Vyk'+IntToStr(Self.Bloky[i].Index), 'T', (Self.Bloky[i] as TVykol).symbol);
      inifile.WriteInteger('Vyk'+IntToStr(Self.Bloky[i].Index), 'O', (Self.Bloky[i] as TVykol).obj);
+     inifile.WriteInteger('Vyk'+IntToStr(Self.Bloky[i].Index), 'V', (Self.Bloky[i] as TVykol).vetev);
     end;
 
     TBlkType.rozp:begin
