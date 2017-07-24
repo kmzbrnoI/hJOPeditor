@@ -333,7 +333,7 @@ begin
   'm':begin
     // move
     if (not Assigned(Self.Relief)) then Exit;
-    if (Self.Relief.Mode = dmBitmap) then Exit;
+    if (Self.Relief.Mode = dmBitmap) then
       Self.B_MoveClick(Self);
   end;
 
