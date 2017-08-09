@@ -61,6 +61,7 @@ TPanelBitmap=class
    KPopisky       : TVBO;
    JCClick        : TVBO;
    Popisky        : TPopisky;
+   Soupravy       : TVBO;
 
    Bitmap:array [0.._MAX_WIDTH-1, 0.._MAX_HEIGHT-1] of ShortInt;
 
@@ -265,6 +266,26 @@ begin
  if (Buffer[0] <> 255) or (Buffer[1] <> 255) then Exit(16);
  //-------------------------------------------
 
+ if (version >= $31) then
+  begin
+   //nacteni poctu symbolu souprav
+   BlockRead(myFile, Buffer, 1, aCount);
+
+   //nacitani symbolu souprav
+   BlockRead(myFile, Buffer, (Buffer[0]*2),aCount);
+
+   VBOData.Count := aCount;
+   for i := 0 to aCount-1 do VBOData.Data[i] := Buffer[i];
+
+   Self.Soupravy.SetLoadedData(VBOData);
+
+   //prazdny radek
+   BlockRead(myFile, Buffer, 2, aCount);
+   if (aCount < 2) then Exit(15);
+   if (Buffer[0] <> 255) or (Buffer[1] <> 255) then Exit(16);
+  end;
+ //-------------------------------------------
+
  //nacitani oblasti rizeni
 
  ORs := '';
@@ -310,7 +331,7 @@ begin
  Buffer[0] := ord('b');
  Buffer[1] := ord('r');
  //verze
- Buffer[2] := $30;
+ Buffer[2] := $31;
  //vyska a sirka
  BitmapData := Self.Symbols.GetSaveData;
 
@@ -382,6 +403,17 @@ begin
  Buffer[0] := 255;
  Buffer[1] := 255;
  BlockWrite(myFile,Buffer,2);
+
+ //-------------------------------------------
+ //soupravy
+ VBOData := Self.Soupravy.GetSaveData;
+ BlockWrite(myFile,VBOData.Data,VBOData.Count);
+
+ //ukonceni bloku
+ Buffer[0] := 255;
+ Buffer[1] := 255;
+ BlockWrite(myFile,Buffer,2);
+
  //-------------------------------------------
 
  len := TEncoding.UTF8.GetByteCount(ORs);
