@@ -41,6 +41,7 @@ const
 
  _KPopisek_Index    = 377;
  _JCPopisek_Index   = 360;
+ _Soupravy_Index    = 376;
  _Prj_Index         = 400;
  _Root_Index        = 42;
  _Root_Color        = 3;

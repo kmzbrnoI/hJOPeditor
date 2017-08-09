@@ -164,6 +164,7 @@ type
    function AddSeparatorVert:Byte;
    function AddSeparatorHor:Byte;
    function AddKPopisek:Byte;
+   function AddSouprava:Byte;
 
    procedure MoveBitmapSymbol;
    procedure DeleteBitmapSymbol;
@@ -838,6 +839,13 @@ begin
 
  if (Assigned(Self.PanelBitmap)) then Result := Self.PanelBitmap.KPopisky.Add;
 end;//procedure
+
+function TRelief.AddSouprava:Byte;
+begin
+ Result := 255;
+
+ if (Assigned(Self.PanelBitmap)) then Result := Self.PanelBitmap.Soupravy.Add;
+end;
 
 procedure TRelief.MessageEvent(Sender:TObject; msg:string);
 begin

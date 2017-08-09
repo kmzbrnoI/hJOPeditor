@@ -111,6 +111,7 @@ type
     TB_Krizeni: TToolBar;
     ToolButton4: TToolButton;
     ToolButton5: TToolButton;
+    ToolButton6: TToolButton;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure PM_NewClick(Sender: TObject);
@@ -141,6 +142,7 @@ type
     procedure MI_ExportServerClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure TB_Separator_HorizClick(Sender: TObject);
+    procedure ToolButton6Click(Sender: TObject);
   private
     pushedButton:TToolButton;                   // last pushed button
 
@@ -795,7 +797,15 @@ procedure TF_Hlavni.ToolButton42Click(Sender: TObject);
 begin
  Relief.Escape(false);
  if (Relief.AddKPopisek <> 0) then Application.MessageBox('Chyba pri pridavani objektu','Chyba',MB_OK OR MB_ICONWARNING);
-end;//procedure
+end;
+
+procedure TF_Hlavni.ToolButton6Click(Sender: TObject);
+begin
+ Relief.Escape(false);
+ if (Relief.AddSouprava <> 0) then Application.MessageBox('Chyba pri pridavani objektu','Chyba',MB_OK OR MB_ICONWARNING);
+end;
+
+//procedure
 
 procedure TF_Hlavni.MI_CloseFileClick(Sender: TObject);
 begin
