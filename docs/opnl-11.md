@@ -1,6 +1,6 @@
 # Specifikace formátu souboru opnl v1.1
 
-Soubor `.bpnl` je textový ini soubor, který definuje reliéf. Definuje logické
+Soubor `.opnl` je textový ini soubor, který definuje reliéf. Definuje logické
 spojení symbolů do bloků a umožňuje blokům na panelu přiřazovat technologické
 bloky.
 
