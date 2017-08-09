@@ -42,7 +42,7 @@ Skládá se z několika sekcí.
  - P=(seznam polí, na kterých se zobrazí číslo koleje)
     Obdobně, jako předchozí.
 
- - S=(seznam polí, na kterých se zobrazí číslo soupravy v pořadí zleva doprava)
+ - Spr=(seznam polí, na kterých se zobrazí číslo soupravy v pořadí zleva doprava)
     Obdobně, jako předchozí.
 
  - N=(název koleje jako text)
