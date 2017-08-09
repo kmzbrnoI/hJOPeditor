@@ -414,7 +414,7 @@ begin
       end;//for j
 
      //soupravy
-     obj := inifile.ReadString('U'+IntToStr(i),'S','');
+     obj := inifile.ReadString('U'+IntToStr(i),'Spr','');
      (blok as TUsek).Soupravy := TList<TPoint>.Create();
      for j := 0 to (Length(obj) div 6)-1 do
       begin
@@ -752,7 +752,7 @@ begin
      obj := '';
      for j := 0 to (Self.Bloky[i] as TUsek).Soupravy.Count-1 do obj := obj + Format('%.3d%.3d',[(Self.Bloky[i] as TUsek).Soupravy[j].X, (Self.Bloky[i] as TUsek).Soupravy[j].Y]);
      if (obj <> '') then
-       inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index),'S',obj);
+       inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index),'Spr',obj);
 
      //Nazev
      if ((Self.Bloky[i] as TUsek).KpopisekStr <> '') then
@@ -962,7 +962,7 @@ begin
            Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).KPopisek[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).KPopisek[j].Y*_Symbol_Vyska, _JCPopisek_Index);
 
          for j := 0 to (Self.Bloky[i] as TUsek).Soupravy.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Soupravy[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Soupravy[j].Y*_Symbol_Vyska, _Soupravy_Index);
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Soupravy[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Soupravy[j].Y*_Symbol_Vyska, _Soupravy_Index-5);
 
          for j := 0 to (Self.Bloky[i] as TUsek).Symbols.Count-1 do
            Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Symbols[j].Position.X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Symbols[j].Position.Y*_Symbol_Vyska,((Self.Bloky[i] as TUsek).Symbols[j].SymbolID*10)+Self.Colors.Selected);
@@ -976,7 +976,7 @@ begin
            Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).KPopisek[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).KPopisek[j].Y*_Symbol_Vyska, _KPopisek_Index);
 
          for j := 0 to (Self.Bloky[i] as TUsek).Soupravy.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Soupravy[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Soupravy[j].Y*_Symbol_Vyska, _Soupravy_Index-1);
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Soupravy[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Soupravy[j].Y*_Symbol_Vyska, _Soupravy_Index);
 
          if (Self.Mode = TMode.dmBloky) then
           begin

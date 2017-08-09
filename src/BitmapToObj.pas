@@ -108,14 +108,20 @@ begin
     end;//for j
   end;//for i
 
- //pridavani KPopisek a JCClick
+ //pridavani KPopisek, JCClick a souprav
  for i := 0 to Self.Objects.Bloky.Count-1 do
   begin
    if (Self.Objects.Bloky[i].typ <> TBlkType.usek) then continue;
    for j := 0 to (Self.Objects.Bloky[i] as TUsek).Symbols.Count-1 do
     begin
-     if (Self.Bitmap.KPopisky.GetObject((Self.Objects.Bloky[i] as TUsek).Symbols[j].Position) <> -1) then (Self.Objects.Bloky[i] as TUsek).KPopisek.Add((Self.Objects.Bloky[i] as TUsek).Symbols[j].Position);
-     if (Self.Bitmap.JCClick.GetObject((Self.Objects.Bloky[i] as TUsek).Symbols[j].Position) <> -1) then (Self.Objects.Bloky[i] as TUsek).JCClick.Add((Self.Objects.Bloky[i] as TUsek).Symbols[j].Position);
+     if (Self.Bitmap.KPopisky.GetObject((Self.Objects.Bloky[i] as TUsek).Symbols[j].Position) <> -1) then
+       (Self.Objects.Bloky[i] as TUsek).KPopisek.Add((Self.Objects.Bloky[i] as TUsek).Symbols[j].Position);
+
+     if (Self.Bitmap.JCClick.GetObject((Self.Objects.Bloky[i] as TUsek).Symbols[j].Position) <> -1) then
+       (Self.Objects.Bloky[i] as TUsek).JCClick.Add((Self.Objects.Bloky[i] as TUsek).Symbols[j].Position);
+
+     if (Self.Bitmap.Soupravy.GetObject((Self.Objects.Bloky[i] as TUsek).Symbols[j].Position) <> -1) then
+       (Self.Objects.Bloky[i] as TUsek).Soupravy.Add((Self.Objects.Bloky[i] as TUsek).Symbols[j].Position);
     end;//for j
   end;//for i
 
@@ -330,6 +336,7 @@ begin
 
  usek.Symbols  := TList<TReliefSym>.Create();
  usek.JCClick  := TList<TPoint>.Create();
+ usek.Soupravy := TList<TPoint>.Create();
  usek.KPopisek := TList<TPoint>.Create();
  usek.Vetve    := TList<TVetev>.Create();
 
