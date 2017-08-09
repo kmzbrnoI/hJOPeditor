@@ -50,6 +50,7 @@ TUsek = class(TGraphBlok)
  Symbols:TList<TReliefSym>; // pokud je v useku vykolejka, je zde ulozena jako klasicky symbol
  JCClick:TList<TPoint>;
  KPopisek:TList<TPoint>;
+ Soupravy:TList<TPoint>;
  KpopisekStr:string;
  DKStype:TDKSType;
 
@@ -277,6 +278,7 @@ begin
      (Self.Bloky[i] as TUsek).Symbols.Free();
      (Self.Bloky[i] as TUsek).JCClick.Free();
      (Self.Bloky[i] as TUsek).KPopisek.Free();
+     (Self.Bloky[i] as TUsek).Soupravy.Free();
      (Self.Bloky[i] as TUsek).Vetve.Free();
     end;
    if (Self.Bloky[i].typ = TBlkType.pomocny_obj) then
@@ -409,6 +411,20 @@ begin
          continue;
        end;
        (blok as TUsek).KPopisek.Add(pos);
+      end;//for j
+
+     //soupravy
+     obj := inifile.ReadString('U'+IntToStr(i),'S','');
+     (blok as TUsek).Soupravy := TList<TPoint>.Create();
+     for j := 0 to (Length(obj) div 6)-1 do
+      begin
+       try
+         pos.X := StrToIntDef(copy(obj,j*6+1,3),0);
+         pos.Y := StrToIntDef(copy(obj,j*6+4,3),0);
+       except
+         continue;
+       end;
+       (blok as TUsek).Soupravy.Add(pos);
       end;//for j
 
      //Nazev
@@ -732,6 +748,12 @@ begin
      if (obj <> '') then
        inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index),'P',obj);
 
+     //soupravy
+     obj := '';
+     for j := 0 to (Self.Bloky[i] as TUsek).Soupravy.Count-1 do obj := obj + Format('%.3d%.3d',[(Self.Bloky[i] as TUsek).Soupravy[j].X, (Self.Bloky[i] as TUsek).Soupravy[j].Y]);
+     if (obj <> '') then
+       inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index),'S',obj);
+
      //Nazev
      if ((Self.Bloky[i] as TUsek).KpopisekStr <> '') then
        inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index),'N',(Self.Bloky[i] as TUsek).KpopisekStr);
@@ -933,13 +955,28 @@ begin
     TBlkType.usek:begin
        if (Self.Selected = Self.Bloky[i]) then
         begin
-         for j := 0 to (Self.Bloky[i] as TUsek).JCClick.Count-1 do Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).JCClick[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).JCClick[j].Y*_Symbol_Vyska, _KPopisek_Index);
-         for j := 0 to (Self.Bloky[i] as TUsek).KPopisek.Count-1 do Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).KPopisek[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).KPopisek[j].Y*_Symbol_Vyska, _JCPopisek_Index);
-         for j := 0 to (Self.Bloky[i] as TUsek).Symbols.Count-1 do Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Symbols[j].Position.X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Symbols[j].Position.Y*_Symbol_Vyska,((Self.Bloky[i] as TUsek).Symbols[j].SymbolID*10)+Self.Colors.Selected);
+         for j := 0 to (Self.Bloky[i] as TUsek).JCClick.Count-1 do
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).JCClick[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).JCClick[j].Y*_Symbol_Vyska, _KPopisek_Index);
+
+         for j := 0 to (Self.Bloky[i] as TUsek).KPopisek.Count-1 do
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).KPopisek[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).KPopisek[j].Y*_Symbol_Vyska, _JCPopisek_Index);
+
+         for j := 0 to (Self.Bloky[i] as TUsek).Soupravy.Count-1 do
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Soupravy[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Soupravy[j].Y*_Symbol_Vyska, _Soupravy_Index);
+
+         for j := 0 to (Self.Bloky[i] as TUsek).Symbols.Count-1 do
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Symbols[j].Position.X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Symbols[j].Position.Y*_Symbol_Vyska,((Self.Bloky[i] as TUsek).Symbols[j].SymbolID*10)+Self.Colors.Selected);
+
          Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Root.X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Root.Y*_Symbol_Vyska, (_Root_Index*10) + Self.Colors.Selected);
         end else begin
-         for j := 0 to (Self.Bloky[i] as TUsek).JCClick.Count-1 do Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).JCClick[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).JCClick[j].Y*_Symbol_Vyska, _JCPopisek_Index);
-         for j := 0 to (Self.Bloky[i] as TUsek).KPopisek.Count-1 do Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).KPopisek[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).KPopisek[j].Y*_Symbol_Vyska, _KPopisek_Index);
+         for j := 0 to (Self.Bloky[i] as TUsek).JCClick.Count-1 do
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).JCClick[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).JCClick[j].Y*_Symbol_Vyska, _JCPopisek_Index);
+
+         for j := 0 to (Self.Bloky[i] as TUsek).KPopisek.Count-1 do
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).KPopisek[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).KPopisek[j].Y*_Symbol_Vyska, _KPopisek_Index);
+
+         for j := 0 to (Self.Bloky[i] as TUsek).Soupravy.Count-1 do
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Soupravy[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Soupravy[j].Y*_Symbol_Vyska, _Soupravy_Index-1);
 
          if (Self.Mode = TMode.dmBloky) then
           begin
