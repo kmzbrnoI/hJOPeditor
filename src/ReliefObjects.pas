@@ -1368,7 +1368,7 @@ begin
 end;//function
 
 function TPanelObjects.KorenyMouseUp(Position:TPoint;Button:TMouseButton):Byte;
-var blk:Integer;
+var blk, i:Integer;
 begin
  Result := 0;
 
@@ -1376,10 +1376,21 @@ begin
  if (Button <> mbLeft) then Exit;
 
  blk := Self.GetObject(Position);
- if ((blk < 0) or (Self.Bloky[blk].typ <> TBlkType.usek)) then
+ if (blk < 0) then
   Self.Selected := nil
- else
-  Self.Selected := Self.Bloky[blk];
+ else if (Self.Bloky[blk].typ = TBlkType.usek) then
+  Self.Selected := Self.Bloky[blk]
+ else if (Self.Bloky[blk].typ = TBlkType.vyhybka) then begin
+  for i := 0 to Self.Bloky.Count-1 do
+    if ((Self.Bloky[i].typ = TBlkType.usek) and (Self.Bloky[i].index = (Self.Bloky[blk] as TVyhybka).obj)) then
+     begin
+      Self.Selected := Self.Bloky[i];
+      break;
+     end;
+ end else
+  Self.Selected := nil;
+
+
 
  if (Assigned(Self.FOnMsg)) then Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (úsek)');
  if ((not Assigned(Self.Selected)) or (not (Self.Selected as TUsek).IsVyhybka)) then Exit;
