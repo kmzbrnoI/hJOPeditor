@@ -33,6 +33,7 @@ type
     procedure AddPos(Pos:TPoint);
     procedure CheckPos;
     procedure AddPrj(Pos:TPoint; index:Integer);
+    function IsSeparator(from, dir:TPoint):Boolean;
 
   public
     function BitmapToObjects(BitmapData:TPanelBitmap;ObjectData:TPanelObjects):Byte;
@@ -324,6 +325,7 @@ var usek:TUsek;
     vyhybka:TVyhybka;
     vykol:TVykol;
     vertSep, horSep: SmallInt;
+    dir:TPoint;
 begin
  //vytvoreni objektu a vlozeni do nej 1. symbolu
  usek           := TUsek.Create();
@@ -356,160 +358,166 @@ begin
    //prochazeni jednotlivych pozici
    for i := 0 to Self.Positions.Count-1 do
     begin
-     if ((Self.Bitmap.SeparatorsVert.GetObject(Point(Self.Positions.Pos[i].X, Self.Positions.Pos[i].Y)) = -1) and
-         (Self.Bitmap.SeparatorsHor.GetObject(Point(Self.Positions.Pos[i].X, Self.Positions.Pos[i].Y)) = -1)) then
+     Symbol := Self.Bitmap.Symbols.GetSymbol(Point(Self.Positions.Pos[i].X,Self.Positions.Pos[i].Y));
+
+     //pokud je symbol usek
+     if (((Symbol >= _Usek_Start) and (Symbol <= _Usek_End)) or
+        ((Symbol >= _Krizeni_Start) and (Symbol <= _Krizeni_End)) or
+        ((Symbol >= _Vykol_Start) and (Symbol <= _Vykol_End))) then
       begin
-       //pokud neni separator
-
-       Symbol := Self.Bitmap.Symbols.GetSymbol(Point(Self.Positions.Pos[i].X,Self.Positions.Pos[i].Y));
-
-       //pokud je symbol usek
-       if (((Symbol >= _Usek_Start) and (Symbol <= _Usek_End)) or
-          ((Symbol >= _Krizeni_Start) and (Symbol <= _Krizeni_End)) or
-          ((Symbol >= _Vykol_Start) and (Symbol <= _Vykol_End))) then
+       //cyklus je kvuli dvou smerum navaznosti
+       for j := 0 to 1 do
         begin
-         //cyklus je kvuli dvou smerum navaznosti
-         for j := 0 to 1 do
+         // vykolejka je pro nase potreby rovna kolej
+         if ((Symbol >= _Vykol_Start) and (Symbol <= _Vykol_End)) then
+           Self.Bitmap.Symbols.Bitmap[Self.Positions.Pos[i].X, Self.Positions.Pos[i].Y] := _Usek_Start;
+
+         //TempPos = pozice teoreticky navaznych objektu
+
+         dir := GetUsekNavaznost(Self.Bitmap.Symbols.GetSymbol(Self.Positions.Pos[i]), TNavDir(j));
+         if (Self.IsSeparator(Self.Positions.Pos[i], dir)) then
+           continue;
+
+         TempPos.X := Self.Positions.Pos[i].X + dir.X;
+         TempPos.Y := Self.Positions.Pos[i].Y + dir.Y;
+
+         Symbol2 := Self.Bitmap.Symbols.GetSymbol(TempPos);
+
+         if (not Self.Zahrnuto[TempPos.X,TempPos.Y]) then
           begin
-           // vykolejka je pro nase potreby rovna kolej
-           if ((Symbol >= _Vykol_Start) and (Symbol <= _Vykol_End)) then
-             Self.Bitmap.Symbols.Bitmap[Self.Positions.Pos[i].X, Self.Positions.Pos[i].Y] := _Usek_Start;
-
-           //TempPos = pozice teoreticky navaznych objektu
-
-           TempPos.X := Self.Positions.Pos[i].X + GetUsekNavaznost(Self.Bitmap.Symbols.GetSymbol(Self.Positions.Pos[i]), TNavDir(j)).X;
-           TempPos.Y := Self.Positions.Pos[i].Y + GetUsekNavaznost(Self.Bitmap.Symbols.GetSymbol(Self.Positions.Pos[i]), TNavDir(j)).Y;
-
-           Symbol2 := Self.Bitmap.Symbols.GetSymbol(TempPos);
-
-           if (not Self.Zahrnuto[TempPos.X,TempPos.Y]) then
+           //vedlejsi Symbol2 = vykolejka
+           if ((Symbol2 >= _Vykol_Start) and (Symbol2 <= _Vykol_End)) then
             begin
-             //vedlejsi Symbol2 = vykolejka
-             if ((Symbol2 >= _Vykol_Start) and (Symbol2 <= _Vykol_End)) then
-              begin
-               vykol             := TVykol.Create();
-               vykol.index       := vykol_index;
-               Inc(vykol_index);
-               vykol.typ         := TBlkType.vykol;
-               vykol.symbol      := Symbol2 - _Vykol_Start;
-               vykol.Blok        := -1;
-               vykol.OblRizeni   := 0;
-               vykol.Pos         := TempPos;
-               vykol.obj         := index-1;
-               vykol.vetev       := -1;
-               Self.Objects.Bloky.Add(vykol);
+             vykol             := TVykol.Create();
+             vykol.index       := vykol_index;
+             Inc(vykol_index);
+             vykol.typ         := TBlkType.vykol;
+             vykol.symbol      := Symbol2 - _Vykol_Start;
+             vykol.Blok        := -1;
+             vykol.OblRizeni   := 0;
+             vykol.Pos         := TempPos;
+             vykol.obj         := index-1;
+             vykol.vetev       := -1;
+             Self.Objects.Bloky.Add(vykol);
 
-               // symbol vykolejky pridame i do useku
-               sym.SymbolID := Symbol2;
-               sym.Position := TempPos;
-               usek.Symbols.Add(sym);
+             // symbol vykolejky pridame i do useku
+             sym.SymbolID := Symbol2;
+             sym.Position := TempPos;
+             usek.Symbols.Add(sym);
 
-               Zahrnuto[TempPos.X, TempPos.Y] := true;
-               Self.AddPos(TempPos);
-              end;
+             Zahrnuto[TempPos.X, TempPos.Y] := true;
+             Self.AddPos(TempPos);
+            end;
 
-             //vedlejsi Symbol2 = usek
-             if (((Symbol2 >= _Usek_Start) and (Symbol2 <= _Usek_End)) or
-                 ((Symbol2 >= _Krizeni_Start) and (Symbol2 <= _Krizeni_End))) then
-              begin
-               //ted vime, ze na NavaznostPos je usek
-
-               if (((TempPos.X + GetUsekNavaznost(Symbol2, ndPositive).X = Self.Positions.Pos[i].X) and
-                    (TempPos.Y + GetUsekNavaznost(Symbol2, ndPositive).Y = Self.Positions.Pos[i].Y)) or
-                   ((TempPos.X + GetUsekNavaznost(Symbol2, ndNegative).X = Self.Positions.Pos[i].X) and
-                    (TempPos.Y + GetUsekNavaznost(Symbol2, ndNegative).Y = Self.Positions.Pos[i].Y))) then
-                begin
-                 //ted vime, ze i navaznost z TempPos vede na Self.Positions.Pos[i].Pos - muzeme pridat Symbol2 do bloku
-
-                 // pri pohybu vlevo a nahoru je zapotrebi overovat separator uz tady, protoze jenom tady vime, ze se pohybujeme doleva nebo nahoru
-                 // pohyb doprava a dolu resi podminka vyse
-
-                 vertSep := Self.Bitmap.SeparatorsVert.GetObject(TempPos);
-                 horSep := Self.Bitmap.SeparatorsHor.GetObject(TempPos);
-
-                 if (((vertSep = -1) and (horSep = -1)) or
-                    ((horSep = -1) and ((TempPos.X > Self.Positions.Pos[i].X) or (TempPos.Y <> Self.Positions.Pos[i].Y))) or
-                    ((vertSep = -1) and ((TempPos.Y > Self.Positions.Pos[i].Y) or (TempPos.X <> Self.Positions.Pos[i].X)))) then
-                  begin
-                   sym.SymbolID := Symbol2;
-                   sym.Position := TempPos;
-                   usek.Symbols.Add(sym);
-                   Zahrnuto[TempPos.X,TempPos.Y] := true;
-                   Self.AddPos(TempPos);
-                  end;
-                end;
-              end;//if ((not Self.Zahrnuto[TempPos[j].X,TempPos[j].Y])...
-
-
-             //vedlejsi Symbol2 = vyhybka
-             if ((Symbol2 >= _Vyhybka_Start) and (Symbol2 <= _Vyhybka_End)) then
-              begin
-               //ted vime, ze na NavaznostPos je vyhybka
-               for k := 0 to 2 do
-                begin
-                 if ((TempPos.X + _Vyh_Navaznost[(Symbol2 - _Vyhybka_Start)*6+(k*2)] = Self.Positions.Pos[i].X) and (TempPos.Y + _Vyh_Navaznost[((Symbol2 - _Vyhybka_Start)*6)+(k*2)+1] = Self.Positions.Pos[i].Y)) then
-                  begin
-                   //ted vime, ze i navaznost z TempPos vede na Self.Positions.Pos[i].Pos - muzeme pridat Symbol2 do bloku
-                   // pridavame vyhybku
-                   vyhybka           := TVyhybka.Create();
-                   vyhybka.index     := vyh_index;
-                   Inc(vyh_index);
-                   vyhybka.typ       := TBlkType.vyhybka;
-                   vyhybka.Blok      := -1;
-                   vyhybka.OblRizeni := 0;
-                   vyhybka.Position  := TempPos;
-                   vyhybka.SymbolID  := Symbol2;
-                   vyhybka.obj       := index-1;
-                   Self.Objects.Bloky.Add(vyhybka);
-
-                   Zahrnuto[TempPos.X,TempPos.Y] := true;
-                   Self.AddPos(TempPos);
-                  end;//if TempPos.x + _Vyh_Navaznost[...
-                end;//for k
-              end;//if ((Symbol2 >= _Vyhybka_Start) and (Symbol2 <= _Vyhybka_End))
-            end;//(not Self.Zahrnuto[TempPos[j].X,TempPos[j].Y])
-          end;//for j
-        end;//if ((Symbol >= _Usek_Start) and (Symbol <= _Usek_End))
-
-
-       //pokud je symbol vyhybka
-       if ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End)) then
-        begin
-         //cyklus je kvuli dvou smerum navazosti
-         for j := 0 to 2 do
-          begin
-           Symbol := Self.Bitmap.Symbols.GetSymbol(Point(Self.Positions.Pos[i].X,Self.Positions.Pos[i].Y));
-           TempPos.X := Self.Positions.Pos[i].X + _Vyh_Navaznost[((Symbol-_Vyhybka_Start)*6) + (j*2)];
-           TempPos.Y := Self.Positions.Pos[i].Y + _Vyh_Navaznost[((Symbol-_Vyhybka_Start)*6) + (j*2) + 1];
-
-           Symbol2 := Self.Bitmap.Symbols.GetSymbol(Point(TempPos.X,TempPos.Y));
-
-           if (not Self.Zahrnuto[TempPos.X,TempPos.Y]) then
+           //vedlejsi Symbol2 = usek
+           if (((Symbol2 >= _Usek_Start) and (Symbol2 <= _Usek_End)) or
+               ((Symbol2 >= _Krizeni_Start) and (Symbol2 <= _Krizeni_End))) then
             begin
-             //vedlejsi Symbol2 = usek
-             if (((Symbol2 >= _Usek_Start) and (Symbol2 <= _Usek_End) or
-                 ((Symbol2 >= _Krizeni_Start) and (Symbol2 <= _Krizeni_End)))) then
+             //ted vime, ze na NavaznostPos je usek
+
+             if (((TempPos.X + GetUsekNavaznost(Symbol2, ndPositive).X = Self.Positions.Pos[i].X) and
+                  (TempPos.Y + GetUsekNavaznost(Symbol2, ndPositive).Y = Self.Positions.Pos[i].Y)) or
+                 ((TempPos.X + GetUsekNavaznost(Symbol2, ndNegative).X = Self.Positions.Pos[i].X) and
+                  (TempPos.Y + GetUsekNavaznost(Symbol2, ndNegative).Y = Self.Positions.Pos[i].Y))) then
               begin
-               //ted vime, ze na NavaznostPos je usek
-               if (((TempPos.X + GetUsekNavaznost(Symbol2, ndPositive).X = Self.Positions.Pos[i].X) and
-                     (TempPos.Y + GetUsekNavaznost(Symbol2, ndPositive).Y = Self.Positions.Pos[i].Y)) or
-                   ((TempPos.X + GetUsekNavaznost(Symbol2, ndNegative).X = Self.Positions.Pos[i].X) and
-                     (TempPos.Y + GetUsekNavaznost(Symbol2, ndNegative).Y = Self.Positions.Pos[i].Y))) then
+               //ted vime, ze i navaznost z TempPos vede na Self.Positions.Pos[i].Pos - muzeme pridat Symbol2 do bloku
+
+               // pri pohybu vlevo a nahoru je zapotrebi overovat separator uz tady, protoze jenom tady vime, ze se pohybujeme doleva nebo nahoru
+               // pohyb doprava a dolu resi podminka vyse
+
+               vertSep := Self.Bitmap.SeparatorsVert.GetObject(TempPos);
+               horSep := Self.Bitmap.SeparatorsHor.GetObject(TempPos);
+
+               if (((vertSep = -1) and (horSep = -1)) or
+                  ((horSep = -1) and ((TempPos.X > Self.Positions.Pos[i].X) or (TempPos.Y <> Self.Positions.Pos[i].Y))) or
+                  ((vertSep = -1) and ((TempPos.Y > Self.Positions.Pos[i].Y) or (TempPos.X <> Self.Positions.Pos[i].X)))) then
                 begin
-                 //ted vime, ze i navaznost z TempPos vede na Self.Positions.Pos[i].Pos - muzeme pridat Symbol2 do bloku
                  sym.SymbolID := Symbol2;
                  sym.Position := TempPos;
                  usek.Symbols.Add(sym);
                  Zahrnuto[TempPos.X,TempPos.Y] := true;
                  Self.AddPos(TempPos);
                 end;
-              end;//if ((not Self.Zahrnuto[TempPos[j].X,TempPos[j].Y])...
+              end;
+            end;//if ((not Self.Zahrnuto[TempPos[j].X,TempPos[j].Y])...
 
-             //zde neni osetreno, pokud by byl vedlejsi symbol vyhybka - predpoklada se, ze se to nikdy nestane
-            end;//if (not Self.Zahrnuto[TempPos[j].X,TempPos[j].Y])
-          end;//for j
-        end;//if ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End))
-      end;//Separator
+
+           //vedlejsi Symbol2 = vyhybka
+           if ((Symbol2 >= _Vyhybka_Start) and (Symbol2 <= _Vyhybka_End)) then
+            begin
+             //ted vime, ze na NavaznostPos je vyhybka
+             for k := 0 to 2 do
+              begin
+               if ((TempPos.X + _Vyh_Navaznost[(Symbol2 - _Vyhybka_Start)*6+(k*2)] = Self.Positions.Pos[i].X) and
+                   (TempPos.Y + _Vyh_Navaznost[((Symbol2 - _Vyhybka_Start)*6)+(k*2)+1] = Self.Positions.Pos[i].Y)) then
+                begin
+                 //ted vime, ze i navaznost z TempPos vede na Self.Positions.Pos[i].Pos - muzeme pridat Symbol2 do bloku
+                 // pridavame vyhybku
+                 vyhybka           := TVyhybka.Create();
+                 vyhybka.index     := vyh_index;
+                 Inc(vyh_index);
+                 vyhybka.typ       := TBlkType.vyhybka;
+                 vyhybka.Blok      := -1;
+                 vyhybka.OblRizeni := 0;
+                 vyhybka.Position  := TempPos;
+                 vyhybka.SymbolID  := Symbol2;
+                 vyhybka.obj       := index-1;
+                 Self.Objects.Bloky.Add(vyhybka);
+
+                 Zahrnuto[TempPos.X,TempPos.Y] := true;
+                 Self.AddPos(TempPos);
+                end;//if TempPos.x + _Vyh_Navaznost[...
+              end;//for k
+            end;//if ((Symbol2 >= _Vyhybka_Start) and (Symbol2 <= _Vyhybka_End))
+          end;//(not Self.Zahrnuto[TempPos[j].X,TempPos[j].Y])
+        end;//for j
+      end;//if ((Symbol >= _Usek_Start) and (Symbol <= _Usek_End))
+
+
+     //pokud je symbol vyhybka
+     if ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End)) then
+      begin
+       //cyklus je kvuli dvou smerum navazosti
+       for j := 0 to 2 do
+        begin
+         Symbol := Self.Bitmap.Symbols.GetSymbol(Point(Self.Positions.Pos[i].X,Self.Positions.Pos[i].Y));
+
+         dir.X := _Vyh_Navaznost[((Symbol-_Vyhybka_Start)*6) + (j*2)];
+         dir.Y := _Vyh_Navaznost[((Symbol-_Vyhybka_Start)*6) + (j*2) + 1];
+
+         if (Self.IsSeparator(Self.Positions.Pos[i], dir)) then
+           continue;
+
+         TempPos.X := Self.Positions.Pos[i].X + dir.X;
+         TempPos.Y := Self.Positions.Pos[i].Y + dir.Y;
+
+         Symbol2 := Self.Bitmap.Symbols.GetSymbol(Point(TempPos.X,TempPos.Y));
+
+         if (not Self.Zahrnuto[TempPos.X,TempPos.Y]) then
+          begin
+           //vedlejsi Symbol2 = usek
+           if (((Symbol2 >= _Usek_Start) and (Symbol2 <= _Usek_End) or
+               ((Symbol2 >= _Krizeni_Start) and (Symbol2 <= _Krizeni_End)))) then
+            begin
+             //ted vime, ze na NavaznostPos je usek
+             if (((TempPos.X + GetUsekNavaznost(Symbol2, ndPositive).X = Self.Positions.Pos[i].X) and
+                   (TempPos.Y + GetUsekNavaznost(Symbol2, ndPositive).Y = Self.Positions.Pos[i].Y)) or
+                 ((TempPos.X + GetUsekNavaznost(Symbol2, ndNegative).X = Self.Positions.Pos[i].X) and
+                   (TempPos.Y + GetUsekNavaznost(Symbol2, ndNegative).Y = Self.Positions.Pos[i].Y))) then
+              begin
+               //ted vime, ze i navaznost z TempPos vede na Self.Positions.Pos[i].Pos - muzeme pridat Symbol2 do bloku
+               sym.SymbolID := Symbol2;
+               sym.Position := TempPos;
+               usek.Symbols.Add(sym);
+               Zahrnuto[TempPos.X,TempPos.Y] := true;
+               Self.AddPos(TempPos);
+              end;
+            end;//if ((not Self.Zahrnuto[TempPos[j].X,TempPos[j].Y])...
+
+           //zde neni osetreno, pokud by byl vedlejsi symbol vyhybka - predpoklada se, ze se to nikdy nestane
+          end;//if (not Self.Zahrnuto[TempPos[j].X,TempPos[j].Y])
+        end;//for j
+      end;//if ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End))
     end;//for i
 
    Self.CheckPos;
@@ -567,5 +575,19 @@ begin
 
  Self.Objects.Bloky.Add(blk);
 end;//procedure
+
+function TBitmapToObj.IsSeparator(from, dir:TPoint):Boolean;
+begin
+ if (dir.X = 1) then
+   Result := (Self.Bitmap.SeparatorsVert.GetObject(from) <> -1)
+ else if (dir.X = -1) then
+   Result := (Self.Bitmap.SeparatorsVert.GetObject(Point(from.X-1, from.Y)) <> -1)
+ else if (dir.Y = 1) then
+   Result := (Self.Bitmap.SeparatorsHor.GetObject(from) <> -1)
+ else if (dir.Y = -1) then
+   Result := (Self.Bitmap.SeparatorsHor.GetObject(Point(from.X, from.Y-1)) <> -1)
+ else
+   Result := false;
+end;
 
 end.//unit
