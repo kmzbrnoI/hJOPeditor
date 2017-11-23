@@ -9,8 +9,9 @@ interface
 uses symbolHelper, Types, Generics.Collections, ReliefObjects, vetev;
 
 const
-  // vedjesi symboly vyhybek ulozeny ve formatu: rovna_x,rovna_y,odbocka_x,odbocka,y, ...
-  _Vyh_Navaznost : array [0..15] of ShortInt = (1,0,0,-1, 1,0,0,1, -1,0,0,-1, -1,0,0,1);
+  // vedjesi symboly vyhybek ulozeny ve formatu: rovna_x,rovna_y,odbocka_x,odbocka_y,zpet_x,zpet_y ...
+  _Vyh_Navaznost : array [0..23] of ShortInt = (1,0,0,-1,-1,0, 1,0,0,1,-1,0, -1,0,0,-1,1,0, -1,0,0,1,1,0);
+//  _Vyh_Navaznost : array [0..15] of ShortInt = (1,0,0,-1, 1,0,0,1, -1,0,0,-1, -1,0,0,1);
 
 type
   TVetevReturner = record
@@ -121,15 +122,18 @@ end;//procedure
 procedure ComputeNormalBlokVetve(po:TPanelObjects; var data:TVetveData; start:TPoint; Vetve:TList<TVetev>);
 var queue:TQueue<TPoint>;
     first, temp, new:TPoint;
-    i, j:Integer;
+    i, j, up:Integer;
     vetev:TVetev;
     symbols:TList<TReliefSym>;
     symbol:TReliefSym;
     node:^TVetevEnd;
+    startOnVyh:boolean;
 begin
  queue := TQueue<TPoint>.Create();
  queue.Enqueue(start);
 
+ startOnVyh := ((data[start.X, start.Y] >= _Vyhybka_Start) and
+                (data[start.X, start.Y] <= _Vyhybka_End));
  symbols := TList<TReliefSym>.Create();
 
  try
@@ -214,20 +218,31 @@ begin
          node^.ref_plus := -1;
          node^.ref_minus := -1;
 
-         // projdu 2 smery, do kterych muze vyhybka (je jasne, ze barvici cesta musela prijit z te strany, kde se koleje spojuji)
-         for i := 0 to 1 do
+         // projdu 2 smery, do kterych muze vyhybka (je jasne, ze barvici cesta
+         // musela prijit z te strany, kde se koleje spojuji)/
+         // Pokud se zacinalo na vyhybce, projde se i 3. smer.
+         if (startOnVyh) then
           begin
-           temp.X := new.X + _Vyh_Navaznost[((data[new.X, new.Y]-_Vyhybka_Start)*4) + (i*2)];
-           temp.Y := new.Y + _Vyh_Navaznost[((data[new.X, new.Y]-_Vyhybka_Start)*4) + (i*2)+1];
+           startOnVyh := false;
+           up := 2;
+          end else
+           up := 1;
+
+         for i := 0 to up do
+          begin
+           temp.X := new.X + _Vyh_Navaznost[((data[new.X, new.Y]-_Vyhybka_Start)*6) + (i*2)];
+           temp.Y := new.Y + _Vyh_Navaznost[((data[new.X, new.Y]-_Vyhybka_Start)*6) + (i*2)+1];
 
            if (data[temp.X, temp.Y] > -1) then
             begin
              // na dalsi pozici za vyhybkou je symbol -> novy zaznam do fronty
-             queue.Enqueue(temp);
+             if (i <> 2) then
+               queue.Enqueue(temp);
 
              case (i) of
               0 : node^.ref_plus  := Vetve.Count + queue.Count;
               1 : node^.ref_minus := Vetve.Count + queue.Count;
+              2 : first := temp;
              end;//case
             end;
           end;//for 2_smery_do_kterych_muze_expandovat_vyhybka
