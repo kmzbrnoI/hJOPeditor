@@ -90,7 +90,8 @@ begin
       begin
        if ((not Self.Zahrnuto[i,j]) and
            (((Symbol >= _Usek_Start) and (Symbol <= _Usek_End)) or
-            ((Symbol >= _Krizeni_Start) and (Symbol <= _Krizeni_End)))) then
+            ((Symbol >= _Krizeni_Start) and (Symbol <= _Krizeni_End)) or
+            ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End)))) then
          Self.ZpracujObject(Point(i,j), index, vyh_index, vykol_index);
       end;//if (Self.BitmapData.Symbols.GetSymbol(Point(i,j)) <> -1)
     end;//for j
@@ -333,12 +334,26 @@ begin
  usek.KPopisek := TList<TPoint>.Create();
  usek.Vetve    := TList<TVetev>.Create();
 
- sym.SymbolID := Self.Bitmap.Symbols.GetSymbol(VychoziPos);
- sym.Position := VychoziPos;
- usek.Symbols.Add(sym);
+ Symbol := Self.Bitmap.Symbols.GetSymbol(VychoziPos);
+ if ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End)) then
+  begin
+   vyhybka           := TVyhybka.Create();
+   vyhybka.index     := vyh_index;
+   Inc(vyh_index);
+   vyhybka.typ       := TBlkType.vyhybka;
+   vyhybka.Blok      := -1;
+   vyhybka.OblRizeni := 0;
+   vyhybka.Position  := VychoziPos;
+   vyhybka.SymbolID  := Symbol;
+   vyhybka.obj       := index-1;
+   Self.Objects.Bloky.Add(vyhybka);
+  end else begin
+   sym.SymbolID := Symbol;
+   sym.Position := VychoziPos;
+   usek.Symbols.Add(sym);
+  end;
 
  Self.Objects.Bloky.Add(usek);
-
  s := TStack<TPoint>.Create();
 
  try
