@@ -113,7 +113,7 @@ uses ReliefObjects;
 //nacitani souboru s bitmapovymi daty
 function TPanelBitmap.FLoad(aFile:string;var ORs:string):Byte;
 var myFile:File;
-    Buffer:array [0..1023] of Byte;
+    Buffer:array [0..16383] of Byte;
     bytesBuf:TBytes;
     i,len:Integer;
     aCount:Integer;
