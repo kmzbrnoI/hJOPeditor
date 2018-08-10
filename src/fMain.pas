@@ -191,7 +191,7 @@ var
 implementation
 
 uses fNewRelief, fChangeRelief, fReliefSettings, fPopiskek, OblastRizeni,
-  fOREdit, fDataCheck;
+  fOREdit, fDataCheck, IBUtils;
 
 {$R *.dfm}
 
@@ -855,7 +855,11 @@ begin
  Self.SB_Main.Panels.Items[0].Text := 'Soubor otevøen';
  Self.SB_Main.Panels.Items[1].Text := 'Soubor není uložen';
 
- Self.Caption := FName+' - '+_Caption + '     v' + GetVersion(Application.ExeName);
+ Self.Caption := FName+' – '+_Caption + '     v' + GetVersion(Application.ExeName);
+
+ Self.Constraints.MinWidth := Max(Self.DXD_main.Width + 2*Self.DXD_main.Left + 20,
+                                  Self.TB_BitmapTools.Left + Self.TB_BitmapTools.Width + 30);
+ Self.Constraints.MinHeight := Self.DXD_main.Height + Self.DXD_main.Top + Self.SB_Main.Height + 70;
 end;//procedure
 
 procedure TF_Hlavni.DesignClose;
