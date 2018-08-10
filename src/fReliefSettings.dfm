@@ -117,6 +117,7 @@ object F_ReliefOptions: TF_ReliefOptions
     Width = 75
     Height = 25
     Caption = 'Pou'#382#237't'
+    Default = True
     TabOrder = 1
     OnClick = B_ApplyClick
   end

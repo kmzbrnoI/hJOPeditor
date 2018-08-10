@@ -43,7 +43,7 @@ var
 
 implementation
 
-uses fMain;
+uses fMain, fBlockEdit;
 
 {$R *.dfm}
 
@@ -60,6 +60,14 @@ begin
 
  if (Assigned(F_Hlavni.Relief)) then
    ReliefOptions.UseData(F_Hlavni.Relief);
+
+ try
+   F_BlockEdit.Bloky.LoadData(ReliefOptions.BlockFile);
+ except
+   on E:Exception do
+     Application.MessageBox(PChar('Chyba pøi naèítáni souboru s bloky technologie:'+#13#10+E.Message),
+                            'Chyba', MB_OK OR MB_ICONWARNING);
+ end;
 
  Self.Close;
 end;//procedure

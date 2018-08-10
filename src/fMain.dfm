@@ -3810,15 +3810,25 @@ object F_Hlavni: TF_Hlavni
       object MI_Mrizka: TMenuItem
         Caption = 'Zobrazit m'#345#237#382'ku'
         Checked = True
+        ShortCut = 16461
         OnClick = MI_MrizkaClick
       end
       object PM_ReliefOptions: TMenuItem
         Caption = 'Nastaven'#237
+        ShortCut = 16468
         OnClick = PM_ReliefOptionsClick
       end
       object MI_SaveShowOptions: TMenuItem
         Caption = 'Ulo'#382'it nastaven'#237
         OnClick = MI_SaveShowOptionsClick
+      end
+      object N6: TMenuItem
+        Caption = '-'
+      end
+      object PM_Reload_Blocks: TMenuItem
+        Caption = 'Znovu na'#269#237'st bloky'
+        ShortCut = 16466
+        OnClick = PM_Reload_BlocksClick
       end
     end
     object MI_Draw: TMenuItem
@@ -3879,6 +3889,7 @@ object F_Hlavni: TF_Hlavni
       Visible = False
       object MI_CheckData: TMenuItem
         Caption = 'Ov'#283#345'it data'
+        ShortCut = 16456
         OnClick = MI_CheckDataClick
       end
     end
@@ -3886,6 +3897,7 @@ object F_Hlavni: TF_Hlavni
       Caption = 'N'#225'pov'#283'da'
       object PM_About: TMenuItem
         Caption = 'O programu'
+        ShortCut = 112
         OnClick = PM_AboutClick
       end
     end
@@ -3913,7 +3925,7 @@ object F_Hlavni: TF_Hlavni
     Left = 200
     Top = 504
     Bitmap = {
-      494C01012600E002E80208000C00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C01012600E002EC0208000C00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       000000000000360000002800000020000000780000000100200000000000003C
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000000000000000000FF000000FF000000FF000000FF00
@@ -4425,7 +4437,7 @@ object F_Hlavni: TF_Hlavni
     Left = 312
     Top = 504
     Bitmap = {
-      494C0101040008006C0010000C00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010104000800700010000C00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001800000001002000000000000018
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

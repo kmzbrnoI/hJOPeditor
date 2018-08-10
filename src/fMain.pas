@@ -112,6 +112,8 @@ type
     ToolButton4: TToolButton;
     ToolButton5: TToolButton;
     ToolButton6: TToolButton;
+    N6: TMenuItem;
+    PM_Reload_Blocks: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure PM_NewClick(Sender: TObject);
@@ -143,6 +145,7 @@ type
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure TB_Separator_HorizClick(Sender: TObject);
     procedure ToolButton6Click(Sender: TObject);
+    procedure PM_Reload_BlocksClick(Sender: TObject);
   private
     pushedButton:TToolButton;                   // last pushed button
 
@@ -469,15 +472,10 @@ begin
    Self.PM_ORAdd.Enabled := true;
   end;
 
-  dmSepVert: Self.PM_BitmapClick(Self.PM_Sep_Vert);
-  dmSepHor: Self.PM_BitmapClick(Self.PM_Sep_Hor);
-
   dmBloky:begin
    Self.PM_ORAdd.Enabled := false;
    Self.PM_BitmapClick(Self.PM_Bloky);
   end;
-
-  dmRoots: Self.PM_BitmapClick(Self.PM_Roots);
  end;
 
  ReliefOptions.UseData(F_Hlavni.Relief);
@@ -496,7 +494,7 @@ begin
    if (Assigned(Relief)) then
     begin
      if (Relief.FileStav <> 0) then
-     FreeAndNil(Relief);
+       FreeAndNil(Relief);
     end;//if Assigned(Relief)
 
    Self.OpenFile(Self.OD_Open.FileName);
@@ -520,7 +518,20 @@ end;//procedure
 procedure TF_Hlavni.PM_ReliefOptionsClick(Sender: TObject);
 begin
  F_ReliefOptions.OpenForm;
-end;//procedure
+end;
+
+procedure TF_Hlavni.PM_Reload_BlocksClick(Sender: TObject);
+begin
+ try
+   F_BlockEdit.Bloky.LoadData(ReliefOptions.BlockFile);
+   Application.MessageBox(PChar('Soubor '+ReliefOptions.BlockFile+' úspìšnì naèten.'),
+                          'Info', MB_OK OR MB_ICONINFORMATION);
+ except
+   on E:Exception do
+     Application.MessageBox(PChar('Chyba pøi naèítáni souboru s bloky technologie:'+#13#10+E.Message),
+                            'Chyba', MB_OK OR MB_ICONWARNING);
+ end;
+end;
 
 //ukladani souboru jako
 procedure TF_Hlavni.PM_SaveAsClick(Sender: TObject);
@@ -682,6 +693,17 @@ begin
        Exit;
       end;
 
+     if (not F_BlockEdit.Bloky.triedLoad) then
+      begin
+       try
+         F_BlockEdit.Bloky.LoadData(ReliefOptions.BlockFile);
+       except
+         on E:Exception do
+           Application.MessageBox(PChar('Chyba pøi naèítáni souboru s bloky technologie:'+#13#10+E.Message),
+                                  'Chyba', MB_OK OR MB_ICONWARNING);
+       end;
+      end;
+
      Self.MI_Data.Visible := true;
     end;//case 2
 
@@ -712,7 +734,7 @@ procedure TF_Hlavni.MI_CheckDataClick(Sender: TObject);
 var error_cnt:Byte;
     LI:TListItem;
 begin
- if ((Self.Relief.Mode = dmBloky) or (Self.Relief.Mode = dmRoots)) then
+ if ((Assigned(Self.Relief)) and ((Self.Relief.Mode = dmBloky) or (Self.Relief.Mode = dmRoots))) then
   begin
    F_DataCheck.OpenForm(Self.Relief.CheckValid(error_cnt));
    LI := F_DataCheck.LV_Errors.Items.Add;

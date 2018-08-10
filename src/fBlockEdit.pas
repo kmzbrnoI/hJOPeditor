@@ -14,6 +14,8 @@ type
     typ:Integer;
   end;
 
+  EFileNotFound = class(Exception);
+
   TBloky=class
    private const
      _MAX_BLK = 1023;
@@ -21,8 +23,13 @@ type
      Bloky:array [0.._MAX_BLK] of TBlok;
      Count:Integer;
      iniFile:TMemIniFile;
+     fTriedLoad:Boolean;
    public
-    function LoadData(FileName:string):Byte;
+    constructor Create();
+
+    procedure LoadData(const FileName:string);
+
+    property triedLoad: boolean read fTriedLoad;
   end;
 
   TF_BlockEdit = class(TForm)
@@ -98,39 +105,37 @@ uses fMain, OblastRizeni;
 
 {$R *.dfm}
 
-function TBloky.LoadData(FileName:string):Byte;
+constructor TBloky.Create();
+begin
+ inherited;
+ Self.fTriedLoad := false;
+end;
+
+procedure TBloky.LoadData(const FileName:string);
 var i:Integer;
     str:TStrings;
 begin
+ Self.fTriedLoad := true;
+
  if (not FileExists(FileName)) then
-  begin
-   Result := 1;
-   Exit;
-  end;
+   raise EFileNotFound.Create('Soubor '+FileName+' neexistuje!');
 
  str := TStringList.Create();
  Self.iniFile := TMemIniFile.Create(FileName, TEncoding.UTF8);
+ try
+   Self.iniFile.ReadSections(str);
+   Self.Count := str.Count;
 
- Self.iniFile.ReadSections(str);
- Self.Count := str.Count;
-
- if (Self.Count <= 0) then
-  begin
-   Result := 0;
-   Exit;
-  end;
-
- for i := 0 to str.Count-1 do
-  begin
-   Self.Bloky[i].id    := StrToInt(str[i]);
-   Self.Bloky[i].Nazev := Self.iniFile.ReadString(str[i], 'nazev','Blok '+IntToStr(i));
-   Self.Bloky[i].typ   := Self.iniFile.ReadInteger(str[i], 'typ', -1);
-  end;//for i
-
- Self.iniFile.Free;
- str.Free();
-
- Result := 0;
+   for i := 0 to str.Count-1 do
+    begin
+     Self.Bloky[i].id    := StrToInt(str[i]);
+     Self.Bloky[i].Nazev := Self.iniFile.ReadString(str[i], 'nazev','Blok '+IntToStr(i));
+     Self.Bloky[i].typ   := Self.iniFile.ReadInteger(str[i], 'typ', -1);
+    end;//for i
+ finally
+   Self.iniFile.Free;
+   str.Free();
+ end;
 end;//procedure
 
 procedure TF_BlockEdit.B_ApplyClick(Sender: TObject);
@@ -244,17 +249,8 @@ begin
 end;
 
 procedure TF_BlockEdit.FormCreate(Sender: TObject);
-var return:byte;
 begin
  Self.Bloky := TBloky.Create;
-
- return := Self.Bloky.LoadData(ReliefOptions.BlockFile);
-
- if (return <> 0) then
-  begin
-   Application.MessageBox(PChar('Chyba pri nacitani souboru s bloky technologie - chyba '+IntToStr(return)),'Chyba',MB_OK OR MB_ICONERROR);
-  end;
-
  Self.OpenBlok := nil;
 end;//procedure
 
