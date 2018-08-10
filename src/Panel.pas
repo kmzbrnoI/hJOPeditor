@@ -19,6 +19,9 @@ type
   //4 - presazeny limity
  TErrorEvent = procedure(Sender:TObject; ErrorID:Integer) of object;
  TMoveEvent  = procedure(Sender:TObject; Position:TPoint) of object;
+ EORLoad = class(Exception);
+ EGeneralFileOpen = class(Exception);
+ EResourceLoad = class(Exception);
 
  TRelief=class
   private const
@@ -100,9 +103,9 @@ type
   FOnMsg           : TMsgEvent;
   FFormBlkClose    : TGlobalEvent;
 
-   function Initialize(Rozmery:TPoint;Mode:TMode):Byte;
+   procedure Initialize(Rozmery:TPoint;Mode:TMode);
 
-   function LoadIL(var IL:TImageList;ResourceName:string;PartWidth,PartHeight:Byte;MaskColor:TColor = clPurple):Integer;
+   procedure LoadIL(var IL:TImageList;ResourceName:string;PartWidth,PartHeight:Byte;MaskColor:TColor = clPurple);
    procedure PaintMrizka(MrizkaColor:TColor);
 
    function PaintKurzor(CursorData:TCursorDraw):Byte;
@@ -116,7 +119,7 @@ type
    procedure DKDeleteClick(Sender:TObject);
 
    function ORSave:string;
-   function ORLoad(data:string):Byte;
+   procedure ORLoad(data:string);
 
    procedure DXDMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
    procedure DXDMouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
@@ -130,7 +133,7 @@ type
 
    procedure SetMrizka(aMrizka:Boolean);
 
-   function FLoad(aFile:string):Byte;
+   procedure FLoad(aFile:string);
 
    procedure ShowEvent;
    procedure BlokEditEvent(Sender:TObject; Blok:TGraphBlok);
@@ -151,8 +154,8 @@ type
    destructor Destroy; override;
 
    function New(size:TPoint;firstOR:TOR):Byte;
-   function Open(aFile:string):Byte;
-   function Save(aFile:string):Byte;
+   procedure Open(aFile:string);
+   procedure Save(aFile:string);
 
    procedure Show(CursorPos:TPoint);
    function Escape(Group:boolean):Byte;
@@ -227,7 +230,7 @@ begin
 end;//contructor
 
 //inicializace objektu Relief
-function TRelief.Initialize(Rozmery:TPoint;Mode:TMode):Byte;
+procedure TRelief.Initialize(Rozmery:TPoint;Mode:TMode);
 begin
  Self.DrawObject.OnMouseUp   := Self.DXDMouseUp;
  Self.DrawObject.OnMouseMove := Self.DXDMouseMove;
@@ -250,21 +253,9 @@ begin
  Self.ORClick.MovingOR := -1;
  Self.FMove := false;
 
- if (Self.LoadIL(Self.IL_Symbols,_Resource_Symbols,8,12) <> 0) then
-  begin
-   Result := 1;
-   Exit;
-  end;//if (Self.LoadIL(Self.IL_Symbols,_Resource_Symbols,8,12) <> 0)
- if (Self.LoadIL(Self.IL_Text,_Resource_Text,8,12) <> 0) then
-  begin
-   Result := 2;
-   Exit;
-  end;//if (Self.LoadIL(Self.IL_Symbols,_Resource_Symbols,8,12) <> 0)
- if (Self.LoadIL(Self.IL_DK,_Resource_DK,8*_OR_Size[0],12*_OR_Size[1]) <> 0) then
-  begin
-   Result := 3;
-   Exit;
-  end;//if (Self.LoadIL(Self.IL_Symbols,_Resource_Symbols,8,12) <> 0)
+ Self.LoadIL(Self.IL_Symbols,_Resource_Symbols,8,12);
+ Self.LoadIL(Self.IL_Text,_Resource_Text,8,12);
+ Self.LoadIL(Self.IL_DK,_Resource_DK,8*_OR_Size[0],12*_OR_Size[1]);
 
  Self.Graphics := TPanelGraphics.Create(Self.DrawObject, Self.IL_Text);
 
@@ -287,18 +278,12 @@ begin
  Self.Show(Point(-1,-1));
 
  Self.DrawObject.Visible := true;
- Result := 0;
 end;//function
 
 //novy relief
 function TRelief.New(size:TPoint;firstOR:TOR):Byte;
 begin
- if (Self.Initialize(size,dmBitmap) <> 0) then
-  begin
-   Result := 1;
-   Exit;
-  end;
-
+ Self.Initialize(size,dmBitmap);
  if (Self.AddOR(firstOR) <> 0) then
   begin
    Result := 2;
@@ -308,37 +293,16 @@ begin
  Result := 0;
 end;//function
 
-function TRelief.Open(aFile:string):Byte;
+procedure TRelief.Open(aFile:string);
 var Mode:TMode;
-    return:Byte;
 begin
- if (not FileExists(aFile)) then
-  begin
-   Result := 1;
-   Exit;
-  end;
-
  if (RightStr(aFile, 5) = _Suf_bmp) then Mode := dmBitmap
  else if (RightStr(aFile, 5) = _Suf_obj) then Mode := dmBloky
- else begin
-   Result := 2;
-   Exit;
- end;
+ else
+   raise EGeneralFileOpen.Create('Soubor s nepodporovanou pøíponou!');
 
- if (Self.Initialize(Point(0,0), Mode) <> 0) then
-  begin
-   Result := 3;
-   Exit;
-  end;
-
- return := Self.FLoad(aFile);
- if (return <> 0) then
-  begin
-   Result := return+3;
-   Exit;
-  end;
-
- Result := 0;
+ Self.Initialize(Point(0,0), Mode);
+ Self.FLoad(aFile);
 end;//function
 
 destructor TRelief.Destroy();
@@ -368,7 +332,7 @@ begin
  inherited Destroy;
 end;//destructor
 
-function TRelief.LoadIL(var IL:TImageList;ResourceName:string;PartWidth,PartHeight:Byte;MaskColor:TColor = clPurple):Integer;
+procedure TRelief.LoadIL(var IL:TImageList;ResourceName:string;PartWidth,PartHeight:Byte;MaskColor:TColor = clPurple);
 var AllImages,ColouredImages:TBitmap;
     i,j,k,symbol:byte;
 begin
@@ -401,8 +365,6 @@ begin
 
  ColouredImages.Free;
  AllImages.Free;
-
- Result := 0;
 end;//procedure
 
 //hlavni zobrazeni celeho reliefu
@@ -699,65 +661,42 @@ begin
  Self.Show(Point(-1,-1));
 end;//procedure
 
-function TRelief.FLoad(aFile:string):Byte;
+procedure TRelief.FLoad(aFile:string);
 var ORs:string;
 begin
  case (Self.DrawMode) of
   dmBitmap, dmSepHor, dmSepVert:begin
-     if (Self.PanelBitmap.FLoad(aFile, ORs) <> 0) then
-      begin
-       Result := 1;
-       Exit;
-      end;// <> 0
-     if (Self.ORLoad(ORs) <> 0) then
-      begin
-       Result := 2;
-       Exit;
-      end;
+     Self.PanelBitmap.FLoad(aFile, ORs);
+     Self.ORLoad(ORs);
      Self.Panel.FileStav  := Self.PanelBitmap.FileStav;
      Self.Zobrazeni.PanelWidth   := Self.PanelBitmap.PanelWidth;
      Self.Zobrazeni.PanelHeight  := Self.PanelBitmap.PanelHeight;
     end;//dmBitmap
   dmBloky, dmRoots:begin
-     if (Self.PanelObjects.FLoad(aFile,ORs) <> 0) then
-      begin
-       Result := 1;
-       Exit;
-      end;// <> 0
-     if (Self.ORLoad(ORs) <> 0) then
-      begin
-       Result := 2;
-       Exit;
-      end;
-
+     Self.PanelObjects.FLoad(aFile,ORs);
+     Self.ORLoad(ORs);
      Self.Panel.FileStav  := Self.PanelObjects.FileStav;
      Self.Zobrazeni.PanelWidth   := Self.PanelObjects.PanelWidth;
      Self.Zobrazeni.PanelHeight  := Self.PanelObjects.PanelHeight;
     end;//dmBloky
  end;//case
 
-
  Self.DrawObject.Width  := Self.Zobrazeni.PanelWidth*_Symbol_Sirka;
  Self.DrawObject.Height := Self.Zobrazeni.PanelHeight*_Symbol_Vyska;
 
  Self.Panel.FileCesta := aFile;
- Result := 0;
 end;//function
 
-function TRelief.Save(aFile:string):Byte;
+procedure TRelief.Save(aFile:string);
 begin
- Result := 0;
-
  case (Self.DrawMode) of
   dmBitmap, dmSepHor, dmSepVert:begin
-     Result := Self.PanelBitmap.FSave(aFile, Self.ORSave());
-     if (Result <> 0) then Exit;
+     Self.PanelBitmap.FSave(aFile, Self.ORSave());
      Self.Panel.FileStav := Self.PanelBitmap.FileStav;
     end;//dmBitmap
 
   dmBloky, dmRoots:begin
-     Result := Self.PanelObjects.FSave(aFile,Self.ORSave());
-     if (Result <> 0) then Exit;
+     Self.PanelObjects.FSave(aFile,Self.ORSave());
      Self.Panel.FileStav := Self.PanelObjects.FileStav;
     end;//dmBloky
  end;///case
@@ -1150,7 +1089,7 @@ end;//function
 
 //na kazdem radku je ulozena jedna oblast rizeni ve formatu:
 //  nazev;nazev_zkratka;id;lichy_smer(0,1);orientace_DK(0,1);ModCasStart(0,1);ModCasStop(0,1);ModCasSet(0,1);dkposx;dkposy;qposx;qposy;timeposx;timeposy;osv_mtb|osv_port|osv_name;
-function TRelief.ORLoad(data:string):Byte;
+procedure TRelief.ORLoad(data:string);
 var lines,data_main,data_osv,data_osv2:TStrings;
     i,j:Integer;
 begin
@@ -1162,10 +1101,7 @@ begin
  data_osv2 := TStringList.Create();
 
  if (RightStr(data,2) <> #13#13) then
-  begin
-   Result := 1;
-   Exit;
-  end;
+   raise EORLoad.Create('OR data nekonèí dvìma symboly nového øádku!');
 
  ExtractStrings([#13],[],PChar(LeftStr(data,Length(data)-2)),lines);
 
@@ -1175,10 +1111,7 @@ begin
    ExtractStrings([';'],[],PChar(lines[i]),data_main);
 
    if (data_main.Count < 14) then
-    begin
-     Result := 2;
-     Exit;
-    end;
+     raise EORLoad.Create('Málo položek definující OØ!');
 
    Self.ORs.Cnt := Self.ORs.Cnt + 1;
    Self.ORs.Data[Self.ORs.Cnt-1].Name       := data_main[0];
@@ -1211,10 +1144,7 @@ begin
      ExtractStrings(['#'],[],PChar(data_osv[j]),data_osv2);
 
      if (data_osv2.Count < 2) then
-      begin
-       Result := 3;
-       Exit;
-      end;
+       raise EORLoad.Create('Málo položek definující osvìtlení!');
 
      Self.ORs.Data[Self.ORs.Cnt-1].Osvetleni.Cnt := Self.ORs.Data[Self.ORs.Cnt-1].Osvetleni.Cnt + 1;
      Self.ORs.Data[Self.ORs.Cnt-1].Osvetleni.Data[Self.ORs.Data[Self.ORs.Cnt-1].Osvetleni.Cnt-1].board := StrToInt(data_osv2[0]);
@@ -1224,14 +1154,11 @@ begin
     end;//for j
   end;//for i
 
-
  FreeAndNil(lines);
  FreeAndNil(data_main);
  FreeAndNil(data_osv);
  FreeAndNil(data_osv2);
- Result := 0;
 end;//procedure
-
 
 //konec operaci s oblastmi rizeni
 ////////////////////////////////////////////////////////////////////////////////

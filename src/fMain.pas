@@ -8,17 +8,6 @@ uses
   ImgList, DXDraws, StdCtrls, AppEvnts, StrUtils, ReliefBitmap, Global,
   ReliefSettings, fBlockEdit, DXSprite, DIB;
 
-const
-  _open_file_errors: array [1..5] of string =
-    ('Zadaný soubor neexistuje',
-     'Zadaný soubor má pøíponu, kterou program nepodporuje',
-     'Nepodaøilo se inicializavat panel',
-     'Nepodaøilo se naèíst symboly',
-     'Nepodaøilo se naèíst oblasti øízení');
-
-  _close_file_errors: array [1..1] of string =
-    ('Nelze pøistoupit k výstupnímu souboru');
-
 type
   TF_Hlavni = class(TForm)
     MM_Hlavni: TMainMenu;
@@ -165,7 +154,7 @@ type
     procedure DestroyClasses;
     procedure DestroyReliefClasses;
 
-    function OpenFile(fname:string):Byte;
+    procedure OpenFile(fname:string);
     procedure DesignOpen(FName:string);
     procedure DesignClose;
 
@@ -446,22 +435,23 @@ begin
 end;
 
 //otevirani souboru
-function TF_Hlavni.OpenFile(fname:string):Byte;
-var aReturn:Integer;
+procedure TF_Hlavni.OpenFile(fname:string);
 begin
  Relief := TRelief.Create(Self.DXD_Main, Self);
 
  Self.AssignReliefEvents();
 
- aReturn := Relief.Open(fname);
-
- if (aReturn <> 0) then
-  begin
-   FreeAndNil(Relief);
-   Application.MessageBox(PChar('Otevøení suboru skonèilo s chybou:'+#13#10+_open_file_errors[aReturn]), 'Chyba', MB_OK OR MB_ICONERROR);
-   Result := 1;
-   Exit;
-  end;
+ try
+   Relief.Open(fname);
+ except
+   on E:Exception do
+    begin
+     if (Assigned(Relief)) then FreeAndNil(Relief);
+     Self.DesignClose();
+     Application.MessageBox(PChar('Otevøení suboru skonèilo s chybou:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONERROR);
+     Exit();
+    end;
+ end;
 
  Self.RepaintModes(Relief.Mode);
 
@@ -479,7 +469,6 @@ begin
 
  ReliefOptions.UseData(F_Hlavni.Relief);
  Self.DesignOpen(ExtractFileName(fname));
- Result := 0;
 end;//function
 
 procedure TF_Hlavni.PM_OpenClick(Sender: TObject);
@@ -557,41 +546,40 @@ end;
 
 //ukladani souboru
 procedure TF_Hlavni.PM_SaveClick(Sender: TObject);
-var return:Byte;
 begin
- return := 0;
-
- if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
-  begin
-   Self.SD_Save.Filter := 'Bitmapove soubory panelu (*.bpnl)|*.bpnl';
-
-   if (Relief.FileStav = 1) then
+ try
+   if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
     begin
-     if (not Self.SD_Save.Execute(Self.Handle)) then Exit;
-     if (RightStr(Self.SD_Save.FileName,5) <> '.bpnl') then return := Relief.Save(Self.SD_Save.FileName+'.bpnl') else return := Relief.Save(Self.SD_Save.FileName);
-    end else begin
-     if (Relief.FileStav = 2) then return := Relief.Save(Relief.FileCesta);
-    end;//else .Stav = 1
-  end;//bitmapovy mod
+     Self.SD_Save.Filter := 'Bitmapove soubory panelu (*.bpnl)|*.bpnl';
 
- if ((Relief.Mode = dmBloky) or (Relief.Mode = dmRoots)) then
-  begin
-   Self.SD_Save.Filter := 'Objektove soubory panelu (*.opnl)|*.opnl';
+     if (Relief.FileStav = 1) then
+      begin
+       if (not Self.SD_Save.Execute(Self.Handle)) then Exit;
+       if (RightStr(Self.SD_Save.FileName,5) <> '.bpnl') then Relief.Save(Self.SD_Save.FileName+'.bpnl') else Relief.Save(Self.SD_Save.FileName);
+      end else begin
+       if (Relief.FileStav = 2) then Relief.Save(Relief.FileCesta);
+      end;//else .Stav = 1
+    end;//bitmapovy mod
 
-   if (Relief.FileStav = 1) then
+   if ((Relief.Mode = dmBloky) or (Relief.Mode = dmRoots)) then
     begin
-     if (not Self.SD_Save.Execute(Self.Handle)) then Exit;
-     if (RightStr(Self.SD_Save.FileName,5) <> '.opnl') then return := Relief.Save(Self.SD_Save.FileName+'.opnl') else return := Relief.Save(Self.SD_Save.FileName);
-    end else begin
-     if (Relief.FileStav = 2) then return := Relief.Save(Relief.FileCesta);
-    end;//else .Stav = 1
-  end;//objektovy mod
+     Self.SD_Save.Filter := 'Objektove soubory panelu (*.opnl)|*.opnl';
 
- if (return <> 0) then
-  begin
-   Application.MessageBox(PChar('Uložení suboru skonèilo s chybou:'+#13#10+_close_file_errors[Return]), 'Chyba', MB_OK OR MB_ICONERROR);
-   Exit;
-  end;
+     if (Relief.FileStav = 1) then
+      begin
+       if (not Self.SD_Save.Execute(Self.Handle)) then Exit;
+       if (RightStr(Self.SD_Save.FileName,5) <> '.opnl') then Relief.Save(Self.SD_Save.FileName+'.opnl') else Relief.Save(Self.SD_Save.FileName);
+      end else begin
+       if (Relief.FileStav = 2) then Relief.Save(Relief.FileCesta);
+      end;//else .Stav = 1
+    end;//objektovy mod
+ except
+   on E:Exception do
+    begin
+     Application.MessageBox(PChar('Uložení suboru skonèilo s chybou:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONERROR);
+     Exit();
+    end;
+ end;
 
  Self.SB_Main.Panels.Items[1].Text := 'Soubor uložen';
  Self.Caption := ExtractFileName(Relief.FileCesta)+' - '+_Caption + '     v' + GetVersion(Application.ExeName);

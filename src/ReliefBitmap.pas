@@ -15,7 +15,9 @@ const
 type
  TORAskEvent = function(Pos:TPoint):Boolean of object;
 
-TPanelBitmap=class
+ EFileLoad = class(Exception);
+
+ TPanelBitmap=class
   private const
 
   private
@@ -68,8 +70,8 @@ TPanelBitmap=class
     constructor Create(SymbolIL,TextIL:TImageList;DrawCanvas:TCanvas;Width,Height:Integer;Mode:TMode;Parent:TForm; Graphics:TPanelGraphics);
     destructor Destroy; override;
 
-    function FLoad(aFile:string;var ORs:string):Byte;
-    function FSave(aFile:string;const ORs:string):Byte;
+    procedure FLoad(aFile:string;var ORs:string);
+    procedure FSave(aFile:string;const ORs:string);
 
     procedure Paint;
     function PaintCursor(CursorPos:TPoint):TCursorDraw;
@@ -99,7 +101,7 @@ TPanelBitmap=class
     property OnShow: TNEvent read FOnShow write FOnShow;
     property OnTextEdit: TChangeTextEvent read FOnTextEdit write FOnTextEdit;
     property OnORAsk: TORAskEvent read FORAskEvent write FORAskEvent;
-end;//class
+ end;//class
 
 //FileSystemStav:
  //0 - soubor zavren
@@ -111,7 +113,7 @@ implementation
 uses ReliefObjects;
 
 //nacitani souboru s bitmapovymi daty
-function TPanelBitmap.FLoad(aFile:string;var ORs:string):Byte;
+procedure TPanelBitmap.FLoad(aFile:string;var ORs:string);
 var myFile:File;
     Buffer:array [0..16383] of Byte;
     bytesBuf:TBytes;
@@ -129,193 +131,192 @@ begin
  Self.SeparatorsHor.Reset;
  Self.Popisky.Reset;
 
- //kontrola existence
- if (not FileExists(aFile)) then Exit(1);
+ AssignFile(myFile, aFile);
+ Reset(myFile, 1);
 
  try
-   AssignFile(myFile,aFile);
-   Reset(myFile,1);
- except
-   Result := 10;
-   Exit;
- end;
+   BlockRead(myFile,Buffer,7,aCount);
+   if (aCount < 7) then
+     raise EFileLoad.Create('Nesprávná délka hlavièky!');
 
- BlockRead(myFile,Buffer,7,aCount);
- if (aCount < 7) then Exit(2);
+   //--- hlavicka zacatek ---
+   //kontrola identifikace
+   if ((Buffer[0] <> ord('b')) or (Buffer[1] <> ord('r'))) then
+     raise EFileLoad.Create('Nesprávná identifika v hlavièce!');
 
- //--- hlavicka zacatek ---
- //kontrola identifikace
- if ((Buffer[0] <> ord('b')) or (Buffer[1] <> ord('r'))) then Exit(3);
+   //kontrola verze
+   version := Buffer[2];
+   if ((version <> $21) and (version <> $30) and (version <> $31) and (version <> $32)) then
+     Application.MessageBox(PChar('Otevíráte soubor s verzí '+IntToHex(version, 2)+', která není aplikací plnì podporována!'),
+                            'Varování', MB_OK OR MB_ICONWARNING);
 
- //kontrola verze
- version := Buffer[2];
- if ((version <> $21) and (version <> $30) and (version <> $31) and (version <> $32)) then
-   Application.MessageBox(PChar('Otevíráte soubor s verzí '+IntToHex(version, 2)+', která není aplikací plnì podporována!'), 'Varování', MB_OK OR MB_ICONWARNING);
+   BitmapData.Width  := Buffer[3];
+   BitmapData.Height := Buffer[4];
+   Self.FPanelWidth  := Buffer[3];
+   Self.FPanelHeight := Buffer[4];
 
- BitmapData.Width  := Buffer[3];
- BitmapData.Height := Buffer[4];
- Self.FPanelWidth  := Buffer[3];
- Self.FPanelHeight := Buffer[4];
+   //kontrola 2x #255
+   if ((Buffer[5] <> 255) or (Buffer[6] <> 255)) then
+     raise EFileLoad.Create('Chybí oddìlovací sekvence mezi hlavièkou a bitmapovými daty!');
 
- //kontrola 2x #255
- if ((Buffer[5] <> 255) or (Buffer[6] <> 255)) then Exit(5);
+   //--- hlavicka konec ---
+   //-------------------------------------------
+   //nacitani bitmapovych dat
+   BlockRead(myFile,BitmapData.Data,BitmapData.Width*BitmapData.Height,aCount);
+   if (aCount < BitmapData.Width*BitmapData.Height) then
+     raise EFileLoad.Create('Málo bitmapových dat!');
 
- //--- hlavicka konec ---
- //-------------------------------------------
- //nacitani bitmapovych dat
- BlockRead(myFile,BitmapData.Data,BitmapData.Width*BitmapData.Height,aCount);
- if (aCount < BitmapData.Width*BitmapData.Height) then Exit(6);
+   Self.Symbols.SetLoadedData(BitmapData);
 
- Self.Symbols.SetLoadedData(BitmapData);
+   //prazdny radek
+   BlockRead(myFile,Buffer,2,aCount);
+   if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
+     raise EFileLoad.Create('Chybí oddìlovací sekvence mezi bitmapovými daty a popisky!');
+   //-------------------------------------------
 
- //prazdny radek
- BlockRead(myFile,Buffer,2,aCount);
- if (aCount < 2) then Exit(7);
- if (Buffer[0] <> 255) or (Buffer[1] <> 255) then Exit(8);
- //-------------------------------------------
+   if (version >= $32) then
+    begin
+     //nacteni poctu popisku
+     BlockRead(myFile, Buffer, 2, aCount);
+     len := (Buffer[0] shl 8) + Buffer[1];
 
- if (version >= $32) then
-  begin
-   //nacteni poctu popisku
-   BlockRead(myFile, Buffer, 2, aCount);
-   len := (Buffer[0] shl 8) + Buffer[1];
+     //nacitani popisku
+     SetLength(bytesBuf, len);
+     BlockRead(myFile, bytesBuf[0], len, aCount);
+     Self.Popisky.SetLoadedDataV32(bytesBuf);
+    end else begin
+     //nacteni poctu popisku
+     BlockRead(myFile, Buffer, 1, aCount);
+     len := Buffer[0] * ReliefText._Block_Length;
 
-   //nacitani popisku
-   SetLength(bytesBuf, len);
-   BlockRead(myFile, bytesBuf[0], len, aCount);
-   Self.Popisky.SetLoadedDataV32(bytesBuf);
-  end else begin
-   //nacteni poctu popisku
-   BlockRead(myFile, Buffer, 1, aCount);
-   len := Buffer[0] * ReliefText._Block_Length;
+     //nacitani popisku
+     SetLength(bytesBuf, len);
+     BlockRead(myFile, bytesBuf[0], len, aCount);
+     Self.Popisky.SetLoadedData(bytesBuf);
+    end;
 
-   //nacitani popisku
-   SetLength(bytesBuf, len);
-   BlockRead(myFile, bytesBuf[0], len, aCount);
-   Self.Popisky.SetLoadedData(bytesBuf);
-  end;
+   //prazdny radek
+   BlockRead(myFile,Buffer,2,aCount);
+   if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
+     raise EFileLoad.Create('Chybí oddìlovací sekvence mezi popisky a separátory!');
+   //-------------------------------------------
 
- //prazdny radek
- BlockRead(myFile,Buffer,2,aCount);
- if (aCount < 2) then Exit(9);
- if (Buffer[0] <> 255) or (Buffer[1] <> 255) then Exit(10);
- //-------------------------------------------
-
- //nacteni poctu vertikalnich separatoru
- BlockRead(myFile,Buffer,1,aCount);
-
- //nacitani vertikalnich separatoru
- BlockRead(myFile,Buffer,(Buffer[0]*2),aCount);
-
- VBOData.Count := aCount;
- for i := 0 to aCount-1 do VBOData.Data[i] := Buffer[i];
-
- Self.SeparatorsVert.SetLoadedData(VBOData);
-
- //prazdny radek
- BlockRead(myFile,Buffer,2,aCount);
- if (aCount < 2) then Exit(11);
- if (Buffer[0] <> 255) or (Buffer[1] <> 255) then Exit(12);
- //-------------------------------------------
-
- if (version >= $30) then
-  begin
-   //nacteni poctu horizontalnich separatoru
+   //nacteni poctu vertikalnich separatoru
    BlockRead(myFile,Buffer,1,aCount);
 
-   //nacitani horizontalnich separatoru
+   //nacitani vertikalnich separatoru
    BlockRead(myFile,Buffer,(Buffer[0]*2),aCount);
 
    VBOData.Count := aCount;
    for i := 0 to aCount-1 do VBOData.Data[i] := Buffer[i];
 
-   Self.SeparatorsHor.SetLoadedData(VBOData);
+   Self.SeparatorsVert.SetLoadedData(VBOData);
 
    //prazdny radek
    BlockRead(myFile,Buffer,2,aCount);
-   if (aCount < 2) then Exit(11);
-   if (Buffer[0] <> 255) or (Buffer[1] <> 255) then Exit(12);
-  end else begin
-   Self.SeparatorsHor.Reset();
-  end;
+   if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
+     raise EFileLoad.Create('Chybí oddìlovací sekvence mezi separátory!');
+   //-------------------------------------------
 
- //-------------------------------------------
+   if (version >= $30) then
+    begin
+     //nacteni poctu horizontalnich separatoru
+     BlockRead(myFile,Buffer,1,aCount);
 
- //nacteni poctu KPopisky
- BlockRead(myFile,Buffer,1,aCount);
+     //nacitani horizontalnich separatoru
+     BlockRead(myFile,Buffer,(Buffer[0]*2),aCount);
 
- //nacitani KPopisky
- BlockRead(myFile,Buffer,(Buffer[0]*2),aCount);
+     VBOData.Count := aCount;
+     for i := 0 to aCount-1 do VBOData.Data[i] := Buffer[i];
 
- VBOData.Count := aCount;
- for i := 0 to aCount-1 do VBOData.Data[i] := Buffer[i];
+     Self.SeparatorsHor.SetLoadedData(VBOData);
 
- Self.KPopisky.SetLoadedData(VBOData);
+     //prazdny radek
+     BlockRead(myFile,Buffer,2,aCount);
+     if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
+       raise EFileLoad.Create('Chybí oddìlovací sekvence mezi hor. separátory a kpopisky!');
+    end else begin
+     Self.SeparatorsHor.Reset();
+    end;
 
- //prazdny radek
- BlockRead(myFile,Buffer,2,aCount);
- if (aCount < 2) then Exit(13);
- if (Buffer[0] <> 255) or (Buffer[1] <> 255) then Exit(14);
- //-------------------------------------------
+   //-------------------------------------------
 
- //nacteni poctu JCClick
- BlockRead(myFile,Buffer,1,aCount);
+   //nacteni poctu KPopisky
+   BlockRead(myFile,Buffer,1,aCount);
 
- //nacitani JCClick
- BlockRead(myFile,Buffer,(Buffer[0]*2),aCount);
-
- VBOData.Count := aCount;
- for i := 0 to aCount-1 do VBOData.Data[i] := Buffer[i];
-
- Self.JCClick.SetLoadedData(VBOData);
-
- //prazdny radek
- BlockRead(myFile,Buffer,2,aCount);
- if (aCount < 2) then Exit(15);
- if (Buffer[0] <> 255) or (Buffer[1] <> 255) then Exit(16);
- //-------------------------------------------
-
- if (version >= $31) then
-  begin
-   //nacteni poctu symbolu souprav
-   BlockRead(myFile, Buffer, 1, aCount);
-
-   //nacitani symbolu souprav
-   BlockRead(myFile, Buffer, (Buffer[0]*2),aCount);
+   //nacitani KPopisky
+   BlockRead(myFile,Buffer,(Buffer[0]*2),aCount);
 
    VBOData.Count := aCount;
    for i := 0 to aCount-1 do VBOData.Data[i] := Buffer[i];
 
-   Self.Soupravy.SetLoadedData(VBOData);
+   Self.KPopisky.SetLoadedData(VBOData);
 
    //prazdny radek
-   BlockRead(myFile, Buffer, 2, aCount);
-   if (aCount < 2) then Exit(15);
-   if (Buffer[0] <> 255) or (Buffer[1] <> 255) then Exit(16);
-  end;
- //-------------------------------------------
+   BlockRead(myFile,Buffer,2,aCount);
+   if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
+     raise EFileLoad.Create('Chybí oddìlovací sekvence mezi kolejovými popisky a JCClick!');
+   //-------------------------------------------
 
- //nacitani oblasti rizeni
+   //nacteni poctu JCClick
+   BlockRead(myFile,Buffer,1,aCount);
 
- ORs := '';
+   //nacitani JCClick
+   BlockRead(myFile,Buffer,(Buffer[0]*2),aCount);
 
- //precteme delku
- BlockRead(myFile,Buffer,2,aCount);
+   VBOData.Count := aCount;
+   for i := 0 to aCount-1 do VBOData.Data[i] := Buffer[i];
 
- //pokud je delka 0, je neco spatne
- if (aCount = 0) then Exit(17);
+   Self.JCClick.SetLoadedData(VBOData);
 
- len := (Buffer[0] shl 8)+Buffer[1];
+   //prazdny radek
+   BlockRead(myFile,Buffer,2,aCount);
+   if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
+     raise EFileLoad.Create('Chybí oddìlovací sekvence mezi JCClick a pozicemi pro souupravy!');
+   //-------------------------------------------
 
- SetLength(bytesBuf, len);
- BlockRead(myFile, bytesBuf[0], len, aCount);
- ORs := TEncoding.UTF8.GetString(bytesBuf, 0, aCount);
+   if (version >= $31) then
+    begin
+     //nacteni poctu symbolu souprav
+     BlockRead(myFile, Buffer, 1, aCount);
 
- CloseFile(myFile);
- Result := 0;
+     //nacitani symbolu souprav
+     BlockRead(myFile, Buffer, (Buffer[0]*2),aCount);
+
+     VBOData.Count := aCount;
+     for i := 0 to aCount-1 do VBOData.Data[i] := Buffer[i];
+
+     Self.Soupravy.SetLoadedData(VBOData);
+
+     //prazdny radek
+     BlockRead(myFile, Buffer, 2, aCount);
+     if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
+       raise EFileLoad.Create('Chybí oddìlovací sekvence mezi pozicemi pro soupravy a oblastmi øízení!');
+    end;
+   //-------------------------------------------
+
+   //nacitani oblasti rizeni
+
+   ORs := '';
+
+   //precteme delku
+   BlockRead(myFile,Buffer,2,aCount);
+
+   //pokud je delka 0, je neco spatne
+   if (aCount = 0) then
+     raise EFileLoad.Create('Prázdné oblasti øízení!');
+
+   len := (Buffer[0] shl 8)+Buffer[1];
+
+   SetLength(bytesBuf, len);
+   BlockRead(myFile, bytesBuf[0], len, aCount);
+   ORs := TEncoding.UTF8.GetString(bytesBuf, 0, aCount);
+ finally
+   CloseFile(myFile);
+ end;
 end;//function
 
-function TPanelBitmap.FSave(aFile:string;const ORs:string):Byte;
+procedure TPanelBitmap.FSave(aFile:string;const ORs:string);
 var myFile:File;
     Buffer:array [0..1023] of Byte;
     bytesBuf:TBytes;
@@ -326,124 +327,119 @@ begin
  Self.FStav   := 2;
  Self.FSoubor := aFile;
 
+ AssignFile(myFile,aFile);
+ Rewrite(myFile,1);
+
  try
-   AssignFile(myFile,aFile);
-   Rewrite(myFile,1);
- except
-   Result := 1;
-   Exit;
+   //--- hlavicka zacatek ---
+   //identifikace
+   Buffer[0] := ord('b');
+   Buffer[1] := ord('r');
+   //verze
+   Buffer[2] := $32;
+   //vyska a sirka
+   BitmapData := Self.Symbols.GetSaveData;
+
+   Buffer[3] := BitmapData.Width;
+   Buffer[4] := BitmapData.Height;
+   //ukonceni hlavicky
+   Buffer[5] := 255;
+   Buffer[6] := 255;
+
+   //zapsani hlavicky
+   BlockWrite(myFile,Buffer,7);
+   //--- hlavicka konec ---
+
+   //-------------------------------------------
+   //ukladani bitmapovych dat
+   BitmapData := Self.Symbols.GetSaveData;
+   BlockWrite(myFile,BitmapData.Data,BitmapData.Width*BitmapData.Height);
+
+   //ukonceni bloku
+   Buffer[0] := 255;
+   Buffer[1] := 255;
+   BlockWrite(myFile,Buffer,2);
+
+   //-------------------------------------------
+   //popisky
+   bytesBuf := Self.Popisky.GetSaveData;
+   BlockWrite(myFile, bytesBuf[0], Length(bytesBuf));
+
+   //ukonceni bloku
+   Buffer[0] := 255;
+   Buffer[1] := 255;
+   BlockWrite(myFile,Buffer,2);
+   //-------------------------------------------
+   //vertikalni oddelovace
+   VBOData := Self.SeparatorsVert.GetSaveData;
+   BlockWrite(myFile,VBOData.Data,VBOData.Count);
+
+   //ukonceni bloku
+   Buffer[0] := 255;
+   Buffer[1] := 255;
+   BlockWrite(myFile,Buffer,2);
+
+   //-------------------------------------------
+   //horizontalni oddelovace
+   VBOData := Self.SeparatorsHor.GetSaveData;
+   BlockWrite(myFile,VBOData.Data,VBOData.Count);
+
+   //ukonceni bloku
+   Buffer[0] := 255;
+   Buffer[1] := 255;
+   BlockWrite(myFile,Buffer,2);
+
+   //-------------------------------------------
+   //KPopisky
+   VBOData := Self.KPopisky.GetSaveData;
+   BlockWrite(myFile,VBOData.Data,VBOData.Count);
+
+   //ukonceni bloku
+   Buffer[0] := 255;
+   Buffer[1] := 255;
+   BlockWrite(myFile,Buffer,2);
+
+   //-------------------------------------------
+   //JCClick
+   VBOData := Self.JCClick.GetSaveData;
+   BlockWrite(myFile,VBOData.Data,VBOData.Count);
+
+   //ukonceni bloku
+   Buffer[0] := 255;
+   Buffer[1] := 255;
+   BlockWrite(myFile,Buffer,2);
+
+   //-------------------------------------------
+   //soupravy
+   VBOData := Self.Soupravy.GetSaveData;
+   BlockWrite(myFile,VBOData.Data,VBOData.Count);
+
+   //ukonceni bloku
+   Buffer[0] := 255;
+   Buffer[1] := 255;
+   BlockWrite(myFile,Buffer,2);
+
+   //-------------------------------------------
+
+   len := TEncoding.UTF8.GetByteCount(ORs);
+   SetLength(bytesBuf, len);
+
+   // delka zpravy
+   Buffer[0] := hi(len);
+   Buffer[1] := lo(len);
+   BlockWrite(myFile, Buffer, 2);
+
+   bytesBuf := TEncoding.UTF8.GetBytes(ORs);
+   BlockWrite(myFile, bytesBuf[0], len);
+
+   //ukonceni bloku
+   Buffer[0] := 255;
+   Buffer[1] := 255;
+   BlockWrite(myFile,Buffer,2);
+   //-------------------------------------------
+ finally
+   CloseFile(myFile);
  end;
-
- //--- hlavicka zacatek ---
- //identifikace
- Buffer[0] := ord('b');
- Buffer[1] := ord('r');
- //verze
- Buffer[2] := $32;
- //vyska a sirka
- BitmapData := Self.Symbols.GetSaveData;
-
- Buffer[3] := BitmapData.Width;
- Buffer[4] := BitmapData.Height;
- //ukonceni hlavicky
- Buffer[5] := 255;
- Buffer[6] := 255;
-
- //zapsani hlavicky
- BlockWrite(myFile,Buffer,7);
- //--- hlavicka konec ---
-
- //-------------------------------------------
- //ukladani bitmapovych dat
- BitmapData := Self.Symbols.GetSaveData;
- BlockWrite(myFile,BitmapData.Data,BitmapData.Width*BitmapData.Height);
-
- //ukonceni bloku
- Buffer[0] := 255;
- Buffer[1] := 255;
- BlockWrite(myFile,Buffer,2);
-
- //-------------------------------------------
- //popisky
- bytesBuf := Self.Popisky.GetSaveData;
- BlockWrite(myFile, bytesBuf[0], Length(bytesBuf));
-
- //ukonceni bloku
- Buffer[0] := 255;
- Buffer[1] := 255;
- BlockWrite(myFile,Buffer,2);
- //-------------------------------------------
- //vertikalni oddelovace
- VBOData := Self.SeparatorsVert.GetSaveData;
- BlockWrite(myFile,VBOData.Data,VBOData.Count);
-
- //ukonceni bloku
- Buffer[0] := 255;
- Buffer[1] := 255;
- BlockWrite(myFile,Buffer,2);
-
- //-------------------------------------------
- //horizontalni oddelovace
- VBOData := Self.SeparatorsHor.GetSaveData;
- BlockWrite(myFile,VBOData.Data,VBOData.Count);
-
- //ukonceni bloku
- Buffer[0] := 255;
- Buffer[1] := 255;
- BlockWrite(myFile,Buffer,2);
-
- //-------------------------------------------
- //KPopisky
- VBOData := Self.KPopisky.GetSaveData;
- BlockWrite(myFile,VBOData.Data,VBOData.Count);
-
- //ukonceni bloku
- Buffer[0] := 255;
- Buffer[1] := 255;
- BlockWrite(myFile,Buffer,2);
-
- //-------------------------------------------
- //JCClick
- VBOData := Self.JCClick.GetSaveData;
- BlockWrite(myFile,VBOData.Data,VBOData.Count);
-
- //ukonceni bloku
- Buffer[0] := 255;
- Buffer[1] := 255;
- BlockWrite(myFile,Buffer,2);
-
- //-------------------------------------------
- //soupravy
- VBOData := Self.Soupravy.GetSaveData;
- BlockWrite(myFile,VBOData.Data,VBOData.Count);
-
- //ukonceni bloku
- Buffer[0] := 255;
- Buffer[1] := 255;
- BlockWrite(myFile,Buffer,2);
-
- //-------------------------------------------
-
- len := TEncoding.UTF8.GetByteCount(ORs);
- SetLength(bytesBuf, len);
-
- // delka zpravy
- Buffer[0] := hi(len);
- Buffer[1] := lo(len);
- BlockWrite(myFile, Buffer, 2);
-
- bytesBuf := TEncoding.UTF8.GetBytes(ORs);
- BlockWrite(myFile, bytesBuf[0], len);
-
- //ukonceni bloku
- Buffer[0] := 255;
- Buffer[1] := 255;
- BlockWrite(myFile,Buffer,2);
- //-------------------------------------------
-
- CloseFile(myFile);
-
- Result := 0;
 end;//function
 
 function TPanelBitmap.SetRozmery(aWidth,aHeight:Byte):Byte;
