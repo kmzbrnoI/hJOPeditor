@@ -308,6 +308,7 @@ begin
  CreateClasses;
 
  ReliefOptions.LoadData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName))+'Config.ini');
+ Self.MI_Mrizka.Checked := ReliefOptions.Mrizka;
 
  Self.DXD_Main.Cursor := crNone;
  Self.Caption := _Caption + '     v' + GetVersion(Application.ExeName);
@@ -850,7 +851,6 @@ begin
  Self.PM_Save.Enabled      := true;
  Self.PM_SaveAs.Enabled    := true;
  Self.MI_Draw.Visible      := true;
- Self.MI_Mrizka.Checked    := ReliefOptions.Mrizka;
  Self.MI_CloseFile.Enabled := true;
  Self.SB_Main.Panels.Items[0].Text := 'Soubor otevøen';
  Self.SB_Main.Panels.Items[1].Text := 'Soubor není uložen';
