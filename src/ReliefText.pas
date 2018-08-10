@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
-  StrUtils, Global, Menus, Forms, PGraphics;
+  StrUtils, Global, Menus, Forms, PGraphics, Generics.Collections;
 
 const
  _MAX_POPISKY     = 64;
@@ -19,11 +19,6 @@ const
 type
  TChangeTextEvent = procedure(Sender:TObject; var Text:string;var Color:Integer) of object;
 
-  TPopiskyFileData=record
-   Count:Integer;
-   Data:array [0..(_MAX_POPISKY*_Block_Length)] of Byte;
-  end;
-
   TPopisek=record
     Position:TPoint;
     Text:string;
@@ -32,10 +27,7 @@ type
 
   TPopisky=class
    private
-     Data:record
-       Popisky:array [0.._MAX_POPISKY-1] of TPopisek;
-       Count:Byte;
-     end;//Data
+     Data:TList<TPopisek>;
 
      TextMenu:TPopupMenu;
      MenuPosition:TPoint;
@@ -65,6 +57,9 @@ type
 
     procedure MITextPropertiesClick(Sender:TObject);
     procedure InitializeTextMenu(var Menu:TPopupMenu;Parent:TForm);
+
+    function GetCount():Integer;
+
    public
     FOnShow : TNEvent;
     FIsSymbol : TPosAskEvent;
@@ -93,8 +88,9 @@ type
      function Move:Byte;
      function Delete:Byte;
 
-     procedure SetLoadedData(LoadData:TPopiskyFileData);
-     function GetSaveData:TPopiskyFileData;
+     procedure SetLoadedData(LoadData:TBytes);
+     procedure SetLoadedDataV32(LoadData:TBytes);
+     function GetSaveData:TBytes;
      procedure Reset;
 
      function MouseUp(Position:TPoint;Button:TMouseButton):Byte;
@@ -102,7 +98,7 @@ type
      property AddKrok:Byte read Operations.FAddKrok;
      property MoveKrok:Byte read Operations.FMoveKrok;
      property DeleteKrok:Byte read Operations.FDeleteKrok;
-     property Count:Byte read Data.Count;
+     property Count:Integer read GetCount;
 
      property OnShow: TNEvent read FOnShow write FOnShow;
      property IsSymbol: TPosAskEvent read FIsSymbol write FIsSymbol;
@@ -120,6 +116,7 @@ begin
  Self.DrawObject.Canvas := DrawCanvas;
  Self.DrawObject.TextIL := TextIL;
  Self.Graphics          := Graphics;
+ Self.Data := TList<TPopisek>.Create();
 
  Self.InitializeTextMenu(Self.TextMenu,Parent);
 
@@ -128,6 +125,8 @@ end;//function
 
 destructor TPopisky.Destroy;
 begin
+ Self.Data.Free();
+
  if (Assigned(Self.TextMenu)) then
   begin
    Self.TextMenu.Free;
@@ -137,6 +136,7 @@ end;//destructor
 
 //pridani popisku
 function TPopisky.AddToStructure(aPos:TPoint;aText:string;aColor:ShortInt):Byte;
+var p:TPopisek;
 begin
  if ((aPos.X < 0) or (aPos.Y < 0) or (aPos.X > (_MAX_WIDTH-1)) or (aPos.Y > (_MAX_HEIGHT-1))) then
   begin
@@ -160,10 +160,11 @@ begin
   end;
 
 
- Self.Data.Count := Self.Data.Count + 1;
- Self.Data.Popisky[Self.Count-1].Position  := aPos;
- Self.Data.Popisky[Self.Count-1].Text      := aText;
- Self.Data.Popisky[Self.Count-1].Color     := aColor;
+ p.Position  := aPos;
+ p.Text      := aText;
+ p.Color     := aColor;
+
+ Self.Data.Add(p);
 
  Result := 0;
 end;//function
@@ -186,9 +187,7 @@ begin
   end;
 
  //samotne mazani
- for i := PIndex to Self.Count-2 do Self.Data.Popisky[i] := Self.Data.Popisky[i+1];
-
- Self.Data.Count := Self.Data.Count - 1;
+ Self.Data.Delete(PIndex);
 
  Result := 0;
 end;//function
@@ -202,9 +201,9 @@ begin
  //vychazime z toho, ze 1 popisek lze zapsat pouze na 1 radek
  for i := 0 to Self.Count-1 do
   begin
-   if (Self.Data.Popisky[i].Position.Y = aPos.Y) then
+   if (Self.Data[i].Position.Y = aPos.Y) then
     begin
-     for j := Self.Data.Popisky[i].Position.X to Self.Data.Popisky[i].Position.X+(Length(Self.Data.Popisky[i].Text))-1 do
+     for j := Self.Data[i].Position.X to Self.Data[i].Position.X+(Length(Self.Data[i].Text))-1 do
       begin
        if (j = aPos.X) then
         begin
@@ -217,48 +216,90 @@ begin
 end;//function
 
 //nacteni surovych dat do struktur
-procedure TPopisky.SetLoadedData(LoadData:TPopiskyFileData);
-var i,j:Integer;
+procedure TPopisky.SetLoadedData(LoadData:TBytes);
+var i, j:Integer;
+    p:TPopisek;
+    count:Integer;
 begin
- Self.Data.Count := LoadData.Count div 35;
- for i := 0 to Self.Count-1 do
+ Self.Data.Clear();
+ count := Length(LoadData) div _Block_Length;
+
+ for i := 0 to count-1 do
   begin
-   Self.Data.Popisky[i].Position.X := LoadData.Data[(i*_Block_Length)];
-   Self.Data.Popisky[i].Position.Y := LoadData.Data[(i*_Block_Length)+1];
-   Self.Data.Popisky[i].Color      := LoadData.Data[(i*_Block_Length)+2];
+   p.Position.X := LoadData[(i*_Block_Length)];
+   p.Position.Y := LoadData[(i*_Block_Length)+1];
+   p.Color      := LoadData[(i*_Block_Length)+2];
+   p.Text       := '';
+
    for j := 0 to _MAX_TEXT_LENGTH do
     begin
-     if ((LoadData.Data[(i*_Block_Length)+3+(j*2)] = 0) and (LoadData.Data[(i*_Block_Length)+3+(j*2)+1] = 0)) then Break;
-     Self.Data.Popisky[i].Text := Self.Data.Popisky[i].Text + chr(((LoadData.Data[(i*_Block_Length)+3+(j*2)]) shl 8) + LoadData.Data[(i*_Block_Length)+3+(j*2)+1]);
+     if ((LoadData[(i*_Block_Length)+3+(j*2)] = 0) and (LoadData[(i*_Block_Length)+3+(j*2)+1] = 0)) then Break;
+     p.Text := p.Text + chr(((LoadData[(i*_Block_Length)+3+(j*2)]) shl 8) +
+                        LoadData[(i*_Block_Length)+3+(j*2)+1]);
     end;//for j
+
+   Self.Data.Add(p);
   end;//for i
 end;//function
 
-//ziskani surovych dat zapisovanych do souboru z dat programu
-function TPopisky.GetSaveData:TPopiskyFileData;
-var i,j:Integer;
+procedure TPopisky.SetLoadedDataV32(LoadData:TBytes);
+var pos:Integer;
+    i:Integer;
+    len:Integer;
+    p:TPopisek;
 begin
- Result.Count := (Self.Count*_Block_Length)+1;
+ Self.Data.Clear();
+ pos := 0;
+ i := 0;
 
- Result.Data[0] := Self.Count;
-
- for i := 0 to Self.Count-1 do
+ while pos < Length(LoadData) do
   begin
-   Result.Data[(i*_Block_Length)+1] := Self.Data.Popisky[i].Position.X;
-   Result.Data[(i*_Block_Length)+2] := Self.Data.Popisky[i].Position.Y;
-   Result.Data[(i*_Block_Length)+3] := Self.Data.Popisky[i].Color;
-   for j := 0 to 31 do
-    begin
-     if (j < Length(Self.Data.Popisky[i].Text)) then
-      begin
-       Result.Data[(i*_Block_Length)+4+(j*2)]   := hi(ord(Self.Data.Popisky[i].Text[j+1]));
-       Result.Data[(i*_Block_Length)+4+(j*2)+1] := lo(ord(Self.Data.Popisky[i].Text[j+1]));
-      end else begin
-       Result.Data[(i*_Block_Length)+4+(j*2)]   := 0;
-       Result.Data[(i*_Block_Length)+4+(j*2+1)] := 0;
-      end;
-    end;//for j
+   p.Position.X := LoadData[pos];
+   p.Position.Y := LoadData[pos+1];
+   p.Color      := LoadData[pos+2];
+   len := LoadData[pos+3];
+   p.Text := TEncoding.UTF8.GetString(LoadData, pos+4, len);
+
+   Self.Data.Add(p);
+   i := i + 1;
+   pos := pos + 4 + len;
   end;//for i
+
+ Self.Data.Count := i;
+end;
+
+//ziskani surovych dat zapisovanych do souboru z dat programu
+function TPopisky.GetSaveData:TBytes;
+var bytesBuf:TBytes;
+    len:Integer;
+    currentLen:Integer;
+    p:TPopisek;
+begin
+ SetLength(Result, 1024);
+ currentLen := 2;
+
+ for p in Self.Data do
+  begin
+   len := TEncoding.UTF8.GetByteCount(p.Text);
+   SetLength(bytesBuf, len);
+   bytesBuf := TEncoding.UTF8.GetBytes(p.Text);
+
+   if (Length(Result) < currentLen + len + 4) then
+     SetLength(Result, Length(Result)*2);
+
+   Result[currentLen] := p.Position.X;
+   Result[currentLen+1] := p.Position.Y;
+   Result[currentLen+2] := p.Color;
+   Result[currentLen+3] := len;
+
+   CopyMemory(@Result[currentLen+4], bytesBuf, len);
+
+   currentLen := currentLen + len + 4;
+  end;//for i
+
+ SetLength(Result, currentLen);
+ Result[0] := hi(currentLen-2);
+ Result[1] := lo(currentLen-2);
 end;//procedure
 
 procedure TPopisky.Reset;
@@ -281,7 +322,7 @@ var i:Integer;
 begin
  //vykresleni textu
  for i := 0 to Self.Count-1 do
-   Self.Graphics.TextOutputI(Self.Data.Popisky[i].Position, Self.Data.Popisky[i].Text, Self.Data.Popisky[i].Color, clBlack);
+   Self.Graphics.TextOutputI(Self.Data[i].Position, Self.Data[i].Text, Self.Data[i].Color, clBlack);
 end;//procedure
 
 function TPopisky.GetPopisekData(Index:Integer):TPopisek;
@@ -292,7 +333,7 @@ begin
    Exit;
   end;
 
- Result := Self.Data.Popisky[Index];
+ Result := Self.Data[Index];
 end;//function
 
 function TPopisky.SetPopisekData(Index:Integer;Data:TPopisek):Byte;
@@ -303,7 +344,7 @@ begin
    Exit;
   end;//if (Index => _MAX_POPISKY)
 
- Self.Data.Popisky[Index] := Data;
+ Self.Data[Index] := Data;
 
  Result := 0;
 end;//function
@@ -649,6 +690,11 @@ begin
 
  Menu.Items.Add(MI);
 end;//procedure
+
+function TPopisky.GetCount():Integer;
+begin
+ Result := Self.Data.Count;
+end;
 
 end.//unit
 

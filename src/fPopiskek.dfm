@@ -45,7 +45,7 @@ object F_Popisek: TF_Popisek
     Top = 8
     Width = 153
     Height = 21
-    MaxLength = 32
+    MaxLength = 128
     TabOrder = 0
     OnKeyPress = E_TextKeyPress
   end

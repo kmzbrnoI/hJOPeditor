@@ -118,7 +118,6 @@ var myFile:File;
     i,len:Integer;
     aCount:Integer;
     VBOData:TVBOData;
-    PopiskyData:TPopiskyFileData;
     BitmapData:TBSData;
     version:Byte;
 begin
@@ -150,7 +149,7 @@ begin
 
  //kontrola verze
  version := Buffer[2];
- if ((version <> $21) and (version <> $30) and (version <> $31)) then
+ if ((version <> $21) and (version <> $30) and (version <> $31) and (version <> $32)) then
    Application.MessageBox(PChar('Otevíráte soubor s verzí '+IntToHex(version, 2)+', která není aplikací plnì podporována!'), 'Varování', MB_OK OR MB_ICONWARNING);
 
  BitmapData.Width  := Buffer[3];
@@ -175,16 +174,26 @@ begin
  if (Buffer[0] <> 255) or (Buffer[1] <> 255) then Exit(8);
  //-------------------------------------------
 
- //nacteni poctu popisku
- BlockRead(myFile,Buffer,1,aCount);
+ if (version >= $32) then
+  begin
+   //nacteni poctu popisku
+   BlockRead(myFile, Buffer, 2, aCount);
+   len := (Buffer[0] shl 8) + Buffer[1];
 
- //nacitani popisku
- BlockRead(myFile,Buffer,(Buffer[0]*_Block_Length),aCount);
+   //nacitani popisku
+   SetLength(bytesBuf, len);
+   BlockRead(myFile, bytesBuf[0], len, aCount);
+   Self.Popisky.SetLoadedDataV32(bytesBuf);
+  end else begin
+   //nacteni poctu popisku
+   BlockRead(myFile, Buffer, 1, aCount);
+   len := Buffer[0] * ReliefText._Block_Length;
 
- PopiskyData.Count := aCount;
- for i := 0 to aCount-1 do PopiskyData.Data[i] := Buffer[i];
-
- Self.Popisky.SetLoadedData(PopiskyData);
+   //nacitani popisku
+   SetLength(bytesBuf, len);
+   BlockRead(myFile, bytesBuf[0], len, aCount);
+   Self.Popisky.SetLoadedData(bytesBuf);
+  end;
 
  //prazdny radek
  BlockRead(myFile,Buffer,2,aCount);
@@ -311,7 +320,6 @@ var myFile:File;
     Buffer:array [0..1023] of Byte;
     bytesBuf:TBytes;
     VBOData:TVBOData;
-    PopiskyData:TPopiskyFileData;
     BitmapData:TBSData;
     len:Cardinal;
 begin
@@ -331,7 +339,7 @@ begin
  Buffer[0] := ord('b');
  Buffer[1] := ord('r');
  //verze
- Buffer[2] := $31;
+ Buffer[2] := $32;
  //vyska a sirka
  BitmapData := Self.Symbols.GetSaveData;
 
@@ -357,8 +365,8 @@ begin
 
  //-------------------------------------------
  //popisky
- PopiskyData := Self.Popisky.GetSaveData;
- BlockWrite(myFile,PopiskyData.Data,PopiskyData.Count);
+ bytesBuf := Self.Popisky.GetSaveData;
+ BlockWrite(myFile, bytesBuf[0], Length(bytesBuf));
 
  //ukonceni bloku
  Buffer[0] := 255;
