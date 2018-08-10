@@ -410,8 +410,10 @@ begin
 
  if (Self.OpenBlok.Blok = -2) then
    index := 1
+ else if (Self.OpenBlok.Blok = -1) then
+   index := 0
  else
-   index := 0;
+   index := -1;
 
  for i := 0 to Self.Bloky.Count-1 do
   begin
@@ -426,6 +428,9 @@ begin
       index := Self.LB_Blocks.Items.Count-1;
     end;
   end;//for i
+
+ if ((Self.E_Blk.Text <> '') and (index <= 0)) then
+   index := 2; // vybrat prvni filtrovany blok
 
  Self.LB_Blocks.ItemIndex := index;
 end;//procedure
