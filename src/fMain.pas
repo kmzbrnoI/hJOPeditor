@@ -135,7 +135,6 @@ type
     procedure PM_ReliefOptionsClick(Sender: TObject);
     procedure MI_SaveShowOptionsClick(Sender: TObject);
     procedure PM_AboutClick(Sender: TObject);
-    procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure ToolButton40Click(Sender: TObject);
     procedure ToolButton41Click(Sender: TObject);
     procedure ToolButton42Click(Sender: TObject);
@@ -215,7 +214,14 @@ begin
      Self.ActiveControl := nil;
      Self.Relief.KeyPress(msg.wParam);
     end;
-  end;//if (msg.message = WM_KeyDown)
+  end else if (msg.message = WM_MOUSELEAVE) then begin
+    if (msg.hwnd = Self.DXD_Main.Handle) then
+     begin
+      Self.SB_Main.Panels.Items[2].Text := '---;---';
+      if (Assigned(Self.Relief)) then
+        Self.Relief.HideMouse();
+     end;
+  end;
 end;//procedure
 
 procedure TF_Hlavni.B_DeleteClick(Sender: TObject);
@@ -424,14 +430,6 @@ begin
 
 
  end;
-end;//procedure
-
-procedure TF_Hlavni.FormMouseMove(Sender: TObject; Shift: TShiftState; X,
-  Y: Integer);
-begin
- Self.SB_Main.Panels.Items[2].Text := '---;---';
- if (Assigned(Self.Relief)) then
-   Self.Relief.HideMouse();
 end;//procedure
 
 //novy soubor

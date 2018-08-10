@@ -19,7 +19,6 @@ object F_Hlavni: TF_Hlavni
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
-  OnMouseMove = FormMouseMove
   PixelsPerInch = 96
   TextHeight = 13
   object P_Menu: TPanel
