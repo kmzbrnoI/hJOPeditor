@@ -601,7 +601,7 @@ end;
 
 procedure TF_Hlavni.PM_AboutClick(Sender: TObject);
 begin
- Application.MessageBox(PChar('hJOPeditor'+#13#10+'v'+GetVersion(Application.ExeName)+#13#10+'(c) Jan Hor·Ëek 2011-2017'),'Info',MB_OK OR MB_ICONINFORMATION);
+ Application.MessageBox(PChar('hJOPeditor'+#13#10+'v'+GetVersion(Application.ExeName)+#13#10+'(c) Jan Hor·Ëek 2011ñ2018'),'Info',MB_OK OR MB_ICONINFORMATION);
 end;//procedure
 
 procedure TF_Hlavni.PM_BitmapClick(Sender: TObject);

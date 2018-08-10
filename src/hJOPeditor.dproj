@@ -138,8 +138,8 @@
 						<VersionInfoKeys Name="FileDescription"/>
 						<VersionInfoKeys Name="FileVersion">2.8.4.0</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName">hJOPeditor</VersionInfoKeys>
-						<VersionInfoKeys Name="LegalCopyright">Jan Horacek 2011-2015</VersionInfoKeys>
-						<VersionInfoKeys Name="LegalTrademarks">Jan Horacek 2011-2015</VersionInfoKeys>
+						<VersionInfoKeys Name="LegalCopyright">Jan Horacek 2011-2018</VersionInfoKeys>
+						<VersionInfoKeys Name="LegalTrademarks">Jan Horacek 2011-2018</VersionInfoKeys>
 						<VersionInfoKeys Name="OriginalFilename">hJOPeditor.exe</VersionInfoKeys>
 						<VersionInfoKeys Name="ProductName">hJOPeditor</VersionInfoKeys>
 						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
