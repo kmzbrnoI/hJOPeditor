@@ -512,6 +512,8 @@ procedure TF_Hlavni.PM_Reload_BlocksClick(Sender: TObject);
 begin
  try
    F_BlockEdit.Bloky.LoadData(ReliefOptions.BlockFile);
+   if (F_BlockEdit.Showing) then
+     F_BlockEdit.FormShow(F_BlockEdit);
    Application.MessageBox(PChar('Soubor '+ReliefOptions.BlockFile+' úspìšnì naèten.'),
                           'Info', MB_OK OR MB_ICONINFORMATION);
  except
