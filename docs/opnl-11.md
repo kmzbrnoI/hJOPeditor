@@ -55,7 +55,7 @@ Skládá se z několika sekcí.
    - 1: DKS směrem nahoru
    - 2: DKS směrem dolů
 
- -- Následujici data reprezentují rozdělení úseku na větve. Né každý úsek musí
+ -- Následující data reprezentují rozdělení úseku na větve. Né každý úsek musí
     být rozdělen na větve, v takovém případě se vykresluje na základě toho, co
     je uloženo v `S=`. Pokud je uložen úsek včetně větví, `S=` se stále ukládá. --
 
@@ -81,14 +81,14 @@ Skládá se z několika sekcí.
  Čtěte také poznámky níže o dvojité kolejové spojce.
 
 ## Návěstidla `[N0]`-`[Nn-1]`
- - B= [asociovany blok technologie]
+ - B= [asociovaný blok technologie]
  - X= [pozice X]
  - Y= [pozice Y]
- - S= [symbol] 0,1 [hlavní návěstidlo], 3,4 [seřadovací návěstidlo]
- - OR= [oblast rizeni] integer 0-n
+ - S= [symbol] 0,1 [hlavní návěstidlo], 3,4 [seřaďovací návěstidlo]
+ - OR= [oblast řízeni] integer 0-n
 
 ## Pomocné bloky `[P0]`-`[Pn-1]`
- - P= [pozice] - 3*X;3*Y;... (bez stredniku - pevne delky)
+ - P= [pozice] - 3*X;3*Y;... (bez středníku - pevné délky)
  - S= [symbol]
 
 ## Text `[T0]`-`[Tn-1]`
@@ -97,19 +97,19 @@ Skládá se z několika sekcí.
  - Y= [pozice Y]
  - C= [barva]
  - B= [blok]
- - OR= [oblast rizeni] integer 0-n
+ - OR= [oblast řízení] integer 0-n
 
 ## Výhybky `[V0]`-`[Vn-1]`
- -  B= [asociovany blok technologie]
+ -  B= [asociovaný blok technologie]
  - S= [symbol]
  - P= [poloha plus]
  - X= [pozice X]
  - Y= [pozice Y]
- - O= [objekt, kteremu vyhybka patri]
- - OR= [oblast rizeni] integer 0-n
+ - O= [objekt, kterému výhybka patří]
+ - OR= [oblast řízení] integer 0-n
 
 ## Přejezdy `[PRJ0]`-`[PRJn-1]`
- - B= [asociovany blok technologie]
+ - B= [asociovaný blok technologie]
  - BP= [blik_pozice] - 3*X;3*Y;3*U... = X,T, tech_usek (bez stredniku - pevne delky)
  - SP= [static_pozice] - 3*X;3*Y;... (bez stredniku - pevne delky)
  - OR= [oblast rizeni] integer 0-n
