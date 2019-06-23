@@ -84,7 +84,7 @@ Skládá se z několika sekcí.
  - B= [asociovaný blok technologie]
  - X= [pozice X]
  - Y= [pozice Y]
- - S= [symbol] 0,1 [hlavní návěstidlo], 3,4 [seřaďovací návěstidlo]
+ - S= [symbol] 0,1 [hlavní návěstidlo], 4,5 [seřaďovací návěstidlo]
  - OR= [oblast řízeni] integer 0-n
 
 ## Pomocné bloky `[P0]`-`[Pn-1]`
