@@ -74,7 +74,7 @@ begin
   end;
 
  if (Self.typ = TBlkType.blok_popisek) then
-   panelGraphics.TextOutputI(Self.Position, Self.Text, color, clBlack, true)
+   panelGraphics.TextOutputI(Self.Position, Self.Text, Self.Color, clBlack, true)
  else
    panelGraphics.TextOutputI(Self.Position, Self.Text, color, clBlack);
 end;
