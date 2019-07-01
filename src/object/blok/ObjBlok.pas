@@ -6,8 +6,8 @@ uses IniFiles, Global, PGraphics;
 
 type
 
-TBlkType = (usek, navestidlo, vyhybka, prejezd, text, pomocny_obj, uvazka,
-            uvazka_spr, zamek, vykol, rozp, TU);
+TBlkType = (usek, navestidlo, vyhybka, prejezd, text, blok_popisek, pomocny_obj, uvazka,
+            uvazka_spr, zamek, vykol, rozp);
 
 TGraphBlok = class
   typ:TBlkType;
@@ -65,6 +65,7 @@ begin
   TBlkType.zamek: Result := 'Z';
   TBlkType.vykol: Result := 'Vyk';
   TBlkType.rozp: Result := 'R';
+  TBlkType.blok_popisek: Result := 'TP';
  else
   Result := '?';
  end;

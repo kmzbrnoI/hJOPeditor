@@ -103,6 +103,7 @@ type
     ToolButton6: TToolButton;
     N6: TMenuItem;
     PM_Reload_Blocks: TMenuItem;
+    PM_Show_Blk_Descriptions: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure PM_NewClick(Sender: TObject);
@@ -129,11 +130,11 @@ type
     procedure ToolButton42Click(Sender: TObject);
     procedure PM_ORAddClick(Sender: TObject);
     procedure MI_CheckDataClick(Sender: TObject);
-    procedure MI_ExportServerClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure TB_Separator_HorizClick(Sender: TObject);
     procedure ToolButton6Click(Sender: TObject);
     procedure PM_Reload_BlocksClick(Sender: TObject);
+    procedure PM_Show_Blk_DescriptionsClick(Sender: TObject);
   private
     pushedButton:TToolButton;                   // last pushed button
 
@@ -211,7 +212,7 @@ begin
         Self.Relief.HideMouse();
      end;
   end;
-end;//procedure
+end;
 
 procedure TF_Hlavni.B_DeleteClick(Sender: TObject);
 begin
@@ -223,7 +224,7 @@ begin
  case (Relief.Mode) of
   dmBitmap, dmSepVert, dmSepHor: Relief.DeleteBitmapSymbol;
  end;//case
-end;//procedure
+end;
 
 //move
 procedure TF_Hlavni.B_MoveClick(Sender: TObject);
@@ -236,12 +237,12 @@ begin
  case (Relief.Mode) of
   dmBitmap, dmSepVert, dmSepHor: Relief.MoveBitmapSymbol;
  end;//case
-end;//procedure
+end;
 
 procedure TF_Hlavni.CHB_GroupClick(Sender: TObject);
 begin
  Relief.Skupina := Self.CHB_Group.Checked;
-end;//procedure
+end;
 
 procedure TF_Hlavni.CreateClasses;
 begin
@@ -296,7 +297,7 @@ begin
   begin
    if (Application.MessageBox('Uzavøením projektu bez jeho uložení ztratíte projektová data, pøesto pokraèovat?','Uzavøení projektu',MB_YESNO OR MB_ICONQUESTION) = mrNo) then CanClose := false;
   end;//if (Assigned(Relief))
-end;//procedure
+end;
 
 procedure TF_Hlavni.FormCreate(Sender: TObject);
 begin
@@ -419,7 +420,7 @@ begin
 
 
  end;
-end;//procedure
+end;
 
 //novy soubor
 procedure TF_Hlavni.PM_NewClick(Sender: TObject);
@@ -469,7 +470,7 @@ begin
 
  ReliefOptions.UseData(F_Hlavni.Relief);
  Self.DesignOpen(ExtractFileName(fname));
-end;//function
+end;
 
 procedure TF_Hlavni.PM_OpenClick(Sender: TObject);
 begin
@@ -501,7 +502,7 @@ begin
  tmpOR.Rights.ModCasSet   := true;
 
  F_OREdit.OpenForm(tmpOR);
-end;//procedure
+end;
 
 procedure TF_Hlavni.PM_ReliefOptionsClick(Sender: TObject);
 begin
@@ -590,7 +591,7 @@ end;
 procedure TF_Hlavni.PM_AboutClick(Sender: TObject);
 begin
  Application.MessageBox(PChar('hJOPeditor'+#13#10+'v'+GetVersion(Application.ExeName)+#13#10+'(c) Jan Horáèek 2011–2018'),'Info',MB_OK OR MB_ICONINFORMATION);
-end;//procedure
+end;
 
 procedure TF_Hlavni.PM_BitmapClick(Sender: TObject);
 var Return:Integer;
@@ -712,7 +713,7 @@ begin
  end;//case (Sender as TMenuItem).Tag
 
  Self.RepaintModes(Relief.Mode);
-end;//procedure
+end;
 
 procedure TF_Hlavni.PM_ChangeRozmeryClick(Sender: TObject);
 begin
@@ -735,12 +736,10 @@ begin
   end;
 end;
 
-//procedure
-
 procedure TF_Hlavni.PM_CloseAppClick(Sender: TObject);
 begin
  Self.Close;
-end;//procedure
+end;
 
 procedure TF_Hlavni.MI_MrizkaClick(Sender: TObject);
 begin
@@ -751,12 +750,12 @@ begin
 
  if (Assigned(Relief)) then
    ReliefOptions.UseData(F_Hlavni.Relief);
-end;//ppocedure
+end;
 
 procedure TF_Hlavni.MI_SaveShowOptionsClick(Sender: TObject);
 begin
  ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName))+_Config_File);
-end;//ppocedure
+end;
 
 procedure TF_Hlavni.TB_Separator_HorizClick(Sender: TObject);
 begin
@@ -799,7 +798,7 @@ begin
 
  (Sender as TToolButton).Down := true;
  Self.pushedButton := (Sender as TToolButton);
-end;//procedure
+end;
 
 procedure TF_Hlavni.ToolButton40Click(Sender: TObject);
 begin
@@ -807,7 +806,7 @@ begin
  F_Popisek.NewPopisek;
 
  if (F_Popisek.PopisekColor <> -1) then Relief.AddText(F_Popisek.PopisekText,F_Popisek.PopisekColor);
-end;//procedure
+end;
 
 procedure TF_Hlavni.ToolButton41Click(Sender: TObject);
 begin
@@ -818,7 +817,7 @@ begin
    on E:Exception do
      Application.MessageBox(PChar('Chyba pøi pøidávání objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
  end;
-end;//procedure
+end;
 
 procedure TF_Hlavni.ToolButton42Click(Sender: TObject);
 begin
@@ -843,7 +842,13 @@ begin
  end;
 end;
 
-//procedure
+procedure TF_Hlavni.PM_Show_Blk_DescriptionsClick(Sender: TObject);
+begin
+ (Sender as TMenuItem).Checked := not (Sender as TMenuItem).Checked;
+
+ if (Assigned(Relief)) then
+   Relief.ShowBlokPopisky := (Sender as TMenuItem).Checked;
+end;
 
 procedure TF_Hlavni.MI_CloseFileClick(Sender: TObject);
 begin
@@ -855,11 +860,6 @@ begin
 
  Self.DestroyReliefClasses;
 end;
-
-procedure TF_Hlavni.MI_ExportServerClick(Sender: TObject);
-begin
- //execute Merger
-end;//procedure
 
 procedure TF_Hlavni.DesignOpen(FName:string);
 begin
@@ -875,7 +875,7 @@ begin
  Self.Constraints.MinWidth := Max(Self.DXD_main.Width + 2*Self.DXD_main.Left + 20,
                                   Self.TB_BitmapTools.Left + Self.TB_BitmapTools.Width + 30);
  Self.Constraints.MinHeight := Self.DXD_main.Height + Self.DXD_main.Top + Self.SB_Main.Height + 70;
-end;//procedure
+end;
 
 procedure TF_Hlavni.DesignClose;
 begin
@@ -908,18 +908,18 @@ begin
  Self.Caption := _Caption + '     v' + GetVersion(Application.ExeName);
 
  F_BlockEdit.Close();
-end;//procedure
+end;
 
 procedure TF_Hlavni.ReliefErrorEvent(Sender:TObject; err:string);
 begin
  Self.SB_Main.Panels.Items[3].Text := 'Chyba: '+err;
-end;//procedure
+end;
 
 procedure TF_Hlavni.ReliefMoveEvent(Sender:TObject; Position:TPoint);
 begin
  Self.SB_Main.Panels.Items[2].Text := Format('%.3d',[Position.X])+' ; '+Format('%.3d',[Position.Y]);
  Self.SB_Main.Panels.Items[3].Text := '';
-end;//procedure
+end;
 
 procedure TF_Hlavni.ReliefChangeTextEvent(Sender:TObject; var Text:string;var Color:Integer);
 begin
@@ -928,17 +928,17 @@ begin
  if (F_Popisek.PopisekColor = -1) then Exit;
  Text  := F_Popisek.PopisekText;
  Color := F_Popisek.PopisekColor;
-end;//procedure
+end;
 
 procedure TF_Hlavni.BlokEditEvent(Sender:TObject; Blok:TGraphBlok);
 begin
  F_BlockEdit.OpenForm(Blok);
-end;//procedure
+end;
 
 procedure TF_Hlavni.MessageEvent(Sender:TObject; msg:string);
 begin
  Self.SB_Main.Panels.Items[3].Text := msg;
-end;//procedure
+end;
 
 procedure TF_Hlavni.RepaintModes(cur:TMode);
 begin
@@ -960,7 +960,7 @@ begin
    end;
 
  end;//case
-end;//procedure
+end;
 
 procedure TF_Hlavni.ActivateSymbol(index:Integer);
 begin
@@ -1007,7 +1007,7 @@ begin
   49: Self.ToolButton49.OnClick(Self.ToolButton49);
   50: Self.ToolButton50.OnClick(Self.ToolButton50);
  end;
-end;//procedure
+end;
 
 procedure TF_Hlavni.AssignReliefEvents();
 begin
@@ -1018,11 +1018,11 @@ begin
 
  Relief.OnMsg         := Self.MessageEvent;
  Relief.FormBlkClose  := Self.FormBlkCloseEvent;
-end;//procedure
+end;
 
 procedure TF_Hlavni.FormBlkCloseEvent(Sender:TObject);
 begin
  F_BlockEdit.Close();
-end;//procedure
+end;
 
 end.//unit

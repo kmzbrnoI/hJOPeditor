@@ -16,7 +16,7 @@ const
 
  _FileVersion = '1.2';
  _FileVersion_accept : array[0..1] of string = (
-    '1.0', '1.1'
+    '1.1', '1.2'
  );
 
 type
@@ -35,6 +35,7 @@ TPanelObjects = class
    FStav:ShortInt;
    FMode:TMode;
    Graphics:TPanelGraphics;
+   fShowBlokPopisky:boolean;
 
    PopUpPos:TPoint;
    DrawObject:TDrawObject;
@@ -42,10 +43,10 @@ TPanelObjects = class
 
    Selected:TGraphBlok;
 
-  FOnBlokEdit     : TBlokAskEvent;
-  FOnShow         : TNEvent;
-  FOnMsg          : TMsgEvent;
-  FFormBlkClose   : TGlobalEvent;
+   FOnBlokEdit     : TBlokAskEvent;
+   FOnShow         : TNEvent;
+   FOnMsg          : TMsgEvent;
+   FFormBlkClose   : TGlobalEvent;
 
     procedure CreatePM(var PM:TPopUpMenu;Parent:TDXDraw);
     procedure PMPropertiesClick(Sender: TObject);
@@ -104,6 +105,7 @@ TPanelObjects = class
     property OnShow: TNEvent read FOnShow write FOnShow;
     property OnMsg: TMsgEvent read FOnMsg write FOnMsg;
     property OnFormBlkClose: TGlobalEvent read FFormBlkClose write FFormBlkClose;
+    property ShowBlokPopisky: boolean read fShowBlokPopisky write fShowBlokPopisky;
 end;//TPanelObjects
 
 //FileSystemStav:
@@ -231,6 +233,10 @@ begin
           vyhybka: blok := ObjBlokVyhybka.TVyhybka.Create(i);
           prejezd: blok := ObjBlokPrejezd.TPrejezd.Create(i);
           text: blok := ObjBlokText.TText.Create(i);
+          blok_popisek: begin
+            blok := ObjBlokText.TText.Create(i);
+            blok.typ := TBlkType.blok_popisek; // override type
+          end;
           pomocny_obj: blok := ObjBlokPomocny.TPomocnyObj.Create(i);
           uvazka: blok := ObjBlokUvazka.TUvazka.Create(i);
           uvazka_spr: blok := ObjBlokUvazkaSpr.TUvazkaSpr.Create(i);
@@ -263,7 +269,6 @@ var i:Integer;
     blok:TGraphBlok;
     counts:TDictionary<TBlkType, Integer>;
     blkTyp:TBlkType;
-      // pocty bloku v tomto poradi: useky, navestidla, vyhybky, prejezdy, popisky, pomocne_objekty, uvazky, uvazky_spr, zamky, vykolejky, rozpojovace
 begin
  Self.FStav := 2;
 
@@ -288,16 +293,15 @@ begin
    for i := 0 to str_list.Count-1 do inifile.WriteString('OR',IntToStr(i),str_list[i]);
    str_list.Free;
 
-   // useky
+   // bloky
    for blok in Self.Bloky do
     begin
      blok.Save(inifile, TGraphBlok.TypeToFileStr(blok.typ)+IntToStr(blok.index ));
      if (not counts.ContainsKey(blok.typ)) then
        counts.Add(blok.typ, 0);
      counts[blok.typ] := counts[blok.typ] + 1;
-    end;//for i
+    end;
 
-   // pocty bloku v tomto poradi: useky, navestidla, vyhybky, prejezdy, popisky, pomocne_objekty, uvazky, uvazky_spr
    for blkTyp in counts.Keys do
      inifile.WriteInteger('P', TGraphBlok.TypeToFileStr(blkTyp), counts[blkTyp]);
 
@@ -322,7 +326,8 @@ var blok:TGraphBlok;
 begin
  Self.DrawObject.Canvas.Pen.Mode := pmMerge; // pruhlednost
  for blok in Self.Bloky do
-   blok.Paint(Self.DrawObject, Self.Graphics, Self.Colors, Self.Selected = blok, Self.Mode);
+   if ((Self.ShowBlokPopisky) or (blok.typ <> TBlkType.blok_popisek)) then
+     blok.Paint(Self.DrawObject, Self.Graphics, Self.Colors, Self.Selected = blok, Self.Mode);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -345,7 +350,8 @@ begin
 
  //vykreslit koren pod kurzorem
  if (Self.FMode = dmRoots) then
-   Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, CursorPos.X*_Symbol_Sirka, CursorPos.Y*_Symbol_Vyska, (_Root_Index*10)+_Root_Color);
+   Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, CursorPos.X*_Symbol_Sirka, CursorPos.Y*_Symbol_Vyska,
+                                 (_Root_Index*10)+_Root_Color);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -376,7 +382,7 @@ begin
          Exit(i);
     end;
 
-    TBlkType.text:begin
+    TBlkType.text, TBlkType.blok_popisek:begin
      if ((Pos.Y = (Self.Bloky[i] as TText).Position.Y) and (Pos.X >= (Self.Bloky[i] as TText).Position.X)
       and (Pos.X < (Self.Bloky[i] as TText).Position.X+Length((Self.Bloky[i] as TText).Text)) and (Length((Self.Bloky[i] as TText).Text) = 1)) then
        Exit(i);
@@ -449,6 +455,7 @@ begin
     TBlkType.vyhybka      : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (výhybka '+IntToStr(Self.Selected.index)+'), pøiøazen úseku '+IntToStr((Self.Selected as TVyhybka).obj));
     TBlkType.prejezd      : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (pøejezd '+IntToStr(Self.Selected.index)+')');
     TBlkType.text         : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (popisek '+IntToStr(Self.Selected.index)+')');
+    TBlkType.blok_popisek : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (popisek bloku '+IntToStr(Self.Selected.index)+')');
     TBlkType.pomocny_obj  : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (pomocný objekt '+IntToStr(Self.Selected.index)+')');
     TBlkType.uvazka       : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (úvazka '+IntToStr(Self.Selected.index)+')');
     TBlkType.uvazka_spr   : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (úvazka spr. '+IntToStr(Self.Selected.index)+')');

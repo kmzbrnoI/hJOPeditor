@@ -149,6 +149,9 @@ type
    procedure AssignBitmapEvents();
    procedure AssignObjectEvents();
 
+   function GetShowBlokPopisky():boolean;
+   procedure SetShowBlokPopisky(show:boolean);
+
 
   public
    constructor Create(DDRaw:TDXDraw;aParentForm:TForm);
@@ -211,6 +214,7 @@ type
    property OnBlokEdit: TBlokAskEvent read FOnBlokEdit write FOnBlokEdit;
    property OnMsg: TMsgEvent read FOnMsg write FOnMsg;
    property FormBlkClose: TGlobalEvent read FFormBlkClose write FFormBlkClose;
+   property ShowBlokPopisky: boolean read GetShowBlokPopisky write SetShowBlokPopisky;
  end;
 
 implementation
@@ -1252,6 +1256,27 @@ end;
 procedure TRelief.BlokEditEvent(Sender:TObject; Blok:TGraphBlok);
 begin
  if (Assigned(Self.FOnBlokEdit)) then Self.FOnBlokEdit(Self, Blok);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TRelief.GetShowBlokPopisky():boolean;
+begin
+ case (Self.Mode) of
+   dmBitmap, dmSepVert, dmSepHor: Result := true;
+   dmBloky, dmRoots: Result := Self.PanelObjects.ShowBlokPopisky;
+ else
+   Result := true;
+ end;
+end;
+
+procedure TRelief.SetShowBlokPopisky(show:boolean);
+begin
+ case (Self.Mode) of
+   dmBitmap, dmSepVert, dmSepHor: ; // TODO
+   dmBloky, dmRoots: Self.PanelObjects.ShowBlokPopisky := show;
+ end;
+ Self.Show(Point(-1,-1));
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
