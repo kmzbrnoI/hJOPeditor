@@ -12,8 +12,6 @@ type
     _MAX_WIDTH     = 256;
     _MAX_HEIGHT    = 256;
 
-    _Max_Pos = 32;
-
   private
    Bitmap:TPanelBitmap;
    Objects:TPanelObjects;
@@ -59,8 +57,6 @@ begin
      if (Symbol = _Rozp_Start) then
       begin
        blk := TRozp.Create(index);
-       blk.Blok      := -1;
-       blk.OblRizeni := 0;
        (blk as TRozp).Pos  := Point(i, j);
        Self.Objects.Bloky.Add(blk);
 
@@ -127,8 +123,6 @@ begin
      if ((Symbol >= _SCom_Start) and (Symbol <= _SCom_End)) then
       begin
        blk := TNavestidlo.Create(index);
-       blk.Blok      := -1;
-       blk.OblRizeni := 0;
        (blk as TNavestidlo).Position  := Point(i, j);
        (blk as TNavestidlo).SymbolID  := Symbol-_SCom_Start;
        Self.Objects.Bloky.Add(blk);
@@ -145,9 +139,7 @@ begin
   begin
    PopData := Self.Bitmap.Popisky.GetPopisekData(i);
 
-   blk           := TText.Create(index);
-   blk.Blok      := -1;
-   blk.OblRizeni := 0;
+   blk := TText.Create(index);
    (blk as TText).Text     := PopData.Text;
    (blk as TText).Position := PopData.Position;
    (blk as TText).Color    := PopData.Color;
@@ -183,8 +175,6 @@ begin
        if (Symbol = _Uvazka) then
         begin
          blk           := TUvazka.Create(index);
-         blk.Blok      := -1;
-         blk.OblRizeni := 0;
          (blk as TUvazka).Pos := Point(i, j);
          Self.Objects.Bloky.Add(blk);
          Self.Zahrnuto[i,j] := true;
@@ -204,8 +194,6 @@ begin
        if (Symbol = _Uvazka_Spr) then
         begin
          blk           := TUvazkaSpr.Create(index);
-         blk.Blok      := -1;
-         blk.OblRizeni := 0;
          (blk as TUvazkaSpr).Pos := Point(i, j);
          (blk as TUvazkaSpr).spr_cnt := 1;
          Self.Objects.Bloky.Add(blk);
@@ -225,9 +213,7 @@ begin
      if (not Self.Zahrnuto[i,j]) then
        if (Symbol = _Zamek) then
         begin
-         blk           := TZamek.Create(index);
-         blk.Blok      := -1;
-         blk.OblRizeni := 0;
+         blk := TZamek.Create(index);
          (blk as TZamek).Pos := Point(i, j);
          Self.Objects.Bloky.Add(blk);
          Self.Zahrnuto[i,j] := true;
@@ -259,9 +245,7 @@ begin
        (blk as TPomocnyObj).Positions.Add(Point(i, j));
       end else begin
        // vytvorit novy blok
-       blk           := TPomocnyObj.Create(index);
-       blk.Blok      := -1;
-       blk.OblRizeni := -1;
+       blk := TPomocnyObj.Create(index);
        (blk as TPomocnyObj).Symbol    := Symbol;
        (blk as TPomocnyObj).Positions.Add(Point(i, j));
 
@@ -309,27 +293,15 @@ var usek:TUsek;
     cur:TPoint;
 begin
  //vytvoreni objektu a vlozeni do nej 1. symbolu
- usek           := TUsek.Create(index);
+ usek := TUsek.Create(index);
  Inc(index);
- usek.typ       := TblkType.usek;
- usek.Root      := Point(-1, -1);
- usek.Blok      := -1;
- usek.OblRizeni := 0;
-
- usek.Symbols  := TList<TReliefSym>.Create();
- usek.JCClick  := TList<TPoint>.Create();
- usek.Soupravy := TList<TPoint>.Create();
- usek.KPopisek := TList<TPoint>.Create();
- usek.Vetve    := TList<TVetev>.Create();
+ usek.Root := Point(-1, -1);
 
  Symbol := Self.Bitmap.Symbols.GetSymbol(VychoziPos);
  if ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End)) then
   begin
-   vyhybka           := TVyhybka.Create(vyh_index);
+   vyhybka := TVyhybka.Create(vyh_index);
    Inc(vyh_index);
-   vyhybka.typ       := TBlkType.vyhybka;
-   vyhybka.Blok      := -1;
-   vyhybka.OblRizeni := 0;
    vyhybka.Position  := VychoziPos;
    vyhybka.SymbolID  := Symbol;
    vyhybka.obj       := index-1;
@@ -391,10 +363,7 @@ begin
           begin
            vykol             := TVykol.Create(vykol_index);
            Inc(vykol_index);
-           vykol.typ         := TBlkType.vykol;
            vykol.symbol      := Symbol2 - _Vykol_Start;
-           vykol.Blok        := -1;
-           vykol.OblRizeni   := 0;
            vykol.Pos         := TempPos;
            vykol.obj         := index-1;
            vykol.vetev       := -1;
@@ -455,9 +424,6 @@ begin
                // pridavame vyhybku
                vyhybka           := TVyhybka.Create(vyh_index);
                Inc(vyh_index);
-               vyhybka.typ       := TBlkType.vyhybka;
-               vyhybka.Blok      := -1;
-               vyhybka.OblRizeni := 0;
                vyhybka.Position  := TempPos;
                vyhybka.SymbolID  := Symbol2;
                vyhybka.obj       := index-1;
@@ -489,9 +455,7 @@ var blik:Boolean;
     blk:TGraphBlok;
     blik_point:TBlikPoint;
 begin
- blk           := TPrejezd.Create(index);
- blk.Blok      := -1;
- blk.OblRizeni := 0;
+ blk := TPrejezd.Create(index);
 
  blik := false;
  while (Self.Bitmap.Symbols.GetSymbol(Pos) = _Prj) do

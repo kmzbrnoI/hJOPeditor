@@ -43,6 +43,11 @@ constructor TUsek.Create(index:Integer);
 begin
  inherited;
  Self.typ := TBlkType.usek;
+ Self.Symbols := TList<TReliefSym>.Create();
+ Self.JCClick := TList<TPoint>.Create();
+ Self.KPopisek := TList<TPoint>.Create();
+ Self.Soupravy := TList<TPoint>.Create();
+ Self.Vetve := TList<TVetev>.Create();
 end;
 
 destructor TUsek.Destroy();
@@ -71,7 +76,7 @@ begin
  Self.DKStype := TDKSType(ini.ReadInteger(key, 'DKS', Integer(dksNone)));
 
  //Symbols
- Self.Symbols := TList<TReliefSym>.Create();
+ Self.Symbols.Clear();
  obj := ini.ReadString(key,'S', '');
  for j := 0 to (Length(obj) div 8)-1 do
   begin
@@ -86,7 +91,7 @@ begin
   end;//for j
 
  //JCClick
- Self.JCClick := TList<TPoint>.Create();
+ Self.JCClick.Clear();
  obj := ini.ReadString(key,'C','');
  for j := 0 to (Length(obj) div 6)-1 do
   begin
@@ -101,7 +106,7 @@ begin
 
  //KPopisek
  obj := ini.ReadString(key,'P','');
- Self.KPopisek := TList<TPoint>.Create();
+ Self.KPopisek.Clear();
  for j := 0 to (Length(obj) div 6)-1 do
   begin
    try
@@ -115,7 +120,7 @@ begin
 
  //soupravy
  obj := ini.ReadString(key,'Spr','');
- Self.Soupravy := TList<TPoint>.Create();
+ Self.Soupravy.Clear();
  for j := 0 to (Length(obj) div 6)-1 do
   begin
    try
@@ -129,7 +134,7 @@ begin
 
  //Nazev
  Self.KpopisekStr := ini.ReadString(key,'N','');
- Self.Vetve := TList<TVetev>.Create();
+ Self.Vetve.Clear();
 
  // vetve
  vetevCount := ini.ReadInteger(key, 'VC', 0);

@@ -28,6 +28,8 @@ constructor TGraphBlok.Create(index:Integer);
 begin
  inherited Create();
  Self.index := index;
+ Self.Blok := -1;
+ Self.OblRizeni := 0;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
