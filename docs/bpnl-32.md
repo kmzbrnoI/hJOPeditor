@@ -35,8 +35,8 @@ Soubor se skládá z několika sekcí, každá sekce je ukončena byty `0xFF, 0x
      * 1. byte: posize X,
      * 2. byte: pozice Y,
      * 3. byte: barva,
-     * 4. byte: délka UTF-8 zakódovaného textu v bytech
-     * 5.-k. byte: UTF-8 text zakódovaný v bytech o délce udané ve 4. bytu
+     * 4. byte: délka UTF-16 zakódovaného textu v bytech
+     * 5.-k. byte: UTF-16 text zakódovaný v bytech o délce udané ve 4. bytu
 
     Pokud má první byte řetězce hodnotu `17` (dec), jedná se o popisek bloku.
     V takovém případě se číslo `17` ignoruje a text začíná až od dalšího znaku.
