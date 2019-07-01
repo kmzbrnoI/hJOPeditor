@@ -9,3 +9,4 @@ Momentálně se zde nachází:
  * [Specifikace formátu bpnl verze 3.1](bpnl-31.md)
  * [Specifikace formátu bpnl verze 3.2](bpnl-32.md)
  * [Specifikace formátu opnl verze 1.1](opnl-11.md)
+ * [Specifikace formátu opnl verze 1.2](opnl-12.md)
