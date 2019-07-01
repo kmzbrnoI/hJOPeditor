@@ -6,7 +6,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
   StrUtils, Global, Menus, Forms, DXDraws, OblastRizeni, PGraphics, RPConst,
-  Generics.Collections, symbolHelper, vetev;
+  Generics.Collections, symbolHelper, vetev, ObjBlok;
 
 const
  _Def_Color_Selected      = 2;
@@ -23,110 +23,7 @@ const
 
 type
 
-TBlkType = (usek, navestidlo, vyhybka, prejezd, popisek, pomocny_obj, uvazka, uvazka_spr, zamek, vykol, rozp, TU);
-TDKSType = (dksNone = 0, dksTop = 1, dksBottom = 2);
-
 EFileLoad = class(Exception);
-
-// abstraktni trida, ze ktere dedi konkretni graficke bloky
-TGraphBlok = class
-  typ:TBlkType;
-
-  Blok:Integer;
-  OblRizeni:Integer;
-  index:Integer;            // index bloku daneho typu v poli vsech bloku (tzn. kazdy typ ma svou indexaci - pocinaje 0)
-end;
-
-// vyhybka
-TVyhybka = class(TGraphBlok)
- PolohaPlus:Byte;
- Position:TPoint;
- SymbolID:Integer;
- obj:integer;               //index useku, na kterem vyhybka je
-end;//Vyhybka
-
-// usek
-TUsek = class(TGraphBlok)
- Root:TPoint;
- IsVyhybka:boolean;         //pomocny flag pro vykreslovani v modu korenu
- Symbols:TList<TReliefSym>; // pokud je v useku vykolejka, je zde ulozena jako klasicky symbol
- JCClick:TList<TPoint>;
- KPopisek:TList<TPoint>;
- Soupravy:TList<TPoint>;
- KpopisekStr:string;
- DKStype:TDKSType;
-
- Vetve:TList<TVetev>;               // vetve useku
-   //vetev 0 je vzdy koren
-   //zde je ulozen binarni strom v pseudo-forme
-     //na 0. indexu je koren, kazdy vrchol pak obsahuje referenci na jeho deti
-
-
- // program si duplikuje ulozena data - po rozdeleni useku na vetve uklada usek jak nerozdeleny tak rozdeleny
-end;
-
-// popisek
-TText = class(TGraphBlok)
- Text:string;
- Position:TPoint;
- Color:Integer;
-end;//Text
-
-// navestidlo
-TNavestidlo = class(TGraphBlok)
- Position:TPoint;
- SymbolID:Integer;
-end;//Navestidlo
-
-// pomocny objekt
-TPomocnyObj = class(TGraphBlok)
- Positions:TList<TPoint>;
- Symbol:Integer;
-end;//PomocnyObj
-
-TBlikPoint = record
- Pos:TPoint;
- TechUsek:Integer;     // jaky technologicky usek ma tato cast prejezdu
-end;
-
-// prejezd
-TPrejezd = class(TGraphBlok)
- StaticPositions : TList<TPoint>;
- BlikPositions : TList<TBlikPoint>;
-end;//Navestidlo
-
-// uvazka
-TUvazka = class(TGraphBlok)
-  Pos:TPoint;
-  defalt_dir:Integer;
-end;
-
-TUvazkaSprVertDir = (top = 0, bottom = 1);
-
-//uvazka spr
-TUvazkaSpr = class(TGraphBlok)
-  Pos:TPoint;
-  vertical_dir:TUvazkaSprVertDir;
-  spr_cnt:Integer;
-end;
-
-// zamek
-TZamek = class(TGraphBlok)
- Pos:TPoint;
-end;
-
-// rozpojovac
-TRozp = class(TGraphBlok)
-  Pos:TPoint;
-end;
-
-// vykolejka
-TVykol = class(TGraphBlok)
-  Pos:TPoint;
-  symbol:Integer;
-  obj:integer;               // index useku, na kterem je vykolejka
-  vetev:integer;             // cislo vetve, ve kterem je vykolejka
-end;
 
 TBlokAskEvent     = procedure(Sender:TObject; Blok:TGraphBlok) of object;
 TMsgEvent         = procedure(Sender:TObject; msg:string) of object;
@@ -500,7 +397,7 @@ begin
     begin
      blok           := TText.Create();
      blok.index     := i;
-     blok.typ       := TBlkType.popisek;
+     blok.typ       := TBlkType.text;
      blok.Blok      := inifile.ReadInteger('T'+IntToStr(i),'B', -1);
      blok.OblRizeni := inifile.ReadInteger('T'+IntToStr(i),'OR', -1);
 
@@ -670,6 +567,7 @@ var i,j,k:Integer;
     inifile:TMemIniFile;
     Obj:string;
     str_list:TStrings;
+    blok:TGraphBlok;
     counts:array [0..10] of Cardinal;
       // pocty bloku v tomto poradi: useky, navestidla, vyhybky, prejezdy, popisky, pomocne_objekty, uvazky, uvazky_spr, zamky, vykolejky, rozpojovace
 begin
@@ -699,203 +597,45 @@ begin
    str_list.Free;
 
    // useky
-   for i := 0 to Self.Bloky.Count-1 do
+   for blok in Self.Bloky do
     begin
-     case (Self.Bloky[i].typ) of
+     case (blok.typ) of
       TBlkType.usek:begin
-       inifile.WriteInteger('U'+IntToStr(Self.Bloky[i].Index),'B',  Self.Bloky[i].Blok);
-       inifile.WriteInteger('U'+IntToStr(Self.Bloky[i].Index),'OR', Self.Bloky[i].OblRizeni);
-
-       //root
-       if ((Self.Bloky[i] as TUsek).IsVyhybka) then
-         inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index), 'R', GetPos((Self.Bloky[i] as TUsek).Root));
-
-       if ((Self.Bloky[i] as TUsek).DKStype <> dksNone) then
-         inifile.WriteInteger('U'+IntToStr(i), 'DKS', Integer((Self.Bloky[i] as TUsek).DKStype));
-
-       //objekty
-       obj := '';
-       for j := 0 to (Self.Bloky[i] as TUsek).Symbols.Count-1 do obj := obj + Format('%.3d%.3d%.2d',[(Self.Bloky[i] as TUsek).Symbols[j].Position.X, (Self.Bloky[i] as TUsek).Symbols[j].Position.Y, (Self.Bloky[i] as TUsek).Symbols[j].SymbolID]);
-       if (obj <> '') then
-         inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index),'S',obj);
-
-       //JCClick
-       obj := '';
-       for j := 0 to (Self.Bloky[i] as TUsek).JCClick.Count-1 do obj := obj + Format('%.3d%.3d',[(Self.Bloky[i] as TUsek).JCClick[j].X, (Self.Bloky[i] as TUsek).JCClick[j].Y]);
-       if (obj <> '') then
-         inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index),'C',obj);
-
-       //KPopisek
-       obj := '';
-       for j := 0 to (Self.Bloky[i] as TUsek).KPopisek.Count-1 do obj := obj + Format('%.3d%.3d',[(Self.Bloky[i] as TUsek).KPopisek[j].X, (Self.Bloky[i] as TUsek).KPopisek[j].Y]);
-       if (obj <> '') then
-         inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index),'P',obj);
-
-       //soupravy
-       obj := '';
-       for j := 0 to (Self.Bloky[i] as TUsek).Soupravy.Count-1 do obj := obj + Format('%.3d%.3d',[(Self.Bloky[i] as TUsek).Soupravy[j].X, (Self.Bloky[i] as TUsek).Soupravy[j].Y]);
-       if (obj <> '') then
-         inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index),'Spr',obj);
-
-       //Nazev
-       if ((Self.Bloky[i] as TUsek).KpopisekStr <> '') then
-         inifile.WriteString('U'+IntToStr(Self.Bloky[i].Index),'N',(Self.Bloky[i] as TUsek).KpopisekStr);
-
-       //vetve
-       if ((Self.Bloky[i] as TUsek).Vetve.Count > 0) then
-         inifile.WriteInteger('U'+IntToStr(i), 'VC', (Self.Bloky[i] as TUsek).Vetve.Count);
-
-       for j := 0 to (Self.Bloky[i] as TUsek).Vetve.Count-1 do
-        begin
-         if ((Self.Bloky[i] as TUsek).Vetve[j].node1.vyh < 0) then
-           Obj := Format('%.2d',[(Self.Bloky[i] as TUsek).Vetve[j].node1.vyh])
-          else
-           Obj := Format('%.3d',[(Self.Bloky[i] as TUsek).Vetve[j].node1.vyh]);
-
-         if ((Self.Bloky[i] as TUsek).Vetve[j].node1.ref_plus < 0) then
-           Obj := Obj + Format('%.1d',[(Self.Bloky[i] as TUsek).Vetve[j].node1.ref_plus])
-          else
-           Obj := Obj + Format('%.2d',[(Self.Bloky[i] as TUsek).Vetve[j].node1.ref_plus]);
-
-         if ((Self.Bloky[i] as TUsek).Vetve[j].node1.ref_minus < 0) then
-           Obj := Obj + Format('%.1d',[(Self.Bloky[i] as TUsek).Vetve[j].node1.ref_minus])
-          else
-           Obj := Obj + Format('%.2d',[(Self.Bloky[i] as TUsek).Vetve[j].node1.ref_minus]);
-
-         ////////
-
-         if ((Self.Bloky[i] as TUsek).Vetve[j].node2.vyh < 0) then
-           Obj := Obj + Format('%.2d',[(Self.Bloky[i] as TUsek).Vetve[j].node2.vyh])
-          else
-           Obj := Obj + Format('%.3d',[(Self.Bloky[i] as TUsek).Vetve[j].node2.vyh]);
-
-         if ((Self.Bloky[i] as TUsek).Vetve[j].node2.ref_plus < 0) then
-           Obj := Obj + Format('%.1d',[(Self.Bloky[i] as TUsek).Vetve[j].node2.ref_plus])
-          else
-           Obj := Obj + Format('%.2d',[(Self.Bloky[i] as TUsek).Vetve[j].node2.ref_plus]);
-
-         if ((Self.Bloky[i] as TUsek).Vetve[j].node2.ref_minus < 0) then
-           Obj := Obj + Format('%.1d',[(Self.Bloky[i] as TUsek).Vetve[j].node2.ref_minus])
-          else
-           Obj := Obj + Format('%.2d',[(Self.Bloky[i] as TUsek).Vetve[j].node2.ref_minus]);
-
-         ////////
-
-         for k := 0 to Length((Self.Bloky[i] as TUsek).Vetve[j].Symbols)-1 do
-           Obj := Obj + Format('%.3d%.3d%.3d',[(Self.Bloky[i] as TUsek).Vetve[j].Symbols[k].Position.X, (Self.Bloky[i] as TUsek).Vetve[j].Symbols[k].Position.Y, (Self.Bloky[i] as TUsek).Vetve[j].Symbols[k].SymbolID]);
-         inifile.WriteString('U'+IntToStr(i), 'V'+IntToStr(j), Obj);
-        end;//for j
-
-      end;// case usek
+      end;
 
       TBlkType.navestidlo:begin
-       inifile.WriteInteger('N'+IntToStr(Self.Bloky[i].Index), 'X', (Self.Bloky[i] as TNavestidlo).Position.X);
-       inifile.WriteInteger('N'+IntToStr(Self.Bloky[i].Index), 'Y', (Self.Bloky[i] as TNavestidlo).Position.Y);
-       inifile.WriteInteger('N'+IntToStr(Self.Bloky[i].Index), 'S', (Self.Bloky[i] as TNavestidlo).SymbolID);
-
-       inifile.WriteInteger('N'+IntToStr(Self.Bloky[i].Index), 'B', Self.Bloky[i].Blok);
-       inifile.WriteInteger('N'+IntToStr(Self.Bloky[i].Index), 'OR',Self.Bloky[i].OblRizeni);
-      end;//case navestidlo
+      end;
 
       TBlkType.vyhybka:begin
-       inifile.WriteInteger('V'+IntToStr(Self.Bloky[i].Index),'B', Self.Bloky[i].Blok);
-       inifile.WriteInteger('V'+IntToStr(Self.Bloky[i].Index),'OR',Self.Bloky[i].OblRizeni);
-
-       inifile.WriteInteger('V'+IntToStr(Self.Bloky[i].Index),'S', (Self.Bloky[i] as TVyhybka).SymbolID);
-       inifile.WriteInteger('V'+IntToStr(Self.Bloky[i].Index),'P', (Self.Bloky[i] as TVyhybka).PolohaPlus);
-       inifile.WriteInteger('V'+IntToStr(Self.Bloky[i].Index),'X', (Self.Bloky[i] as TVyhybka).Position.X);
-       inifile.WriteInteger('V'+IntToStr(Self.Bloky[i].Index),'Y', (Self.Bloky[i] as TVyhybka).Position.Y);
-       inifile.WriteInteger('V'+IntToStr(Self.Bloky[i].Index),'O', (Self.Bloky[i] as TVyhybka).obj);
       end;
 
       TBlkType.prejezd:begin
-       inifile.WriteInteger('PRJ'+IntToStr(Self.Bloky[i].Index), 'B',  Self.Bloky[i].Blok);
-       inifile.WriteInteger('PRJ'+IntToStr(Self.Bloky[i].Index), 'OR', Self.Bloky[i].OblRizeni);
-
-       obj := '';
-       for j := 0 to (Self.Bloky[i] as TPrejezd).BlikPositions.Count-1 do
-        begin
-         if ((Self.Bloky[i] as TPrejezd).BlikPositions[j].TechUsek >= 0) then
-           obj := obj + Format('%.3d%.3d%.3d',[(Self.Bloky[i] as TPrejezd).BlikPositions[j].Pos.X, (Self.Bloky[i] as TPrejezd).BlikPositions[j].Pos.Y, (Self.Bloky[i] as TPrejezd).BlikPositions[j].TechUsek])
-         else
-           obj := obj + Format('%.3d%.3d-01',[(Self.Bloky[i] as TPrejezd).BlikPositions[j].Pos.X, (Self.Bloky[i] as TPrejezd).BlikPositions[j].Pos.Y]);
-        end;
-       inifile.WriteString('PRJ'+IntToStr(Self.Bloky[i].Index), 'BP', obj);
-
-       obj := '';
-       for j := 0 to (Self.Bloky[i] as TPrejezd).StaticPositions.Count-1 do obj := obj + Format('%.3d%.3d',[(Self.Bloky[i] as TPrejezd).StaticPositions[j].X, (Self.Bloky[i] as TPrejezd).StaticPositions[j].Y]);
-       inifile.WriteString('PRJ'+IntToStr(Self.Bloky[i].Index), 'SP', obj);
       end;
 
-      TBlkType.popisek:begin
-       inifile.WriteString('T'+IntToStr(Self.Bloky[i].Index),  'T', (Self.Bloky[i] as TText).Text);
-       inifile.WriteInteger('T'+IntToStr(Self.Bloky[i].Index), 'X', (Self.Bloky[i] as TText).Position.X);
-       inifile.WriteInteger('T'+IntToStr(Self.Bloky[i].Index), 'Y', (Self.Bloky[i] as TText).Position.Y);
-       inifile.WriteInteger('T'+IntToStr(Self.Bloky[i].Index), 'C', (Self.Bloky[i] as TText).Color);
-
-       if (Length((Self.Bloky[i] as TText).Text) = 1) then
-        begin
-         inifile.WriteInteger('T'+IntToStr(Self.Bloky[i].Index), 'B', Self.Bloky[i].Blok);
-         inifile.WriteInteger('T'+IntToStr(Self.Bloky[i].Index), 'OR', Self.Bloky[i].OblRizeni);
-        end;
+      TBlkType.text:begin
       end;
 
       TBlkType.pomocny_obj:begin
-       inifile.WriteInteger('P'+IntToStr(Self.Bloky[i].Index),'S', (Self.Bloky[i] as TPomocnyObj).Symbol);
-       obj := '';
-       for j := 0 to (Self.Bloky[i] as TPomocnyObj).Positions.Count-1 do obj := obj + Format('%.3d%.3d',[(Self.Bloky[i] as TPomocnyObj).Positions[j].X, (Self.Bloky[i] as TPomocnyObj).Positions[j].Y]);
-       inifile.WriteString('P'+IntToStr(Self.Bloky[i].Index),'P', obj);
       end;
 
       TBlkType.uvazka:begin
-       inifile.WriteInteger('Uv'+IntToStr(Self.Bloky[i].Index), 'B',  Self.Bloky[i].Blok);
-       inifile.WriteInteger('Uv'+IntToStr(Self.Bloky[i].Index), 'OR', Self.Bloky[i].OblRizeni);
-
-       inifile.WriteInteger('Uv'+IntToStr(Self.Bloky[i].Index), 'X', (Self.Bloky[i] as TUvazka).Pos.X);
-       inifile.WriteInteger('Uv'+IntToStr(Self.Bloky[i].Index), 'Y', (Self.Bloky[i] as TUvazka).Pos.Y);
-       inifile.WriteInteger('Uv'+IntToStr(Self.Bloky[i].Index), 'D', (Self.Bloky[i] as TUvazka).defalt_dir);
       end;
 
       TBlkType.uvazka_spr:begin
-       inifile.WriteInteger('UvS'+IntToStr(Self.Bloky[i].Index), 'B', Self.Bloky[i].Blok);
-       inifile.WriteInteger('UvS'+IntToStr(Self.Bloky[i].Index), 'OR', Self.Bloky[i].OblRizeni);
-
-       inifile.WriteInteger('UvS'+IntToStr(Self.Bloky[i].Index), 'X', (Self.Bloky[i] as TUvazkaSpr).Pos.X);
-       inifile.WriteInteger('UvS'+IntToStr(Self.Bloky[i].Index), 'Y', (Self.Bloky[i] as TUvazkaSpr).Pos.Y);
-       inifile.WriteInteger('UvS'+IntToStr(Self.Bloky[i].Index), 'VD', Integer((Self.Bloky[i] as TUvazkaSpr).vertical_dir));
-       inifile.WriteInteger('UvS'+IntToStr(Self.Bloky[i].Index), 'C', (Self.Bloky[i] as TUvazkaSpr).spr_cnt);
       end;
 
       TBlkType.zamek:begin
-       inifile.WriteInteger('Z'+IntToStr(Self.Bloky[i].Index), 'B',  Self.Bloky[i].Blok);
-       inifile.WriteInteger('Z'+IntToStr(Self.Bloky[i].Index), 'OR', Self.Bloky[i].OblRizeni);
-
-       inifile.WriteInteger('Z'+IntToStr(Self.Bloky[i].Index), 'X', (Self.Bloky[i] as TZamek).Pos.X);
-       inifile.WriteInteger('Z'+IntToStr(Self.Bloky[i].Index), 'Y', (Self.Bloky[i] as TZamek).Pos.Y);
       end;
 
       TBlkType.vykol:begin
-       inifile.WriteInteger('Vyk'+IntToStr(Self.Bloky[i].Index), 'B',  Self.Bloky[i].Blok);
-       inifile.WriteInteger('Vyk'+IntToStr(Self.Bloky[i].Index), 'OR', Self.Bloky[i].OblRizeni);
-
-       inifile.WriteInteger('Vyk'+IntToStr(Self.Bloky[i].Index), 'X', (Self.Bloky[i] as TVykol).Pos.X);
-       inifile.WriteInteger('Vyk'+IntToStr(Self.Bloky[i].Index), 'Y', (Self.Bloky[i] as TVykol).Pos.Y);
-       inifile.WriteInteger('Vyk'+IntToStr(Self.Bloky[i].Index), 'T', (Self.Bloky[i] as TVykol).symbol);
-       inifile.WriteInteger('Vyk'+IntToStr(Self.Bloky[i].Index), 'O', (Self.Bloky[i] as TVykol).obj);
-       inifile.WriteInteger('Vyk'+IntToStr(Self.Bloky[i].Index), 'V', (Self.Bloky[i] as TVykol).vetev);
       end;
 
       TBlkType.rozp:begin
-       inifile.WriteInteger('R'+IntToStr(Self.Bloky[i].Index), 'B',  Self.Bloky[i].Blok);
-       inifile.WriteInteger('R'+IntToStr(Self.Bloky[i].Index), 'OR', Self.Bloky[i].OblRizeni);
-
-       inifile.WriteInteger('R'+IntToStr(Self.Bloky[i].Index), 'X', (Self.Bloky[i] as TRozp).Pos.X);
-       inifile.WriteInteger('R'+IntToStr(Self.Bloky[i].Index), 'Y', (Self.Bloky[i] as TRozp).Pos.Y);
       end;
 
      end;//case
 
-     Inc(counts[Integer(Self.Bloky[i].typ)]);
+     Inc(counts[Integer(blok.typ)]);
     end;//for i
 
    // pocty bloku v tomto poradi: useky, navestidla, vyhybky, prejezdy, popisky, pomocne_objekty, uvazky, uvazky_spr
@@ -927,71 +667,81 @@ end;
 
 procedure TPanelObjects.PaintBloky();
 var i,j, color:Integer;
+    blok:TGraphBlok;
 begin
  // pruhlednost
  Self.DrawObject.Canvas.Pen.Mode := pmMerge;
 
- for i := 0 to Self.Bloky.Count-1 do
+ for blok in Self.Bloky do
   begin
-   case (Self.Bloky[i].typ) of
+   case (blok.typ) of
     TBlkType.usek:begin
-       if (Self.Selected = Self.Bloky[i]) then
+       if (Self.Selected = blok) then
         begin
-         for j := 0 to (Self.Bloky[i] as TUsek).JCClick.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).JCClick[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).JCClick[j].Y*_Symbol_Vyska, _KPopisek_Index);
+         for j := 0 to (blok as TUsek).JCClick.Count-1 do
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).JCClick[j].X*_Symbol_Sirka,
+                                         (blok as TUsek).JCClick[j].Y*_Symbol_Vyska, _KPopisek_Index);
 
-         for j := 0 to (Self.Bloky[i] as TUsek).KPopisek.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).KPopisek[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).KPopisek[j].Y*_Symbol_Vyska, _JCPopisek_Index);
+         for j := 0 to (blok as TUsek).KPopisek.Count-1 do
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).KPopisek[j].X*_Symbol_Sirka,
+                                         (blok as TUsek).KPopisek[j].Y*_Symbol_Vyska, _JCPopisek_Index);
 
-         for j := 0 to (Self.Bloky[i] as TUsek).Soupravy.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Soupravy[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Soupravy[j].Y*_Symbol_Vyska, _Soupravy_Index-5);
+         for j := 0 to (blok as TUsek).Soupravy.Count-1 do
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).Soupravy[j].X*_Symbol_Sirka,
+                                         (blok as TUsek).Soupravy[j].Y*_Symbol_Vyska, _Soupravy_Index-5);
 
-         for j := 0 to (Self.Bloky[i] as TUsek).Symbols.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Symbols[j].Position.X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Symbols[j].Position.Y*_Symbol_Vyska,((Self.Bloky[i] as TUsek).Symbols[j].SymbolID*10)+Self.Colors.Selected);
+         for j := 0 to (blok as TUsek).Symbols.Count-1 do
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).Symbols[j].Position.X*_Symbol_Sirka,
+                                         (blok as TUsek).Symbols[j].Position.Y*_Symbol_Vyska,((blok as TUsek).Symbols[j].SymbolID*10)+Self.Colors.Selected);
 
-         Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Root.X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Root.Y*_Symbol_Vyska, (_Root_Index*10) + Self.Colors.Selected);
+         Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).Root.X*_Symbol_Sirka, (blok as TUsek).Root.Y*_Symbol_Vyska, (_Root_Index*10) + Self.Colors.Selected);
         end else begin
-         for j := 0 to (Self.Bloky[i] as TUsek).JCClick.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).JCClick[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).JCClick[j].Y*_Symbol_Vyska, _JCPopisek_Index);
+         for j := 0 to (blok as TUsek).JCClick.Count-1 do
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).JCClick[j].X*_Symbol_Sirka,
+                                         (blok as TUsek).JCClick[j].Y*_Symbol_Vyska, _JCPopisek_Index);
 
-         for j := 0 to (Self.Bloky[i] as TUsek).KPopisek.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).KPopisek[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).KPopisek[j].Y*_Symbol_Vyska, _KPopisek_Index);
+         for j := 0 to (blok as TUsek).KPopisek.Count-1 do
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).KPopisek[j].X*_Symbol_Sirka,
+                                         (blok as TUsek).KPopisek[j].Y*_Symbol_Vyska, _KPopisek_Index);
 
-         for j := 0 to (Self.Bloky[i] as TUsek).Soupravy.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Soupravy[j].X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Soupravy[j].Y*_Symbol_Vyska, _Soupravy_Index);
+         for j := 0 to (blok as TUsek).Soupravy.Count-1 do
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).Soupravy[j].X*_Symbol_Sirka,
+                                         (blok as TUsek).Soupravy[j].Y*_Symbol_Vyska, _Soupravy_Index);
 
          if (Self.Mode = TMode.dmBloky) then
           begin
-           case (Self.Bloky[i].Blok) of
+           case (blok.Blok) of
             -1: color := Self.Colors.Alert;
             -2: color := Self.Colors.IntUnassigned;
            else
              color := Self.Colors.Normal;
            end;
           end else begin
-           if (((Self.Bloky[i] as TUsek).IsVyhybka) and ((Self.Bloky[i] as TUsek).Root.X = -1)) then
+           if (((blok as TUsek).IsVyhybka) and ((blok as TUsek).Root.X = -1)) then
              color := Self.Colors.Alert
            else
              color := Self.Colors.Normal;
           end;
 
-         for j := 0 to (Self.Bloky[i] as TUsek).Symbols.Count-1 do Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Symbols[j].Position.X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Symbols[j].Position.Y*_Symbol_Vyska,((Self.Bloky[i] as TUsek).Symbols[j].SymbolID*10)+color);
-         Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUsek).Root.X*_Symbol_Sirka, (Self.Bloky[i] as TUsek).Root.Y*_Symbol_Vyska, (_Root_Index*10) + _Root_Color);
+         for j := 0 to (blok as TUsek).Symbols.Count-1 do
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).Symbols[j].Position.X*_Symbol_Sirka, (blok as TUsek).Symbols[j].Position.Y*_Symbol_Vyska,((blok as TUsek).Symbols[j].SymbolID*10)+color);
+         Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).Root.X*_Symbol_Sirka,
+                                       (blok as TUsek).Root.Y*_Symbol_Vyska, (_Root_Index*10) + _Root_Color);
         end;//else Selected = i
     end;
 
     /////////////////////////////////////////////////
 
     TBlkType.navestidlo:begin
-       if (Self.Selected = Self.Bloky[i]) then
+       if (Self.Selected = blok) then
         begin
-         Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TNavestidlo).Position.X*_Symbol_Sirka, (Self.Bloky[i] as TNavestidlo).Position.Y*_Symbol_Vyska, ((_SCom_Start+(Self.Bloky[i] as TNavestidlo).SymbolID)*10)+Self.Colors.Selected);
+         Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TNavestidlo).Position.X*_Symbol_Sirka, (blok as TNavestidlo).Position.Y*_Symbol_Vyska, ((_SCom_Start+(blok as TNavestidlo).SymbolID)*10)+Self.Colors.Selected);
         end else begin
-         case (Self.Bloky[i].Blok) of
-           -1: Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TNavestidlo).Position.X*_Symbol_Sirka, (Self.Bloky[i] as TNavestidlo).Position.Y*_Symbol_Vyska,((_SCom_Start+(Self.Bloky[i] as TNavestidlo).SymbolID)*10)+Self.Colors.Alert);
-           -2: Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TNavestidlo).Position.X*_Symbol_Sirka, (Self.Bloky[i] as TNavestidlo).Position.Y*_Symbol_Vyska,((_SCom_Start+(Self.Bloky[i] as TNavestidlo).SymbolID)*10)+Self.Colors.IntUnassigned);
+         case (blok.Blok) of
+           -1: Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TNavestidlo).Position.X*_Symbol_Sirka, (blok as TNavestidlo).Position.Y*_Symbol_Vyska,((_SCom_Start+(blok as TNavestidlo).SymbolID)*10)+Self.Colors.Alert);
+           -2: Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TNavestidlo).Position.X*_Symbol_Sirka, (blok as TNavestidlo).Position.Y*_Symbol_Vyska,((_SCom_Start+(blok as TNavestidlo).SymbolID)*10)+Self.Colors.IntUnassigned);
          else
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TNavestidlo).Position.X*_Symbol_Sirka, (Self.Bloky[i] as TNavestidlo).Position.Y*_Symbol_Vyska,((_SCom_Start+(Self.Bloky[i] as TNavestidlo).SymbolID)*10)+Self.Colors.Normal);
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TNavestidlo).Position.X*_Symbol_Sirka, (blok as TNavestidlo).Position.Y*_Symbol_Vyska,((_SCom_Start+(blok as TNavestidlo).SymbolID)*10)+Self.Colors.Normal);
          end;
         end;//else (Self.Selected > 255)
     end;
@@ -999,15 +749,15 @@ begin
     /////////////////////////////////////////////////
 
     TBlkType.vyhybka:begin
-       if (Self.Selected = Self.Bloky[i]) then
+       if (Self.Selected = blok) then
         begin
-         Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TVyhybka).Position.X*_Symbol_Sirka, (Self.Bloky[i] as TVyhybka).Position.Y*_Symbol_Vyska, (((Self.Bloky[i] as TVyhybka).SymbolID)*10)+Self.Colors.Selected);
+         Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TVyhybka).Position.X*_Symbol_Sirka, (blok as TVyhybka).Position.Y*_Symbol_Vyska, (((blok as TVyhybka).SymbolID)*10)+Self.Colors.Selected);
         end else begin
-         case (Self.Bloky[i].Blok) of
-           -1: Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TVyhybka).Position.X*_Symbol_Sirka, (Self.Bloky[i] as TVyhybka).Position.Y*_Symbol_Vyska, (((Self.Bloky[i] as TVyhybka).SymbolID)*10)+Self.Colors.Alert);
-           -2: Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TVyhybka).Position.X*_Symbol_Sirka, (Self.Bloky[i] as TVyhybka).Position.Y*_Symbol_Vyska, (((Self.Bloky[i] as TVyhybka).SymbolID)*10)+Self.Colors.IntUnassigned);
+         case (blok.Blok) of
+           -1: Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TVyhybka).Position.X*_Symbol_Sirka, (blok as TVyhybka).Position.Y*_Symbol_Vyska, (((blok as TVyhybka).SymbolID)*10)+Self.Colors.Alert);
+           -2: Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TVyhybka).Position.X*_Symbol_Sirka, (blok as TVyhybka).Position.Y*_Symbol_Vyska, (((blok as TVyhybka).SymbolID)*10)+Self.Colors.IntUnassigned);
          else
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TVyhybka).Position.X*_Symbol_Sirka, (Self.Bloky[i] as TVyhybka).Position.Y*_Symbol_Vyska, (((Self.Bloky[i] as TVyhybka).SymbolID)*10)+Self.Colors.Normal);
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TVyhybka).Position.X*_Symbol_Sirka, (blok as TVyhybka).Position.Y*_Symbol_Vyska, (((blok as TVyhybka).SymbolID)*10)+Self.Colors.Normal);
          end;
         end;//else (Self.Selected > 255)
     end;
@@ -1015,11 +765,11 @@ begin
     /////////////////////////////////////////////////
 
     TBlkType.prejezd:begin
-       if (Self.Selected = Self.Bloky[i]) then
+       if (Self.Selected = blok) then
         begin
          color := Self.Colors.Selected;
         end else begin
-         case (Self.Bloky[i].Blok) of
+         case (blok.Blok) of
           -1: color := Self.Colors.Alert;
           -2: color := Self.Colors.IntUnassigned;
          else
@@ -1027,23 +777,23 @@ begin
          end;
         end;//else (Self.Selected > 255)
 
-       for j := 0 to (Self.Bloky[i] as TPrejezd).StaticPositions.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TPrejezd).StaticPositions[j].X*_Symbol_Sirka, (Self.Bloky[i] as TPrejezd).StaticPositions[j].Y*_Symbol_Vyska, _Prj_Index+color);
+       for j := 0 to (blok as TPrejezd).StaticPositions.Count-1 do
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TPrejezd).StaticPositions[j].X*_Symbol_Sirka, (blok as TPrejezd).StaticPositions[j].Y*_Symbol_Vyska, _Prj_Index+color);
 
-       for j := 0 to (Self.Bloky[i] as TPrejezd).BlikPositions.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TPrejezd).BlikPositions[j].Pos.X*_Symbol_Sirka, (Self.Bloky[i] as TPrejezd).BlikPositions[j].Pos.Y*_Symbol_Vyska, _Prj_Index+color);
+       for j := 0 to (blok as TPrejezd).BlikPositions.Count-1 do
+           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TPrejezd).BlikPositions[j].Pos.X*_Symbol_Sirka, (blok as TPrejezd).BlikPositions[j].Pos.Y*_Symbol_Vyska, _Prj_Index+color);
     end;
 
     /////////////////////////////////////////////////
 
-    TBlkType.popisek:begin
-       if (Length((Self.Bloky[i] as TText).Text) = 1) then
+    TBlkType.text:begin
+       if (Length((blok as TText).Text) = 1) then
         begin
-         if (Self.Selected = Self.Bloky[i]) then
+         if (Self.Selected = blok) then
           begin
            color := Self.Colors.Selected;
           end else begin
-           case (Self.Bloky[i].Blok) of
+           case (blok.Blok) of
             -1: color := Self.Colors.Alert;
             -2: color := Self.Colors.IntUnassigned;
            else
@@ -1051,30 +801,30 @@ begin
            end;
           end;//else (Self.Selected > 255)
         end else begin
-          color := (Self.Bloky[i] as TText).Color;
+          color := (blok as TText).Color;
         end;
 
-       Self.Graphics.TextOutputI((Self.Bloky[i] as TText).Position, (Self.Bloky[i] as TText).Text, color, clBlack);
+       Self.Graphics.TextOutputI((blok as TText).Position, (blok as TText).Text, color, clBlack);
     end;
 
     /////////////////////////////////////////////////
 
     TBlkType.pomocny_obj:begin
-       for j := 0 to (Self.Bloky[i] as TPomocnyObj).Positions.Count-1 do
+       for j := 0 to (blok as TPomocnyObj).Positions.Count-1 do
          Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas,
-                                       (Self.Bloky[i] as TPomocnyObj).Positions[j].X*_Symbol_Sirka,
-                                       (Self.Bloky[i] as TPomocnyObj).Positions[j].Y*_Symbol_Vyska,
-                                       ((Self.Bloky[i] as TPomocnyObj).Symbol*10)+_Bitmap_DrawColors[(Self.Bloky[i] as TPomocnyObj).Symbol]);
+                                       (blok as TPomocnyObj).Positions[j].X*_Symbol_Sirka,
+                                       (blok as TPomocnyObj).Positions[j].Y*_Symbol_Vyska,
+                                       ((blok as TPomocnyObj).Symbol*10)+_Bitmap_DrawColors[(blok as TPomocnyObj).Symbol]);
     end;
 
     /////////////////////////////////////////////////
 
     TBlkType.uvazka:begin
-     if (Self.Selected = Self.Bloky[i]) then
+     if (Self.Selected = blok) then
       begin
        color := Self.Colors.Selected;
       end else begin
-       case (Self.Bloky[i].Blok) of
+       case (blok.Blok) of
         -1: color := Self.Colors.Alert;
         -2: color := Self.Colors.IntUnassigned;
        else
@@ -1082,19 +832,19 @@ begin
        end;
       end;//else (Self.Selected > 255)
 
-     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUvazka).Pos.X*_Symbol_Sirka, (Self.Bloky[i] as TUvazka).Pos.Y*_Symbol_Vyska, (_Uvazka_Start*10)+color);
-     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, ((Self.Bloky[i] as TUvazka).Pos.X+1)*_Symbol_Sirka, (Self.Bloky[i] as TUvazka).Pos.Y*_Symbol_Vyska, ((_Uvazka_Start+1)*10)+color);
+     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUvazka).Pos.X*_Symbol_Sirka, (blok as TUvazka).Pos.Y*_Symbol_Vyska, (_Uvazka_Start*10)+color);
+     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, ((blok as TUvazka).Pos.X+1)*_Symbol_Sirka, (blok as TUvazka).Pos.Y*_Symbol_Vyska, ((_Uvazka_Start+1)*10)+color);
     end;
 
     /////////////////////////////////////////////////
 
     TBlkType.uvazka_spr:begin
-       if (Self.Selected = Self.Bloky[i]) then
+       if (Self.Selected = blok) then
         begin
          Self.DrawObject.Canvas.Pen.Color := clRed;
          color := Self.Colors.Selected;
         end else begin
-         case (Self.Bloky[i].Blok) of
+         case (blok.Blok) of
           -1: begin
             color := Self.Colors.Alert;
             Self.DrawObject.Canvas.Pen.Color := clAqua;
@@ -1111,35 +861,35 @@ begin
 
        Self.DrawObject.Canvas.Brush.Color := clBlack;
 
-       case ((Self.Bloky[i] as TUvazkaSpr).vertical_dir) of
+       case ((blok as TUvazkaSpr).vertical_dir) of
         TUvazkaSprVertDir.top:begin
          Self.DrawObject.Canvas.Rectangle(
-            (Self.Bloky[i] as TUvazkaSpr).Pos.X*_Symbol_Sirka,
-            (Self.Bloky[i] as TUvazkaSpr).Pos.Y*_Symbol_Vyska + _Symbol_Vyska - 1,
-            ((Self.Bloky[i] as TUvazkaSpr).Pos.X + _Uvazka_Spr_Sirka)*_Symbol_Sirka - 1,
-            ((Self.Bloky[i] as TUvazkaSpr).Pos.Y - (Self.Bloky[i] as TUvazkaSpr).spr_cnt + 1)*_Symbol_Vyska);
+            (blok as TUvazkaSpr).Pos.X*_Symbol_Sirka,
+            (blok as TUvazkaSpr).Pos.Y*_Symbol_Vyska + _Symbol_Vyska - 1,
+            ((blok as TUvazkaSpr).Pos.X + _Uvazka_Spr_Sirka)*_Symbol_Sirka - 1,
+            ((blok as TUvazkaSpr).Pos.Y - (blok as TUvazkaSpr).spr_cnt + 1)*_Symbol_Vyska);
         end;
 
         TUvazkaSprVertDir.bottom:begin
          Self.DrawObject.Canvas.Rectangle(
-            (Self.Bloky[i] as TUvazkaSpr).Pos.X*_Symbol_Sirka,
-            (Self.Bloky[i] as TUvazkaSpr).Pos.Y*_Symbol_Vyska,
-            ((Self.Bloky[i] as TUvazkaSpr).Pos.X + _Uvazka_Spr_Sirka)*_Symbol_Sirka - 1,
-            ((Self.Bloky[i] as TUvazkaSpr).Pos.Y + (Self.Bloky[i] as TUvazkaSpr).spr_cnt)*_Symbol_Vyska - 1);
+            (blok as TUvazkaSpr).Pos.X*_Symbol_Sirka,
+            (blok as TUvazkaSpr).Pos.Y*_Symbol_Vyska,
+            ((blok as TUvazkaSpr).Pos.X + _Uvazka_Spr_Sirka)*_Symbol_Sirka - 1,
+            ((blok as TUvazkaSpr).Pos.Y + (blok as TUvazkaSpr).spr_cnt)*_Symbol_Vyska - 1);
         end;
        end;//case
 
-       Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TUvazkaSpr).Pos.X*_Symbol_Sirka, (Self.Bloky[i] as TUvazkaSpr).Pos.Y*_Symbol_Vyska, (_Uvazka_Spr_Index*10)+color);
+       Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUvazkaSpr).Pos.X*_Symbol_Sirka, (blok as TUvazkaSpr).Pos.Y*_Symbol_Vyska, (_Uvazka_Spr_Index*10)+color);
     end;
 
     /////////////////////////////////////////////////
 
     TBlkType.zamek:begin
-     if (Self.Selected = Self.Bloky[i]) then
+     if (Self.Selected = blok) then
       begin
        color := Self.Colors.Selected;
       end else begin
-       case (Self.Bloky[i].Blok) of
+       case (blok.Blok) of
         -1: color := Self.Colors.Alert;
         -2: color := Self.Colors.IntUnassigned;
        else
@@ -1148,17 +898,17 @@ begin
       end;//else (Self.Selected > 255)
 
      Self.DrawObject.Canvas.Brush.Color := clBlack;
-     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TZamek).Pos.X*_Symbol_Sirka, (Self.Bloky[i] as TZamek).Pos.Y*_Symbol_Vyska, (_Zamek*10)+color);
+     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TZamek).Pos.X*_Symbol_Sirka, (blok as TZamek).Pos.Y*_Symbol_Vyska, (_Zamek*10)+color);
     end;
 
     /////////////////////////////////////////////////
 
     TBlkType.vykol:begin
-     if (Self.Selected = Self.Bloky[i]) then
+     if (Self.Selected = blok) then
       begin
        color := Self.Colors.Selected;
       end else begin
-       case (Self.Bloky[i].Blok) of
+       case (blok.Blok) of
         -1: color := Self.Colors.Alert;
         -2: color := Self.Colors.IntUnassigned;
        else
@@ -1167,17 +917,17 @@ begin
       end;//else (Self.Selected > 255)
 
      Self.DrawObject.Canvas.Brush.Color := clBlack;
-     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TVykol).Pos.X*_Symbol_Sirka, (Self.Bloky[i] as TVykol).Pos.Y*_Symbol_Vyska, ((_Vykol_Start+(Self.Bloky[i] as TVykol).symbol)*10)+color);
+     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TVykol).Pos.X*_Symbol_Sirka, (blok as TVykol).Pos.Y*_Symbol_Vyska, ((_Vykol_Start+(blok as TVykol).symbol)*10)+color);
     end;
 
     /////////////////////////////////////////////////
 
     TBlkType.rozp:begin
-     if (Self.Selected = Self.Bloky[i]) then
+     if (Self.Selected = blok) then
       begin
        color := Self.Colors.Selected;
       end else begin
-       case (Self.Bloky[i].Blok) of
+       case (blok.Blok) of
         -1: color := Self.Colors.Alert;
         -2: color := Self.Colors.IntUnassigned;
        else
@@ -1185,7 +935,7 @@ begin
        end;
       end;//else (Self.Selected > 255)
 
-     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Bloky[i] as TRozp).Pos.X*_Symbol_Sirka, (Self.Bloky[i] as TRozp).Pos.Y*_Symbol_Vyska, ((_Rozp_Start+1)*10)+color);
+     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TRozp).Pos.X*_Symbol_Sirka, (blok as TRozp).Pos.Y*_Symbol_Vyska, ((_Rozp_Start+1)*10)+color);
     end;
 
     /////////////////////////////////////////////////
@@ -1245,7 +995,7 @@ begin
          Exit(i);
     end;
 
-    TBlkType.popisek:begin
+    TBlkType.text:begin
      if ((Pos.Y = (Self.Bloky[i] as TText).Position.Y) and (Pos.X >= (Self.Bloky[i] as TText).Position.X)
       and (Pos.X < (Self.Bloky[i] as TText).Position.X+Length((Self.Bloky[i] as TText).Text)) and (Length((Self.Bloky[i] as TText).Text) = 1)) then
        Exit(i);
@@ -1317,7 +1067,7 @@ begin
     TBlkType.navestidlo   : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (návìstidlo '+IntToStr(Self.Selected.index)+')');
     TBlkType.vyhybka      : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (výhybka '+IntToStr(Self.Selected.index)+'), pøiøazen úseku '+IntToStr((Self.Selected as TVyhybka).obj));
     TBlkType.prejezd      : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (pøejezd '+IntToStr(Self.Selected.index)+')');
-    TBlkType.popisek      : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (popisek '+IntToStr(Self.Selected.index)+')');
+    TBlkType.text         : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (popisek '+IntToStr(Self.Selected.index)+')');
     TBlkType.pomocny_obj  : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (pomocný objekt '+IntToStr(Self.Selected.index)+')');
     TBlkType.uvazka       : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (úvazka '+IntToStr(Self.Selected.index)+')');
     TBlkType.uvazka_spr   : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (úvazka spr. '+IntToStr(Self.Selected.index)+')');
@@ -1426,13 +1176,15 @@ begin
 
  for i := 0 to Self.Bloky.Count-1 do
   begin
-   if ((Self.Bloky[i].Blok = -1) and (Self.Bloky[i].typ <> TBlkType.pomocny_obj) and ((Self.Bloky[i].typ <> TBlkType.popisek) or (Length((Self.Bloky[i] as TText).Text) = 1))) then
+   if ((Self.Bloky[i].Blok = -1) and (Self.Bloky[i].typ <> TBlkType.pomocny_obj) and
+       ((Self.Bloky[i].typ <> TBlkType.text) or (Length((Self.Bloky[i] as TText).Text) = 1))) then
     begin
      Result.Add('ERR: blok '+IntToStr(i)+': neni navaznost na technologicky blok');
      error_cnt := error_cnt + 1;
     end;
    if ((Self.Bloky[i].OblRizeni < 0) and
-    ((Self.Bloky[i].typ <> TBlkType.pomocny_obj) xor ((Self.Bloky[i].typ = TBlkType.popisek) and (Length((Self.Bloky[i] as TText).Text) > 1)))) then
+       ((Self.Bloky[i].typ <> TBlkType.pomocny_obj) xor ((Self.Bloky[i].typ = TBlkType.text) and
+       (Length((Self.Bloky[i] as TText).Text) > 1)))) then
     begin
      Result.Add('ERR: blok '+IntToStr(i)+': neni navaznost na oblast rizeni');
      error_cnt := error_cnt + 1;
