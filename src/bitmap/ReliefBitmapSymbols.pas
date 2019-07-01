@@ -4,21 +4,14 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
-  StrUtils, ReliefText, VektorBasedObject, Global, RPConst;
+  StrUtils, ReliefText, VektorBasedObject, Global, symbolHelper;
 
 const
   _MAX_WIDTH   = 256;
   _MAX_HEIGHT  = 256;
   _MAX_MOVE = 64;
-  _Symbol_Sirka = 8;
-  _Symbol_Vyska = 12;
   _Symbol_Uvazka_Spr = 45;
   _Symbol_Uvazka     = 43;
-
-  //zde je definovano, jaky symbol se ma vykreslovat jakou barvou (mimo separatoru)
-  _Bitmap_DrawColors:array [0..60] of Byte = (1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,6,6,6,1,1,1,1,1,1,1,1,1,1,7,1,1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1);
 
 type
 

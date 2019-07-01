@@ -2,11 +2,12 @@ unit ObjBlok;
 
 interface
 
-uses IniFiles;
+uses IniFiles, Global, PGraphics;
 
 type
 
-TBlkType = (usek, navestidlo, vyhybka, prejezd, text, pomocny_obj, uvazka, uvazka_spr, zamek, vykol, rozp, TU);
+TBlkType = (usek, navestidlo, vyhybka, prejezd, text, pomocny_obj, uvazka,
+            uvazka_spr, zamek, vykol, rozp, TU);
 
 TGraphBlok = class
   typ:TBlkType;
@@ -18,6 +19,8 @@ TGraphBlok = class
   constructor Create(index:Integer);
   procedure Load(ini:TMemIniFile; key:string); virtual;
   procedure Save(ini:TMemIniFile; key:string); virtual;
+  procedure Paint(DrawObject:TDrawObject; panelGraphics:TPanelGraphics; colors:TObjColors;
+                  selected:boolean; mode:TMode); virtual; abstract;
 
   class function TypeToFileStr(typ:TBlkType):string;
 end;

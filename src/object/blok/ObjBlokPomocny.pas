@@ -2,7 +2,8 @@ unit ObjBlokPomocny;
 
 interface
 
-uses ObjBlok, IniFiles, Generics.Collections, Types, SysUtils;
+uses ObjBlok, IniFiles, Generics.Collections, Types, SysUtils, Global, PGraphics,
+     symbolHelper;
 
 type
 
@@ -14,6 +15,8 @@ TPomocnyObj = class(TGraphBlok)
  destructor Destroy(); override;
  procedure Load(ini:TMemIniFile; key:string); override;
  procedure Save(ini:TMemIniFile; key:string); override;
+ procedure Paint(DrawObject:TDrawObject; panelGraphics:TPanelGraphics; colors:TObjColors;
+                  selected:boolean; mode:TMode); override;
 end;
 
 implementation
@@ -65,6 +68,20 @@ begin
  for point in Self.Positions do
    obj := obj + Format('%.3d%.3d',[point.X, point.Y]);
  ini.WriteString(key, 'P', obj);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TPomocnyObj.Paint(DrawObject:TDrawObject; panelGraphics:TPanelGraphics; colors:TObjColors;
+                            selected:boolean; mode:TMode);
+var pos:TPoint;
+begin
+ for pos in Self.Positions do
+   DrawObject.SymbolIL.Draw(DrawObject.Canvas,
+                            pos.X*_Symbol_Sirka,
+                            pos.Y*_Symbol_Vyska,
+                            (Self.Symbol*10)+_Bitmap_DrawColors[Self.Symbol]);
+
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

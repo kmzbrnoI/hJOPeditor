@@ -7,6 +7,15 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
   StrUtils;
 
+const
+ //zde je definovan pocet barev
+ _Symbol_ColorsCount = 10;
+ //zde jsou definovany jednotluve barvy
+ _Symbol_Colors: array [0..(_Symbol_ColorsCount-1)] of TColor = ($FF00FF,$A0A0A0,$0000FF,$00FF00,$FFFFFF,$FFFF00,$FF0000,$00FFFF,$800080,$000000);
+
+ _Uvazka_Spr_Sirka = 9;
+ _MAX_BLK     = 1023;
+
 type
  TNEvent = procedure of object;
  TPosAskEvent = function(Pos:TPoint):boolean of object;
@@ -14,13 +23,24 @@ type
 
  TGlobalEvent = procedure(Sender:TObject) of object;
 
- TMode=(dmBitmap = 0, dmSepVert = 1, dmSepHor = 2, dmBloky = 3, dmRoots = 4);
+ TMode =(dmBitmap = 0, dmSepVert = 1, dmSepHor = 2, dmBloky = 3, dmRoots = 4);
 
  TCursorDraw=record
    Color:ShortInt;
    //0 - vychozi;1 - operace;2 - OnObject
    Pos1,Pos2:TPoint;
  end;
+
+ TDrawObject = record
+   Canvas:TCanvas;
+   SymbolIL,TextIL:TImageList;
+   Width,Height:Integer;
+ end;
+
+ TObjColors = record
+   Selected,Normal,Alert,IntUnassigned:Byte;
+ end;
+
 
 function GetVersion(const FileName: string): string;//cteni verze z nastaveni
 function GetPos(data:string):TPoint; overload;              //format: -1;-1, 5;10 = x;y

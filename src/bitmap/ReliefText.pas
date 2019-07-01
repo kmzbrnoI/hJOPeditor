@@ -4,15 +4,13 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
-  StrUtils, Global, Menus, Forms, PGraphics, Generics.Collections;
+  StrUtils, Global, Menus, Forms, PGraphics, Generics.Collections, symbolHelper;
 
 const
  _MAX_POPISKY     = 256;
  _MAX_TEXT_LENGTH = 32;
  _MAX_WIDTH       = 256;
  _MAX_HEIGHT      = 256;
- _Symbol_Sirka = 8;
- _Symbol_Vyska = 12;
  _Block_Length = 35;
 
 type

@@ -5,7 +5,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
-  StrUtils, Global, Menus, Forms, DXDraws, OblastRizeni, PGraphics, RPConst,
+  StrUtils, Global, Menus, Forms, DXDraws, OblastRizeni, PGraphics,
   Generics.Collections, symbolHelper, vetev, ObjBlok;
 
 const
@@ -14,23 +14,16 @@ const
  _Def_Color_Alert         = 5;
  _Def_Color_IntUnassigned = 4;
 
- //zde je definovano, jaky symbol se ma vykreslovat jakou barvou (mimo separatoru)
-  _Bitmap_DrawColors:array [0..60] of Byte = (1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,6,6,6,1,1,1,1,1,1,1,1,1,1,7,1,1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1);
-
- _FileVersion = '1.1';
+ _FileVersion = '1.1'; // TODO
 
 type
 
 EFileLoad = class(Exception);
 
-TBlokAskEvent     = procedure(Sender:TObject; Blok:TGraphBlok) of object;
-TMsgEvent         = procedure(Sender:TObject; msg:string) of object;
+TBlokAskEvent = procedure(Sender:TObject; Blok:TGraphBlok) of object;
+TMsgEvent = procedure(Sender:TObject; msg:string) of object;
 
-TVetveData = array of array of Integer;
-
-TPanelObjects=class
+TPanelObjects = class
   private
 
    PM_Properties:TPopUpMenu;
@@ -41,15 +34,8 @@ TPanelObjects=class
    Graphics:TPanelGraphics;
 
    PopUpPos:TPoint;
-
-   DrawObject:record
-    Canvas:TCanvas;
-    SymbolIL,TextIL:TImageList;
-    Width,Height:Integer;
-   end;
-   Colors:record
-    Selected,Normal,Alert,IntUnassigned:Byte;
-   end;
+   DrawObject:TDrawObject;
+   Colors:TObjColors;
 
    Selected:TGraphBlok;
 
@@ -62,7 +48,6 @@ TPanelObjects=class
     procedure PMPropertiesClick(Sender: TObject);
 
     procedure SetMode(mode:TMode);
-
     procedure ComputeVyhybkaFlag();                                   //volano pri prechodu z Bloky do Koreny
 
   public
@@ -316,282 +301,11 @@ begin
 end;
 
 procedure TPanelObjects.PaintBloky();
-var i,j, color:Integer;
-    blok:TGraphBlok;
+var blok:TGraphBlok;
 begin
- // pruhlednost
- Self.DrawObject.Canvas.Pen.Mode := pmMerge;
-
+ Self.DrawObject.Canvas.Pen.Mode := pmMerge; // pruhlednost
  for blok in Self.Bloky do
-  begin
-   case (blok.typ) of
-    TBlkType.usek:begin
-       if (Self.Selected = blok) then
-        begin
-         for j := 0 to (blok as TUsek).JCClick.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).JCClick[j].X*_Symbol_Sirka,
-                                         (blok as TUsek).JCClick[j].Y*_Symbol_Vyska, _KPopisek_Index);
-
-         for j := 0 to (blok as TUsek).KPopisek.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).KPopisek[j].X*_Symbol_Sirka,
-                                         (blok as TUsek).KPopisek[j].Y*_Symbol_Vyska, _JCPopisek_Index);
-
-         for j := 0 to (blok as TUsek).Soupravy.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).Soupravy[j].X*_Symbol_Sirka,
-                                         (blok as TUsek).Soupravy[j].Y*_Symbol_Vyska, _Soupravy_Index-5);
-
-         for j := 0 to (blok as TUsek).Symbols.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).Symbols[j].Position.X*_Symbol_Sirka,
-                                         (blok as TUsek).Symbols[j].Position.Y*_Symbol_Vyska,((blok as TUsek).Symbols[j].SymbolID*10)+Self.Colors.Selected);
-
-         Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).Root.X*_Symbol_Sirka, (blok as TUsek).Root.Y*_Symbol_Vyska, (_Root_Index*10) + Self.Colors.Selected);
-        end else begin
-         for j := 0 to (blok as TUsek).JCClick.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).JCClick[j].X*_Symbol_Sirka,
-                                         (blok as TUsek).JCClick[j].Y*_Symbol_Vyska, _JCPopisek_Index);
-
-         for j := 0 to (blok as TUsek).KPopisek.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).KPopisek[j].X*_Symbol_Sirka,
-                                         (blok as TUsek).KPopisek[j].Y*_Symbol_Vyska, _KPopisek_Index);
-
-         for j := 0 to (blok as TUsek).Soupravy.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).Soupravy[j].X*_Symbol_Sirka,
-                                         (blok as TUsek).Soupravy[j].Y*_Symbol_Vyska, _Soupravy_Index);
-
-         if (Self.Mode = TMode.dmBloky) then
-          begin
-           case (blok.Blok) of
-            -1: color := Self.Colors.Alert;
-            -2: color := Self.Colors.IntUnassigned;
-           else
-             color := Self.Colors.Normal;
-           end;
-          end else begin
-           if (((blok as TUsek).IsVyhybka) and ((blok as TUsek).Root.X = -1)) then
-             color := Self.Colors.Alert
-           else
-             color := Self.Colors.Normal;
-          end;
-
-         for j := 0 to (blok as TUsek).Symbols.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).Symbols[j].Position.X*_Symbol_Sirka, (blok as TUsek).Symbols[j].Position.Y*_Symbol_Vyska,((blok as TUsek).Symbols[j].SymbolID*10)+color);
-         Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUsek).Root.X*_Symbol_Sirka,
-                                       (blok as TUsek).Root.Y*_Symbol_Vyska, (_Root_Index*10) + _Root_Color);
-        end;//else Selected = i
-    end;
-
-    /////////////////////////////////////////////////
-
-    TBlkType.navestidlo:begin
-       if (Self.Selected = blok) then
-        begin
-         Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TNavestidlo).Position.X*_Symbol_Sirka, (blok as TNavestidlo).Position.Y*_Symbol_Vyska, ((_SCom_Start+(blok as TNavestidlo).SymbolID)*10)+Self.Colors.Selected);
-        end else begin
-         case (blok.Blok) of
-           -1: Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TNavestidlo).Position.X*_Symbol_Sirka, (blok as TNavestidlo).Position.Y*_Symbol_Vyska,((_SCom_Start+(blok as TNavestidlo).SymbolID)*10)+Self.Colors.Alert);
-           -2: Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TNavestidlo).Position.X*_Symbol_Sirka, (blok as TNavestidlo).Position.Y*_Symbol_Vyska,((_SCom_Start+(blok as TNavestidlo).SymbolID)*10)+Self.Colors.IntUnassigned);
-         else
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TNavestidlo).Position.X*_Symbol_Sirka, (blok as TNavestidlo).Position.Y*_Symbol_Vyska,((_SCom_Start+(blok as TNavestidlo).SymbolID)*10)+Self.Colors.Normal);
-         end;
-        end;//else (Self.Selected > 255)
-    end;
-
-    /////////////////////////////////////////////////
-
-    TBlkType.vyhybka:begin
-       if (Self.Selected = blok) then
-        begin
-         Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TVyhybka).Position.X*_Symbol_Sirka, (blok as TVyhybka).Position.Y*_Symbol_Vyska, (((blok as TVyhybka).SymbolID)*10)+Self.Colors.Selected);
-        end else begin
-         case (blok.Blok) of
-           -1: Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TVyhybka).Position.X*_Symbol_Sirka, (blok as TVyhybka).Position.Y*_Symbol_Vyska, (((blok as TVyhybka).SymbolID)*10)+Self.Colors.Alert);
-           -2: Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TVyhybka).Position.X*_Symbol_Sirka, (blok as TVyhybka).Position.Y*_Symbol_Vyska, (((blok as TVyhybka).SymbolID)*10)+Self.Colors.IntUnassigned);
-         else
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TVyhybka).Position.X*_Symbol_Sirka, (blok as TVyhybka).Position.Y*_Symbol_Vyska, (((blok as TVyhybka).SymbolID)*10)+Self.Colors.Normal);
-         end;
-        end;//else (Self.Selected > 255)
-    end;
-
-    /////////////////////////////////////////////////
-
-    TBlkType.prejezd:begin
-       if (Self.Selected = blok) then
-        begin
-         color := Self.Colors.Selected;
-        end else begin
-         case (blok.Blok) of
-          -1: color := Self.Colors.Alert;
-          -2: color := Self.Colors.IntUnassigned;
-         else
-           color := Self.Colors.Normal;
-         end;
-        end;//else (Self.Selected > 255)
-
-       for j := 0 to (blok as TPrejezd).StaticPositions.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TPrejezd).StaticPositions[j].X*_Symbol_Sirka, (blok as TPrejezd).StaticPositions[j].Y*_Symbol_Vyska, _Prj_Index+color);
-
-       for j := 0 to (blok as TPrejezd).BlikPositions.Count-1 do
-           Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TPrejezd).BlikPositions[j].Pos.X*_Symbol_Sirka, (blok as TPrejezd).BlikPositions[j].Pos.Y*_Symbol_Vyska, _Prj_Index+color);
-    end;
-
-    /////////////////////////////////////////////////
-
-    TBlkType.text:begin
-       if (Length((blok as TText).Text) = 1) then
-        begin
-         if (Self.Selected = blok) then
-          begin
-           color := Self.Colors.Selected;
-          end else begin
-           case (blok.Blok) of
-            -1: color := Self.Colors.Alert;
-            -2: color := Self.Colors.IntUnassigned;
-           else
-             color := Self.Colors.Normal;
-           end;
-          end;//else (Self.Selected > 255)
-        end else begin
-          color := (blok as TText).Color;
-        end;
-
-       Self.Graphics.TextOutputI((blok as TText).Position, (blok as TText).Text, color, clBlack);
-    end;
-
-    /////////////////////////////////////////////////
-
-    TBlkType.pomocny_obj:begin
-       for j := 0 to (blok as TPomocnyObj).Positions.Count-1 do
-         Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas,
-                                       (blok as TPomocnyObj).Positions[j].X*_Symbol_Sirka,
-                                       (blok as TPomocnyObj).Positions[j].Y*_Symbol_Vyska,
-                                       ((blok as TPomocnyObj).Symbol*10)+_Bitmap_DrawColors[(blok as TPomocnyObj).Symbol]);
-    end;
-
-    /////////////////////////////////////////////////
-
-    TBlkType.uvazka:begin
-     if (Self.Selected = blok) then
-      begin
-       color := Self.Colors.Selected;
-      end else begin
-       case (blok.Blok) of
-        -1: color := Self.Colors.Alert;
-        -2: color := Self.Colors.IntUnassigned;
-       else
-         color := Self.Colors.Normal;
-       end;
-      end;//else (Self.Selected > 255)
-
-     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUvazka).Pos.X*_Symbol_Sirka, (blok as TUvazka).Pos.Y*_Symbol_Vyska, (_Uvazka_Start*10)+color);
-     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, ((blok as TUvazka).Pos.X+1)*_Symbol_Sirka, (blok as TUvazka).Pos.Y*_Symbol_Vyska, ((_Uvazka_Start+1)*10)+color);
-    end;
-
-    /////////////////////////////////////////////////
-
-    TBlkType.uvazka_spr:begin
-       if (Self.Selected = blok) then
-        begin
-         Self.DrawObject.Canvas.Pen.Color := clRed;
-         color := Self.Colors.Selected;
-        end else begin
-         case (blok.Blok) of
-          -1: begin
-            color := Self.Colors.Alert;
-            Self.DrawObject.Canvas.Pen.Color := clAqua;
-          end;
-          -2: begin
-            color := Self.Colors.IntUnassigned;
-            Self.DrawObject.Canvas.Pen.Color := clWhite;
-          end
-         else
-           color := 7;
-           Self.DrawObject.Canvas.Pen.Color := clYellow;
-         end;
-        end;//else (Self.Selected > 255)
-
-       Self.DrawObject.Canvas.Brush.Color := clBlack;
-
-       case ((blok as TUvazkaSpr).vertical_dir) of
-        TUvazkaSprVertDir.top:begin
-         Self.DrawObject.Canvas.Rectangle(
-            (blok as TUvazkaSpr).Pos.X*_Symbol_Sirka,
-            (blok as TUvazkaSpr).Pos.Y*_Symbol_Vyska + _Symbol_Vyska - 1,
-            ((blok as TUvazkaSpr).Pos.X + _Uvazka_Spr_Sirka)*_Symbol_Sirka - 1,
-            ((blok as TUvazkaSpr).Pos.Y - (blok as TUvazkaSpr).spr_cnt + 1)*_Symbol_Vyska);
-        end;
-
-        TUvazkaSprVertDir.bottom:begin
-         Self.DrawObject.Canvas.Rectangle(
-            (blok as TUvazkaSpr).Pos.X*_Symbol_Sirka,
-            (blok as TUvazkaSpr).Pos.Y*_Symbol_Vyska,
-            ((blok as TUvazkaSpr).Pos.X + _Uvazka_Spr_Sirka)*_Symbol_Sirka - 1,
-            ((blok as TUvazkaSpr).Pos.Y + (blok as TUvazkaSpr).spr_cnt)*_Symbol_Vyska - 1);
-        end;
-       end;//case
-
-       Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TUvazkaSpr).Pos.X*_Symbol_Sirka, (blok as TUvazkaSpr).Pos.Y*_Symbol_Vyska, (_Uvazka_Spr_Index*10)+color);
-    end;
-
-    /////////////////////////////////////////////////
-
-    TBlkType.zamek:begin
-     if (Self.Selected = blok) then
-      begin
-       color := Self.Colors.Selected;
-      end else begin
-       case (blok.Blok) of
-        -1: color := Self.Colors.Alert;
-        -2: color := Self.Colors.IntUnassigned;
-       else
-         color := Self.Colors.Normal;
-       end;
-      end;//else (Self.Selected > 255)
-
-     Self.DrawObject.Canvas.Brush.Color := clBlack;
-     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TZamek).Pos.X*_Symbol_Sirka, (blok as TZamek).Pos.Y*_Symbol_Vyska, (_Zamek*10)+color);
-    end;
-
-    /////////////////////////////////////////////////
-
-    TBlkType.vykol:begin
-     if (Self.Selected = blok) then
-      begin
-       color := Self.Colors.Selected;
-      end else begin
-       case (blok.Blok) of
-        -1: color := Self.Colors.Alert;
-        -2: color := Self.Colors.IntUnassigned;
-       else
-         color := Self.Colors.Normal;
-       end;
-      end;//else (Self.Selected > 255)
-
-     Self.DrawObject.Canvas.Brush.Color := clBlack;
-     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TVykol).Pos.X*_Symbol_Sirka, (blok as TVykol).Pos.Y*_Symbol_Vyska, ((_Vykol_Start+(blok as TVykol).symbol)*10)+color);
-    end;
-
-    /////////////////////////////////////////////////
-
-    TBlkType.rozp:begin
-     if (Self.Selected = blok) then
-      begin
-       color := Self.Colors.Selected;
-      end else begin
-       case (blok.Blok) of
-        -1: color := Self.Colors.Alert;
-        -2: color := Self.Colors.IntUnassigned;
-       else
-         color := Self.Colors.Normal;
-       end;
-      end;//else (Self.Selected > 255)
-
-     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (blok as TRozp).Pos.X*_Symbol_Sirka, (blok as TRozp).Pos.Y*_Symbol_Vyska, ((_Rozp_Start+1)*10)+color);
-    end;
-
-    /////////////////////////////////////////////////
-
-   end;//case typ
-  end;//for i
+   blok.Paint(Self.DrawObject, Self.Graphics, Self.Colors, Self.Selected = blok, Self.Mode);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

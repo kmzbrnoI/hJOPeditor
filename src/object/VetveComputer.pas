@@ -18,6 +18,8 @@ type
     symbols:TList<TReliefSym>;
     next:TPoint;
   end;
+  TVetveData = array of array of Integer;
+
 
 procedure ComputeVetve(po:TPanelObjects);
 procedure ComputeNormalBlokVetve(po:TPanelObjects; var data:TVetveData; start:TPoint; Vetve:TList<TVetev>);

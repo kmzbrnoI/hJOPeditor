@@ -9,6 +9,9 @@ interface
 uses Types;
 
 const
+ _Symbol_Sirka = 8;
+ _Symbol_Vyska = 12;
+
   _Usek_Navaznost: array [0..47] of ShortInt =
     (-1,0,1,0,0,-1,0,1,0,1,1,0,-1,0,0,-1,-1,0,0,1,0,-1,1,0,-1,0,1,0,0,-1,0,1,
     0,1,1,0,-1,0,0,-1,-1,0,0,1,0,-1,1,0);
@@ -48,6 +51,11 @@ const
 
  _Separ_Vert_Index  = 352;
  _Separ_Hor_Index   = 572;
+
+ //zde je definovano, jaky symbol se ma vykreslovat jakou barvou (mimo separatoru)
+  _Bitmap_DrawColors:array [0..60] of Byte = (1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,6,6,6,1,1,1,1,1,1,1,1,1,1,7,1,1,1,1,1,1,1,1,1,
+    1,1,1,1,1,1);
 
 type
   TNavDir = (ndPositive = 0, ndNegative = 1);

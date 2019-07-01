@@ -4,12 +4,10 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
-  StrUtils, Global, Generics.Collections;
+  StrUtils, Global, Generics.Collections, symbolHelper;
 
 const
   _MAX_DATA = 256;
-  _Symbol_Sirka = 8;
-  _Symbol_Vyska = 12;
 
 type
 

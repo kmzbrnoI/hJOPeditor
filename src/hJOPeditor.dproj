@@ -84,7 +84,6 @@
 			<DCCReference Include="zt\ReliefZT.pas"/>
 			<DCCReference Include="ObjToZT.pas"/>
 			<DCCReference Include="PGraphics.pas"/>
-			<DCCReference Include="RPConst.pas"/>
 			<DCCReference Include="object\VetveComputer.pas"/>
 			<DCCReference Include="symbolHelper.pas"/>
 			<DCCReference Include="object\vetev.pas"/>

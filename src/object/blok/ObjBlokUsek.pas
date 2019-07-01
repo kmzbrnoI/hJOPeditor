@@ -2,8 +2,8 @@ unit ObjBlokUsek;
 
 interface
 
-uses ObjBLok, Generics.Collections, Types, symbolHelper, vetev, IniFiles,
-     SysUtils, StrUtils;
+uses ObjBlok, Generics.Collections, Types, symbolHelper, vetev, IniFiles,
+     SysUtils, StrUtils, Global, Graphics, PGraphics;
 
 type
 
@@ -31,11 +31,11 @@ TUsek = class(TGraphBlok)
  destructor Destroy(); override;
  procedure Load(ini:TMemIniFile; key:string); override;
  procedure Save(ini:TMemIniFile; key:string); override;
+ procedure Paint(DrawObject:TDrawObject; panelGraphics:TPanelGraphics; colors:TObjColors;
+                  selected:boolean; mode:TMode); override;
 end;
 
 implementation
-
-uses Global;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -259,5 +259,70 @@ begin
    ini.WriteString(key, 'V'+IntToStr(i), Obj);
   end;//for j
 end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TUsek.Paint(DrawObject:TDrawObject; panelGraphics:TPanelGraphics; colors:TObjColors;
+                      selected:boolean; mode:TMode);
+var pos:TPoint;
+    sym:TReliefSym;
+    color:TColor;
+begin
+ if (selected) then
+  begin
+   for pos in Self.JCClick do
+     DrawObject.SymbolIL.Draw(DrawObject.Canvas, pos.X*_Symbol_Sirka,
+                              pos.Y*_Symbol_Vyska, _KPopisek_Index);
+
+   for pos in Self.KPopisek do
+     DrawObject.SymbolIL.Draw(DrawObject.Canvas, pos.X*_Symbol_Sirka,
+                              pos.Y*_Symbol_Vyska, _JCPopisek_Index);
+
+   for pos in Self.Soupravy do
+     DrawObject.SymbolIL.Draw(DrawObject.Canvas, pos.X*_Symbol_Sirka,
+                              pos.Y*_Symbol_Vyska, _Soupravy_Index-5);
+
+   for sym in Self.Symbols do
+     DrawObject.SymbolIL.Draw(DrawObject.Canvas, sym.Position.X*_Symbol_Sirka,
+                              sym.Position.Y*_Symbol_Vyska,(sym.SymbolID*10)+colors.Selected);
+
+   DrawObject.SymbolIL.Draw(DrawObject.Canvas, Self.Root.X*_Symbol_Sirka, Self.Root.Y*_Symbol_Vyska, (_Root_Index*10) + colors.Selected);
+  end else begin
+   for pos in Self.JCClick do
+     DrawObject.SymbolIL.Draw(DrawObject.Canvas, pos.X*_Symbol_Sirka,
+                              pos.Y*_Symbol_Vyska, _JCPopisek_Index);
+
+   for pos in Self.KPopisek do
+     DrawObject.SymbolIL.Draw(DrawObject.Canvas, pos.X*_Symbol_Sirka,
+                              pos.Y*_Symbol_Vyska, _KPopisek_Index);
+
+   for pos in Self.Soupravy do
+     DrawObject.SymbolIL.Draw(DrawObject.Canvas, pos.X*_Symbol_Sirka,
+                              pos.Y*_Symbol_Vyska, _Soupravy_Index);
+
+   if (mode = TMode.dmBloky) then
+    begin
+     case (Self.Blok) of
+      -1: color := colors.Alert;
+      -2: color := colors.IntUnassigned;
+     else
+       color := colors.Normal;
+     end;
+    end else begin
+     if ((Self.IsVyhybka) and (Self.Root.X = -1)) then
+       color := colors.Alert
+     else
+       color := colors.Normal;
+    end;
+
+   for sym in Self.Symbols do
+     DrawObject.SymbolIL.Draw(DrawObject.Canvas, sym.Position.X*_Symbol_Sirka,
+                              sym.Position.Y*_Symbol_Vyska,(sym.SymbolID*10)+color);
+   DrawObject.SymbolIL.Draw(DrawObject.Canvas, Self.Root.X*_Symbol_Sirka,
+                            Self.Root.Y*_Symbol_Vyska, (_Root_Index*10) + _Root_Color);
+  end;//else Selected = i
+end;
+
+////////////////////////////////////////////////////////////////////////////////
 
 end.

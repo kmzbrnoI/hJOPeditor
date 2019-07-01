@@ -5,7 +5,8 @@ unit PGraphics;
 
 interface
 
-uses DXDraws, Graphics, Classes, Types, SysUtils, StrUtils, Controls, RPConst;
+uses DXDraws, Graphics, Classes, Types, SysUtils, StrUtils, Controls, Global,
+     symbolHelper;
 
 type
   TPanelGraphics = class

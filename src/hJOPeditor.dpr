@@ -24,7 +24,6 @@ uses
   ReliefZT in 'zt\ReliefZT.pas',
   ObjToZT in 'ObjToZT.pas',
   PGraphics in 'PGraphics.pas',
-  RPConst in 'RPConst.pas',
   VetveComputer in 'object\VetveComputer.pas',
   symbolHelper in 'symbolHelper.pas',
   vetev in 'object\vetev.pas',

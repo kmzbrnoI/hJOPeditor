@@ -2,7 +2,8 @@ unit ObjBlokPrejezd;
 
 interface
 
-uses ObjBlok, Generics.Collections, Types, IniFiles, SysUtils;
+uses ObjBlok, Generics.Collections, Types, IniFiles, SysUtils, Global, Graphics,
+     symbolHelper, PGraphics;
 
 type
 
@@ -19,6 +20,8 @@ TPrejezd = class(TGraphBlok)
  destructor Destroy(); override;
  procedure Load(ini:TMemIniFile; key:string); override;
  procedure Save(ini:TMemIniFile; key:string); override;
+ procedure Paint(DrawObject:TDrawObject; panelGraphics:TPanelGraphics; colors:TObjColors;
+                  selected:boolean; mode:TMode); override;
 end;
 
 implementation
@@ -101,5 +104,34 @@ begin
    obj := obj + Format('%.3d%.3d',[point.X, point.Y]);
  ini.WriteString(key, 'SP', obj);
 end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TPrejezd.Paint(DrawObject:TDrawObject; panelGraphics:TPanelGraphics; colors:TObjColors;
+                         selected:boolean; mode:TMode);
+var color:TColor;
+    pos:TPoint;
+    bp:TBlikPoint;
+begin
+ if (selected) then
+  begin
+   color := colors.Selected;
+  end else begin
+   case (Self.blok) of
+    -1: color := colors.Alert;
+    -2: color := colors.IntUnassigned;
+   else
+     color := colors.Normal;
+   end;
+  end;//else (Self.Selected > 255)
+
+ for pos in Self.StaticPositions do
+   DrawObject.SymbolIL.Draw(DrawObject.Canvas, pos.X*_Symbol_Sirka, pos.Y*_Symbol_Vyska, _Prj_Index+color);
+
+ for bp in Self.BlikPositions do
+   DrawObject.SymbolIL.Draw(DrawObject.Canvas, bp.Pos.X*_Symbol_Sirka, bp.Pos.Y*_Symbol_Vyska, _Prj_Index+color);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
 
 end.

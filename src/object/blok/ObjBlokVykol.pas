@@ -2,7 +2,7 @@ unit ObjBlokVykol;
 
 interface
 
-uses ObjBlok, Types, IniFiles;
+uses ObjBlok, Types, IniFiles, Global, symbolHelper, Graphics, PGraphics;
 
 type
 
@@ -15,6 +15,8 @@ TVykol = class(TGraphBlok)
   constructor Create(index:Integer);
   procedure Load(ini:TMemIniFile; key:string); override;
   procedure Save(ini:TMemIniFile; key:string); override;
+  procedure Paint(DrawObject:TDrawObject; panelGraphics:TPanelGraphics; colors:TObjColors;
+                  selected:boolean; mode:TMode); override;
 end;
 
 implementation
@@ -49,6 +51,29 @@ begin
  ini.WriteInteger(key, 'T', Self.symbol);
  ini.WriteInteger(key, 'O', Self.obj);
  ini.WriteInteger(key, 'V', Self.vetev);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TVykol.Paint(DrawObject:TDrawObject; panelGraphics:TPanelGraphics; colors:TObjColors;
+                       selected:boolean; mode:TMode);
+var color:TColor;
+begin
+ if (selected) then
+  begin
+   color := colors.Selected;
+  end else begin
+   case (Self.blok) of
+    -1: color := colors.Alert;
+    -2: color := colors.IntUnassigned;
+   else
+     color := colors.Normal;
+   end;
+  end;//else (Self.Selected > 255)
+
+ DrawObject.Canvas.Brush.Color := clBlack;
+ DrawObject.SymbolIL.Draw(DrawObject.Canvas, Self.Pos.X*_Symbol_Sirka, Self.Pos.Y*_Symbol_Vyska,
+                          ((_Vykol_Start+Self.symbol)*10)+color);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

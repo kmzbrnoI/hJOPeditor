@@ -2,7 +2,7 @@ unit ObjBlokText;
 
 interface
 
-uses ObjBlok, IniFiles, Types;
+uses ObjBlok, IniFiles, Types, Global, PGraphics, Graphics;
 
 type
 
@@ -14,6 +14,8 @@ TText = class(TGraphBlok)
  constructor Create(index:Integer);
  procedure Load(ini:TMemIniFile; key:string); override;
  procedure Save(ini:TMemIniFile; key:string); override;
+ procedure Paint(DrawObject:TDrawObject; panelGraphics:TPanelGraphics; colors:TObjColors;
+                  selected:boolean; mode:TMode); override;
 end;
 
 implementation
@@ -47,6 +49,31 @@ begin
  ini.WriteInteger(key, 'X', Self.Position.X);
  ini.WriteInteger(key, 'Y', Self.Position.Y);
  ini.WriteInteger(key, 'C', Self.Color);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TText.Paint(DrawObject:TDrawObject; panelGraphics:TPanelGraphics; colors:TObjColors;
+                      selected:boolean; mode:TMode);
+begin
+ if (Length(Self.Text) = 1) then
+  begin
+   if (selected) then
+    begin
+     color := colors.Selected;
+    end else begin
+     case (Self.blok) of
+      -1: color := colors.Alert;
+      -2: color := colors.IntUnassigned;
+     else
+       color := colors.Normal;
+     end;
+    end;//else (Self.Selected > 255)
+  end else begin
+    color := Self.Color;
+  end;
+
+ panelGraphics.TextOutputI(Self.Position, Self.Text, color, clBlack);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
