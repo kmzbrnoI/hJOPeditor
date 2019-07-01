@@ -27,7 +27,7 @@ Soubor se skládá z několika sekcí, každá sekce je ukončena byty `0xFF, 0x
     Vlastní symbly reliéfu. Obsahuje čísla symbolů uspořádaná po řádcích.
     Každý řádek je ukončen dvojicí znaků CR,LF (#13,#10)
 
- 3. Popisky
+ 3. Texty
     Formát: 1. a 2. byte je délka bloku v bytech, první byte obsahuje bity
     vyšších významu.
 
@@ -37,6 +37,10 @@ Soubor se skládá z několika sekcí, každá sekce je ukončena byty `0xFF, 0x
      * 3. byte: barva,
      * 4. byte: délka UTF-8 zakódovaného textu v bytech
      * 5.-k. byte: UTF-8 text zakódovaný v bytech o délce udané ve 4. bytu
+
+    Pokud má první byte řetězce hodnotu `17` (dec), jedná se o popisek bloku.
+    V takovém případě se číslo `17` ignoruje a text začíná až od dalšího znaku.
+    Délka textu je včetně bytu s hodnotou `17`.
 
  4. Vertikální oddělovače
     Formát: 1. byte je počet oddělovačů, pak následují dvojice pozic [X, Y]
