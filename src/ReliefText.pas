@@ -7,9 +7,8 @@ uses
   StrUtils, Global, Menus, Forms, PGraphics, Generics.Collections;
 
 const
- _MAX_POPISKY     = 64;
+ _MAX_POPISKY     = 256;
  _MAX_TEXT_LENGTH = 32;
- _MIN_TEXT_LENGTH = 1;
  _MAX_WIDTH       = 256;
  _MAX_HEIGHT      = 256;
  _Symbol_Sirka = 8;
@@ -18,6 +17,14 @@ const
 
 type
  TChangeTextEvent = procedure(Sender:TObject; var Text:string;var Color:Integer) of object;
+
+ EInvalidPosition = class(Exception);
+ ENonemptyField = class(Exception);
+ EEmptyField = class(Exception);
+ EMaxReached = class(Exception);
+ ENoSymbol = class(Exception);
+ EOperationInProgress = class(Exception);
+ ETooLongText = class(Exception);
 
   TPopisek=record
     Position:TPoint;
@@ -48,17 +55,18 @@ type
       end;
      end;//Operations
 
-    function AddToStructure(aPos:TPoint;aText:string;aColor:ShortInt):Byte;
-    function DeleteFromStructure(aPos:TPoint):Byte;
+    procedure AddToStructure(aPos:TPoint;aText:string;aColor:ShortInt);
+    procedure DeleteFromStructure(aPos:TPoint);
 
-    function Adding(Position:TPoint):Byte;
-    function Moving(Position:TPoint):Byte;
-    function Deleting(Position:TPoint):Byte;
+    procedure Adding(Position:TPoint);
+    procedure Moving(Position:TPoint);
+    procedure Deleting(Position:TPoint);
 
     procedure MITextPropertiesClick(Sender:TObject);
     procedure InitializeTextMenu(var Menu:TPopupMenu;Parent:TForm);
 
     function GetCount():Integer;
+    procedure CheckOpInProgressAndExcept();
 
    public
     FOnShow : TNEvent;
@@ -84,16 +92,16 @@ type
      function GetPopisek(aPos:TPoint):SmallInt;
      function IsObsazeno(Pos1,Pos2:TPoint):boolean;
 
-     function Add(aText:string;aColor:ShortInt):Byte;
-     function Move:Byte;
-     function Delete:Byte;
+     procedure Add(aText:string;aColor:ShortInt);
+     procedure Move();
+     procedure Delete();
 
      procedure SetLoadedData(LoadData:TBytes);
      procedure SetLoadedDataV32(LoadData:TBytes);
      function GetSaveData:TBytes;
      procedure Reset;
 
-     function MouseUp(Position:TPoint;Button:TMouseButton):Byte;
+     procedure MouseUp(Position:TPoint;Button:TMouseButton);
 
      property AddKrok:Byte read Operations.FAddKrok;
      property MoveKrok:Byte read Operations.FMoveKrok;
@@ -121,7 +129,7 @@ begin
  Self.InitializeTextMenu(Self.TextMenu,Parent);
 
  Self.Reset;
-end;//function
+end;
 
 destructor TPopisky.Destroy;
 begin
@@ -135,62 +143,38 @@ begin
 end;//destructor
 
 //pridani popisku
-function TPopisky.AddToStructure(aPos:TPoint;aText:string;aColor:ShortInt):Byte;
+procedure TPopisky.AddToStructure(aPos:TPoint;aText:string;aColor:ShortInt);
 var p:TPopisek;
 begin
  if ((aPos.X < 0) or (aPos.Y < 0) or (aPos.X > (_MAX_WIDTH-1)) or (aPos.Y > (_MAX_HEIGHT-1))) then
-  begin
-   Result := 1;
-   Exit;
-  end;//if kontrola limitu
+   raise EInvalidPosition.Create('Neplatná pozice!');
  if (Self.GetPopisek(aPos) <> -1) then
-  begin
-   Result := 2;
-   Exit;
-  end;//if (Self.Bitmap[aPos.X,aPos.Y] <> -1)
- if (Self.Count >= 255) then
-  begin
-   Result := 3;
-   Exit;
-  end;
- if ((Length(aText) < _MIN_TEXT_LENGTH) or (Length(aText) > _MAX_TEXT_LENGTH)) then
-  begin
-   Result := 4;
-   Exit;
-  end;
-
+   raise ENonemptyField.Create('Na pozici je již symbol!');
+ if (Self.Count >= _MAX_POPISKY) then
+   raise EMaxReached.Create('Dosaženo maximálního poètu textù!');
+ if (Length(aText) > _MAX_TEXT_LENGTH) then
+   raise ETooLongText.Create('Text je pøíliš dlouhý!');
 
  p.Position  := aPos;
  p.Text      := aText;
  p.Color     := aColor;
 
  Self.Data.Add(p);
-
- Result := 0;
-end;//function
+end;
 
 //smazani popisku
-function TPopisky.DeleteFromStructure(aPos:TPoint):Byte;
+procedure TPopisky.DeleteFromStructure(aPos:TPoint);
 var PIndex:Integer;
 begin
  if ((aPos.X < 0) or (aPos.Y < 0) or (aPos.X > (_MAX_WIDTH-1)) or (aPos.Y > (_MAX_HEIGHT-1))) then
-  begin
-   Result := 1;
-   Exit;
-  end;//if kontrola limitu
+   raise EInvalidPosition.Create('Neplatná pozice!');
 
  PIndex := Self.GetPopisek(aPos);
  if (PIndex = -1) then
-  begin
-   Result := 2;
-   Exit;
-  end;
+   raise ENoSymbol.Create('Na této pozici není žádný symbol!');
 
- //samotne mazani
  Self.Data.Delete(PIndex);
-
- Result := 0;
-end;//function
+end;
 
 //zjisteni, zda-li je na dane pozici popisek, popr jeho index v poli separatoru
 function TPopisky.GetPopisek(aPos:TPoint):SmallInt;
@@ -200,20 +184,11 @@ begin
 
  //vychazime z toho, ze 1 popisek lze zapsat pouze na 1 radek
  for i := 0 to Self.Count-1 do
-  begin
    if (Self.Data[i].Position.Y = aPos.Y) then
-    begin
      for j := Self.Data[i].Position.X to Self.Data[i].Position.X+(Length(Self.Data[i].Text))-1 do
-      begin
        if (j = aPos.X) then
-        begin
-         Result := i;
-         Break;
-        end;//if (Self.Popisky[i].Position.X = j)
-      end;//for j
-    end;//if (Self.Popisky[i].Position.Y = aPos.Y)
-  end;//for i
-end;//function
+         Exit(i);
+end;
 
 //nacteni surovych dat do struktur
 procedure TPopisky.SetLoadedData(LoadData:TBytes);
@@ -240,7 +215,7 @@ begin
 
    Self.Data.Add(p);
   end;//for i
-end;//function
+end;
 
 procedure TPopisky.SetLoadedDataV32(LoadData:TBytes);
 var pos:Integer;
@@ -300,21 +275,21 @@ begin
  SetLength(Result, currentLen);
  Result[0] := hi(currentLen-2);
  Result[1] := lo(currentLen-2);
-end;//procedure
+end;
 
 procedure TPopisky.Reset;
 begin
  Self.Data.Count := 0;
 
  Self.Escape;
-end;//procedure
+end;
 
 procedure TPopisky.Escape;
 begin
  Self.Operations.FAddKrok    := 0;
  Self.Operations.FMoveKrok   := 0;
  Self.Operations.FDeleteKrok := 0;
-end;//procedure
+end;
 
 //vykresleni textu
 procedure TPopisky.Paint;
@@ -323,7 +298,7 @@ begin
  //vykresleni textu
  for i := 0 to Self.Count-1 do
    Self.Graphics.TextOutputI(Self.Data[i].Position, Self.Data[i].Text, Self.Data[i].Color, clBlack);
-end;//procedure
+end;
 
 function TPopisky.GetPopisekData(Index:Integer):TPopisek;
 begin
@@ -334,7 +309,7 @@ begin
   end;
 
  Result := Self.Data[Index];
-end;//function
+end;
 
 function TPopisky.SetPopisekData(Index:Integer;Data:TPopisek):Byte;
 begin
@@ -347,111 +322,64 @@ begin
  Self.Data[Index] := Data;
 
  Result := 0;
-end;//function
+end;
 
 //pridavani textu
-function TPopisky.Adding(Position:TPoint):Byte;
+procedure TPopisky.Adding(Position:TPoint);
 var i:Integer;
 begin
- Result := 0;
-
  //kontrola obsazenosti pozice
  if (Assigned(FIsSymbol)) then
-  begin
    for i := Position.X to Position.X+Length(Self.Operations.TextProperties.Text)-1 do
-    begin
      if (FIsSymbol(Point(i,Position.Y))) then
-      begin
-       Result := 4;
-       Exit;
-      end;
-    end;//for i
-  end else begin
-   if (Self.IsObsazeno(Position,Point(Position.X+Length(Self.Operations.TextProperties.Text),Position.Y))) then
-    begin
-     Result := 4;
-     Exit;
-    end;//if PanelBitmap...
-  end;//else (Assigned(FIsOperation))
+       raise ENonemptyField.Create('Na pozici je již symbol!');
 
- //kontrola obsazenosti
  if (Self.IsObsazeno(Position,Point(Position.X+Length(Self.Operations.TextProperties.Text),Position.Y))) then
-  begin
-   Result := 4;
-   Exit;
-  end;//if Self.IsBitmapObsazeno
+   raise ENonemptyField.Create('Na pozici je již symbol!');
 
- if (Self.AddToStructure(Position,Self.Operations.TextProperties.Text,Self.Operations.TextProperties.Color) <> 0) then
-  begin
-   //chyba externi funkce
-   Result := 3;
-   Exit;
-  end;//if (aReturn <> 0)
+ Self.AddToStructure(Position,Self.Operations.TextProperties.Text,Self.Operations.TextProperties.Color);
 
  Self.Operations.FAddKrok := 0;
-end;//procedure
+end;
 
 //pohyb textu
-function TPopisky.Moving(Position:TPoint):Byte;
+procedure TPopisky.Moving(Position:TPoint);
 var PopisekIndex:Integer;
     i:Integer;
 begin
- Result := 0;
-
  //zde neni skupina pripustna
  case (Self.Operations.FMoveKrok) of
   1:begin
      PopisekIndex := Self.GetPopisek(Position);
      if (PopisekIndex = -1) then
-      begin
-       //neni s cim pohybovat
-       Result := 2;
-       Exit;
-      end;
+       Exit();
 
      //ziskani dat popisku
-     Self.Operations.TextProperties.Text  := Self.GetPopisekData(PopisekIndex).Text;
+     Self.Operations.TextProperties.Text := Self.GetPopisekData(PopisekIndex).Text;
      Self.Operations.TextProperties.Color := Self.GetPopisekData(PopisekIndex).Color;
 
-     if (Self.DeleteFromStructure(Position) <> 0) then
-      begin
-       //chyba externi funkce
-       Result := 3;
-       Exit;
-      end;//if (PanelBitmap.DeleteSymbol(Position) <> 0)
+     Self.DeleteFromStructure(Position);
 
      if (Assigned(FNullOperations)) then FNullOperations;
      Self.Operations.FMoveKrok := 2;
-    end;//case 1
+    end;
+
   2:begin
      if (Assigned(FIsSymbol)) then
       begin
        for i := Position.X to Position.X+Length(Self.Operations.TextProperties.Text)-1 do
-        begin
          if (FIsSymbol(Point(i,Position.Y))) then
-          begin
-           Result := 4;
-           Exit;
-          end;
-        end;//for i
+           raise ENonemptyField.Create('Pozice obsazena!');
       end else begin
        if (Self.IsObsazeno(Position,Point(Position.X+Length(Self.Operations.TextProperties.Text),Position.Y))) then
-        begin
-         Result := 4;
-         Exit;
-        end;
-      end;//else Assigned(FIsOperation)
+         raise ENonemptyField.Create('Pozice obsazena!');
+      end;
 
-     if (Self.AddToStructure(Position,Self.Operations.TextProperties.Text,Self.Operations.TextProperties.Color) <> 0) then
-      begin
-       //chyba externi funkce
-       Result := 3;
-       Exit;
-      end;//if (aReturn <> 0)
+     Self.AddToStructure(Position,Self.Operations.TextProperties.Text,Self.Operations.TextProperties.Color);
 
-     Self.Operations.TextProperties.Text  := '';
+     Self.Operations.TextProperties.Text := '';
      Self.Operations.TextProperties.Color := 0;
-     Self.Operations.FMoveKrok             := 0;
+     Self.Operations.FMoveKrok := 0;
 
      //znovu pripraveni pohybu objektu
      if Assigned(FOnShow) then
@@ -460,29 +388,20 @@ begin
        Sleep(50);
       end;
      if (Assigned(Self.FMoveActivate)) then Self.FMoveActivate;
-    end;//case 3
+    end;
+
   end;//case
-end;//procedure
+end;
 
 //mazani textu
-function TPopisky.Deleting(Position:TPoint):Byte;
+procedure TPopisky.Deleting(Position:TPoint);
 begin
- Result := 0;
-
  if (Self.GetPopisek(Position) = -1) then
-  begin
-   Result := 2;
-   Exit;
-  end;
+   Exit();
 
  Self.Operations.FDeleteKrok := 0;
 
- if (Self.DeleteFromStructure(Position) <> 0) then
-  begin
-   //chyba externi funkce
-   Result := 3;
-   Exit;
-  end;//if (aReturn <> 0)
+ Self.DeleteFromStructure(Position);
 
  Self.Operations.FDeleteKrok := 0;
  if Assigned(FOnShow) then
@@ -492,7 +411,7 @@ begin
   end;
 
  if (Assigned(Self.FDeleteActivate)) then Self.FDeleteActivate;
-end;//procedure
+end;
 
 function TPopisky.IsObsazeno(Pos1,Pos2:TPoint):Boolean;
 var i,j:Integer;
@@ -501,112 +420,50 @@ begin
 
  //kontrola obsazenosti
  for i := Pos1.X to Pos2.X do
-  begin
     for j := Pos1.Y to Pos2.Y do
-     begin
       if (Self.GetPopisek(Point(i,j)) <> -1) then
-       begin
-        Result := true;
-        Exit;
-       end;
-     end;//for j
-  end;//for i
-end;//function
+        Exit(true);
+end;
 
-function TPopisky.Add(aText:string;aColor:ShortInt):Byte;
+procedure TPopisky.Add(aText:string;aColor:ShortInt);
 begin
- if ((Length(aText) < _MIN_TEXT_LENGTH) or (Length(aText) > _MAX_TEXT_LENGTH)) then
-  begin
-   Result := 2;
-   Exit;
-  end;
+ if (Length(aText) > _MAX_TEXT_LENGTH) then
+   raise ETooLongText.Create('Text je pøíliš dlouhý!');
 
- if (Assigned(Self.FOPAsk)) then
-  begin
-   if (Self.FOPAsk) then
-    begin
-     Result := 1;
-     Exit;
-    end;
-  end else begin
-   if ((Self.Operations.FAddKrok > 0) or (Self.Operations.FMoveKrok > 0) or (Self.Operations.FDeleteKrok > 0)) then
-    begin
-     Result := 1;
-     Exit;
-    end;
-  end;//else (Assigned(Self.FOPAsk))
-
+ Self.CheckOpInProgressAndExcept();
 
  Self.Operations.FAddKrok             := 1;
  Self.Operations.TextProperties.Text  := aText;
  Self.Operations.TextProperties.Color := aColor;
+end;
 
- Result := 0;
-end;//function
-
-function TPopisky.Move:Byte;
+procedure TPopisky.Move();
 begin
- if (Assigned(Self.FOPAsk)) then
-  begin
-   if (Self.FOPAsk) then
-    begin
-     Result := 1;
-     Exit;
-    end;
-  end else begin
-   if ((Self.Operations.FAddKrok > 0) or (Self.Operations.FMoveKrok > 0) or (Self.Operations.FDeleteKrok > 0)) then
-    begin
-     Result := 1;
-     Exit;
-    end;
-  end;//else (Assigned(Self.FOPAsk))
-
+ Self.CheckOpInProgressAndExcept();
  Self.Operations.FMoveKrok := 1;
+end;
 
- Result := 0;
-end;//function
-
-function TPopisky.Delete:Byte;
+procedure TPopisky.Delete();
 begin
- if (Assigned(Self.FOPAsk)) then
-  begin
-   if (Self.FOPAsk) then
-    begin
-     Result := 1;
-     Exit;
-    end;
-  end else begin
-   if ((Self.Operations.FAddKrok > 0) or (Self.Operations.FMoveKrok > 0) or (Self.Operations.FDeleteKrok > 0)) then
-    begin
-     Result := 1;
-     Exit;
-    end;
-  end;//else (Assigned(Self.FOPAsk))
-
-
+ Self.CheckOpInProgressAndExcept();
  Self.Operations.FDeleteKrok := 1;
+end;
 
- Result := 0;
-end;//function
-
-function TPopisky.MouseUp(Position:TPoint;Button:TMouseButton):Byte;
+procedure TPopisky.MouseUp(Position:TPoint;Button:TMouseButton);
 begin
- Result := 0;
-
  if (Button = mbLeft) then
   begin
-   if (Self.Operations.FAddKrok    > 0) then Result := Self.Adding(Position);
-   if (Self.Operations.FMoveKrok   > 0) then Result := Self.Moving(Position);
-   if (Self.Operations.FDeleteKrok > 0) then Result := Self.Deleting(Position);
-  end;//if Button = mbLeft
+   if (Self.Operations.FAddKrok > 0) then Self.Adding(Position)
+   else if (Self.Operations.FMoveKrok > 0) then Self.Moving(Position)
+   else if (Self.Operations.FDeleteKrok > 0) then Self.Deleting(Position);
+  end;
 
  if (Button = mbRight) then
   begin
    Self.MenuPosition := Position;
-
    if (Self.GetPopisek(Position) <> -1) then Self.TextMenu.Popup(Mouse.CursorPos.X,Mouse.CursorPos.Y);
-  end;//if Button = mbRight
-end;//procedure
+  end;
+end;
 
 //zabyva se vykreslovanim posouvanych objektu textu
 procedure TPopisky.PaintTextMove(KurzorPos:TPoint);
@@ -614,7 +471,7 @@ begin
  //pridavani, posouvani
  if ((Self.Operations.FAddKrok = 1) or (Self.Operations.FMoveKrok = 2)) then
      Self.Graphics.TextOutputI(KurzorPos, Self.Operations.TextProperties.Text, Self.Operations.TextProperties.Color, clBlack);
-end;//procedure
+end;
 
 //vykresleni kurzoru - vraci data PIXELECH!
 function TPopisky.PaintCursor(CursorPos:TPoint):TCursorDraw;
@@ -655,7 +512,7 @@ begin
    Result.Pos2.X := (CursorPos.X+Length(Self.Operations.TextProperties.Text)-1)*_Symbol_Sirka;
    Result.Pos2.Y := CursorPos.Y*_Symbol_Vyska;
   end;
-end;//function
+end;
 
 procedure TPopisky.MITextPropertiesClick(Sender:TObject);
 var PIndex:Integer;
@@ -675,7 +532,7 @@ begin
  Self.SetPopisekData(PIndex,aPopisek);
 
  if Assigned(FOnShow) then FOnShow;
-end;//procedure
+end;
 
 procedure TPopisky.InitializeTextMenu(var Menu:TPopupMenu;Parent:TForm);
 var MI:TMenuItem;
@@ -689,11 +546,23 @@ begin
  MI.OnClick := Self.MITextPropertiesClick;
 
  Menu.Items.Add(MI);
-end;//procedure
+end;
 
 function TPopisky.GetCount():Integer;
 begin
  Result := Self.Data.Count;
+end;
+
+procedure TPopisky.CheckOpInProgressAndExcept();
+begin
+ if (Assigned(Self.FOPAsk)) then
+  begin
+   if (Self.FOPAsk) then
+     raise EOperationInProgress.Create('Právì probíhá operace!');
+  end else begin
+   if ((Self.Operations.FAddKrok > 0) or (Self.Operations.FMoveKrok > 0) or (Self.Operations.FDeleteKrok > 0)) then
+     raise EOperationInProgress.Create('Právì probíhá operace!');
+  end;
 end;
 
 end.//unit

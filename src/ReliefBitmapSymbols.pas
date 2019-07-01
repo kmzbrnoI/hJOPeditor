@@ -424,7 +424,7 @@ begin
        Self.Operations.Move.aHeight := 1;
 
        if (Self.GetSymbol(Position) = -1) then
-         raise ENoSymbol.Create('Na této pozici není žádný symbol!');
+         Exit();
 
        if (Assigned(FNullOperations)) then FNullOperations;
 
