@@ -66,7 +66,7 @@ TUsek = class(TGraphBlok)
 end;
 
 // popisek
-TPopisek = class(TGraphBlok)
+TText = class(TGraphBlok)
  Text:string;
  Position:TPoint;
  Color:Integer;
@@ -498,16 +498,16 @@ begin
    count := inifile.ReadInteger('P','T',0);
    for i := 0 to count-1 do
     begin
-     blok           := TPopisek.Create();
+     blok           := TText.Create();
      blok.index     := i;
      blok.typ       := TBlkType.popisek;
      blok.Blok      := inifile.ReadInteger('T'+IntToStr(i),'B', -1);
      blok.OblRizeni := inifile.ReadInteger('T'+IntToStr(i),'OR', -1);
 
-     (blok as TPopisek).Text       := inifile.ReadString('T'+IntToStr(i),'T', 'text');
-     (blok as TPopisek).Position.X := inifile.ReadInteger('T'+IntToStr(i),'X', 0);
-     (blok as TPopisek).Position.Y := inifile.ReadInteger('T'+IntToStr(i),'Y', 0);
-     (blok as TPopisek).Color      := inifile.ReadInteger('T'+IntToStr(i),'C', 0);
+     (blok as TText).Text       := inifile.ReadString('T'+IntToStr(i),'T', 'text');
+     (blok as TText).Position.X := inifile.ReadInteger('T'+IntToStr(i),'X', 0);
+     (blok as TText).Position.Y := inifile.ReadInteger('T'+IntToStr(i),'Y', 0);
+     (blok as TText).Color      := inifile.ReadInteger('T'+IntToStr(i),'C', 0);
 
      Self.Bloky.Add(blok);
     end;//for i
@@ -828,12 +828,12 @@ begin
       end;
 
       TBlkType.popisek:begin
-       inifile.WriteString('T'+IntToStr(Self.Bloky[i].Index),  'T', (Self.Bloky[i] as TPopisek).Text);
-       inifile.WriteInteger('T'+IntToStr(Self.Bloky[i].Index), 'X', (Self.Bloky[i] as TPopisek).Position.X);
-       inifile.WriteInteger('T'+IntToStr(Self.Bloky[i].Index), 'Y', (Self.Bloky[i] as TPopisek).Position.Y);
-       inifile.WriteInteger('T'+IntToStr(Self.Bloky[i].Index), 'C', (Self.Bloky[i] as TPopisek).Color);
+       inifile.WriteString('T'+IntToStr(Self.Bloky[i].Index),  'T', (Self.Bloky[i] as TText).Text);
+       inifile.WriteInteger('T'+IntToStr(Self.Bloky[i].Index), 'X', (Self.Bloky[i] as TText).Position.X);
+       inifile.WriteInteger('T'+IntToStr(Self.Bloky[i].Index), 'Y', (Self.Bloky[i] as TText).Position.Y);
+       inifile.WriteInteger('T'+IntToStr(Self.Bloky[i].Index), 'C', (Self.Bloky[i] as TText).Color);
 
-       if (Length((Self.Bloky[i] as TPopisek).Text) = 1) then
+       if (Length((Self.Bloky[i] as TText).Text) = 1) then
         begin
          inifile.WriteInteger('T'+IntToStr(Self.Bloky[i].Index), 'B', Self.Bloky[i].Blok);
          inifile.WriteInteger('T'+IntToStr(Self.Bloky[i].Index), 'OR', Self.Bloky[i].OblRizeni);
@@ -1037,7 +1037,7 @@ begin
     /////////////////////////////////////////////////
 
     TBlkType.popisek:begin
-       if (Length((Self.Bloky[i] as TPopisek).Text) = 1) then
+       if (Length((Self.Bloky[i] as TText).Text) = 1) then
         begin
          if (Self.Selected = Self.Bloky[i]) then
           begin
@@ -1051,10 +1051,10 @@ begin
            end;
           end;//else (Self.Selected > 255)
         end else begin
-          color := (Self.Bloky[i] as TPopisek).Color;
+          color := (Self.Bloky[i] as TText).Color;
         end;
 
-       Self.Graphics.TextOutputI((Self.Bloky[i] as TPopisek).Position, (Self.Bloky[i] as TPopisek).Text, color, clBlack);
+       Self.Graphics.TextOutputI((Self.Bloky[i] as TText).Position, (Self.Bloky[i] as TText).Text, color, clBlack);
     end;
 
     /////////////////////////////////////////////////
@@ -1246,8 +1246,8 @@ begin
     end;
 
     TBlkType.popisek:begin
-     if ((Pos.Y = (Self.Bloky[i] as TPopisek).Position.Y) and (Pos.X >= (Self.Bloky[i] as TPopisek).Position.X)
-      and (Pos.X < (Self.Bloky[i] as TPopisek).Position.X+Length((Self.Bloky[i] as TPopisek).Text)) and (Length((Self.Bloky[i] as TPopisek).Text) = 1)) then
+     if ((Pos.Y = (Self.Bloky[i] as TText).Position.Y) and (Pos.X >= (Self.Bloky[i] as TText).Position.X)
+      and (Pos.X < (Self.Bloky[i] as TText).Position.X+Length((Self.Bloky[i] as TText).Text)) and (Length((Self.Bloky[i] as TText).Text) = 1)) then
        Exit(i);
     end;
 
@@ -1426,13 +1426,13 @@ begin
 
  for i := 0 to Self.Bloky.Count-1 do
   begin
-   if ((Self.Bloky[i].Blok = -1) and (Self.Bloky[i].typ <> TBlkType.pomocny_obj) and ((Self.Bloky[i].typ <> TBlkType.popisek) or (Length((Self.Bloky[i] as TPopisek).Text) = 1))) then
+   if ((Self.Bloky[i].Blok = -1) and (Self.Bloky[i].typ <> TBlkType.pomocny_obj) and ((Self.Bloky[i].typ <> TBlkType.popisek) or (Length((Self.Bloky[i] as TText).Text) = 1))) then
     begin
      Result.Add('ERR: blok '+IntToStr(i)+': neni navaznost na technologicky blok');
      error_cnt := error_cnt + 1;
     end;
    if ((Self.Bloky[i].OblRizeni < 0) and
-    ((Self.Bloky[i].typ <> TBlkType.pomocny_obj) xor ((Self.Bloky[i].typ = TBlkType.popisek) and (Length((Self.Bloky[i] as TPopisek).Text) > 1)))) then
+    ((Self.Bloky[i].typ <> TBlkType.pomocny_obj) xor ((Self.Bloky[i].typ = TBlkType.popisek) and (Length((Self.Bloky[i] as TText).Text) > 1)))) then
     begin
      Result.Add('ERR: blok '+IntToStr(i)+': neni navaznost na oblast rizeni');
      error_cnt := error_cnt + 1;

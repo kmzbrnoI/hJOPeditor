@@ -145,14 +145,14 @@ begin
   begin
    PopData := Self.Bitmap.Popisky.GetPopisekData(i);
 
-   blk           := ReliefObjects.TPopisek.Create();
+   blk           := ReliefObjects.TText.Create();
    blk.index     := index;
    blk.typ       := TBlkType.popisek;
    blk.Blok      := -1;
    blk.OblRizeni := 0;
-   (blk as ReliefObjects.TPopisek).Text     := PopData.Text;
-   (blk as ReliefObjects.TPopisek).Position := PopData.Position;
-   (blk as ReliefObjects.TPopisek).Color    := PopData.Color;
+   (blk as ReliefObjects.TText).Text     := PopData.Text;
+   (blk as ReliefObjects.TText).Position := PopData.Position;
+   (blk as ReliefObjects.TText).Color    := PopData.Color;
    Self.Objects.Bloky.Add(blk);
    Inc(index);
   end;//for i
