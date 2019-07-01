@@ -47,63 +47,59 @@
 			<DelphiCompile Include="hJOPeditor.dpr">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="fMain.pas">
+			<DCCReference Include="forms\fMain.pas">
 				<Form>F_Hlavni</Form>
 			</DCCReference>
-			<DCCReference Include="ReliefObjects.pas">
-				<Form>,
-  Panel in &apos;Panel.pas&apos;,
-  fNewRelief in &apos;fNewRelief.pas&apos; {F_NewRelief</Form>
-			</DCCReference>
+			<DCCReference Include="object\ReliefObjects.pas"/>
 			<DCCReference Include="Panel.pas"/>
-			<DCCReference Include="fNewRelief.pas">
+			<DCCReference Include="forms\fNewRelief.pas">
 				<Form>F_NewRelief</Form>
 			</DCCReference>
-			<DCCReference Include="ReliefBitmap.pas"/>
-			<DCCReference Include="fChangeRelief.pas">
+			<DCCReference Include="bitmap\ReliefBitmap.pas"/>
+			<DCCReference Include="forms\fChangeRelief.pas">
 				<Form>F_ReliefProperties</Form>
 			</DCCReference>
 			<DCCReference Include="Global.pas"/>
 			<DCCReference Include="ReliefSettings.pas"/>
-			<DCCReference Include="fReliefSettings.pas">
+			<DCCReference Include="forms\fReliefSettings.pas">
 				<Form>F_ReliefOptions</Form>
 			</DCCReference>
-			<DCCReference Include="ReliefText.pas"/>
-			<DCCReference Include="fPopiskek.pas">
+			<DCCReference Include="bitmap\ReliefText.pas"/>
+			<DCCReference Include="forms\fPopiskek.pas">
 				<Form>F_Popisek</Form>
 			</DCCReference>
-			<DCCReference Include="VektorBasedObject.pas"/>
-			<DCCReference Include="ReliefBitmapSymbols.pas"/>
+			<DCCReference Include="bitmap\VektorBasedObject.pas"/>
+			<DCCReference Include="bitmap\ReliefBitmapSymbols.pas"/>
 			<DCCReference Include="BitmapToObj.pas"/>
-			<DCCReference Include="fBlockEdit.pas">
+			<DCCReference Include="forms\fBlockEdit.pas">
 				<Form>F_BlockEdit</Form>
 			</DCCReference>
 			<DCCReference Include="OblastRizeni.pas"/>
-			<DCCReference Include="fOREdit.pas">
+			<DCCReference Include="forms\fOREdit.pas">
 				<Form>F_OREdit</Form>
 			</DCCReference>
-			<DCCReference Include="fDataCheck.pas">
+			<DCCReference Include="forms\fDataCheck.pas">
 				<Form>F_DataCheck</Form>
 			</DCCReference>
-			<DCCReference Include="ReliefZT.pas"/>
+			<DCCReference Include="zt\ReliefZT.pas"/>
 			<DCCReference Include="ObjToZT.pas"/>
 			<DCCReference Include="PGraphics.pas"/>
 			<DCCReference Include="RPConst.pas"/>
-			<DCCReference Include="VetveComputer.pas"/>
+			<DCCReference Include="object\VetveComputer.pas"/>
 			<DCCReference Include="symbolHelper.pas"/>
-			<DCCReference Include="vetev.pas"/>
-			<DCCReference Include="ObjBlok.pas"/>
-			<DCCReference Include="ObjBlokVyhybka.pas"/>
-			<DCCReference Include="ObjBlokUsek.pas"/>
-			<DCCReference Include="ObjBlokText.pas"/>
-			<DCCReference Include="ObjBlokNavestidlo.pas"/>
-			<DCCReference Include="ObjBlokPomocny.pas"/>
-			<DCCReference Include="ObjBlokPrejezd.pas"/>
-			<DCCReference Include="ObjBlokUvazkaSpr.pas"/>
-			<DCCReference Include="ObjBlokUvazka.pas"/>
-			<DCCReference Include="ObjBlokZamek.pas"/>
-			<DCCReference Include="ObjBlokRozp.pas"/>
-			<DCCReference Include="ObjBlokVykol.pas"/>
+			<DCCReference Include="object\vetev.pas"/>
+			<DCCReference Include="object\blok\ObjBlok.pas"/>
+			<DCCReference Include="object\blok\ObjBlokVyhybka.pas"/>
+			<DCCReference Include="object\blok\ObjBlokUsek.pas"/>
+			<DCCReference Include="object\blok\ObjBlokText.pas"/>
+			<DCCReference Include="object\blok\ObjBlokNavestidlo.pas"/>
+			<DCCReference Include="object\blok\ObjBlokPomocny.pas"/>
+			<DCCReference Include="object\blok\ObjBlokPrejezd.pas"/>
+			<DCCReference Include="object\blok\ObjBlokUvazkaSpr.pas"/>
+			<DCCReference Include="object\blok\ObjBlokUvazka.pas"/>
+			<DCCReference Include="object\blok\ObjBlokZamek.pas"/>
+			<DCCReference Include="object\blok\ObjBlokRozp.pas"/>
+			<DCCReference Include="object\blok\ObjBlokVykol.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>
@@ -136,7 +132,7 @@
 						<VersionInfo Name="MajorVer">2</VersionInfo>
 						<VersionInfo Name="MinorVer">9</VersionInfo>
 						<VersionInfo Name="Release">2</VersionInfo>
-						<VersionInfo Name="Build">1</VersionInfo>
+						<VersionInfo Name="Build">2</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -148,7 +144,7 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName"/>
 						<VersionInfoKeys Name="FileDescription"/>
-						<VersionInfoKeys Name="FileVersion">2.9.2.1</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">2.9.2.2</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName">hJOPeditor</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalCopyright">Jan Horacek 2011-2018</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks">Jan Horacek 2011-2018</VersionInfoKeys>
