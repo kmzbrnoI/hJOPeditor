@@ -53,6 +53,7 @@ type
     procedure Deleting(Position:TPoint);
 
     function GetCount():Integer;
+    procedure CheckOpInProgressAndExcept();
 
   public
    FOnShow : TNEvent;
@@ -297,44 +298,20 @@ end;
 
 procedure TVBO.Add();
 begin
- if (Assigned(Self.FOPAsk)) then
-  begin
-   if (Self.FOPAsk) then
-     raise EOperationInProgress.Create('Právì probíhá operace!');
-  end else begin
-   if ((Self.Operations.FAddKrok > 0) or (Self.Operations.FMoveKrok > 0) or (Self.Operations.FDeleteKrok > 0)) then
-     raise EOperationInProgress.Create('Právì probíhá operace!');
-  end;
-
+ Self.CheckOpInProgressAndExcept();
  Self.Operations.FAddKrok := 1;
  if Assigned(FOnShow) then FOnShow();
 end;
 
 procedure TVBO.Move();
 begin
- if (Assigned(Self.FOPAsk)) then
-  begin
-   if (Self.FOPAsk) then
-     raise EOperationInProgress.Create('Právì probíhá operace!');
-  end else begin
-   if ((Self.Operations.FAddKrok > 0) or (Self.Operations.FMoveKrok > 0) or (Self.Operations.FDeleteKrok > 0)) then
-     raise EOperationInProgress.Create('Právì probíhá operace!');
-  end;
-
+ Self.CheckOpInProgressAndExcept();
  Self.Operations.FMoveKrok := 1;
 end;
 
 procedure TVBO.Delete();
 begin
- if (Assigned(Self.FOPAsk)) then
-  begin
-   if (Self.FOPAsk) then
-     raise EOperationInProgress.Create('Právì probíhá operace!');
-  end else begin
-   if ((Self.Operations.FAddKrok > 0) or (Self.Operations.FMoveKrok > 0) or (Self.Operations.FDeleteKrok > 0)) then
-     raise EOperationInProgress.Create('Právì probíhá operace!');
-  end;
-
+ Self.CheckOpInProgressAndExcept();
  Self.Operations.FDeleteKrok := 1;
 end;
 
@@ -384,6 +361,18 @@ end;
 function TVBO.GetCount():Integer;
 begin
  Result := Self.Data.Count;
+end;
+
+procedure TVBO.CheckOpInProgressAndExcept();
+begin
+ if (Assigned(Self.FOPAsk)) then
+  begin
+   if (Self.FOPAsk) then
+     raise EOperationInProgress.Create('Právì probíhá operace!');
+  end else begin
+   if ((Self.Operations.FAddKrok > 0) or (Self.Operations.FMoveKrok > 0) or (Self.Operations.FDeleteKrok > 0)) then
+     raise EOperationInProgress.Create('Právì probíhá operace!');
+  end;
 end;
 
 end.//unit

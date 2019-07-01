@@ -72,6 +72,7 @@ type
       procedure Deleting(Position:TPoint);
 
       function ControlCursorPos(Pos1,Pos2:TPoint):Boolean;
+      procedure CheckOpInProgressAndExcept();
 
     public
      FOnShow : TNEvent;
@@ -530,14 +531,7 @@ end;
 
 procedure TBitmapSymbols.Add(SymbolID:Integer);
 begin
- if (Assigned(Self.FOPAsk)) then
-  begin
-   if (Self.FOPAsk) then
-     raise EOperationInProgress.Create('Právì probíhá operace!');
-  end else begin
-   if ((Self.Operations.Add.Krok > 0) or (Self.Operations.Move.Krok > 0) or (Self.Operations.FDeleteKrok > 0)) then
-     raise EOperationInProgress.Create('Právì probíhá operace!');
-  end;
+ Self.CheckOpInProgressAndExcept();
 
  Self.Operations.Add.Krok   := 1;
  Self.Operations.Add.Symbol := SymbolID;
@@ -547,29 +541,13 @@ end;
 
 procedure TBitmapSymbols.Move();
 begin
- if (Assigned(Self.FOPAsk)) then
-  begin
-   if (Self.FOPAsk) then
-     raise EOperationInProgress.Create('Právì probíhá operace!');
-  end else begin
-   if ((Self.Operations.Add.Krok > 0) or (Self.Operations.Move.Krok > 0) or (Self.Operations.FDeleteKrok > 0)) then
-     raise EOperationInProgress.Create('Právì probíhá operace!');
-  end;
-
+ Self.CheckOpInProgressAndExcept();
  Self.Operations.Move.Krok := 1;
 end;
 
 procedure TBitmapSymbols.Delete();
 begin
- if (Assigned(Self.FOPAsk)) then
-  begin
-   if (Self.FOPAsk) then
-     raise EOperationInProgress.Create('Právì probíhá operace!');
-  end else begin
-   if ((Self.Operations.Add.Krok > 0) or (Self.Operations.Move.Krok > 0) or (Self.Operations.FDeleteKrok > 0)) then
-     raise EOperationInProgress.Create('Právì probíhá operace!');
-  end;
-
+ Self.CheckOpInProgressAndExcept();
  Self.Operations.FDeleteKrok := 1;
 end;
 
@@ -687,6 +665,18 @@ begin
    Self.DrawObject.IL.Draw(Self.DrawObject.Canvas,(X+1)*_Symbol_Sirka, Y*_Symbol_Vyska,((_Symbol_Uvazka+1)*10)+color);
 
  IL.Draw(Self.DrawObject.Canvas, X*_Symbol_Sirka, Y*_Symbol_Vyska, (index*10) + color);
+end;
+
+procedure TBitmapSymbols.CheckOpInProgressAndExcept();
+begin
+ if (Assigned(Self.FOPAsk)) then
+  begin
+   if (Self.FOPAsk) then
+     raise EOperationInProgress.Create('Právì probíhá operace!');
+  end else begin
+   if ((Self.Operations.Add.Krok > 0) or (Self.Operations.Move.Krok > 0) or (Self.Operations.FDeleteKrok > 0)) then
+     raise EOperationInProgress.Create('Právì probíhá operace!');
+  end;
 end;
 
 end.//unit
