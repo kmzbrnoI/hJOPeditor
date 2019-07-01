@@ -36,7 +36,7 @@ var i,j:Integer;
     blk:TGraphBlok;
     PopData:TPopisek;
     pomocne:TDictionary<integer, TGraphBlok>;
-    index, vyh_index, vykol_index:Integer;
+    index, popisek_index, vyh_index, vykol_index:Integer;
 begin
  Self.Bitmap  := BitmapData;
  Self.Objects := ObjectData;
@@ -131,16 +131,27 @@ begin
 
  //prevadeni textu
  index := 0;
- for i := 0 to Self.Bitmap.Popisky.Count-1 do
+ popisek_index := 0;
+ for i := 0 to Self.Bitmap.Text.Count-1 do
   begin
-   PopData := Self.Bitmap.Popisky.GetPopisekData(i);
+   PopData := Self.Bitmap.Text.GetPopisekData(i);
 
-   blk := TText.Create(index);
+   if (PopData.BlokPopisek) then
+     blk := TText.Create(popisek_index)
+   else
+     blk := TText.Create(index);
    (blk as TText).Text     := PopData.Text;
    (blk as TText).Position := PopData.Position;
    (blk as TText).Color    := PopData.Color;
+
+   if (PopData.BlokPopisek) then
+    begin
+     blk.typ := TBlkType.blok_popisek;
+     Inc(popisek_index);
+    end else
+     Inc(index);
+
    Self.Objects.Bloky.Add(blk);
-   Inc(index);
   end;//for i
 
  //prevedeni prejezdu

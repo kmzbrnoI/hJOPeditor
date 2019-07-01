@@ -31,7 +31,7 @@ type
 
   TChangeTextEvent = procedure(Sender:TObject; var popisek:TPopisek) of object;
 
-  TPopisky = class
+  TText = class
    private
      Data:TList<TPopisek>;
 
@@ -115,11 +115,11 @@ type
      property OnMoveActivate: TNEvent read FMoveActivate write FMoveActivate;
      property OnDeleteActivate: TNEvent read FDeleteActivate write FDeleteActivate;
      property OnChangeText: TChangeTextEvent read FOnChangeText write FOnChangeText;
-  end;//TPopisky
+  end;//TText
 
 implementation
 
-constructor TPopisky.Create(DrawCanvas:TCanvas;TextIL:TImageList;Parent:TForm; Graphics:TPanelGraphics);
+constructor TText.Create(DrawCanvas:TCanvas;TextIL:TImageList;Parent:TForm; Graphics:TPanelGraphics);
 begin
  inherited Create();
 
@@ -132,7 +132,7 @@ begin
  Self.Reset();
 end;
 
-destructor TPopisky.Destroy();
+destructor TText.Destroy();
 begin
  Self.Data.Free();
 
@@ -146,7 +146,7 @@ begin
 end;
 
 //pridani popisku
-procedure TPopisky.AddToStructure(aPos:TPoint; aText:string; aColor:ShortInt; aBlokDesc:boolean);
+procedure TText.AddToStructure(aPos:TPoint; aText:string; aColor:ShortInt; aBlokDesc:boolean);
 var p:TPopisek;
 begin
  if ((aPos.X < 0) or (aPos.Y < 0) or (aPos.X > (_MAX_WIDTH-1)) or (aPos.Y > (_MAX_HEIGHT-1))) then
@@ -167,7 +167,7 @@ begin
 end;
 
 //smazani popisku
-procedure TPopisky.DeleteFromStructure(aPos:TPoint);
+procedure TText.DeleteFromStructure(aPos:TPoint);
 var PIndex:Integer;
 begin
  if ((aPos.X < 0) or (aPos.Y < 0) or (aPos.X > (_MAX_WIDTH-1)) or (aPos.Y > (_MAX_HEIGHT-1))) then
@@ -181,7 +181,7 @@ begin
 end;
 
 //zjisteni, zda-li je na dane pozici popisek, popr jeho index v poli separatoru
-function TPopisky.GetPopisek(aPos:TPoint):SmallInt;
+function TText.GetPopisek(aPos:TPoint):SmallInt;
 var i,j:Integer;
 begin
  Result := -1;
@@ -195,7 +195,7 @@ begin
 end;
 
 //nacteni surovych dat do struktur
-procedure TPopisky.SetLoadedData(LoadData:TBytes);
+procedure TText.SetLoadedData(LoadData:TBytes);
 var i, j:Integer;
     p:TPopisek;
     count:Integer;
@@ -222,7 +222,7 @@ begin
   end;//for i
 end;
 
-procedure TPopisky.SetLoadedDataV32(LoadData:TBytes);
+procedure TText.SetLoadedDataV32(LoadData:TBytes);
 var pos:Integer;
     i:Integer;
     len:Integer;
@@ -253,7 +253,7 @@ begin
 end;
 
 //ziskani surovych dat zapisovanych do souboru z dat programu
-function TPopisky.GetSaveData():TBytes;
+function TText.GetSaveData():TBytes;
 var bytesBuf:TBytes;
     len:Integer;
     currentLen:Integer;
@@ -295,13 +295,13 @@ begin
  Result[1] := lo(currentLen-2);
 end;
 
-procedure TPopisky.Reset();
+procedure TText.Reset();
 begin
  Self.Data.Count := 0;
  Self.Escape;
 end;
 
-procedure TPopisky.Escape();
+procedure TText.Escape();
 begin
  Self.Operations.FAddKrok    := 0;
  Self.Operations.FMoveKrok   := 0;
@@ -309,7 +309,7 @@ begin
 end;
 
 //vykresleni textu
-procedure TPopisky.Paint();
+procedure TText.Paint();
 var popisek:TPopisek;
 begin
  //vykresleni textu
@@ -317,7 +317,7 @@ begin
    Self.Graphics.TextOutputI(popisek.Position, popisek.Text, popisek.Color, clBlack, popisek.BlokPopisek);
 end;
 
-function TPopisky.GetPopisekData(Index:Integer):TPopisek;
+function TText.GetPopisekData(Index:Integer):TPopisek;
 begin
  if (Index >= _MAX_POPISKY) then
   begin
@@ -328,7 +328,7 @@ begin
  Result := Self.Data[Index];
 end;
 
-function TPopisky.SetPopisekData(Index:Integer;Data:TPopisek):Byte;
+function TText.SetPopisekData(Index:Integer;Data:TPopisek):Byte;
 begin
  if (Index >= _MAX_POPISKY) then
   begin
@@ -342,7 +342,7 @@ begin
 end;
 
 //pridavani textu
-procedure TPopisky.Adding(Position:TPoint);
+procedure TText.Adding(Position:TPoint);
 var i:Integer;
 begin
  //kontrola obsazenosti pozice
@@ -361,7 +361,7 @@ begin
 end;
 
 //pohyb textu
-procedure TPopisky.Moving(Position:TPoint);
+procedure TText.Moving(Position:TPoint);
 var PopisekIndex:Integer;
     i:Integer;
 begin
@@ -414,7 +414,7 @@ begin
 end;
 
 //mazani textu
-procedure TPopisky.Deleting(Position:TPoint);
+procedure TText.Deleting(Position:TPoint);
 begin
  if (Self.GetPopisek(Position) = -1) then
    Exit();
@@ -433,7 +433,7 @@ begin
  if (Assigned(Self.FDeleteActivate)) then Self.FDeleteActivate;
 end;
 
-function TPopisky.IsObsazeno(Pos1,Pos2:TPoint):Boolean;
+function TText.IsObsazeno(Pos1,Pos2:TPoint):Boolean;
 var i,j:Integer;
 begin
  Result := false;
@@ -445,7 +445,7 @@ begin
         Exit(true);
 end;
 
-procedure TPopisky.Add(aText:string; aColor:ShortInt; popisekBlok:boolean);
+procedure TText.Add(aText:string; aColor:ShortInt; popisekBlok:boolean);
 begin
  if (Length(aText) > _MAX_TEXT_LENGTH) then
    raise ETooLongText.Create('Text je pøíliš dlouhý!');
@@ -458,19 +458,19 @@ begin
  Self.Operations.TextProperties.blokPopisek := popisekBlok;
 end;
 
-procedure TPopisky.Move();
+procedure TText.Move();
 begin
  Self.CheckOpInProgressAndExcept();
  Self.Operations.FMoveKrok := 1;
 end;
 
-procedure TPopisky.Delete();
+procedure TText.Delete();
 begin
  Self.CheckOpInProgressAndExcept();
  Self.Operations.FDeleteKrok := 1;
 end;
 
-procedure TPopisky.MouseUp(Position:TPoint;Button:TMouseButton);
+procedure TText.MouseUp(Position:TPoint;Button:TMouseButton);
 begin
  if (Button = mbLeft) then
   begin
@@ -487,7 +487,7 @@ begin
 end;
 
 //zabyva se vykreslovanim posouvanych objektu textu
-procedure TPopisky.PaintTextMove(KurzorPos:TPoint);
+procedure TText.PaintTextMove(KurzorPos:TPoint);
 begin
  //pridavani, posouvani
  if ((Self.Operations.FAddKrok = 1) or (Self.Operations.FMoveKrok = 2)) then
@@ -496,7 +496,7 @@ begin
 end;
 
 //vykresleni kurzoru - vraci data PIXELECH!
-function TPopisky.PaintCursor(CursorPos:TPoint):TCursorDraw;
+function TText.PaintCursor(CursorPos:TPoint):TCursorDraw;
 var PopisekI:Integer;
     PData:TPopisek;
 begin
@@ -536,7 +536,7 @@ begin
   end;
 end;
 
-procedure TPopisky.MITextPropertiesClick(Sender:TObject);
+procedure TText.MITextPropertiesClick(Sender:TObject);
 var PIndex:Integer;
     aPopisek:TPopisek;
 begin
@@ -549,7 +549,7 @@ begin
  if Assigned(FOnShow) then FOnShow();
 end;
 
-procedure TPopisky.InitializeTextMenu(var Menu:TPopupMenu;Parent:TForm);
+procedure TText.InitializeTextMenu(var Menu:TPopupMenu;Parent:TForm);
 var MI:TMenuItem;
 begin
  Menu := TPopupMenu.Create(Parent);
@@ -563,12 +563,12 @@ begin
  Menu.Items.Add(MI);
 end;
 
-function TPopisky.GetCount():Integer;
+function TText.GetCount():Integer;
 begin
  Result := Self.Data.Count;
 end;
 
-procedure TPopisky.CheckOpInProgressAndExcept();
+procedure TText.CheckOpInProgressAndExcept();
 begin
  if (Assigned(Self.FOPAsk)) then
   begin

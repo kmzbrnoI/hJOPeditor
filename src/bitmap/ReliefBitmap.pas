@@ -26,6 +26,7 @@ type
    end;
    FStav:ShortInt;
    Graphics:TPanelGraphics;
+   fShowBlokPopisky:boolean;
 
    FORAskEvent: TORAskEvent;
    FOnShow : TNEvent;
@@ -58,7 +59,7 @@ type
    SeparatorsHor  : TVBO;
    KPopisky       : TVBO;
    JCClick        : TVBO;
-   Popisky        : TPopisky;
+   Text           : TText;
    Soupravy       : TVBO;
 
    Bitmap:array [0.._MAX_WIDTH-1, 0.._MAX_HEIGHT-1] of ShortInt;
@@ -97,6 +98,7 @@ type
     property OnShow: TNEvent read FOnShow write FOnShow;
     property OnTextEdit: TChangeTextEvent read FOnTextEdit write FOnTextEdit;
     property OnORAsk: TORAskEvent read FORAskEvent write FORAskEvent;
+    property ShowBlokPopisky: boolean read fShowBlokPopisky write fShowBlokPopisky;
  end;//class
 
 //FileSystemStav:
@@ -125,7 +127,7 @@ begin
  Self.Symbols.Reset;
  Self.SeparatorsVert.Reset;
  Self.SeparatorsHor.Reset;
- Self.Popisky.Reset;
+ Self.Text.Reset;
 
  AssignFile(myFile, aFile);
  Reset(myFile, 1);
@@ -179,7 +181,7 @@ begin
      //nacitani popisku
      SetLength(bytesBuf, len);
      BlockRead(myFile, bytesBuf[0], len, aCount);
-     Self.Popisky.SetLoadedDataV32(bytesBuf);
+     Self.Text.SetLoadedDataV32(bytesBuf);
     end else begin
      //nacteni poctu popisku
      BlockRead(myFile, Buffer, 1, aCount);
@@ -188,7 +190,7 @@ begin
      //nacitani popisku
      SetLength(bytesBuf, len);
      BlockRead(myFile, bytesBuf[0], len, aCount);
-     Self.Popisky.SetLoadedData(bytesBuf);
+     Self.Text.SetLoadedData(bytesBuf);
     end;
 
    //prazdny radek
@@ -358,7 +360,7 @@ begin
 
    //-------------------------------------------
    //popisky
-   bytesBuf := Self.Popisky.GetSaveData;
+   bytesBuf := Self.Text.GetSaveData;
    BlockWrite(myFile, bytesBuf[0], Length(bytesBuf));
 
    //ukonceni bloku
@@ -509,14 +511,14 @@ begin
  Self.Soupravy.FDeleteActivate := Self.DeleteActivateEvent;
  Self.Soupravy.FOPAsk          := Self.IsOperationEvent;
 
- Self.Popisky    := TPopisky.Create(DrawCanvas, TextIL, Parent, Graphics);
- Self.Popisky.FOnShow         := Self.ShowEvent;
- Self.Popisky.FIsSymbol       := Self.IsSymbolSymbolTextEvent;
- Self.Popisky.FNullOperations := Self.NullOperationsEvent;
- Self.Popisky.FMoveActivate   := Self.MoveActivateEvent;
- Self.Popisky.FDeleteActivate := Self.DeleteActivateEvent;
- Self.Popisky.FOPAsk          := Self.IsOperationEvent;
- Self.Popisky.FOnChangeText   := Self.ChangeTextEvent;
+ Self.Text    := TText.Create(DrawCanvas, TextIL, Parent, Graphics);
+ Self.Text.FOnShow         := Self.ShowEvent;
+ Self.Text.FIsSymbol       := Self.IsSymbolSymbolTextEvent;
+ Self.Text.FNullOperations := Self.NullOperationsEvent;
+ Self.Text.FMoveActivate   := Self.MoveActivateEvent;
+ Self.Text.FDeleteActivate := Self.DeleteActivateEvent;
+ Self.Text.FOPAsk          := Self.IsOperationEvent;
+ Self.Text.FOnChangeText   := Self.ChangeTextEvent;
 
  Self.SetRozmery(Width,Height);
 end;//contructor
@@ -529,7 +531,7 @@ begin
  FreeAndNil(Self.KPopisky);
  FreeAndNil(Self.JCClick);
  FreeAndNil(Self.Soupravy);
- FreeAndNil(Self.Popisky);
+ FreeAndNil(Self.Text);
 
  inherited;
 end;//contructor
@@ -543,7 +545,7 @@ begin
  Self.Symbols.Paint;
  Self.SeparatorsVert.Paint;
  Self.SeparatorsHor.Paint;
- Self.Popisky.Paint;
+ Self.Text.Paint;
 end;//procedure
 
 procedure TPanelBitmap.MouseUp(Position:TPoint;Button:TMouseButton);
@@ -556,7 +558,7 @@ begin
      Self.JCClick.MouseUp(Position,Button);
      Self.Soupravy.MouseUp(Position,Button);
      Self.Symbols.MouseUp(Position,Button);
-     Self.Popisky.MouseUp(Position,Button);
+     Self.Text.MouseUp(Position,Button);
     end;
 
    dmSepHor: Self.SeparatorsHor.MouseUp(Position,Button);
@@ -582,7 +584,7 @@ begin
  Result := false;
 
  if (Self.Symbols.GetSymbol(Pos)  <> -1) then Exit(true);
- if (Self.Popisky.GetPopisek(Pos) <> -1) then Exit(true);
+ if (Self.Text.GetPopisek(Pos) <> -1) then Exit(true);
  if (Assigned(Self.FORAskEvent)) then Exit(Self.FORAskEvent(Pos));
 end;//function
 
@@ -645,7 +647,7 @@ begin
  if (Assigned(Self.KPopisky)) then Self.KPopisky.Escape;
  if (Assigned(Self.JCClick)) then Self.JCClick.Escape;
  if (Assigned(Self.Soupravy)) then Self.Soupravy.Escape;
- if (Assigned(Self.Popisky)) then Self.Popisky.Escape;
+ if (Assigned(Self.Text)) then Self.Text.Escape;
 end;//procedure
 
 procedure TPanelBitmap.ResetPanel;
@@ -656,7 +658,7 @@ begin
  if (Assigned(Self.KPopisky)) then Self.KPopisky.Reset;
  if (Assigned(Self.JCClick)) then Self.JCClick.Reset;
  if (Assigned(Self.Soupravy)) then Self.Soupravy.Reset;
- if (Assigned(Self.Popisky)) then Self.Popisky.Reset;
+ if (Assigned(Self.Text)) then Self.Text.Reset;
 end;//procedure
 
 function TPanelBitmap.PaintCursor(CursorPos:TPoint):TCursorDraw;
@@ -670,7 +672,7 @@ begin
  Return[2] := Self.SeparatorsHor.PaintCursor(CursorPos);
  Return[3] := Self.KPopisky.PaintCursor(CursorPos);
  Return[4] := Self.JCClick.PaintCursor(CursorPos);
- Return[5] := Self.Popisky.PaintCursor(CursorPos);
+ Return[5] := Self.Text.PaintCursor(CursorPos);
  Return[6] := Self.Soupravy.PaintCursor(CursorPos);
 
  if (Self.Mode = dmSepVert) then
@@ -723,7 +725,7 @@ begin
      (Self.KPopisky.AddKrok <> 0) or (Self.KPopisky.MoveKrok > 1) or (Self.KPopisky.DeleteKrok > 1) or
      (Self.JCClick.AddKrok <> 0) or (Self.JCClick.MoveKrok > 1) or (Self.JCClick.DeleteKrok > 1) or
      (Self.Soupravy.AddKrok <> 0) or (Self.Soupravy.MoveKrok > 1) or (Self.Soupravy.DeleteKrok > 1) or
-     (Self.Popisky.AddKrok <> 0) or (Self.Popisky.MoveKrok > 1) or (Self.Popisky.DeleteKrok > 1)) then Result := true else Result := false;
+     (Self.Text.AddKrok <> 0) or (Self.Text.MoveKrok > 1) or (Self.Text.DeleteKrok > 1)) then Result := true else Result := false;
 end;//function
 
 procedure TPanelBitmap.Move;
@@ -734,7 +736,7 @@ begin
             if (Assigned(Self.KPopisky)) then Self.KPopisky.Move;
             if (Assigned(Self.JCClick)) then Self.JCClick.Move;
             if (Assigned(Self.Soupravy)) then Self.Soupravy.Move;
-            if (Assigned(Self.Popisky)) then Self.Popisky.Move;
+            if (Assigned(Self.Text)) then Self.Text.Move;
            end;
 
   dmSepHor: if (Assigned(Self.SeparatorsHor)) then Self.SeparatorsHor.Move;
@@ -750,7 +752,7 @@ begin
             if (Assigned(Self.KPopisky)) then Self.KPopisky.Delete;
             if (Assigned(Self.JCClick)) then Self.JCClick.Delete;
             if (Assigned(Self.Soupravy)) then Self.Soupravy.Delete;
-            if (Assigned(Self.Popisky)) then Self.Popisky.Delete;
+            if (Assigned(Self.Text)) then Self.Text.Delete;
            end;
   dmSepHor: if (Assigned(Self.SeparatorsHor)) then Self.SeparatorsHor.Delete;
   dmSepVert: if (Assigned(Self.SeparatorsVert)) then Self.SeparatorsVert.Delete;
@@ -765,7 +767,7 @@ begin
  if (Assigned(Self.KPopisky)) then Self.KPopisky.PaintMove(CursorPos);
  if (Assigned(Self.JCClick)) then Self.JCClick.PaintMove(CursorPos);
  if (Assigned(Self.Soupravy)) then Self.Soupravy.PaintMove(CursorPos);
- if (Assigned(Self.Popisky)) then Self.Popisky.PaintTextMove(CursorPos);
+ if (Assigned(Self.Text)) then Self.Text.PaintTextMove(CursorPos);
 end;//procedure
 
 procedure TPanelBitmap.CheckOperations;

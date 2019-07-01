@@ -571,7 +571,7 @@ begin
   begin
    //konverze z Bitmap na Objects
 
-   Self.PanelObjects            := TPanelObjects.Create(Self.IL_Symbols,Self.IL_Text,Self.DrawObject.Surface.Canvas,Self.Zobrazeni.PanelWidth,Self.Zobrazeni.PanelHeight, Self.DrawObject, Self.Graphics);
+   Self.PanelObjects := TPanelObjects.Create(Self.IL_Symbols,Self.IL_Text,Self.DrawObject.Surface.Canvas,Self.Zobrazeni.PanelWidth,Self.Zobrazeni.PanelHeight, Self.DrawObject, Self.Graphics);
    Self.AssignObjectEvents();
    Result := Self.PanelObjects.Import(Self.PanelBitmap);
 
@@ -757,7 +757,7 @@ end;
 procedure TRelief.AddText(Text:string; Color:Integer; popisekBlok:boolean);
 begin
  if (Assigned(Self.PanelBitmap)) then
-   Self.PanelBitmap.Popisky.Add(Text,Color, popisekBlok);
+   Self.PanelBitmap.Text.Add(Text,Color, popisekBlok);
 end;
 
 procedure TRelief.AddJCClick();
@@ -1273,7 +1273,7 @@ end;
 procedure TRelief.SetShowBlokPopisky(show:boolean);
 begin
  case (Self.Mode) of
-   dmBitmap, dmSepVert, dmSepHor: ; // TODO
+   dmBitmap, dmSepVert, dmSepHor: ;
    dmBloky, dmRoots: Self.PanelObjects.ShowBlokPopisky := show;
  end;
  Self.Show(Point(-1,-1));
