@@ -4,7 +4,8 @@ interface
 
 uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
      ReliefObjects, Forms, StdCtrls, ExtCtrls, ReliefBitmap, Menus, ReliefText,
-     Global, BitmapToObj, OblastRizeni, StrUtils, DirectX, RPConst, PGraphics;
+     Global, BitmapToObj, OblastRizeni, StrUtils, DirectX, RPConst, PGraphics,
+     ObjBlok;
 
 type
  TObjectPointer=record

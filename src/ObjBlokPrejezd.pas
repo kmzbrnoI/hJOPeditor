@@ -15,16 +15,68 @@ TPrejezd = class(TGraphBlok)
  StaticPositions : TList<TPoint>;
  BlikPositions : TList<TBlikPoint>;
 
+ constructor Create(index:Integer);
  destructor Destroy(); override;
+ procedure Load(ini:TMemIniFile; key:string); override;
  procedure Save(ini:TMemIniFile; key:string); override;
 end;
 
 implementation
 
+////////////////////////////////////////////////////////////////////////////////
+
+constructor TPrejezd.Create(index:Integer);
+begin
+ inherited;
+ Self.typ := TBlkType.prejezd;
+ Self.BlikPositions := TList<TBlikPoint>.Create();
+ Self.StaticPositions := TList<TPoint>.Create();
+end;
+
 destructor TPrejezd.Destroy;
 begin
  Self.StaticPositions.Free();
  Self.BlikPositions.Free();
+ inherited;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TPrejezd.Load(ini:TMemIniFile; key:string);
+var obj:string;
+    pos:TPoint;
+    j:Integer;
+    blik_pos:TBlikPoint;
+begin
+ inherited;
+
+ obj := ini.ReadString(key, 'BP', '');
+ Self.BlikPositions.Clear();
+ for j := 0 to (Length(obj) div 9)-1 do
+  begin
+   try
+     blik_pos.Pos.X    := StrToInt(copy(obj, j*9+1, 3));
+     blik_pos.Pos.Y    := StrToInt(copy(obj, j*9+4, 3));
+     blik_pos.TechUsek := StrToInt(copy(obj, j*9+7, 3));
+   except
+     continue;
+   end;
+
+   Self.BlikPositions.Add(blik_pos);
+  end;
+
+ obj := ini.ReadString(key, 'SP', '');
+ Self.StaticPositions.Clear();
+ for j := 0 to (Length(obj) div 6)-1 do
+  begin
+   try
+     pos.X := StrToInt(copy(obj, j*6+1, 3));
+     pos.Y := StrToInt(copy(obj, j*6+4, 3));
+   except
+     continue;
+   end;
+   Self.StaticPositions.Add(pos);
+  end;
 end;
 
 procedure TPrejezd.Save(ini: TMemIniFile; key: string);

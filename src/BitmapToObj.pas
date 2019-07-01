@@ -59,7 +59,6 @@ begin
      if (Symbol = _Rozp_Start) then
       begin
        blk := TRozp.Create(index);
-       blk.typ       := TBlkType.rozp;
        blk.Blok      := -1;
        blk.OblRizeni := 0;
        (blk as TRozp).Pos  := Point(i, j);
@@ -128,7 +127,6 @@ begin
      if ((Symbol >= _SCom_Start) and (Symbol <= _SCom_End)) then
       begin
        blk := TNavestidlo.Create(index);
-       blk.typ       := TBlkType.navestidlo;
        blk.Blok      := -1;
        blk.OblRizeni := 0;
        (blk as TNavestidlo).Position  := Point(i, j);
@@ -148,7 +146,6 @@ begin
    PopData := Self.Bitmap.Popisky.GetPopisekData(i);
 
    blk           := TText.Create(index);
-   blk.typ       := TBlkType.text;
    blk.Blok      := -1;
    blk.OblRizeni := 0;
    (blk as TText).Text     := PopData.Text;
@@ -186,7 +183,6 @@ begin
        if (Symbol = _Uvazka) then
         begin
          blk           := TUvazka.Create(index);
-         blk.typ       := TBlkType.uvazka;
          blk.Blok      := -1;
          blk.OblRizeni := 0;
          (blk as TUvazka).Pos := Point(i, j);
@@ -208,7 +204,6 @@ begin
        if (Symbol = _Uvazka_Spr) then
         begin
          blk           := TUvazkaSpr.Create(index);
-         blk.typ       := TBlkType.uvazka_spr;
          blk.Blok      := -1;
          blk.OblRizeni := 0;
          (blk as TUvazkaSpr).Pos := Point(i, j);
@@ -231,7 +226,6 @@ begin
        if (Symbol = _Zamek) then
         begin
          blk           := TZamek.Create(index);
-         blk.typ       := TBlkType.zamek;
          blk.Blok      := -1;
          blk.OblRizeni := 0;
          (blk as TZamek).Pos := Point(i, j);
@@ -266,11 +260,9 @@ begin
       end else begin
        // vytvorit novy blok
        blk           := TPomocnyObj.Create(index);
-       blk.typ       := TBlkType.pomocny_obj;
        blk.Blok      := -1;
        blk.OblRizeni := -1;
        (blk as TPomocnyObj).Symbol    := Symbol;
-       (blk as TPomocnyObj).Positions := TList<TPoint>.Create();
        (blk as TPomocnyObj).Positions.Add(Point(i, j));
 
        pomocne.Add(Symbol, blk);
@@ -498,12 +490,8 @@ var blik:Boolean;
     blik_point:TBlikPoint;
 begin
  blk           := TPrejezd.Create(index);
- blk.typ       := TBlkType.prejezd;
  blk.Blok      := -1;
  blk.OblRizeni := 0;
-
- (blk as TPrejezd).StaticPositions := TList<TPoint>.Create();
- (blk as TPrejezd).BlikPositions   := TList<TBlikPoint>.Create();
 
  blik := false;
  while (Self.Bitmap.Symbols.GetSymbol(Pos) = _Prj) do

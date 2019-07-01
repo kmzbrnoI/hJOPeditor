@@ -6,7 +6,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, Menus, ReliefObjects, Buttons, ToolWin, ComCtrls, ExtCtrls, Panel,
   ImgList, DXDraws, StdCtrls, AppEvnts, StrUtils, ReliefBitmap, Global,
-  ReliefSettings, fBlockEdit, DXSprite, DIB;
+  ReliefSettings, fBlockEdit, DXSprite, DIB, ObjBlok;
 
 type
   TF_Hlavni = class(TForm)

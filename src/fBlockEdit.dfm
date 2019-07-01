@@ -254,7 +254,7 @@ object F_BlockEdit: TF_BlockEdit
     Width = 185
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
+    ItemHeight = 0
     TabOrder = 1
     OnChange = CB_ORChange
   end

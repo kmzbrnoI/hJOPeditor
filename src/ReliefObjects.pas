@@ -123,7 +123,9 @@ end;//TPanelObjects
 
 implementation
 
-uses ReliefBitmap, BitmapToObj, VetveComputer, ObjBlokUsek, ObjBlokVyhybka;
+uses ReliefBitmap, BitmapToObj, VetveComputer, ObjBlokUsek, ObjBlokVyhybka,
+     ObjBlokPomocny, ObjBlokNavestidlo, ObjBlokText, ObjBlokPrejezd, ObjBlokUvazka,
+     ObjBlokUvazkaSpr, ObjBlokZamek, ObjBlokVykol, ObjBlokRozp;
 
 //vytvoreni objektu
 constructor TPanelObjects.Create(SymbolIL,TextIL:TImageList;DrawCanvas:TCanvas;Width,Height:Integer;Parent:TDXDraw; Graphics:TPanelGraphics);
@@ -177,19 +179,12 @@ end;
 
 //nacitani souboru
 procedure TPanelObjects.FLoad(aFile:string;var ORs:string);
-var i,j,k:Integer;
+var i:Integer;
     inifile:TMemIniFile;
-    Obj:string;
     ver:string;
     sect_str:TStrings;
-
-    symbol:TReliefSym;
-    blik_pos:TBlikPoint;
-    pos:TPoint;
     blok:TGraphBlok;
-    count,count2:Integer;
-    Vetev:TVetev;
-    indexes:array [0..7] of Integer;
+    count:Integer;
 begin
  Self.FStav := 2;
  Self.FSoubor := aFile;
@@ -226,8 +221,7 @@ begin
    for i := 0 to count-1 do
     begin
      try
-       blok := ObjBlokUsek.TUsek.Create();
-       blok.index := i;
+       blok := ObjBlokUsek.TUsek.Create(i);
        blok.Load(inifile, 'U'+IntToStr(i));
        Self.Bloky.Add(blok);
      except
@@ -239,204 +233,130 @@ begin
    count := inifile.ReadInteger('P', 'N', 0);
    for i := 0 to count-1 do
     begin
-     blok           := TNavestidlo.Create();
-     blok.index     := i;
-     blok.typ       := TBlkType.navestidlo;
-     blok.Blok      := inifile.ReadInteger('N'+IntToStr(i),'B',-1);
-     blok.OblRizeni := inifile.ReadInteger('N'+IntToStr(i),'OR',-1);
+     try
+       blok := TNavestidlo.Create(i);
+       blok.Load(inifile, 'N'+IntToStr(i));
+       Self.Bloky.Add(blok);
+     except
 
-     (blok as TNavestidlo).Position.X := inifile.ReadInteger('N'+IntToStr(i),'X',0);
-     (blok as TNavestidlo).Position.Y := inifile.ReadInteger('N'+IntToStr(i),'Y',0);
-     (blok as TNavestidlo).SymbolID   := inifile.ReadInteger('N'+IntToStr(i),'S',0);
-     Self.Bloky.Add(blok);
-    end;//for i
+     end;
+    end;
 
    // pomocne symboly
-   count := inifile.ReadInteger('P','P',0);
+   count := inifile.ReadInteger('P', 'P', 0);
    for i := 0 to count-1 do
     begin
-     blok           := TPomocnyObj.Create();
-     blok.index     := i;
-     blok.typ       := TBlkType.pomocny_obj;
-     blok.Blok      := -1;
-     blok.OblRizeni := -1;
+     try
+       blok := TPomocnyObj.Create(i);
+       blok.Load(inifile, 'P'+IntToStr(i));
+       Self.Bloky.Add(blok);
+     except
 
-     (blok as TPomocnyObj).Symbol :=  inifile.ReadInteger('P'+IntToStr(i),'S',0);
-
-     obj := inifile.ReadString('P'+IntToStr(i),'P','');
-     (blok as TPomocnyObj).Positions := TList<TPoint>.Create();
-     for j := 0 to (Length(obj) div 6)-1 do
-      begin
-       pos.X := StrToIntDef(copy(obj,j*6+1,3),0);
-       pos.Y := StrToIntDef(copy(obj,j*6+4,3),0);
-       (blok as TPomocnyObj).Positions.Add(pos);
-      end;//for j
-
-     Self.Bloky.Add(blok);
-    end;//for i
+     end;
+    end;
 
    // popisky
    count := inifile.ReadInteger('P','T',0);
    for i := 0 to count-1 do
     begin
-     blok           := TText.Create();
-     blok.index     := i;
-     blok.typ       := TBlkType.text;
-     blok.Blok      := inifile.ReadInteger('T'+IntToStr(i),'B', -1);
-     blok.OblRizeni := inifile.ReadInteger('T'+IntToStr(i),'OR', -1);
+     try
+       blok := TText.Create(i);
+       blok.Load(inifile, 'T'+IntToStr(i));
+       Self.Bloky.Add(blok);
+     except
 
-     (blok as TText).Text       := inifile.ReadString('T'+IntToStr(i),'T', 'text');
-     (blok as TText).Position.X := inifile.ReadInteger('T'+IntToStr(i),'X', 0);
-     (blok as TText).Position.Y := inifile.ReadInteger('T'+IntToStr(i),'Y', 0);
-     (blok as TText).Color      := inifile.ReadInteger('T'+IntToStr(i),'C', 0);
-
-     Self.Bloky.Add(blok);
-    end;//for i
+     end;
+    end;
 
    // vyhybky
    count := inifile.ReadInteger('P','V',0);
    for i := 0 to count-1 do
     begin
-     blok           := TVyhybka.Create();
-     blok.index     := i;
-     blok.typ       := TBlkType.vyhybka;
-     blok.Blok      := inifile.ReadInteger('V'+IntToStr(i),'B', -1);
-     blok.OblRizeni := inifile.ReadInteger('V'+IntToStr(i),'OR', -1);
+     try
+       blok := TVyhybka.Create(i);
+       blok.Load(inifile, 'V'+IntToStr(i));
+       Self.Bloky.Add(blok);
+     except
 
-     (blok as TVyhybka).SymbolID    := inifile.ReadInteger('V'+IntToStr(i),'S',0);
-     (blok as TVyhybka).PolohaPlus  := inifile.ReadInteger('V'+IntToStr(i),'P',0);
-     (blok as TVyhybka).Position.X  := inifile.ReadInteger('V'+IntToStr(i),'X',0);
-     (blok as TVyhybka).Position.Y  := inifile.ReadInteger('V'+IntToStr(i),'Y',0);
-     (blok as TVyhybka).obj         := inifile.ReadInteger('V'+IntToStr(i),'O',-1);
-
-     Self.Bloky.Add(blok);
+     end;
     end;
 
    // prejezdy
    count := inifile.ReadInteger('P','PRJ',0);
    for i := 0 to count-1 do
     begin
-     blok           := TPrejezd.Create();
-     blok.index     := i;
-     blok.typ       := TBlkType.prejezd;
-     blok.Blok      := inifile.ReadInteger('PRJ'+IntToStr(i),'B', -1);
-     blok.OblRizeni := inifile.ReadInteger('PRJ'+IntToStr(i),'OR', -1);
+     try
+       blok := TPrejezd.Create(i);
+       blok.Load(inifile, 'PRJ'+IntToStr(i));
+       Self.Bloky.Add(blok);
+     except
 
-     obj := inifile.ReadString('PRJ'+IntToStr(i), 'BP', '');
-     (blok as TPrejezd).BlikPositions := TList<TBlikPoint>.Create();
-     for j := 0 to (Length(obj) div 9)-1 do
-      begin
-       try
-         blik_pos.Pos.X    := StrToInt(copy(obj, j*9+1, 3));
-         blik_pos.Pos.Y    := StrToInt(copy(obj, j*9+4, 3));
-         blik_pos.TechUsek := StrToInt(copy(obj, j*9+7, 3));
-       except
-         continue;
-       end;
-
-       (blok as TPrejezd).BlikPositions.Add(blik_pos);
-      end;//for j
-
-     obj := inifile.ReadString('PRJ'+IntToStr(i), 'SP', '');
-     (blok as TPrejezd).StaticPositions := TList<TPoint>.Create();
-     for j := 0 to (Length(obj) div 6)-1 do
-      begin
-       try
-         pos.X := StrToInt(copy(obj, j*6+1, 3));
-         pos.Y := StrToInt(copy(obj, j*6+4, 3));
-       except
-         continue;
-       end;
-       (blok as TPrejezd).StaticPositions.Add(pos);
-      end;//for j
-
-     Self.Bloky.Add(blok);
+     end;
     end;
 
    // uvazky
    count := inifile.ReadInteger('P','Uv',0);
    for i := 0 to count-1 do
     begin
-     blok           := TUvazka.Create();
-     blok.index     := i;
-     blok.typ       := TBlkType.uvazka;
-     blok.Blok      := inifile.ReadInteger('Uv'+IntToStr(i),'B', -1);
-     blok.OblRizeni := inifile.ReadInteger('Uv'+IntToStr(i),'OR', -1);
+     try
+       blok := TUvazka.Create(i);
+       blok.Load(inifile, 'Uv'+IntToStr(i));
+       Self.Bloky.Add(blok);
+     except
 
-     (blok as TUvazka).Pos.X       := inifile.ReadInteger('Uv'+IntToStr(i), 'X', 0);
-     (blok as TUvazka).Pos.Y       := inifile.ReadInteger('Uv'+IntToStr(i), 'Y', 0);
-     (blok as TUvazka).defalt_dir  := inifile.ReadInteger('Uv'+IntToStr(i), 'D', 0);
-
-     Self.Bloky.Add(blok);
+     end;
     end;//for i
 
    // uvazky soupravy
    count := inifile.ReadInteger('P','UvS',0);
    for i := 0 to count-1 do
     begin
-     blok           := TUvazkaSpr.Create();
-     blok.index     := i;
-     blok.typ       := TBlkType.uvazka_spr;
-     blok.Blok      := inifile.ReadInteger('UvS'+IntToStr(i),'B', -1);
-     blok.OblRizeni := inifile.ReadInteger('UvS'+IntToStr(i),'OR', -1);
+     try
+       blok := TUvazkaSpr.Create(i);
+       blok.Load(inifile, 'UvS'+IntToStr(i));
+       Self.Bloky.Add(blok);
+     except
 
-     (blok as TUvazkaSpr).Pos.X        := inifile.ReadInteger('UvS'+IntToStr(i), 'X', 0);
-     (blok as TUvazkaSpr).Pos.Y        := inifile.ReadInteger('UvS'+IntToStr(i), 'Y', 0);
-     (blok as TUvazkaSpr).vertical_dir := TUvazkaSprVertDir(inifile.ReadInteger('UvS'+IntToStr(i), 'VD', 0));
-     (blok as TUvazkaSpr).spr_cnt      := inifile.ReadInteger('UvS'+IntToStr(i), 'C', 1);
-
-     Self.Bloky.Add(blok);
+     end;
     end;//for i
 
    // zamky
    count := inifile.ReadInteger('P','Z',0);
    for i := 0 to count-1 do
     begin
-     blok           := TZamek.Create();
-     blok.index     := i;
-     blok.typ       := TBlkType.zamek;
-     blok.Blok      := inifile.ReadInteger('Z'+IntToStr(i),'B', -1);
-     blok.OblRizeni := inifile.ReadInteger('Z'+IntToStr(i),'OR', -1);
+     try
+       blok := TZamek.Create(i);
+       blok.Load(inifile, 'Z'+IntToStr(i));
+       Self.Bloky.Add(blok);
+     except
 
-     (blok as TZamek).Pos.X := inifile.ReadInteger('Z'+IntToStr(i), 'X', 0);
-     (blok as TZamek).Pos.Y := inifile.ReadInteger('Z'+IntToStr(i), 'Y', 0);
-
-     Self.Bloky.Add(blok);
+     end;
     end;
 
    // vykolejky
    count := inifile.ReadInteger('P', 'Vyk', 0);
    for i := 0 to count-1 do
     begin
-     blok           := TVykol.Create();
-     blok.index     := i;
-     blok.typ       := TBlkType.vykol;
-     blok.Blok      := inifile.ReadInteger('Vyk'+IntToStr(i),'B', -1);
-     blok.OblRizeni := inifile.ReadInteger('Vyk'+IntToStr(i),'OR', -1);
+     try
+       blok := TVykol.Create(i);
+       blok.Load(inifile, 'Vyk'+IntToStr(i));
+       Self.Bloky.Add(blok);
+     except
 
-     (blok as TVykol).Pos.X := inifile.ReadInteger('Vyk'+IntToStr(i), 'X', 0);
-     (blok as TVykol).Pos.Y := inifile.ReadInteger('Vyk'+IntToStr(i), 'Y', 0);
-     (blok as TVykol).symbol:= inifile.ReadInteger('Vyk'+IntToStr(i), 'T', 0);
-     (blok as TVykol).obj   := inifile.ReadInteger('Vyk'+IntToStr(i), 'O', 0);
-     (blok as TVykol).vetev := inifile.ReadInteger('Vyk'+IntToStr(i), 'V', -1);
-
-     Self.Bloky.Add(blok);
+     end;
     end;
 
    // rozpojovace
    count := inifile.ReadInteger('P', 'R', 0);
    for i := 0 to count-1 do
     begin
-     blok           := TRozp.Create();
-     blok.index     := i;
-     blok.typ       := TBlkType.rozp;
-     blok.Blok      := inifile.ReadInteger('R'+IntToStr(i),'B', -1);
-     blok.OblRizeni := inifile.ReadInteger('R'+IntToStr(i),'OR', -1);
+     try
+       blok := TRozp.Create(i);
+       blok.Load(inifile, 'R'+IntToStr(i));
+       Self.Bloky.Add(blok);
+     except
 
-     (blok as TRozp).Pos.X := inifile.ReadInteger('R'+IntToStr(i), 'X', 0);
-     (blok as TRozp).Pos.Y := inifile.ReadInteger('R'+IntToStr(i), 'Y', 0);
-
-     Self.Bloky.Add(blok);
+     end;
     end;
 
    Self.ComputeVyhybkaFlag();
@@ -447,12 +367,12 @@ begin
 end;
 
 procedure TPanelObjects.FSave(aFile:string;const ORs:string);
-var i,j,k:Integer;
+var i:Integer;
     inifile:TMemIniFile;
-    Obj:string;
     str_list:TStrings;
     blok:TGraphBlok;
     counts:array [0..10] of Cardinal;
+    key:string;
       // pocty bloku v tomto poradi: useky, navestidla, vyhybky, prejezdy, popisky, pomocne_objekty, uvazky, uvazky_spr, zamky, vykolejky, rozpojovace
 begin
  Self.FStav := 2;
@@ -484,42 +404,22 @@ begin
    for blok in Self.Bloky do
     begin
      case (blok.typ) of
-      TBlkType.usek:begin
-       // TODO
-      end;
+      TBlkType.usek: key := 'U';
+      TBlkType.navestidlo: key := 'N';
+      TBlkType.vyhybka: key := 'V';
+      TBlkType.prejezd: key := 'PRJ';
+      TBlkType.text: key := 'T';
+      TBlkType.pomocny_obj: key := 'P';
+      TBlkType.uvazka: key := 'Uv';
+      TBlkType.uvazka_spr: key := 'UvS';
+      TBlkType.zamek: key := 'Z';
+      TBlkType.vykol: key := 'Vyk';
+      TBlkType.rozp: key := 'R';
+     else
+      key := '?';
+     end;
 
-      TBlkType.navestidlo:begin
-      end;
-
-      TBlkType.vyhybka:begin
-      end;
-
-      TBlkType.prejezd:begin
-      end;
-
-      TBlkType.text:begin
-      end;
-
-      TBlkType.pomocny_obj:begin
-      end;
-
-      TBlkType.uvazka:begin
-      end;
-
-      TBlkType.uvazka_spr:begin
-      end;
-
-      TBlkType.zamek:begin
-      end;
-
-      TBlkType.vykol:begin
-      end;
-
-      TBlkType.rozp:begin
-      end;
-
-     end;//case
-
+     blok.Save(inifile, key+IntToStr(blok.index ));
      Inc(counts[Integer(blok.typ)]);
     end;//for i
 
@@ -536,8 +436,8 @@ begin
    inifile.WriteInteger('P', 'Vyk', counts[9]);
    inifile.WriteInteger('P', 'R'  , counts[10]);
  finally
-   inifile.UpdateFile;
-   inifile.Free;
+   inifile.UpdateFile();
+   inifile.Free();
  end;
 end;
 

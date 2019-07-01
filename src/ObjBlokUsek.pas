@@ -41,6 +41,7 @@ uses Global;
 
 constructor TUsek.Create(index:Integer);
 begin
+ inherited;
  Self.typ := TBlkType.usek;
 end;
 
@@ -51,6 +52,7 @@ begin
  Self.KPopisek.Free();
  Self.Soupravy.Free();
  Self.Vetve.Free();
+ inherited;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -165,6 +167,8 @@ var obj:string;
     vetev:TVetev;
     i:Integer;
 begin
+ inherited;
+
  //root
  if (Self.IsVyhybka) then
    ini.WriteString(key, 'R', GetPos(Self.Root));

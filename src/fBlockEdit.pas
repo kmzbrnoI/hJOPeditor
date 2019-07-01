@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, IniFiles, ReliefSettings, ReliefObjects, ExtCtrls, RPConst,
-  StrUtils, Spin;
+  StrUtils, Spin, ObjBlok;
 
 type
   TBlok=record
@@ -101,7 +101,8 @@ var
 
 implementation
 
-uses fMain, OblastRizeni;
+uses fMain, OblastRizeni, ObjBLokUvazkaSpr, ObjBlokVyhybka, ObjBlokUsek,
+     ObjBlokUvazka;
 
 {$R *.dfm}
 
@@ -313,7 +314,7 @@ begin
      Self.Caption := 'Editace pøejezdu';
   end;
 
-  TBlkType.popisek:begin
+  TBlkType.text:begin
      Self.Caption := 'Editace popisku';
   end;
 
