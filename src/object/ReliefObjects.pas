@@ -14,7 +14,10 @@ const
  _Def_Color_Alert         = 5;
  _Def_Color_IntUnassigned = 4;
 
- _FileVersion = '1.1'; // TODO
+ _FileVersion = '1.2';
+ _FileVersion_accept : array[0..1] of string = (
+    '1.0', '1.1'
+ );
 
 type
 
@@ -49,6 +52,8 @@ TPanelObjects = class
 
     procedure SetMode(mode:TMode);
     procedure ComputeVyhybkaFlag();                                   //volano pri prechodu z Bloky do Koreny
+
+    class function FileSupportedVersionsStr():string;
 
   public
    Bloky:TList<TGraphBlok>;
@@ -171,6 +176,7 @@ var i:Integer;
     blok:TGraphBlok;
     count:Integer;
     blkTyp:TBlkType;
+    versionOk:boolean;
 begin
  Self.FStav := 2;
  Self.FSoubor := aFile;
@@ -182,9 +188,20 @@ begin
  try
    //kontrola verze
    ver := inifile.ReadString('G', 'ver', _FileVersion);
-   if (_FileVersion <> ver) then
+   versionOk := false;
+   for i := 0 to Length(_FileVersion_accept)-1 do
     begin
-     if (Application.MessageBox(PChar('Naèítáte soubor s verzí '+ver+#13#10+'Aplikace momentálnì podporuje verzi '+_FileVersion+#13#10+'Chcete pokraèovat?'),
+     if (ver = _FileVersion_accept[i]) then
+      begin
+       versionOk := true;
+       Break;
+      end;
+    end;
+
+   if (not versionOk) then
+    begin
+     if (Application.MessageBox(PChar('Naèítáte soubor s verzí '+ver+#13#10+
+         'Aplikace momentálnì podporuje verze '+Self.FileSupportedVersionsStr()+#13#10+'Chcete pokraèovat?'),
          'Varování', MB_YESNO OR MB_ICONQUESTION) = mrNo) then
        raise EFileLoad.Create('Uživatel zrušil naèítání souboru!');
     end;
@@ -672,6 +689,17 @@ begin
      (Self.Bloky[i] as TPrejezd).BlikPositions[j] := blik_point;
     end;//for j
   end;//for i
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+class function TPanelObjects.FileSupportedVersionsStr():string;
+var i: Integer;
+begin
+ Result := '';
+ for i := 0 to Length(_FileVersion_accept)-1 do
+   Result := Result + _FileVersion_accept[i] + ', ';
+ Result := LeftStr(Result, Length(Result)-2);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
