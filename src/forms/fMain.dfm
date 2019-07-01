@@ -478,48 +478,48 @@ object F_Hlavni: TF_Hlavni
       TabOrder = 6
       Transparent = False
       Visible = False
-      object ToolButton40: TToolButton
+      object TB_Text: TToolButton
         Left = 0
         Top = 0
         Hint = 'Text'
-        Caption = 'ToolButton40'
+        Caption = 'TB_Text'
         ImageIndex = 26
         ParentShowHint = False
         ShowHint = True
-        OnClick = ToolButton40Click
+        OnClick = TB_TextClick
       end
-      object ToolButton41: TToolButton
+      object TB_EndJC: TToolButton
         Tag = 41
         Left = 23
         Top = 0
         Hint = 'Konec j'#237'zdn'#237' cesty'
-        Caption = 'ToolButton41'
+        Caption = 'TB_EndJC'
         ImageIndex = 27
         ParentShowHint = False
         ShowHint = True
-        OnClick = ToolButton41Click
+        OnClick = TB_EndJCClick
       end
-      object ToolButton42: TToolButton
+      object TB_KCislo: TToolButton
         Tag = 42
         Left = 46
         Top = 0
         Hint = 'Popisek koleje (n'#225'zev pop'#345'. '#269#237'slo vlaku)'
-        Caption = 'ToolButton42'
+        Caption = 'TB_KCislo'
         ImageIndex = 28
         ParentShowHint = False
         ShowHint = True
-        OnClick = ToolButton42Click
+        OnClick = TB_KCisloClick
       end
-      object ToolButton6: TToolButton
+      object TB_SoupravaPos: TToolButton
         Tag = 43
         Left = 69
         Top = 0
         Hint = 'Pozice pro zobrazen'#237' soupravy'
-        Caption = 'ToolButton6'
+        Caption = 'TB_SoupravaPos'
         ImageIndex = 37
         ParentShowHint = False
         ShowHint = True
-        OnClick = ToolButton6Click
+        OnClick = TB_SoupravaPosClick
       end
     end
     object TB_Trat: TToolBar

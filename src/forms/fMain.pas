@@ -77,9 +77,9 @@ type
     PM_ReliefOptions: TMenuItem;
     MI_SaveShowOptions: TMenuItem;
     TB_Other: TToolBar;
-    ToolButton40: TToolButton;
-    ToolButton41: TToolButton;
-    ToolButton42: TToolButton;
+    TB_Text: TToolButton;
+    TB_EndJC: TToolButton;
+    TB_KCislo: TToolButton;
     N5: TMenuItem;
     PM_ORAdd: TMenuItem;
     MI_Data: TMenuItem;
@@ -100,7 +100,7 @@ type
     TB_Krizeni: TToolBar;
     ToolButton4: TToolButton;
     ToolButton5: TToolButton;
-    ToolButton6: TToolButton;
+    TB_SoupravaPos: TToolButton;
     N6: TMenuItem;
     PM_Reload_Blocks: TMenuItem;
     PM_Show_Blk_Descriptions: TMenuItem;
@@ -125,14 +125,14 @@ type
     procedure PM_ReliefOptionsClick(Sender: TObject);
     procedure MI_SaveShowOptionsClick(Sender: TObject);
     procedure PM_AboutClick(Sender: TObject);
-    procedure ToolButton40Click(Sender: TObject);
-    procedure ToolButton41Click(Sender: TObject);
-    procedure ToolButton42Click(Sender: TObject);
+    procedure TB_TextClick(Sender: TObject);
+    procedure TB_EndJCClick(Sender: TObject);
+    procedure TB_KCisloClick(Sender: TObject);
     procedure PM_ORAddClick(Sender: TObject);
     procedure MI_CheckDataClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure TB_Separator_HorizClick(Sender: TObject);
-    procedure ToolButton6Click(Sender: TObject);
+    procedure TB_SoupravaPosClick(Sender: TObject);
     procedure PM_Reload_BlocksClick(Sender: TObject);
     procedure PM_Show_Blk_DescriptionsClick(Sender: TObject);
   private
@@ -418,6 +418,11 @@ begin
     end;
   end;//'s'
 
+  't':begin
+    if (not Assigned(Self.Relief)) then Exit;
+    if (Self.Relief.Mode <> dmBitmap) then Exit;
+    Self.TB_TextClick(Self.TB_Text);
+  end;
 
  end;
 end;
@@ -800,7 +805,7 @@ begin
  Self.pushedButton := (Sender as TToolButton);
 end;
 
-procedure TF_Hlavni.ToolButton40Click(Sender: TObject);
+procedure TF_Hlavni.TB_TextClick(Sender: TObject);
 begin
  Relief.Escape(false);
  F_Popisek.NewPopisek();
@@ -809,7 +814,7 @@ begin
    Relief.AddText(F_Popisek.PopisekText, F_Popisek.PopisekColor, F_Popisek.PopisekBlok);
 end;
 
-procedure TF_Hlavni.ToolButton41Click(Sender: TObject);
+procedure TF_Hlavni.TB_EndJCClick(Sender: TObject);
 begin
  Relief.Escape(false);
  try
@@ -820,7 +825,7 @@ begin
  end;
 end;
 
-procedure TF_Hlavni.ToolButton42Click(Sender: TObject);
+procedure TF_Hlavni.TB_KCisloClick(Sender: TObject);
 begin
  Relief.Escape(false);
  try
@@ -831,7 +836,7 @@ begin
  end;
 end;
 
-procedure TF_Hlavni.ToolButton6Click(Sender: TObject);
+procedure TF_Hlavni.TB_SoupravaPosClick(Sender: TObject);
 begin
  Relief.Escape(false);
 
@@ -1000,8 +1005,10 @@ begin
   34: Self.ToolButton34.OnClick(Self.ToolButton34);
   35: Self.ToolButton35.OnClick(Self.ToolButton35);
 
-  41: Self.ToolButton34.OnClick(Self.ToolButton41);
-  42: Self.ToolButton35.OnClick(Self.ToolButton42);
+  40: Self.TB_Text.OnClick(Self.TB_Text);
+  41: Self.TB_EndJC.OnClick(Self.TB_EndJC);
+  42: Self.TB_KCislo.OnClick(Self.TB_KCislo);
+  43: Self.TB_SoupravaPos.OnClick(Self.TB_SoupravaPos);
 
   48: Self.ToolButton48.OnClick(Self.ToolButton48);
   55: Self.ToolButton55.OnClick(Self.ToolButton55);
