@@ -35,6 +35,7 @@ type
     procedure B_ApplyClick(Sender: TObject);
     procedure RB_Col0Click(Sender: TObject);
     procedure E_TextKeyPress(Sender: TObject; var Key: Char);
+    procedure FormCreate(Sender: TObject);
   private
    //private
   public
@@ -121,19 +122,21 @@ begin
  else//case
   Key := #0;
  end;
-end;//procedure
+end;
+
+procedure TF_Popisek.FormCreate(Sender: TObject);
+begin
+ Self.PopisekColor := 1;
+end;
 
 procedure TF_Popisek.NewPopisek();
 begin
  Self.E_Text.Text := '';
- Self.RB_Col1.Checked := true;
-
  Self.PopisekText := '';
- Self.PopisekColor := 1;
- Self.PopisekBlok := Self.CHB_Blok_Popisek.Checked;
 
  Self.Caption := 'Nový popisek';
- Self.ShowModal;
+ Self.ActiveControl := Self.E_Text;
+ Self.ShowModal();
 end;//procedure
 
 procedure TF_Popisek.OpenPopisek(aText:string; popisek:TPopisek);
@@ -156,6 +159,7 @@ begin
  Self.CHB_Blok_Popisek.Checked := popisek.BlokPopisek;
 
  Self.Caption := 'Editovat popisek';
+ Self.ActiveControl := Self.E_Text;
  Self.ShowModal();
 end;//procedure
 

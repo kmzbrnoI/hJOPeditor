@@ -13,6 +13,7 @@ object F_Popisek: TF_Popisek
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
@@ -128,7 +129,9 @@ object F_Popisek: TF_Popisek
       Top = 40
       Width = 13
       Height = 17
+      Checked = True
       TabOrder = 1
+      TabStop = True
       OnClick = RB_Col0Click
     end
     object RB_Col2: TRadioButton
