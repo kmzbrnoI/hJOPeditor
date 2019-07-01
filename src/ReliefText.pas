@@ -171,7 +171,7 @@ end;//function
 
 //smazani popisku
 function TPopisky.DeleteFromStructure(aPos:TPoint):Byte;
-var PIndex,i:Integer;
+var PIndex:Integer;
 begin
  if ((aPos.X < 0) or (aPos.Y < 0) or (aPos.X > (_MAX_WIDTH-1)) or (aPos.Y > (_MAX_HEIGHT-1))) then
   begin

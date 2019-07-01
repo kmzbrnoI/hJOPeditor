@@ -7,7 +7,7 @@ uses
   StrUtils, Global;
 
 const
-  _MAX_DATA = 64;
+  _MAX_DATA = 256;
   _Symbol_Sirka = 8;
   _Symbol_Vyska = 12;
 
@@ -24,7 +24,7 @@ type
   private
     Data:record
       Data:array [0.._MAX_DATA-1] of TPoint;
-      Count:Byte;
+      Count:Integer;
      end;
     DrawObject:record
      Canvas:TCanvas;
@@ -77,7 +77,7 @@ type
     property AddKrok:Byte read Operations.FAddKrok;
     property MoveKrok:Byte read Operations.FMoveKrok;
     property DeleteKrok:Byte read Operations.FDeleteKrok;
-    property Count:Byte read Data.Count;
+    property Count:Integer read Data.Count;
 
     property OnShow: TNEvent read FOnShow write FOnShow;
     property IsSymbol: TPosAskEvent read FIsSymbol write FIsSymbol;
@@ -121,12 +121,12 @@ begin
   begin
    Result := 1;
    Exit;
-  end;//if kontrola limitu
+  end;
  if (Self.GetObject(Position) <> -1) then
   begin
    Result := 2;
    Exit;
-  end;//if (Self.Bitmap[aPos.X,aPos.Y] <> -1)
+  end;
  if (Self.Data.Count >= _MAX_DATA) then
   begin
    Result := 3;
