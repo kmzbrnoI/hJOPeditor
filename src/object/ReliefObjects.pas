@@ -371,8 +371,8 @@ var i:Integer;
     inifile:TMemIniFile;
     str_list:TStrings;
     blok:TGraphBlok;
-    counts:array [0..10] of Cardinal;
-    key:string;
+    counts:TDictionary<TBlkType, Integer>;
+    blkTyp:TBlkType;
       // pocty bloku v tomto poradi: useky, navestidla, vyhybky, prejezdy, popisky, pomocne_objekty, uvazky, uvazky_spr, zamky, vykolejky, rozpojovace
 begin
  Self.FStav := 2;
@@ -383,10 +383,8 @@ begin
  DeleteFile(aFile);
 
  inifile := TMemIniFile.Create(aFile, TEncoding.UTF8);
+ counts := TDictionary<TBlkType, Integer>.Create();
  try
-   for i := 0 to 7 do
-     counts[i] := 0;
-
    inifile.WriteString('G', 'ver', _FileVersion);
 
    inifile.WriteInteger('P', 'H', Self.DrawObject.Height);
@@ -403,41 +401,20 @@ begin
    // useky
    for blok in Self.Bloky do
     begin
-     case (blok.typ) of
-      TBlkType.usek: key := 'U';
-      TBlkType.navestidlo: key := 'N';
-      TBlkType.vyhybka: key := 'V';
-      TBlkType.prejezd: key := 'PRJ';
-      TBlkType.text: key := 'T';
-      TBlkType.pomocny_obj: key := 'P';
-      TBlkType.uvazka: key := 'Uv';
-      TBlkType.uvazka_spr: key := 'UvS';
-      TBlkType.zamek: key := 'Z';
-      TBlkType.vykol: key := 'Vyk';
-      TBlkType.rozp: key := 'R';
-     else
-      key := '?';
-     end;
-
-     blok.Save(inifile, key+IntToStr(blok.index ));
-     Inc(counts[Integer(blok.typ)]);
+     blok.Save(inifile, TGraphBlok.TypeToFileStr(blok.typ)+IntToStr(blok.index ));
+     if (not counts.ContainsKey(blok.typ)) then
+       counts.Add(blok.typ, 0);
+     counts[blok.typ] := counts[blok.typ] + 1;
     end;//for i
 
    // pocty bloku v tomto poradi: useky, navestidla, vyhybky, prejezdy, popisky, pomocne_objekty, uvazky, uvazky_spr
-   inifile.WriteInteger('P', 'U',   counts[0]);
-   inifile.WriteInteger('P', 'N',   counts[1]);
-   inifile.WriteInteger('P', 'V',   counts[2]);
-   inifile.WriteInteger('P', 'PRJ', counts[3]);
-   inifile.WriteInteger('P', 'T',   counts[4]);
-   inifile.WriteInteger('P', 'P',   counts[5]);
-   inifile.WriteInteger('P', 'Uv',  counts[6]);
-   inifile.WriteInteger('P', 'UvS', counts[7]);
-   inifile.WriteInteger('P', 'Z'  , counts[8]);
-   inifile.WriteInteger('P', 'Vyk', counts[9]);
-   inifile.WriteInteger('P', 'R'  , counts[10]);
+   for blkTyp in counts.Keys do
+     inifile.WriteInteger('P', TGraphBlok.TypeToFileStr(blkTyp), counts[blkTyp]);
+
  finally
    inifile.UpdateFile();
    inifile.Free();
+   counts.Free();
  end;
 end;
 

@@ -18,6 +18,8 @@ TGraphBlok = class
   constructor Create(index:Integer);
   procedure Load(ini:TMemIniFile; key:string); virtual;
   procedure Save(ini:TMemIniFile; key:string); virtual;
+
+  class function TypeToFileStr(typ:TBlkType):string;
 end;
 
 implementation
@@ -40,6 +42,27 @@ procedure TGraphBlok.Save(ini: TMemIniFile; key: string);
 begin
  ini.WriteInteger(key, 'B', Self.Blok);
  ini.WriteInteger(key, 'OR', Self.OblRizeni);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+class function TGraphBlok.TypeToFileStr(typ:TBlkType):string;
+begin
+ case (typ) of
+  TBlkType.usek: Result := 'U';
+  TBlkType.navestidlo: Result := 'N';
+  TBlkType.vyhybka: Result := 'V';
+  TBlkType.prejezd: Result := 'PRJ';
+  TBlkType.text: Result := 'T';
+  TBlkType.pomocny_obj: Result := 'P';
+  TBlkType.uvazka: Result := 'Uv';
+  TBlkType.uvazka_spr: Result := 'UvS';
+  TBlkType.zamek: Result := 'Z';
+  TBlkType.vykol: Result := 'Vyk';
+  TBlkType.rozp: Result := 'R';
+ else
+  Result := '?';
+ end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
