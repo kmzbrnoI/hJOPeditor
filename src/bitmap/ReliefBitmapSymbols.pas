@@ -7,8 +7,6 @@ uses
   StrUtils, ReliefText, VektorBasedObject, Global, symbolHelper;
 
 const
-  _MAX_WIDTH   = 256;
-  _MAX_HEIGHT  = 256;
   _MAX_MOVE = 64;
   _Symbol_Uvazka_Spr = 45;
   _Symbol_Uvazka     = 43;

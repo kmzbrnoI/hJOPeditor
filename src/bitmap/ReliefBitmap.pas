@@ -8,10 +8,6 @@ uses
   StrUtils, ReliefText, VektorBasedObject, ReliefBitmapSymbols, Global, Forms,
   OblastRizeni, PGraphics, symbolHelper;
 
-const
- _MAX_WIDTH   = 256;
- _MAX_HEIGHT  = 256;
-
 type
  TORAskEvent = function(Pos:TPoint):Boolean of object;
 

@@ -9,9 +9,9 @@ uses
 const
  _MAX_POPISKY     = 256;
  _MAX_TEXT_LENGTH = 32;
- _MAX_WIDTH       = 256;
- _MAX_HEIGHT      = 256;
  _Block_Length = 35;
+
+ _POPISEK_MAGIC_CODE = 17;
 
 type
  EInvalidPosition = class(Exception);
@@ -132,7 +132,7 @@ begin
  Self.Reset();
 end;
 
-destructor TPopisky.Destroy;
+destructor TPopisky.Destroy();
 begin
  Self.Data.Free();
 
@@ -207,8 +207,8 @@ begin
   begin
    p.Position.X := LoadData[(i*_Block_Length)];
    p.Position.Y := LoadData[(i*_Block_Length)+1];
-   p.Color      := LoadData[(i*_Block_Length)+2];
-   p.Text       := '';
+   p.Color := LoadData[(i*_Block_Length)+2];
+   p.Text := '';
 
    for j := 0 to _MAX_TEXT_LENGTH do
     begin

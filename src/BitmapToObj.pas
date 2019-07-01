@@ -4,14 +4,10 @@ interface
 
 uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
      ReliefObjects, Forms, StdCtrls, ExtCtrls, ReliefBitmap, Menus, ReliefText,
-     symbolHelper, Generics.Collections, vetev;
+     symbolHelper, Generics.Collections, vetev, Global;
 
 type
  TBitmapToObj=class
-  private const
-    _MAX_WIDTH     = 256;
-    _MAX_HEIGHT    = 256;
-
   private
    Bitmap:TPanelBitmap;
    Objects:TPanelObjects;
