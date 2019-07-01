@@ -83,7 +83,7 @@ type
      function GetPopisekData(Index:Integer):TPopisek;
      function SetPopisekData(Index:Integer;Data:TPopisek):Byte;
 
-     procedure Paint;
+     procedure Paint(showPopisky:boolean);
      procedure PaintTextMove(KurzorPos:TPoint);
      function PaintCursor(CursorPos:TPoint):TCursorDraw;
 
@@ -309,12 +309,13 @@ begin
 end;
 
 //vykresleni textu
-procedure TText.Paint();
+procedure TText.Paint(showPopisky:boolean);
 var popisek:TPopisek;
 begin
  //vykresleni textu
  for popisek in Self.Data do
-   Self.Graphics.TextOutputI(popisek.Position, popisek.Text, popisek.Color, clBlack, popisek.BlokPopisek);
+   if (showPopisky) or (not popisek.BlokPopisek) then
+     Self.Graphics.TextOutputI(popisek.Position, popisek.Text, popisek.Color, clBlack, popisek.BlokPopisek);
 end;
 
 function TText.GetPopisekData(Index:Integer):TPopisek;

@@ -131,6 +131,7 @@ begin
  Self.DrawObject.Height := Height;
 
  Self.Graphics := Graphics;
+ Self.fShowBlokPopisky := true;
 
  //vychozi barvy
  Self.Colors.Selected      := _Def_Color_Selected;

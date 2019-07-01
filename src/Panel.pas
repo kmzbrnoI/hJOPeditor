@@ -581,8 +581,8 @@ begin
      Exit;
     end;
 
+   Self.PanelObjects.ShowBlokPopisky := Self.PanelBitmap.ShowBlokPopisky;
    FreeAndNil(Self.PanelBitmap);
-
    Self.Panel.FileStav := 1;
   end else
 
@@ -1263,7 +1263,7 @@ end;
 function TRelief.GetShowBlokPopisky():boolean;
 begin
  case (Self.Mode) of
-   dmBitmap, dmSepVert, dmSepHor: Result := true;
+   dmBitmap, dmSepVert, dmSepHor: Result := Self.PanelBitmap.ShowBlokPopisky;
    dmBloky, dmRoots: Result := Self.PanelObjects.ShowBlokPopisky;
  else
    Result := true;
@@ -1273,7 +1273,7 @@ end;
 procedure TRelief.SetShowBlokPopisky(show:boolean);
 begin
  case (Self.Mode) of
-   dmBitmap, dmSepVert, dmSepHor: ;
+   dmBitmap, dmSepVert, dmSepHor: Self.PanelBitmap.ShowBlokPopisky := show;
    dmBloky, dmRoots: Self.PanelObjects.ShowBlokPopisky := show;
  end;
  Self.Show(Point(-1,-1));

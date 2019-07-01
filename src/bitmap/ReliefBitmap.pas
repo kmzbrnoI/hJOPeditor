@@ -460,6 +460,7 @@ constructor TPanelBitmap.Create(SymbolIL,TextIL:TImageList;DrawCanvas:TCanvas;Wi
 begin
  inherited Create;
 
+ Self.fShowBlokPopisky := true;
  Self.Mode := Mode;
  Self.Graphics := Graphics;
 
@@ -545,7 +546,7 @@ begin
  Self.Symbols.Paint;
  Self.SeparatorsVert.Paint;
  Self.SeparatorsHor.Paint;
- Self.Text.Paint;
+ Self.Text.Paint(Self.fShowBlokPopisky);
 end;//procedure
 
 procedure TPanelBitmap.MouseUp(Position:TPoint;Button:TMouseButton);
