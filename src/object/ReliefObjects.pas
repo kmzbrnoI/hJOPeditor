@@ -185,6 +185,7 @@ var i:Integer;
     sect_str:TStrings;
     blok:TGraphBlok;
     count:Integer;
+    blkTyp:TBlkType;
 begin
  Self.FStav := 2;
  Self.FSoubor := aFile;
@@ -216,148 +217,35 @@ begin
    ORs := ORs+#13;
    sect_str.Free;
 
-   // useky
-   count := inifile.ReadInteger('P', 'U', 0);
-   for i := 0 to count-1 do
+   for blkTyp := Low(TBlkType) to High(TBlkType) do
     begin
-     try
-       blok := ObjBlokUsek.TUsek.Create(i);
-       blok.Load(inifile, 'U'+IntToStr(i));
-       Self.Bloky.Add(blok);
-     except
+     count := inifile.ReadInteger('P', TGraphBlok.TypeToFileStr(blkTyp), 0);
+     for i := 0 to count-1 do
+      begin
+       try
+         case (blkTyp) of
+          usek: blok := ObjBlokUsek.TUsek.Create(i);
+          navestidlo: blok := ObjBlokNavestidlo.TNavestidlo.Create(i);
+          vyhybka: blok := ObjBlokVyhybka.TVyhybka.Create(i);
+          prejezd: blok := ObjBlokPrejezd.TPrejezd.Create(i);
+          text: blok := ObjBlokText.TText.Create(i);
+          pomocny_obj: blok := ObjBlokPomocny.TPomocnyObj.Create(i);
+          uvazka: blok := ObjBlokUvazka.TUvazka.Create(i);
+          uvazka_spr: blok := ObjBlokUvazkaSpr.TUvazkaSpr.Create(i);
+          zamek: blok := ObjBlokZamek.TZamek.Create(i);
+          vykol: blok := ObjBlokVykol.TVykol.Create(i);
+          rozp: blok := ObjBlokRozp.TRozp.Create(i);
+         else
+          blok := nil;
+         end;
 
-     end;
-    end;
+         blok.Load(inifile, TGraphBlok.TypeToFileStr(blkTyp)+IntToStr(i));
+         Self.Bloky.Add(blok);
+       except
 
-   // navestidla
-   count := inifile.ReadInteger('P', 'N', 0);
-   for i := 0 to count-1 do
-    begin
-     try
-       blok := TNavestidlo.Create(i);
-       blok.Load(inifile, 'N'+IntToStr(i));
-       Self.Bloky.Add(blok);
-     except
-
-     end;
-    end;
-
-   // pomocne symboly
-   count := inifile.ReadInteger('P', 'P', 0);
-   for i := 0 to count-1 do
-    begin
-     try
-       blok := TPomocnyObj.Create(i);
-       blok.Load(inifile, 'P'+IntToStr(i));
-       Self.Bloky.Add(blok);
-     except
-
-     end;
-    end;
-
-   // popisky
-   count := inifile.ReadInteger('P','T',0);
-   for i := 0 to count-1 do
-    begin
-     try
-       blok := TText.Create(i);
-       blok.Load(inifile, 'T'+IntToStr(i));
-       Self.Bloky.Add(blok);
-     except
-
-     end;
-    end;
-
-   // vyhybky
-   count := inifile.ReadInteger('P','V',0);
-   for i := 0 to count-1 do
-    begin
-     try
-       blok := TVyhybka.Create(i);
-       blok.Load(inifile, 'V'+IntToStr(i));
-       Self.Bloky.Add(blok);
-     except
-
-     end;
-    end;
-
-   // prejezdy
-   count := inifile.ReadInteger('P','PRJ',0);
-   for i := 0 to count-1 do
-    begin
-     try
-       blok := TPrejezd.Create(i);
-       blok.Load(inifile, 'PRJ'+IntToStr(i));
-       Self.Bloky.Add(blok);
-     except
-
-     end;
-    end;
-
-   // uvazky
-   count := inifile.ReadInteger('P','Uv',0);
-   for i := 0 to count-1 do
-    begin
-     try
-       blok := TUvazka.Create(i);
-       blok.Load(inifile, 'Uv'+IntToStr(i));
-       Self.Bloky.Add(blok);
-     except
-
-     end;
-    end;//for i
-
-   // uvazky soupravy
-   count := inifile.ReadInteger('P','UvS',0);
-   for i := 0 to count-1 do
-    begin
-     try
-       blok := TUvazkaSpr.Create(i);
-       blok.Load(inifile, 'UvS'+IntToStr(i));
-       Self.Bloky.Add(blok);
-     except
-
-     end;
-    end;//for i
-
-   // zamky
-   count := inifile.ReadInteger('P','Z',0);
-   for i := 0 to count-1 do
-    begin
-     try
-       blok := TZamek.Create(i);
-       blok.Load(inifile, 'Z'+IntToStr(i));
-       Self.Bloky.Add(blok);
-     except
-
-     end;
-    end;
-
-   // vykolejky
-   count := inifile.ReadInteger('P', 'Vyk', 0);
-   for i := 0 to count-1 do
-    begin
-     try
-       blok := TVykol.Create(i);
-       blok.Load(inifile, 'Vyk'+IntToStr(i));
-       Self.Bloky.Add(blok);
-     except
-
-     end;
-    end;
-
-   // rozpojovace
-   count := inifile.ReadInteger('P', 'R', 0);
-   for i := 0 to count-1 do
-    begin
-     try
-       blok := TRozp.Create(i);
-       blok.Load(inifile, 'R'+IntToStr(i));
-       Self.Bloky.Add(blok);
-     except
-
-     end;
-    end;
+       end;
+      end;
+    end;//for blkTyp
 
    Self.ComputeVyhybkaFlag();
    Self.Escape();
