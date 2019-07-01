@@ -209,6 +209,7 @@ begin
    p.Position.Y := LoadData[(i*_Block_Length)+1];
    p.Color := LoadData[(i*_Block_Length)+2];
    p.Text := '';
+   p.BlokPopisek := false;
 
    for j := 0 to _MAX_TEXT_LENGTH do
     begin
@@ -235,9 +236,13 @@ begin
   begin
    p.Position.X := LoadData[pos];
    p.Position.Y := LoadData[pos+1];
-   p.Color      := LoadData[pos+2];
+   p.Color := LoadData[pos+2];
    len := LoadData[pos+3];
-   p.Text := TEncoding.UTF8.GetString(LoadData, pos+4, len);
+   p.BlokPopisek := (LoadData[pos+4] = _POPISEK_MAGIC_CODE);
+   if (p.BlokPopisek) then
+     p.Text := TEncoding.UTF8.GetString(LoadData, pos+5, len-1)
+   else
+     p.Text := TEncoding.UTF8.GetString(LoadData, pos+4, len);
 
    Self.Data.Add(p);
    i := i + 1;
@@ -248,11 +253,12 @@ begin
 end;
 
 //ziskani surovych dat zapisovanych do souboru z dat programu
-function TPopisky.GetSaveData:TBytes;
+function TPopisky.GetSaveData():TBytes;
 var bytesBuf:TBytes;
     len:Integer;
     currentLen:Integer;
     p:TPopisek;
+    offset:Integer;
 begin
  SetLength(Result, 1024);
  currentLen := 2;
@@ -269,11 +275,19 @@ begin
    Result[currentLen] := p.Position.X;
    Result[currentLen+1] := p.Position.Y;
    Result[currentLen+2] := p.Color;
-   Result[currentLen+3] := len;
 
-   CopyMemory(@Result[currentLen+4], bytesBuf, len);
+   if (p.BlokPopisek) then
+    begin
+     Result[currentLen+3] := len+1;
+     Result[currentLen+4] := _POPISEK_MAGIC_CODE;
+     offset := currentLen+5;
+    end else begin
+     Result[currentLen+3] := len;
+     offset := currentLen+4;
+    end;
 
-   currentLen := currentLen + len + 4;
+   CopyMemory(@Result[offset], bytesBuf, len);
+   currentLen := offset + len;
   end;//for i
 
  SetLength(Result, currentLen);
