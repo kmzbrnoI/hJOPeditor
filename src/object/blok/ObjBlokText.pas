@@ -34,10 +34,10 @@ procedure TText.Load(ini: TMemIniFile; key: string);
 begin
  inherited;
 
- Self.Text       := ini.ReadString(key, 'T', 'text');
+ Self.Text := ini.ReadString(key, 'T', 'text');
  Self.Position.X := ini.ReadInteger(key, 'X', 0);
  Self.Position.Y := ini.ReadInteger(key, 'Y', 0);
- Self.Color      := ini.ReadInteger(key, 'C', 0);
+ Self.Color := ini.ReadInteger(key, 'C', 0);
 end;
 
 procedure TText.Save(ini: TMemIniFile; key: string);
@@ -56,7 +56,7 @@ end;
 procedure TText.Paint(DrawObject:TDrawObject; panelGraphics:TPanelGraphics; colors:TObjColors;
                       selected:boolean; mode:TMode);
 begin
- if (Length(Self.Text) = 1) then
+ if ((Length(Self.Text) = 1) and (Self.typ = TBlkType.text)) then
   begin
    if (selected) then
     begin
@@ -73,7 +73,10 @@ begin
     color := Self.Color;
   end;
 
- panelGraphics.TextOutputI(Self.Position, Self.Text, color, clBlack);
+ if (Self.typ = TBlkType.blok_popisek) then
+   panelGraphics.TextOutputI(Self.Position, Self.Text, color, clBlack, true)
+ else
+   panelGraphics.TextOutputI(Self.Position, Self.Text, color, clBlack);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

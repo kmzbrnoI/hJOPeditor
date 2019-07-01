@@ -3,7 +3,7 @@ object F_Popisek: TF_Popisek
   Top = 0
   BorderStyle = bsToolWindow
   Caption = '[operace]'
-  ClientHeight = 281
+  ClientHeight = 336
   ClientWidth = 241
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -23,8 +23,8 @@ object F_Popisek: TF_Popisek
     Caption = 'Text :'
   end
   object B_Apply: TButton
-    Left = 161
-    Top = 247
+    Left = 158
+    Top = 303
     Width = 75
     Height = 25
     Caption = 'Pou'#382#237't'
@@ -32,12 +32,12 @@ object F_Popisek: TF_Popisek
     OnClick = B_ApplyClick
   end
   object B_Storno: TButton
-    Left = 80
-    Top = 247
+    Left = 77
+    Top = 303
     Width = 75
     Height = 25
     Caption = 'Storno'
-    TabOrder = 2
+    TabOrder = 4
     OnClick = B_StornoClick
   end
   object E_Text: TEdit
@@ -184,5 +184,25 @@ object F_Popisek: TF_Popisek
       TabOrder = 7
       OnClick = RB_Col0Click
     end
+  end
+  object CHB_Blok_Popisek: TCheckBox
+    Left = 8
+    Top = 248
+    Width = 81
+    Height = 17
+    Caption = 'Popisek bloku'
+    TabOrder = 2
+  end
+  object StaticText1: TStaticText
+    AlignWithMargins = True
+    Left = 8
+    Top = 271
+    Width = 225
+    Height = 26
+    AutoSize = False
+    Caption = 
+      'Popisky bloku se zobrazuj'#237' podtr'#382'en'#283', v panelu pak nebudou podtr' +
+      #382'en'#233'.'
+    TabOrder = 5
   end
 end

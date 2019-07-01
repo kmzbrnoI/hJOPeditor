@@ -6,7 +6,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, Menus, ReliefObjects, Buttons, ToolWin, ComCtrls, ExtCtrls, Panel,
   ImgList, DXDraws, StdCtrls, AppEvnts, StrUtils, ReliefBitmap, Global,
-  ReliefSettings, fBlockEdit, DXSprite, DIB, ObjBlok;
+  ReliefSettings, fBlockEdit, DXSprite, DIB, ObjBlok, ReliefText;
 
 type
   TF_Hlavni = class(TForm)
@@ -165,7 +165,7 @@ type
 
     procedure ReliefErrorEvent(Sender:TObject; err:string);
     procedure ReliefMoveEvent(Sender:TObject; Position:TPoint);
-    procedure ReliefChangeTextEvent(Sender:TObject; var Text:string;var Color:Integer);
+    procedure ReliefChangeTextEvent(Sender:TObject; var popisek:TPopisek);
     procedure BlokEditEvent(Sender:TObject; Blok:TGraphBlok);
 
     procedure MessageEvent(Sender:TObject; msg:string);
@@ -803,9 +803,10 @@ end;
 procedure TF_Hlavni.ToolButton40Click(Sender: TObject);
 begin
  Relief.Escape(false);
- F_Popisek.NewPopisek;
+ F_Popisek.NewPopisek();
 
- if (F_Popisek.PopisekColor <> -1) then Relief.AddText(F_Popisek.PopisekText,F_Popisek.PopisekColor);
+ if (F_Popisek.PopisekColor <> -1) then
+   Relief.AddText(F_Popisek.PopisekText, F_Popisek.PopisekColor, F_Popisek.PopisekBlok);
 end;
 
 procedure TF_Hlavni.ToolButton41Click(Sender: TObject);
@@ -921,13 +922,14 @@ begin
  Self.SB_Main.Panels.Items[3].Text := '';
 end;
 
-procedure TF_Hlavni.ReliefChangeTextEvent(Sender:TObject; var Text:string;var Color:Integer);
+procedure TF_Hlavni.ReliefChangeTextEvent(Sender:TObject; var popisek:TPopisek);
 begin
- F_Popisek.OpenPopisek(Text,Color);
+ F_Popisek.OpenPopisek(Text, popisek);
 
  if (F_Popisek.PopisekColor = -1) then Exit;
- Text  := F_Popisek.PopisekText;
- Color := F_Popisek.PopisekColor;
+ popisek.Text := F_Popisek.PopisekText;
+ popisek.Color := F_Popisek.PopisekColor;
+ popisek.BlokPopisek := F_Popisek.PopisekBlok;
 end;
 
 procedure TF_Hlavni.BlokEditEvent(Sender:TObject; Blok:TGraphBlok);

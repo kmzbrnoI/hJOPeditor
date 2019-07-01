@@ -51,7 +51,7 @@ type
     procedure MoveActivateEvent;
     procedure DeleteActivateEvent;
     function IsOperationEvent:boolean;
-    procedure ChangeTextEvent(Sender:TObject; var Text:string;var Color:Integer);
+    procedure ChangeTextEvent(Sender:TObject; var popisek:TPopisek);
 
     function ImportObj(Data:TObject):Byte;
 
@@ -784,9 +784,9 @@ begin
   end;
 end;//procedure
 
-procedure TPanelBitmap.ChangeTextEvent(Sender:TObject; var Text:string;var Color:Integer);
+procedure TPanelBitmap.ChangeTextEvent(Sender:TObject; var popisek:TPopisek);
 begin
- if (Assigned(FOnTextEdit)) then FOnTextEdit(Self, Text, Color);
+ if (Assigned(FOnTextEdit)) then FOnTextEdit(Self, popisek);
 end;//procedure
 
 ///////////////////////////////////////////////////////////////////////////////

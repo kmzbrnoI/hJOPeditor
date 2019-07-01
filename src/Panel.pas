@@ -166,7 +166,7 @@ type
    function SetRozmery(aWidth,aHeight:Byte):Byte;
 
    procedure AddSymbol(SymbolID:Integer);
-   procedure AddText(Text:string;Color:Integer);
+   procedure AddText(Text:string; Color:Integer; popisekBlok:boolean);
    procedure AddJCClick();
    procedure AddSeparatorVert();
    procedure AddSeparatorHor();
@@ -754,10 +754,10 @@ begin
    Self.PanelBitmap.Symbols.Add(SymbolID);
 end;
 
-procedure TRelief.AddText(Text:string;Color:Integer);
+procedure TRelief.AddText(Text:string; Color:Integer; popisekBlok:boolean);
 begin
  if (Assigned(Self.PanelBitmap)) then
-   Self.PanelBitmap.Popisky.Add(Text,Color);
+   Self.PanelBitmap.Popisky.Add(Text,Color, popisekBlok);
 end;
 
 procedure TRelief.AddJCClick();

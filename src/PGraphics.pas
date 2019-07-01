@@ -23,7 +23,7 @@ type
       constructor Create(drawObject:TDXDraw; IL_Text:TImageList);
 
       procedure TextOutputC(Pos:TPoint;Text:string;Popredi,Pozadi:TColor);
-      procedure TextOutputI(Pos:TPoint;Text:string;Popredi:ShortInt;Pozadi:TColor);
+      procedure TextOutputI(Pos:TPoint;Text:string;Popredi:ShortInt;Pozadi:TColor; underline:boolean = false);
 
       function GetColorIndex(Color:TColor):integer;
   end;
@@ -46,7 +46,7 @@ begin
  Self.TextOutputI(Pos, Text, Self.GetColorIndex(Popredi), Pozadi);
 end;//procedure
 
-procedure TPanelGraphics.TextOutputI(Pos:TPoint;Text:string;Popredi:ShortInt;Pozadi:TColor);
+procedure TPanelGraphics.TextOutputI(Pos:TPoint;Text:string;Popredi:ShortInt;Pozadi:TColor; underline:boolean = false);
 var j:Integer;
     TextIndex:Integer;
 begin
@@ -94,8 +94,16 @@ begin
    end;
 
    Self.IL_Text.BkColor := Pozadi;
-   Self.IL_Text.Draw(Self.DrawObject.Surface.Canvas,Pos.X*_Symbol_Sirka+(j*_Symbol_Sirka),Pos.Y*_Symbol_Vyska,(TextIndex*10)+Popredi);
+   Self.IL_Text.Draw(Self.DrawObject.Surface.Canvas,Pos.X*_Symbol_Sirka+(j*_Symbol_Sirka),
+                     Pos.Y*_Symbol_Vyska,(TextIndex*10)+Popredi)
   end;//for j
+
+ if (underline) then
+  begin
+   Self.DrawObject.Surface.Canvas.Pen.Color := _Symbol_Colors[Popredi];
+   Self.DrawObject.Surface.Canvas.Rectangle(Pos.X*_Symbol_Sirka, (Pos.Y+1)*_Symbol_Vyska-1,
+                                            (Pos.X+Length(Text))*_Symbol_Sirka, (Pos.Y+1)*_Symbol_Vyska);
+  end;
 end;//procedure
 
 ////////////////////////////////////////////////////////////////////////////////

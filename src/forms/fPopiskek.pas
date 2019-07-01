@@ -29,6 +29,8 @@ type
     S_Col5: TShape;
     S_Col6: TShape;
     S_Col7: TShape;
+    CHB_Blok_Popisek: TCheckBox;
+    StaticText1: TStaticText;
     procedure B_StornoClick(Sender: TObject);
     procedure B_ApplyClick(Sender: TObject);
     procedure RB_Col0Click(Sender: TObject);
@@ -38,9 +40,10 @@ type
   public
    PopisekText:string;
    PopisekColor:ShortInt;
+   PopisekBlok:Boolean;
 
     procedure NewPopisek;
-    procedure OpenPopisek(aText:string;aColor:Byte);
+    procedure OpenPopisek(aText:string; popisek:TPopisek);
   end;
 
 var
@@ -64,16 +67,16 @@ begin
   end;
 
  Self.PopisekText := Self.E_Text.Text;
+ Self.PopisekBlok := Self.CHB_Blok_Popisek.Checked;
 
- Self.Close;
-end;//procedure
+ Self.Close();
+end;
 
 procedure TF_Popisek.B_StornoClick(Sender: TObject);
 begin
  Self.PopisekColor := -1;
-
- Self.Close;
-end;//procedure
+ Self.Close();
+end;
 
 procedure TF_Popisek.E_TextKeyPress(Sender: TObject; var Key: Char);
 begin
@@ -120,25 +123,27 @@ begin
  end;
 end;//procedure
 
-procedure TF_Popisek.NewPopisek;
+procedure TF_Popisek.NewPopisek();
 begin
- Self.E_Text.Text     := '';
+ Self.E_Text.Text := '';
  Self.RB_Col1.Checked := true;
 
- Self.PopisekText  := '';
+ Self.PopisekText := '';
  Self.PopisekColor := 1;
+ Self.PopisekBlok := Self.CHB_Blok_Popisek.Checked;
 
  Self.Caption := 'Nový popisek';
  Self.ShowModal;
 end;//procedure
 
-procedure TF_Popisek.OpenPopisek(aText:string;aColor:Byte);
+procedure TF_Popisek.OpenPopisek(aText:string; popisek:TPopisek);
 begin
- Self.PopisekText  := aText;
- Self.PopisekColor := aColor;
+ Self.PopisekText := popisek.Text;
+ Self.PopisekColor := popisek.Color;
+ Self.PopisekBlok := popisek.BlokPopisek;
 
- Self.E_Text.Text := aText;
- case (aColor) of
+ Self.E_Text.Text := popisek.Text;
+ case (popisek.Color) of
   0:Self.RB_Col0.Checked := true;
   1:Self.RB_Col1.Checked := true;
   2:Self.RB_Col2.Checked := true;
@@ -148,9 +153,10 @@ begin
   6:Self.RB_Col6.Checked := true;
   7:Self.RB_Col7.Checked := true;
  end;//case
+ Self.CHB_Blok_Popisek.Checked := popisek.BlokPopisek;
 
  Self.Caption := 'Editovat popisek';
- Self.ShowModal;
+ Self.ShowModal();
 end;//procedure
 
 procedure TF_Popisek.RB_Col0Click(Sender: TObject);

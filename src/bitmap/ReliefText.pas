@@ -14,8 +14,6 @@ const
  _Block_Length = 35;
 
 type
- TChangeTextEvent = procedure(Sender:TObject; var Text:string;var Color:Integer) of object;
-
  EInvalidPosition = class(Exception);
  ENonemptyField = class(Exception);
  EEmptyField = class(Exception);
@@ -24,13 +22,16 @@ type
  EOperationInProgress = class(Exception);
  ETooLongText = class(Exception);
 
-  TPopisek=record
+  TPopisek = record
     Position:TPoint;
     Text:string;
     Color:ShortInt;
+    BlokPopisek:boolean;
   end;
 
-  TPopisky=class
+  TChangeTextEvent = procedure(Sender:TObject; var popisek:TPopisek) of object;
+
+  TPopisky = class
    private
      Data:TList<TPopisek>;
 
@@ -50,10 +51,11 @@ type
       TextProperties:record
        Text:string;
        Color:Integer;
+       blokPopisek:boolean;
       end;
      end;//Operations
 
-    procedure AddToStructure(aPos:TPoint;aText:string;aColor:ShortInt);
+    procedure AddToStructure(aPos:TPoint; aText:string; aColor:ShortInt; aBlokDesc:boolean);
     procedure DeleteFromStructure(aPos:TPoint);
 
     procedure Adding(Position:TPoint);
@@ -90,7 +92,7 @@ type
      function GetPopisek(aPos:TPoint):SmallInt;
      function IsObsazeno(Pos1,Pos2:TPoint):boolean;
 
-     procedure Add(aText:string;aColor:ShortInt);
+     procedure Add(aText:string; aColor:ShortInt; popisekBlok:boolean);
      procedure Move();
      procedure Delete();
 
@@ -119,14 +121,15 @@ implementation
 
 constructor TPopisky.Create(DrawCanvas:TCanvas;TextIL:TImageList;Parent:TForm; Graphics:TPanelGraphics);
 begin
+ inherited Create();
+
  Self.DrawObject.Canvas := DrawCanvas;
  Self.DrawObject.TextIL := TextIL;
- Self.Graphics          := Graphics;
+ Self.Graphics := Graphics;
  Self.Data := TList<TPopisek>.Create();
 
  Self.InitializeTextMenu(Self.TextMenu,Parent);
-
- Self.Reset;
+ Self.Reset();
 end;
 
 destructor TPopisky.Destroy;
@@ -138,10 +141,12 @@ begin
    Self.TextMenu.Free;
    Self.TextMenu := nil;
   end;
-end;//destructor
+
+ inherited;
+end;
 
 //pridani popisku
-procedure TPopisky.AddToStructure(aPos:TPoint;aText:string;aColor:ShortInt);
+procedure TPopisky.AddToStructure(aPos:TPoint; aText:string; aColor:ShortInt; aBlokDesc:boolean);
 var p:TPopisek;
 begin
  if ((aPos.X < 0) or (aPos.Y < 0) or (aPos.X > (_MAX_WIDTH-1)) or (aPos.Y > (_MAX_HEIGHT-1))) then
@@ -153,9 +158,10 @@ begin
  if (Length(aText) > _MAX_TEXT_LENGTH) then
    raise ETooLongText.Create('Text je pøíliš dlouhý!');
 
- p.Position  := aPos;
- p.Text      := aText;
- p.Color     := aColor;
+ p.Position := aPos;
+ p.Text := aText;
+ p.Color := aColor;
+ p.BlokPopisek := aBlokDesc;
 
  Self.Data.Add(p);
 end;
@@ -275,14 +281,13 @@ begin
  Result[1] := lo(currentLen-2);
 end;
 
-procedure TPopisky.Reset;
+procedure TPopisky.Reset();
 begin
  Self.Data.Count := 0;
-
  Self.Escape;
 end;
 
-procedure TPopisky.Escape;
+procedure TPopisky.Escape();
 begin
  Self.Operations.FAddKrok    := 0;
  Self.Operations.FMoveKrok   := 0;
@@ -290,12 +295,12 @@ begin
 end;
 
 //vykresleni textu
-procedure TPopisky.Paint;
-var i:Integer;
+procedure TPopisky.Paint();
+var popisek:TPopisek;
 begin
  //vykresleni textu
- for i := 0 to Self.Count-1 do
-   Self.Graphics.TextOutputI(Self.Data[i].Position, Self.Data[i].Text, Self.Data[i].Color, clBlack);
+ for popisek in Self.Data do
+   Self.Graphics.TextOutputI(popisek.Position, popisek.Text, popisek.Color, clBlack, popisek.BlokPopisek);
 end;
 
 function TPopisky.GetPopisekData(Index:Integer):TPopisek;
@@ -335,7 +340,8 @@ begin
  if (Self.IsObsazeno(Position,Point(Position.X+Length(Self.Operations.TextProperties.Text),Position.Y))) then
    raise ENonemptyField.Create('Na pozici je již symbol!');
 
- Self.AddToStructure(Position,Self.Operations.TextProperties.Text,Self.Operations.TextProperties.Color);
+ Self.AddToStructure(Position, Self.Operations.TextProperties.Text,
+                     Self.Operations.TextProperties.Color, Self.Operations.TextProperties.blokPopisek);
 
  Self.Operations.FAddKrok := 0;
 end;
@@ -355,6 +361,7 @@ begin
      //ziskani dat popisku
      Self.Operations.TextProperties.Text := Self.GetPopisekData(PopisekIndex).Text;
      Self.Operations.TextProperties.Color := Self.GetPopisekData(PopisekIndex).Color;
+     Self.Operations.TextProperties.blokPopisek := Self.GetPopisekData(PopisekIndex).BlokPopisek;
 
      Self.DeleteFromStructure(Position);
 
@@ -373,7 +380,8 @@ begin
          raise ENonemptyField.Create('Pozice obsazena!');
       end;
 
-     Self.AddToStructure(Position,Self.Operations.TextProperties.Text,Self.Operations.TextProperties.Color);
+     Self.AddToStructure(Position,Self.Operations.TextProperties.Text,
+                         Self.Operations.TextProperties.Color, Self.Operations.TextProperties.blokPopisek);
 
      Self.Operations.TextProperties.Text := '';
      Self.Operations.TextProperties.Color := 0;
@@ -423,16 +431,17 @@ begin
         Exit(true);
 end;
 
-procedure TPopisky.Add(aText:string;aColor:ShortInt);
+procedure TPopisky.Add(aText:string; aColor:ShortInt; popisekBlok:boolean);
 begin
  if (Length(aText) > _MAX_TEXT_LENGTH) then
    raise ETooLongText.Create('Text je pøíliš dlouhý!');
 
  Self.CheckOpInProgressAndExcept();
 
- Self.Operations.FAddKrok             := 1;
+ Self.Operations.FAddKrok := 1;
  Self.Operations.TextProperties.Text  := aText;
  Self.Operations.TextProperties.Color := aColor;
+ Self.Operations.TextProperties.blokPopisek := popisekBlok;
 end;
 
 procedure TPopisky.Move();
@@ -468,7 +477,8 @@ procedure TPopisky.PaintTextMove(KurzorPos:TPoint);
 begin
  //pridavani, posouvani
  if ((Self.Operations.FAddKrok = 1) or (Self.Operations.FMoveKrok = 2)) then
-     Self.Graphics.TextOutputI(KurzorPos, Self.Operations.TextProperties.Text, Self.Operations.TextProperties.Color, clBlack);
+     Self.Graphics.TextOutputI(KurzorPos, Self.Operations.TextProperties.Text,
+                               Self.Operations.TextProperties.Color, clBlack, Self.Operations.TextProperties.blokPopisek);
 end;
 
 //vykresleni kurzoru - vraci data PIXELECH!
@@ -514,22 +524,15 @@ end;
 
 procedure TPopisky.MITextPropertiesClick(Sender:TObject);
 var PIndex:Integer;
-    aText:string;
-    aColor:Integer;
     aPopisek:TPopisek;
 begin
  PIndex := Self.GetPopisek(MenuPosition);
 
  aPopisek := Self.GetPopisekData(PIndex);
- aText  := aPopisek.Text;
- aColor := aPopisek.Color;
- if Assigned(FOnChangeText) then FOnChangeText(Self, aText, aColor);
+ if Assigned(FOnChangeText) then FOnChangeText(Self, aPopisek);
+ Self.SetPopisekData(PIndex, aPopisek);
 
- aPopisek.Text  := aText;
- aPopisek.Color := aColor;
- Self.SetPopisekData(PIndex,aPopisek);
-
- if Assigned(FOnShow) then FOnShow;
+ if Assigned(FOnShow) then FOnShow();
 end;
 
 procedure TPopisky.InitializeTextMenu(var Menu:TPopupMenu;Parent:TForm);
