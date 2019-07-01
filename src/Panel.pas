@@ -17,13 +17,13 @@ type
   //2 - chyba externi funkce
   //3 - obsazeno
   //4 - presazeny limity
- TErrorEvent = procedure(Sender:TObject; ErrorID:Integer) of object;
+ TErrorEvent = procedure(Sender:TObject; err:string) of object;
  TMoveEvent  = procedure(Sender:TObject; Position:TPoint) of object;
  EORLoad = class(Exception);
  EGeneralFileOpen = class(Exception);
  EResourceLoad = class(Exception);
 
- TRelief=class
+ TRelief = class
   private const
     _MAX_MOVE = 64;
     _MAX_TEXT_LENGTH = 32;
@@ -161,13 +161,13 @@ type
    function Escape(Group:boolean):Byte;
    function SetRozmery(aWidth,aHeight:Byte):Byte;
 
-   function AddSymbol(SymbolID:Integer):Byte;
-   function AddText(Text:string;Color:Integer):Byte;
-   function AddJCClick:Byte;
-   function AddSeparatorVert:Byte;
-   function AddSeparatorHor:Byte;
-   function AddKPopisek:Byte;
-   function AddSouprava:Byte;
+   procedure AddSymbol(SymbolID:Integer);
+   procedure AddText(Text:string;Color:Integer);
+   procedure AddJCClick();
+   procedure AddSeparatorVert();
+   procedure AddSeparatorHor();
+   procedure AddKPopisek();
+   procedure AddSouprava();
 
    procedure MoveBitmapSymbol;
    procedure DeleteBitmapSymbol;
@@ -278,7 +278,7 @@ begin
  Self.Show(Point(-1,-1));
 
  Self.DrawObject.Visible := true;
-end;//function
+end;
 
 //novy relief
 function TRelief.New(size:TPoint;firstOR:TOR):Byte;
@@ -291,7 +291,7 @@ begin
   end;
 
  Result := 0;
-end;//function
+end;
 
 procedure TRelief.Open(aFile:string);
 var Mode:TMode;
@@ -303,7 +303,7 @@ begin
 
  Self.Initialize(Point(0,0), Mode);
  Self.FLoad(aFile);
-end;//function
+end;
 
 destructor TRelief.Destroy();
 begin
@@ -365,7 +365,7 @@ begin
 
  ColouredImages.Free;
  AllImages.Free;
-end;//procedure
+end;
 
 //hlavni zobrazeni celeho reliefu
 procedure TRelief.Show(CursorPos:TPoint);
@@ -404,7 +404,7 @@ begin
  Self.DrawObject.EndScene;
  Self.DrawObject.Surface.Canvas.Release;
  Self.DrawObject.Flip;
-end;//procedure
+end;
 
 //vykresleni mrizky
 procedure TRelief.PaintMrizka(MrizkaColor:TColor);
@@ -422,7 +422,7 @@ begin
    Self.DrawObject.Surface.Canvas.MoveTo(0,(i*_Symbol_Vyska)-1);
    Self.DrawObject.Surface.Canvas.LineTo(Self.Zobrazeni.PanelWidth*_Symbol_Sirka,(i*_Symbol_Vyska)-1);
   end;//for i
-end;//procedure
+end;
 
 //vykresluje kurzor
 function TRelief.PaintKurzor(CursorData:TCursorDraw):Byte;
@@ -476,7 +476,7 @@ begin
   end;//else ((KurzorPos2.X > KurzorPos1.X) and (KurzorPos2.Y > KurzorPos1.Y))
 
  Result := 0;
-end;//procedure
+end;
 
 procedure TRelief.DXDMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
@@ -492,7 +492,7 @@ begin
   end;//ORMouseUp = 0
 
  Self.Show(LastPos);
-end;//procedure
+end;
 
 procedure TRelief.DXDMouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
 begin
@@ -508,7 +508,7 @@ begin
  Self.Show(LastPos);
 
  if Assigned(FOnMove) then FOnMove(Self, LastPos);
-end;//procedure
+end;
 
 procedure TRelief.DXDDoubleClick(Sender: TObject);
 begin
@@ -518,7 +518,7 @@ begin
  end;//case
 
  Self.Show(LastPos);
-end;//procedure
+end;
 
 procedure TRelief.KeyPress(Key:Integer);
 var mouse:TPoint;
@@ -541,7 +541,7 @@ begin
 
    VK_RETURN: Self.DXDMouseUp(Self.DrawObject, mbLeft, [], Self.LastPos.X*_Symbol_Sirka, Self.LastPos.Y*_Symbol_Vyska);      // enter
  end;
-end;//procedure
+end;
 
 function TRelief.Escape(Group:boolean):Byte;
 begin
@@ -557,7 +557,7 @@ begin
  Self.FMove := false;
 
  Self.Show(LastPos);
-end;//function
+end;
 
 function TRelief.SwitchMode(aMode:TMode):Byte;
 begin
@@ -594,39 +594,47 @@ begin
 
  Self.Show(Point(-1,-1));
  Result := 0;
-end;//procedure
+end;
 
 procedure TRelief.BitmapMouseUp(Position:TPoint;Button:TMouseButton);
-var Return:Byte;
 begin
- Return := Self.PanelBitmap.MouseUp(Position,Button);
-
- if (Return <> 0) then if Assigned(FOnError) then FOnError(Self, Return-1);
-end;//procedure
+ try
+   Self.PanelBitmap.MouseUp(Position,Button);
+ except
+   on E:Exception do
+     if Assigned(FOnError) then FOnError(Self, E.Message);
+ end;
+end;
 
 procedure TRelief.ObjectMouseUp(Position:TPoint;Button:TMouseButton);
-var Return:Byte;
 begin
- Return := Self.PanelObjects.MouseUp(Position,Button);
-
- if (Return <> 0) then if Assigned(FOnError) then FOnError(Self, Return-1);
-end;//procedure
+ try
+   Self.PanelObjects.MouseUp(Position,Button);
+ except
+   on E:Exception do
+     if Assigned(FOnError) then FOnError(Self, E.Message);
+ end;
+end;
 
 procedure TRelief.BitmapDblClick(Position:TPoint);
-var Return:Byte;
 begin
- Return := Self.PanelBitmap.DblClick(Position);
-
- if (Return <> 0) then if Assigned(FOnError) then FOnError(Self, Return-1);
-end;//procedure
+ try
+   Self.PanelBitmap.DblClick(Position);
+ except
+   on E:Exception do
+     if Assigned(FOnError) then FOnError(Self, E.Message);
+ end;
+end;
 
 procedure TRelief.ObjectDblClick(Position:TPoint);
-var Return:Byte;
 begin
- Return := Self.PanelObjects.DblClick(Position);
-
- if (Return <> 0) then if Assigned(FOnError) then FOnError(Self, Return-1);
-end;//procedure
+ try
+   Self.PanelObjects.DblClick(Position);
+ except
+   on E:Exception do
+     if Assigned(FOnError) then FOnError(Self, E.Message);
+ end;
+end;
 
 function TRelief.SetRozmery(aWidth,aHeight:Byte):Byte;
 begin
@@ -652,14 +660,14 @@ begin
  Self.Show(LastPos);
 
  Result := 0;
-end;//function
+end;
 
 procedure TRelief.SetMrizka(aMrizka:Boolean);
 begin
  Self.Zobrazeni.Mrizka := aMrizka;
 
  Self.Show(Point(-1,-1));
-end;//procedure
+end;
 
 procedure TRelief.FLoad(aFile:string);
 var ORs:string;
@@ -685,7 +693,7 @@ begin
  Self.DrawObject.Height := Self.Zobrazeni.PanelHeight*_Symbol_Vyska;
 
  Self.Panel.FileCesta := aFile;
-end;//function
+end;
 
 procedure TRelief.Save(aFile:string);
 begin
@@ -702,17 +710,17 @@ begin
  end;///case
 
  Self.Panel.FileCesta := aFile;
-end;//function
+end;
 
 procedure TRelief.ShowEvent;
 begin
  Self.Show(LastPos);
-end;//procedure
+end;
 
 procedure TRelief.SetGroup(State:boolean);
 begin
  if (Assigned(Self.PanelBitmap)) then Self.PanelBitmap.Group := State;
-end;//procedure
+end;
 
 function TRelief.GetGroup:boolean;
 begin
@@ -726,70 +734,63 @@ begin
  if (Assigned(Self.PanelBitmap)) then Self.PanelBitmap.Move;
  Self.FMove := true;
  Self.Show(Self.LastPos);
-end;//procedure
+end;
 
 procedure TRelief.DeleteBitmapSymbol();
 begin
  if (Assigned(Self.PanelBitmap)) then Self.PanelBitmap.Delete;
  Self.FMove := false;
  Self.Show(Self.LastPos);
-end;//procedure
+end;
 
-function TRelief.AddSymbol(SymbolID:Integer):Byte;
+procedure TRelief.AddSymbol(SymbolID:Integer);
 begin
- Result := 255;
+ if (Assigned(Self.PanelBitmap)) then
+   Self.PanelBitmap.Symbols.Add(SymbolID);
+end;
 
- if (Assigned(Self.PanelBitmap)) then Result := Self.PanelBitmap.Symbols.Add(SymbolID);
-end;//procedure
-
-function TRelief.AddText(Text:string;Color:Integer):Byte;
+procedure TRelief.AddText(Text:string;Color:Integer);
 begin
- Result := 255;
+ if (Assigned(Self.PanelBitmap)) then
+   Self.PanelBitmap.Popisky.Add(Text,Color);
+end;
 
- if (Assigned(Self.PanelBitmap)) then Result := Self.PanelBitmap.Popisky.Add(Text,Color);
-end;//procedure
-
-function TRelief.AddJCClick:Byte;
+procedure TRelief.AddJCClick();
 begin
- Result := 255;
+ if (Assigned(Self.PanelBitmap)) then
+   Self.PanelBitmap.JCClick.Add();
+end;
 
- if (Assigned(Self.PanelBitmap)) then Result := Self.PanelBitmap.JCClick.Add;
-end;//procedure
-
-function TRelief.AddSeparatorVert:Byte;
+procedure TRelief.AddSeparatorVert();
 begin
- Result := 255;
-
  if (Self.Mode <> dmSepVert) then Self.SwitchMode(dmSepVert);
- if (Assigned(Self.PanelBitmap)) then Result := Self.PanelBitmap.SeparatorsVert.Add;
-end;//procedure
+ if (Assigned(Self.PanelBitmap)) then
+   Self.PanelBitmap.SeparatorsVert.Add();
+end;
 
-function TRelief.AddSeparatorHor:Byte;
+procedure TRelief.AddSeparatorHor();
 begin
- Result := 255;
-
  if (Self.Mode <> dmSepHor) then Self.SwitchMode(dmSepHor);
- if (Assigned(Self.PanelBitmap)) then Result := Self.PanelBitmap.SeparatorsHor.Add;
-end;//procedure
+ if (Assigned(Self.PanelBitmap)) then
+   Self.PanelBitmap.SeparatorsHor.Add();
+end;
 
-function TRelief.AddKPopisek:Byte;
+procedure TRelief.AddKPopisek();
 begin
- Result := 255;
+ if (Assigned(Self.PanelBitmap)) then
+   Self.PanelBitmap.KPopisky.Add();
+end;
 
- if (Assigned(Self.PanelBitmap)) then Result := Self.PanelBitmap.KPopisky.Add;
-end;//procedure
-
-function TRelief.AddSouprava:Byte;
+procedure TRelief.AddSouprava();
 begin
- Result := 255;
-
- if (Assigned(Self.PanelBitmap)) then Result := Self.PanelBitmap.Soupravy.Add;
+ if (Assigned(Self.PanelBitmap)) then
+   Self.PanelBitmap.Soupravy.Add();
 end;
 
 procedure TRelief.MessageEvent(Sender:TObject; msg:string);
 begin
  if (Assigned(Self.FOnMsg)) then Self.FOnMsg(Self, msg);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 //operace s oblastmi rizeni:
@@ -799,14 +800,14 @@ var i:Integer;
 begin
  Result.Cnt := Self.ORs.Cnt;
  for i := 0 to Self.ORs.Cnt-1 do Result.data[i] := Self.ORs.Data[i].Name;   
-end;//function
+end;
 
 function TRelief.GetOR(index:Integer):TOR;
 begin
  if (index < 0) or (index >= Self.ORs.Cnt) then Exit;
 
  Result := Self.ORs.Data[index];
-end;//function
+end;
 
 function TRelief.SetOR(index:Integer;data:TOR):Byte;
 begin
@@ -818,7 +819,7 @@ begin
 
  Self.ORs.Data[index] := data;
  Result := 0;
-end;//function
+end;
 
 function TRelief.AddOR(data:TOR):Byte;
 begin
@@ -835,7 +836,7 @@ begin
  Self.ORMove.MovingSymbol := 0; //0 = dopravni kancelar
 
  Result := 0;
-end;//function
+end;
 
 function TRelief.DeleteOR(index:Integer):Byte;
 var i:Integer;
@@ -850,7 +851,7 @@ begin
  Self.ORs.Cnt := Self.ORs.Cnt - 1;
 
  Result := 0;
-end;//function
+end;
 
 function TRelief.DeleteOR(pos:TPoint):Byte;
 var i:Integer;
@@ -866,7 +867,7 @@ begin
   end;
 
  Result := 1;
-end;//function
+end;
 
 //vykresli vsechny oblasti rizeni
 //zatim jen baracky
@@ -891,7 +892,7 @@ begin
    Self.Graphics.TextOutputI(Self.ORs.Data[i].Poss.Time, 'MER CASU', 1, clBlack);
    Self.Graphics.TextOutputC(Point(Self.ORs.Data[i].Poss.Time.X+8, Self.ORs.Data[i].Poss.Time.Y), '        ', clBlack, clWhite);
   end;//for i
-end;//procedure
+end;
 
 //vykresluje kurzor pri pohybu
 function TRelief.PaintORCursor(CursorPos:TPoint):TCursorDraw;
@@ -937,7 +938,7 @@ begin
    Result.Pos2.X := (CursorPos.X+_OR_Size[Self.ORMove.MovingSymbol*2]-1)*_Symbol_Sirka;
    Result.Pos2.Y := (CursorPos.Y+_OR_Size[Self.ORMove.MovingSymbol*2+1]-1)*_Symbol_Vyska;
   end;
-end;//function
+end;
 
 function TRelief.ORMouseUp(Position:TPoint; Button:TMouseButton):Byte;
 var tmp_or:TORGraf;
@@ -993,7 +994,7 @@ begin
      end;//case
     end;
   end;//dmBitmap
-end;//function
+end;
 
 //vraci OR na dane pozici
 function TRelief.GetORGraf(pos:TPoint):TORGraf;
@@ -1026,7 +1027,7 @@ begin
      Exit;
     end;
   end;//for i
-end;//function
+end;
 
 procedure TRelief.DKMenuInit();
 var MI:TMenuItem;
@@ -1043,12 +1044,12 @@ begin
  MI.Caption := 'Smazat OØ';
  MI.OnClick := Self.DKDeleteClick;
  Self.DK_Menu.Items.Add(MI);
-end;//procedure
+end;
 
 procedure TRelief.DKPropClick(Sender:TObject);
 begin
  F_OREdit.OpenForm(Self.ORClick.MovingOR);
-end;//procedure
+end;
 
 procedure TRelief.DKDeleteClick(Sender:TObject);
 begin
@@ -1062,7 +1063,7 @@ begin
   begin
    Self.DeleteOR(Self.ORClick.MovingOR);
   end;
-end;//procedure
+end;
 
 //na kazdem radku je ulozena jedna oblast rizeni ve formatu:
 //  nazev;nazev_zkratka;id;lichy_smer(0,1);orientace_DK(0,1);ModCasStart(0,1);ModCasStop(0,1);ModCasSet(0,1);dkposx;dkposy;qposx;qposy;timeposx;timeposy;osv_mtb|osv_port|osv_name;
@@ -1085,7 +1086,7 @@ begin
   end;//for i
 
  Result := Result + #13;
-end;//function
+end;
 
 //na kazdem radku je ulozena jedna oblast rizeni ve formatu:
 //  nazev;nazev_zkratka;id;lichy_smer(0,1);orientace_DK(0,1);ModCasStart(0,1);ModCasStop(0,1);ModCasSet(0,1);dkposx;dkposy;qposx;qposy;timeposx;timeposy;osv_mtb|osv_port|osv_name;
@@ -1158,7 +1159,7 @@ begin
  FreeAndNil(data_main);
  FreeAndNil(data_osv);
  FreeAndNil(data_osv2);
-end;//procedure
+end;
 
 //konec operaci s oblastmi rizeni
 ////////////////////////////////////////////////////////////////////////////////
@@ -1171,7 +1172,7 @@ begin
    Exit;
   end;
  Result := Self.PanelObjects.CheckValid(error_cnt);
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1180,7 +1181,7 @@ begin
  Self.PanelBitmap.OnShow     := Self.ShowEvent;
  Self.PanelBitmap.OnTextEdit := Self.OnChangeText;
  Self.PanelBitmap.OnORAsk    := Self.IsOREvent;
-end;//procedure
+end;
 
 procedure TRelief.AssignObjectEvents();
 begin
@@ -1188,7 +1189,7 @@ begin
  Self.PanelObjects.OnMsg           := Self.MessageEvent;
  Self.PanelObjects.OnShow          := Self.ShowEvent;
  Self.PanelObjects.OnFormBlkClose  := Self.BlkFormCloseEvent;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1223,14 +1224,14 @@ begin
   end;
 
  Result := false;
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.BlkFormCloseEvent(Sender:TObject);
 begin
  if (Assigned(Self.FFormBlkClose)) then Self.FFormBlkClose(Self);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1243,14 +1244,14 @@ begin
    LastPos.X := -1;
    LastPos.Y := -1;
   end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TRelief.BlokEditEvent(Sender:TObject; Blok:TGraphBlok);
 begin
  if (Assigned(Self.FOnBlokEdit)) then Self.FOnBlokEdit(Self, Blok);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

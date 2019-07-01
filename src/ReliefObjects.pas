@@ -186,11 +186,11 @@ TPanelObjects=class
     procedure ResetPanel;
     procedure Escape;
 
-    function MouseUp(Position:TPoint;Button:TMouseButton):Byte;
+    procedure MouseUp(Position:TPoint;Button:TMouseButton);
     procedure MouseMove(Position:TPoint);
-    function BlokyMouseUp(Position:TPoint;Button:TMouseButton):Byte;
-    function KorenyMouseUp(Position:TPoint;Button:TMouseButton):Byte;
-    function DblClick(Position:TPoint):Byte;
+    procedure BlokyMouseUp(Position:TPoint;Button:TMouseButton);
+    procedure KorenyMouseUp(Position:TPoint;Button:TMouseButton);
+    procedure DblClick(Position:TPoint);
 
     function GetObject(Pos:TPoint):Integer;
 
@@ -295,7 +295,7 @@ begin
   end;
  Self.Bloky.Clear();
  Self.Selected := nil;
-end;//procedure NewFile
+end;
 
 //nacitani souboru
 procedure TPanelObjects.FLoad(aFile:string;var ORs:string);
@@ -663,7 +663,7 @@ begin
  finally
    inifile.Free;
  end;
-end;//procedure LoadFile
+end;
 
 procedure TPanelObjects.FSave(aFile:string;const ORs:string);
 var i,j,k:Integer;
@@ -914,7 +914,7 @@ begin
    inifile.UpdateFile;
    inifile.Free;
  end;
-end;//procedure SaveFile
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -923,7 +923,7 @@ begin
  case (Self.FMode) of
    dmBloky, dmRoots : Self.PaintBloky();
  end;
-end;//procedure
+end;
 
 procedure TPanelObjects.PaintBloky();
 var i,j, color:Integer;
@@ -1192,7 +1192,7 @@ begin
 
    end;//case typ
   end;//for i
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1200,7 +1200,7 @@ end;//procedure
 procedure TPanelObjects.Escape();
 begin
  Self.Selected := nil;
-end;//procedure
+end;
 
 //vykresleni kurzoru - vraci data v PIXELECH!
 function TPanelObjects.PaintCursor(CursorPos:TPoint):TCursorDraw;
@@ -1215,7 +1215,7 @@ begin
  //vykreslit koren pod kurzorem
  if (Self.FMode = dmRoots) then
    Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, CursorPos.X*_Symbol_Sirka, CursorPos.Y*_Symbol_Vyska, (_Root_Index*10)+_Root_Color);
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1269,7 +1269,7 @@ begin
   end;
 
  Result := tmp;
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1291,21 +1291,17 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function TPanelObjects.MouseUp(Position:TPoint;Button:TMouseButton):Byte;
+procedure TPanelObjects.MouseUp(Position:TPoint;Button:TMouseButton);
 begin
  case (Self.FMode) of
-  dmBloky : Result := Self.BlokyMouseUp(Position, Button);
-  dmRoots : Result := Self.KorenyMouseUp(Position, Button);
- else
-  Result := 0;
+  dmBloky : Self.BlokyMouseUp(Position, Button);
+  dmRoots : Self.KorenyMouseUp(Position, Button);
  end;
-end;//function
+end;
 
-function TPanelObjects.BlokyMouseUp(Position:TPoint;Button:TMouseButton):Byte;
+procedure TPanelObjects.BlokyMouseUp(Position:TPoint;Button:TMouseButton);
 var blk:Integer;
 begin
- Result := 0;
-
  blk := Self.GetObject(Position);
  if (blk < 0) then
   begin
@@ -1347,13 +1343,11 @@ begin
  if (Button = mbLeft) then
    if (Self.Selected.typ <> TBlkType.pomocny_obj) then
      Self.PMPropertiesClick(self);
-end;//function
+end;
 
-function TPanelObjects.KorenyMouseUp(Position:TPoint;Button:TMouseButton):Byte;
+procedure TPanelObjects.KorenyMouseUp(Position:TPoint;Button:TMouseButton);
 var blk, i:Integer;
 begin
- Result := 0;
-
  //leve tlacitko mysi
  if (Button <> mbLeft) then Exit;
 
@@ -1372,21 +1366,18 @@ begin
  end else
   Self.Selected := nil;
 
-
-
  if (Assigned(Self.FOnMsg)) then Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (úsek)');
  if ((not Assigned(Self.Selected)) or (not (Self.Selected as TUsek).IsVyhybka)) then Exit;
  (Self.Selected as TUsek).Root := Position;
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function TPanelObjects.DblClick(Position:TPoint):Byte;
+procedure TPanelObjects.DblClick(Position:TPoint);
 begin
  Self.PopUpPos := Position;
  Self.PMPropertiesClick(self);
- Result := 0;
-end;//function
+end;
 
 procedure TPanelObjects.CreatePM(var PM:TPopUpMenu;Parent:TDXDraw);
 var MI:TMenuItem;
@@ -1398,13 +1389,13 @@ begin
  MI.OnClick := Self.PMPropertiesClick;
 
  PM.Items.Add(MI);
-end;//procedure
+end;
 
 procedure TPanelObjects.PMPropertiesClick(Sender: TObject);
 begin
  if (Self.Selected <> nil) then
    if (Assigned(Self.FOnBlokEdit)) then Self.FOnBlokEdit(Self, Self.Selected);
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1415,7 +1406,7 @@ begin
  if (Self.Selected = nil) then Exit(1);
  Self.Selected.OblRizeni := OblR;
  Result := 0;
-end;//function
+end;
 
 //checking data valid
 function TPanelObjects.CheckValid(var error_cnt:Byte):TStrings;
@@ -1486,7 +1477,7 @@ begin
   end;//for i
 
  Result.Add('--- Validace hotova. ---');
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1496,7 +1487,7 @@ begin
  Self.Selected := nil;
  if (mode = TMode.dmRoots) then
    Self.ComputeVyhybkaFlag();
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1521,7 +1512,7 @@ begin
          break;
         end;
     end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1538,7 +1529,7 @@ begin
    Result := BitmapToObj.BitmapToObjects((Data as TPanelBitmap), Self);
   end;//if (Data.ClassType = TPanelBitmap)
 
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1565,7 +1556,7 @@ begin
      (Self.Bloky[i] as TPrejezd).BlikPositions[j] := blik_point;
     end;//for j
   end;//for i
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

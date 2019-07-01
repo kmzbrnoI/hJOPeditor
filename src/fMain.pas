@@ -162,7 +162,7 @@ type
 
     procedure AssignReliefEvents();
 
-    procedure ReliefErrorEvent(Sender:TObject; ErrorID:Integer);
+    procedure ReliefErrorEvent(Sender:TObject; err:string);
     procedure ReliefMoveEvent(Sender:TObject; Position:TPoint);
     procedure ReliefChangeTextEvent(Sender:TObject; var Text:string;var Color:Integer);
     procedure BlokEditEvent(Sender:TObject; Blok:TGraphBlok);
@@ -763,7 +763,12 @@ begin
  if (Relief.Mode <> dmSepHor) then Self.PM_BitmapClick(Self.PM_Sep_Hor);
 
  Relief.Escape(false);
- if (Relief.AddSeparatorHor <> 0) then Application.MessageBox('Chyba pri pridavani objektu','Chyba',MB_OK OR MB_ICONWARNING);
+ try
+   Relief.AddSeparatorHor();
+ except
+   on E:Exception do
+     Application.MessageBox(PChar('Chyba pøi pøidávání objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
+ end;
 end;
 
 procedure TF_Hlavni.TB_Separator_VertClick(Sender: TObject);
@@ -771,17 +776,23 @@ begin
  if (Relief.Mode <> dmSepVert) then Self.PM_BitmapClick(Self.PM_Sep_Vert);
 
  Relief.Escape(false);
- if (Relief.AddSeparatorVert <> 0) then Application.MessageBox('Chyba pri pridavani objektu','Chyba',MB_OK OR MB_ICONWARNING);
+ try
+   Relief.AddSeparatorVert();
+ except
+   on E:Exception do
+     Application.MessageBox(PChar('Chyba pøi pøidávání objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
+ end;
 end;
 
 procedure TF_Hlavni.ToolButton0Click(Sender: TObject);
 begin
  Relief.Escape(false);
- if (Relief.AddSymbol((Sender as TToolButton).Tag) <> 0) then
-  begin
-   Application.MessageBox('Chyba pri pridavani objektu','Chyba',MB_OK OR MB_ICONWARNING);
-   Exit;
-  end;
+ try
+   Relief.AddSymbol((Sender as TToolButton).Tag);
+ except
+   on E:Exception do
+     Application.MessageBox(PChar('Chyba pøi pøidávání symbolu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
+ end;
 
  if (Assigned(Self.pushedButton)) then
    Self.pushedButton.Down := false;
@@ -801,19 +812,35 @@ end;//procedure
 procedure TF_Hlavni.ToolButton41Click(Sender: TObject);
 begin
  Relief.Escape(false);
- if (Relief.AddJCClick <> 0) then Application.MessageBox('Chyba pri pridavani objektu','Chyba',MB_OK OR MB_ICONWARNING);
+ try
+   Relief.AddJCClick();
+ except
+   on E:Exception do
+     Application.MessageBox(PChar('Chyba pøi pøidávání objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
+ end;
 end;//procedure
 
 procedure TF_Hlavni.ToolButton42Click(Sender: TObject);
 begin
  Relief.Escape(false);
- if (Relief.AddKPopisek <> 0) then Application.MessageBox('Chyba pri pridavani objektu','Chyba',MB_OK OR MB_ICONWARNING);
+ try
+   Relief.AddKPopisek();
+ except
+   on E:Exception do
+     Application.MessageBox(PChar('Chyba pøi pøidávání objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
+ end;
 end;
 
 procedure TF_Hlavni.ToolButton6Click(Sender: TObject);
 begin
  Relief.Escape(false);
- if (Relief.AddSouprava <> 0) then Application.MessageBox('Chyba pri pridavani objektu','Chyba',MB_OK OR MB_ICONWARNING);
+
+ try
+   Relief.AddSouprava();
+ except
+   on E:Exception do
+     Application.MessageBox(PChar('Chyba pøi pøidávání objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
+ end;
 end;
 
 //procedure
@@ -883,9 +910,9 @@ begin
  F_BlockEdit.Close();
 end;//procedure
 
-procedure TF_Hlavni.ReliefErrorEvent(Sender:TObject; ErrorID:Integer);
+procedure TF_Hlavni.ReliefErrorEvent(Sender:TObject; err:string);
 begin
- Self.SB_Main.Panels.Items[3].Text := 'Chyba: '+_PanelErrors[ErrorID]+'(ID:'+IntToStr(ErrorID)+')';
+ Self.SB_Main.Panels.Items[3].Text := 'Chyba: '+err;
 end;//procedure
 
 procedure TF_Hlavni.ReliefMoveEvent(Sender:TObject; Position:TPoint);

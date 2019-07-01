@@ -17,7 +17,7 @@ type
 
  EFileLoad = class(Exception);
 
- TPanelBitmap=class
+ TPanelBitmap = class
   private const
 
   private
@@ -85,8 +85,8 @@ type
     procedure Move;
     procedure Delete;
 
-    function MouseUp(Position:TPoint;Button:TMouseButton):Byte;
-    function DblClick(Position:TPoint):Byte;
+    procedure MouseUp(Position:TPoint;Button:TMouseButton);
+    procedure DblClick(Position:TPoint);
 
     function Import(Data:TObject):Byte;     // import dat zatim z TPanelObjects
 
@@ -550,56 +550,31 @@ begin
  Self.Popisky.Paint;
 end;//procedure
 
-function TPanelBitmap.MouseUp(Position:TPoint;Button:TMouseButton):Byte;
-var return:array [0..4] of Byte;
-    i:Integer;
-    AllStav:Boolean;
+procedure TPanelBitmap.MouseUp(Position:TPoint;Button:TMouseButton);
 begin
- Result := 0;
-
  Self.Operations.Disable := true;
 
  case (Self.Mode) of
-  dmBitmap:begin
-            //reseni ignorace chyby 2 tak, aby se vypisovala pouze, pokud je u vsech typu objektu
-            Return[0] := Self.KPopisky.MouseUp(Position,Button);
-            Return[1] := Self.JCClick.MouseUp(Position,Button);
-            Return[2] := Self.Soupravy.MouseUp(Position,Button);
-            Return[3] := Self.Symbols.MouseUp(Position,Button);
-            Return[4] := Self.Popisky.MouseUp(Position,Button);
+   dmBitmap:begin
+     Self.KPopisky.MouseUp(Position,Button);
+     Self.JCClick.MouseUp(Position,Button);
+     Self.Soupravy.MouseUp(Position,Button);
+     Self.Symbols.MouseUp(Position,Button);
+     Self.Popisky.MouseUp(Position,Button);
+    end;
 
-            Result := 0;
-
-            //pokud neni zadna chyba
-            AllStav := true;
-            for i := 0 to 4 do if (Return[i] <> 0) then AllStav := false;
-            if (not AllStav) then
-             begin
-              for i := 0 to 4 do
-                if ((Return[i] = 1) or (Return[i] > 2)) then
-                  Result := Return[i];
-
-              if (Result = 0) then
-               begin
-                AllStav := true;
-                for i := 0 to 4 do if (Return[i] <> 2) then AllStav := false;
-                if (AllStav) then Result := 2;
-               end;//if Result = 0
-             end;//if not AllStav
-           end;//dmBitmap
-
-   dmSepHor:Result := Self.SeparatorsHor.MouseUp(Position,Button);
-   dmSepVert:Result := Self.SeparatorsVert.MouseUp(Position,Button);
+   dmSepHor: Self.SeparatorsHor.MouseUp(Position,Button);
+   dmSepVert: Self.SeparatorsVert.MouseUp(Position,Button);
   end;//case
 
  Self.Operations.Disable := false;
  Self.CheckOperations;
 end;//procedure
 
-function TPanelBitmap.DblClick(Position:TPoint):Byte;
+procedure TPanelBitmap.DblClick(Position:TPoint);
 begin
- Result := 0;
-end;//function
+
+end;
 
 procedure TPanelBitmap.ShowEvent;
 begin
@@ -805,6 +780,7 @@ begin
     1:Self.Move;
     2:Self.Delete;
    end;//case
+   Self.Operations.OpType := 0;
   end;
 end;//procedure
 
