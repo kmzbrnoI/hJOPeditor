@@ -10,7 +10,7 @@ bloky.
 Skládá se z několika sekcí.
 
 ## Globální sekce `[G]`
- - ver=1.1 (verze souboru)
+ - ver=1.2 (verze souboru)
 
 ## Specifikace panelu `[P]`
  - W=(šířka panelu)
