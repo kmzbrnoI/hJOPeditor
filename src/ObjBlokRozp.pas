@@ -9,19 +9,17 @@ type
 TRozp = class(TGraphBlok)
   Pos:TPoint;
 
-  procedure Save(ini:TMemIniFile; key:string);
+  procedure Save(ini:TMemIniFile; key:string); override;
 end;
 
 implementation
 
 procedure TRozp.Save(ini: TMemIniFile; key: string);
 begin
-       inifile.WriteInteger('R'+IntToStr(blok.Index), 'B',  blok.Blok);
-       inifile.WriteInteger('R'+IntToStr(blok.Index), 'OR', blok.OblRizeni);
+  inherited;
 
-       inifile.WriteInteger('R'+IntToStr(blok.Index), 'X', (blok as TRozp).Pos.X);
-       inifile.WriteInteger('R'+IntToStr(blok.Index), 'Y', (blok as TRozp).Pos.Y);
-
+  ini.WriteInteger(key, 'X', Self.Pos.X);
+  ini.WriteInteger(key, 'Y', Self.Pos.Y);
 end;
 
 end.

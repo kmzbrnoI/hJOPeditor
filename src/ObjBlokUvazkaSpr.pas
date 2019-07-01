@@ -13,20 +13,20 @@ TUvazkaSpr = class(TGraphBlok)
   Pos:TPoint;
   vertical_dir:TUvazkaSprVertDir;
   spr_cnt:Integer;
+
+  procedure Save(ini: TMemIniFile; key: string); override;
 end;
 
 implementation
 
-procedure TUvazkaSpr.Save();
+procedure TUvazkaSpr.Save(ini: TMemIniFile; key: string);
 begin
-       inifile.WriteInteger('UvS'+IntToStr(blok.Index), 'B', blok.Blok);
-       inifile.WriteInteger('UvS'+IntToStr(blok.Index), 'OR', blok.OblRizeni);
+  inherited;
 
-       inifile.WriteInteger('UvS'+IntToStr(blok.Index), 'X', (blok as TUvazkaSpr).Pos.X);
-       inifile.WriteInteger('UvS'+IntToStr(blok.Index), 'Y', (blok as TUvazkaSpr).Pos.Y);
-       inifile.WriteInteger('UvS'+IntToStr(blok.Index), 'VD', Integer((blok as TUvazkaSpr).vertical_dir));
-       inifile.WriteInteger('UvS'+IntToStr(blok.Index), 'C', (blok as TUvazkaSpr).spr_cnt);
-
+  ini.WriteInteger(key, 'X', Self.Pos.X);
+  ini.WriteInteger(key, 'Y', Self.Pos.Y);
+  ini.WriteInteger(key, 'VD', Integer(Self.vertical_dir));
+  ini.WriteInteger(key, 'C', Self.spr_cnt);
 end;
 
 end.

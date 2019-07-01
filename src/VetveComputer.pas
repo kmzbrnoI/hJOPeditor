@@ -26,6 +26,8 @@ procedure ComputeDKSBlokVetve(po:TPanelObjects; var data:TVetveData; start:TPoin
 
 implementation
 
+uses ObjBlok, ObjBlokUsek, ObjBlokVyhybka, ObjBlokVykol;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 {

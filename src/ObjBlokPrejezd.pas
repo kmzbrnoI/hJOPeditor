@@ -2,7 +2,7 @@ unit ObjBlokPrejezd;
 
 interface
 
-uses ObjBlok, Generics.Collections, Types, IniFiles;
+uses ObjBlok, Generics.Collections, Types, IniFiles, SysUtils;
 
 type
 
@@ -15,30 +15,39 @@ TPrejezd = class(TGraphBlok)
  StaticPositions : TList<TPoint>;
  BlikPositions : TList<TBlikPoint>;
 
- procedure Save(ini:TMemIniFile; key:string);
+ destructor Destroy(); override;
+ procedure Save(ini:TMemIniFile; key:string); override;
 end;
 
 implementation
 
-procedure TPrejezd.Save(ini: TMemIniFile; key: string);
+destructor TPrejezd.Destroy;
 begin
- inifile.WriteInteger('PRJ'+IntToStr(blok.Index), 'B',  blok.Blok);
- inifile.WriteInteger('PRJ'+IntToStr(blok.Index), 'OR', blok.OblRizeni);
+ Self.StaticPositions.Free();
+ Self.BlikPositions.Free();
+end;
+
+procedure TPrejezd.Save(ini: TMemIniFile; key: string);
+var obj:string;
+    bp:TBlikPoint;
+    point:TPoint;
+begin
+ inherited;
 
  obj := '';
- for j := 0 to (blok as TPrejezd).BlikPositions.Count-1 do
+ for bp in Self.BlikPositions do
   begin
-   if ((blok as TPrejezd).BlikPositions[j].TechUsek >= 0) then
-     obj := obj + Format('%.3d%.3d%.3d',[(blok as TPrejezd).BlikPositions[j].Pos.X, (blok as TPrejezd).BlikPositions[j].Pos.Y, (blok as TPrejezd).BlikPositions[j].TechUsek])
+   if (bp.TechUsek >= 0) then
+     obj := obj + Format('%.3d%.3d%.3d',[bp.Pos.X, bp.Pos.Y, bp.TechUsek])
    else
-     obj := obj + Format('%.3d%.3d-01',[(blok as TPrejezd).BlikPositions[j].Pos.X, (blok as TPrejezd).BlikPositions[j].Pos.Y]);
+     obj := obj + Format('%.3d%.3d-01',[bp.Pos.X, bp.Pos.Y]);
   end;
- inifile.WriteString('PRJ'+IntToStr(blok.Index), 'BP', obj);
+ ini.WriteString(key, 'BP', obj);
 
  obj := '';
- for j := 0 to (blok as TPrejezd).StaticPositions.Count-1 do obj := obj + Format('%.3d%.3d',[(blok as TPrejezd).StaticPositions[j].X, (blok as TPrejezd).StaticPositions[j].Y]);
- inifile.WriteString('PRJ'+IntToStr(blok.Index), 'SP', obj);
-
+ for point in Self.StaticPositions do
+   obj := obj + Format('%.3d%.3d',[point.X, point.Y]);
+ ini.WriteString(key, 'SP', obj);
 end;
 
 end.

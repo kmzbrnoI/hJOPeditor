@@ -95,8 +95,15 @@
 			<DCCReference Include="ObjBlok.pas"/>
 			<DCCReference Include="ObjBlokVyhybka.pas"/>
 			<DCCReference Include="ObjBlokUsek.pas"/>
-			<DCCReference Include="ObjText.pas"/>
+			<DCCReference Include="ObjBlokText.pas"/>
 			<DCCReference Include="ObjBlokNavestidlo.pas"/>
+			<DCCReference Include="ObjBlokPomocny.pas"/>
+			<DCCReference Include="ObjBlokPrejezd.pas"/>
+			<DCCReference Include="ObjBlokUvazkaSpr.pas"/>
+			<DCCReference Include="ObjBlokUvazka.pas"/>
+			<DCCReference Include="ObjBlokZamek.pas"/>
+			<DCCReference Include="ObjBlokRozp.pas"/>
+			<DCCReference Include="ObjBlokVykol.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>

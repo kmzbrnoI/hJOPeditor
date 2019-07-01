@@ -123,7 +123,7 @@ end;//TPanelObjects
 
 implementation
 
-uses ReliefBitmap, BItmapToObj, VetveComputer;
+uses ReliefBitmap, BitmapToObj, VetveComputer, ObjBlokUsek, ObjBlokVyhybka;
 
 //vytvoreni objektu
 constructor TPanelObjects.Create(SymbolIL,TextIL:TImageList;DrawCanvas:TCanvas;Width,Height:Integer;Parent:TDXDraw; Graphics:TPanelGraphics);
@@ -166,30 +166,11 @@ begin
 end;//destructor
 
 //reset dat
-procedure TPanelObjects.ResetPanel;
-var i:Integer;
+procedure TPanelObjects.ResetPanel();
+var blok:TGraphBlok;
 begin
- //vymazani dat
- for i := 0 to Self.Bloky.Count-1 do
-  begin
-   if ((Self.Bloky[i].typ = TBlkType.usek) or (Self.Bloky[i].typ = TBlkType.TU)) then
-    begin
-     (Self.Bloky[i] as TUsek).Symbols.Free();
-     (Self.Bloky[i] as TUsek).JCClick.Free();
-     (Self.Bloky[i] as TUsek).KPopisek.Free();
-     (Self.Bloky[i] as TUsek).Soupravy.Free();
-     (Self.Bloky[i] as TUsek).Vetve.Free();
-    end;
-   if (Self.Bloky[i].typ = TBlkType.pomocny_obj) then
-     (Self.Bloky[i] as TPomocnyObj).Positions.Free();
-   if (Self.Bloky[i].typ = TBlkType.prejezd) then
-    begin
-     (Self.Bloky[i] as TPrejezd).StaticPositions.Free();
-     (Self.Bloky[i] as TPrejezd).BlikPositions.Free();
-    end;
-
-   Self.Bloky[i].Free();
-  end;
+ for blok in Self.Bloky do
+   blok.Free();
  Self.Bloky.Clear();
  Self.Selected := nil;
 end;
@@ -219,7 +200,7 @@ begin
  inifile := TMemIniFile.Create(aFile, TEncoding.UTF8);
  try
    //kontrola verze
-   ver := inifile.ReadString('G','ver',_FileVersion);
+   ver := inifile.ReadString('G', 'ver', _FileVersion);
    if (_FileVersion <> ver) then
     begin
      if (Application.MessageBox(PChar('Naèítáte soubor s verzí '+ver+#13#10+'Aplikace momentálnì podporuje verzi '+_FileVersion+#13#10+'Chcete pokraèovat?'),
@@ -245,114 +226,17 @@ begin
    for i := 0 to count-1 do
     begin
      try
-       blok           := TUsek.Create();
-       blok.index     := i;
-       blok.typ       := TBlkType.usek;
-       blok.Blok      := inifile.ReadInteger('U'+IntToStr(i),'B',-1);
-       blok.OblRizeni := inifile.ReadInteger('U'+IntToStr(i),'OR',-1);
-
-       //root
-       (blok as TUsek).Root := GetPos(inifile.ReadString('U'+IntToStr(i), 'R', '-1;-1'));
-       (blok as TUsek).DKStype := TDKSType(inifile.ReadInteger('U'+IntToStr(i), 'DKS', Integer(dksNone)));
-
-       //Symbols
-       (blok as TUsek).Symbols := TList<TReliefSym>.Create();
-       obj := inifile.ReadString('U'+IntToStr(i),'S', '');
-       for j := 0 to (Length(obj) div 8)-1 do
-        begin
-         try
-           symbol.Position.X := StrToInt(copy(obj,j*8+1,3));
-           symbol.Position.Y := StrToInt(copy(obj,j*8+4,3));
-           symbol.SymbolID   := StrToInt(copy(obj,j*8+7,2));
-         except
-           continue;
-         end;
-         (blok as TUsek).Symbols.Add(symbol);
-        end;//for j
-
-       //JCClick
-       (blok as TUsek).JCClick := TList<TPoint>.Create();
-       obj := inifile.ReadString('U'+IntToStr(i),'C','');
-       for j := 0 to (Length(obj) div 6)-1 do
-        begin
-         try
-           pos.X := StrToInt(copy(obj,j*6+1,3));
-           pos.Y := StrToInt(copy(obj,j*6+4,3));
-         except
-          continue;
-         end;
-         (blok as TUsek).JCClick.Add(pos);
-        end;//for j
-
-       //KPopisek
-       obj := inifile.ReadString('U'+IntToStr(i),'P','');
-       (blok as TUsek).KPopisek := TList<TPoint>.Create();
-       for j := 0 to (Length(obj) div 6)-1 do
-        begin
-         try
-           pos.X := StrToIntDef(copy(obj,j*6+1,3),0);
-           pos.Y := StrToIntDef(copy(obj,j*6+4,3),0);
-         except
-           continue;
-         end;
-         (blok as TUsek).KPopisek.Add(pos);
-        end;//for j
-
-       //soupravy
-       obj := inifile.ReadString('U'+IntToStr(i),'Spr','');
-       (blok as TUsek).Soupravy := TList<TPoint>.Create();
-       for j := 0 to (Length(obj) div 6)-1 do
-        begin
-         try
-           pos.X := StrToIntDef(copy(obj,j*6+1,3),0);
-           pos.Y := StrToIntDef(copy(obj,j*6+4,3),0);
-         except
-           continue;
-         end;
-         (blok as TUsek).Soupravy.Add(pos);
-        end;//for j
-
-       //Nazev
-       (blok as TUsek).KpopisekStr := inifile.ReadString('U'+IntToStr(i),'N','');
-       (blok as TUsek).Vetve := TList<TVetev>.Create();
-
-       // vetve
-       count2 := inifile.ReadInteger('U'+IntToStr(i), 'VC', 0);
-       for j := 0 to count2-1 do
-        begin
-         obj := inifile.ReadString('U'+IntToStr(i), 'V'+IntToStr(j), '');
-
-         vetev.node1.vyh        := StrToIntDef(copy(obj, 0, 3), 0);
-         vetev.node1.ref_plus   := StrToIntDef(copy(obj, 4, 2), 0);
-         vetev.node1.ref_minus  := StrToIntDef(copy(obj, 6, 2), 0);
-
-         vetev.node2.vyh        := StrToIntDef(copy(obj, 8, 3), 0);
-         vetev.node2.ref_plus   := StrToIntDef(copy(obj, 11, 2), 0);
-         vetev.node2.ref_minus  := StrToIntDef(copy(obj, 13, 2), 0);
-
-         obj := RightStr(obj, Length(obj)-14);
-
-         SetLength(vetev.Symbols, Length(obj) div 9);
-
-         for k := 0 to Length(vetev.Symbols)-1 do
-          begin
-           vetev.Symbols[k].Position.X := StrToIntDef(copy(obj, 9*k + 1, 3), 0);
-           vetev.Symbols[k].Position.Y := StrToIntDef(copy(obj, (9*k + 4), 3), 0);
-           vetev.Symbols[k].SymbolID   := StrToIntDef(copy(obj, (9*k + 7), 3), 0);
-          end;
-
-         (blok as TUsek).Vetve.Add(vetev);
-        end;//for j
-
+       blok := ObjBlokUsek.TUsek.Create();
+       blok.index := i;
+       blok.Load(inifile, 'U'+IntToStr(i));
        Self.Bloky.Add(blok);
      except
 
      end;
-
-    end;//for i
+    end;
 
    // navestidla
-   count := inifile.ReadInteger('P','N',0);
+   count := inifile.ReadInteger('P', 'N', 0);
    for i := 0 to count-1 do
     begin
      blok           := TNavestidlo.Create();
@@ -601,6 +485,7 @@ begin
     begin
      case (blok.typ) of
       TBlkType.usek:begin
+       // TODO
       end;
 
       TBlkType.navestidlo:begin

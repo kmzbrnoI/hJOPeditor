@@ -12,21 +12,20 @@ TVyhybka = class(TGraphBlok)
  SymbolID:Integer;
  obj:integer;               //index useku, na kterem vyhybka je
 
- procedure Save(ini:TMemIniFile; key:string);
+ procedure Save(ini:TMemIniFile; key:string); override;
 end;
 
 implementation
 
 procedure TVyhybka.Save(ini: TMemIniFile; key: string);
 begin
- inifile.WriteInteger('V'+IntToStr(blok.Index),'B', blok.Blok);
- inifile.WriteInteger('V'+IntToStr(blok.Index),'OR',blok.OblRizeni);
+ inherited;
 
- inifile.WriteInteger('V'+IntToStr(blok.Index),'S', (blok as TVyhybka).SymbolID);
- inifile.WriteInteger('V'+IntToStr(blok.Index),'P', (blok as TVyhybka).PolohaPlus);
- inifile.WriteInteger('V'+IntToStr(blok.Index),'X', (blok as TVyhybka).Position.X);
- inifile.WriteInteger('V'+IntToStr(blok.Index),'Y', (blok as TVyhybka).Position.Y);
- inifile.WriteInteger('V'+IntToStr(blok.Index),'O', (blok as TVyhybka).obj);
+ ini.WriteInteger(key, 'S', Self.SymbolID);
+ ini.WriteInteger(key, 'P', Self.PolohaPlus);
+ ini.WriteInteger(key, 'X', Self.Position.X);
+ ini.WriteInteger(key, 'Y', Self.Position.Y);
+ ini.WriteInteger(key, 'O', Self.obj);
 end;
 
 end.

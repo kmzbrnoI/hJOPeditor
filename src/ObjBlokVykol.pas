@@ -12,21 +12,20 @@ TVykol = class(TGraphBlok)
   obj:integer;               // index useku, na kterem je vykolejka
   vetev:integer;             // cislo vetve, ve kterem je vykolejka
 
-  procedure Save(ini:TMemIniFile; key:string);
+  procedure Save(ini:TMemIniFile; key:string); override;
 end;
 
 implementation
 
 procedure TVykol.Save(ini: TMemIniFile; key: string);
 begin
-       inifile.WriteInteger('Vyk'+IntToStr(blok.Index), 'B',  blok.Blok);
-       inifile.WriteInteger('Vyk'+IntToStr(blok.Index), 'OR', blok.OblRizeni);
+  inherited;
 
-       inifile.WriteInteger('Vyk'+IntToStr(blok.Index), 'X', (blok as TVykol).Pos.X);
-       inifile.WriteInteger('Vyk'+IntToStr(blok.Index), 'Y', (blok as TVykol).Pos.Y);
-       inifile.WriteInteger('Vyk'+IntToStr(blok.Index), 'T', (blok as TVykol).symbol);
-       inifile.WriteInteger('Vyk'+IntToStr(blok.Index), 'O', (blok as TVykol).obj);
-       inifile.WriteInteger('Vyk'+IntToStr(blok.Index), 'V', (blok as TVykol).vetev);
+  ini.WriteInteger(key, 'X', Self.Pos.X);
+  ini.WriteInteger(key, 'Y', Self.Pos.Y);
+  ini.WriteInteger(key, 'T', Self.symbol);
+  ini.WriteInteger(key, 'O', Self.obj);
+  ini.WriteInteger(key, 'V', Self.vetev);
 end;
 
 end.

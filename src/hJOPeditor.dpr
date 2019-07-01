@@ -33,8 +33,15 @@ uses
   ObjBlok in 'ObjBlok.pas',
   ObjBlokVyhybka in 'ObjBlokVyhybka.pas',
   ObjBlokUsek in 'ObjBlokUsek.pas',
-  ObjText in 'ObjText.pas',
-  ObjBlokNavestidlo in 'ObjBlokNavestidlo.pas';
+  ObjBlokText in 'ObjBlokText.pas',
+  ObjBlokNavestidlo in 'ObjBlokNavestidlo.pas',
+  ObjBlokPomocny in 'ObjBlokPomocny.pas',
+  ObjBlokPrejezd in 'ObjBlokPrejezd.pas',
+  ObjBlokUvazkaSpr in 'ObjBlokUvazkaSpr.pas',
+  ObjBlokUvazka in 'ObjBlokUvazka.pas',
+  ObjBlokZamek in 'ObjBlokZamek.pas',
+  ObjBlokRozp in 'ObjBlokRozp.pas',
+  ObjBlokVykol in 'ObjBlokVykol.pas';
 
 {$R *.res}
 

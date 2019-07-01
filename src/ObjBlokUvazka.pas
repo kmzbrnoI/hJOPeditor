@@ -10,19 +10,18 @@ TUvazka = class(TGraphBlok)
   Pos:TPoint;
   defalt_dir:Integer;
 
-  procedure Save(ini:TMemIniFile; key:string);
+  procedure Save(ini:TMemIniFile; key:string); override;
 end;
 
 implementation
 
 procedure TUvazka.Save(ini: TMemIniFile; key: string);
 begin
- inifile.WriteInteger('Uv'+IntToStr(blok.Index), 'B',  blok.Blok);
- inifile.WriteInteger('Uv'+IntToStr(blok.Index), 'OR', blok.OblRizeni);
+  inherited;
 
- inifile.WriteInteger('Uv'+IntToStr(blok.Index), 'X', (blok as TUvazka).Pos.X);
- inifile.WriteInteger('Uv'+IntToStr(blok.Index), 'Y', (blok as TUvazka).Pos.Y);
- inifile.WriteInteger('Uv'+IntToStr(blok.Index), 'D', (blok as TUvazka).defalt_dir);
+  ini.WriteInteger(key, 'X', Self.Pos.X);
+  ini.WriteInteger(key, 'Y', Self.Pos.Y);
+  ini.WriteInteger(key, 'D', Self.defalt_dir);
 end;
 
 end.

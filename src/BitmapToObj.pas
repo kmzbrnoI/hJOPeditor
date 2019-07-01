@@ -31,6 +31,10 @@ type
 
 implementation
 
+uses ObjBlok, ObjBlokRozp, ObjBlokUsek, ObjBlokNavestidlo, ObjBlokText,
+     ObjBlokUvazka, ObjBlokUvazkaSpr, ObjBlokZamek, ObjBlokPomocny, ObjBlokVyhybka,
+     ObjBlokVykol, ObjBlokPrejezd;
+
 //tato funkce se vola zvnejsku
 function TBitmapToObj.BitmapToObjects(BitmapData:TPanelBitmap;ObjectData:TPanelObjects):Byte;
 var i,j:Integer;
@@ -54,8 +58,7 @@ begin
      Symbol := Self.Bitmap.Symbols.GetSymbol(Point(i,j));
      if (Symbol = _Rozp_Start) then
       begin
-       blk := TRozp.Create();
-       blk.index     := index;
+       blk := TRozp.Create(index);
        blk.typ       := TBlkType.rozp;
        blk.Blok      := -1;
        blk.OblRizeni := 0;
@@ -124,8 +127,7 @@ begin
      Symbol := Self.Bitmap.Symbols.GetSymbol(Point(i,j));
      if ((Symbol >= _SCom_Start) and (Symbol <= _SCom_End)) then
       begin
-       blk := TNavestidlo.Create();
-       blk.index     := index;
+       blk := TNavestidlo.Create(index);
        blk.typ       := TBlkType.navestidlo;
        blk.Blok      := -1;
        blk.OblRizeni := 0;
@@ -145,14 +147,13 @@ begin
   begin
    PopData := Self.Bitmap.Popisky.GetPopisekData(i);
 
-   blk           := ReliefObjects.TText.Create();
-   blk.index     := index;
-   blk.typ       := TBlkType.popisek;
+   blk           := TText.Create(index);
+   blk.typ       := TBlkType.text;
    blk.Blok      := -1;
    blk.OblRizeni := 0;
-   (blk as ReliefObjects.TText).Text     := PopData.Text;
-   (blk as ReliefObjects.TText).Position := PopData.Position;
-   (blk as ReliefObjects.TText).Color    := PopData.Color;
+   (blk as TText).Text     := PopData.Text;
+   (blk as TText).Position := PopData.Position;
+   (blk as TText).Color    := PopData.Color;
    Self.Objects.Bloky.Add(blk);
    Inc(index);
   end;//for i
@@ -184,12 +185,11 @@ begin
      if (not Self.Zahrnuto[i,j]) then
        if (Symbol = _Uvazka) then
         begin
-         blk           := ReliefObjects.TUvazka.Create();
-         blk.index     := index;
+         blk           := TUvazka.Create(index);
          blk.typ       := TBlkType.uvazka;
          blk.Blok      := -1;
          blk.OblRizeni := 0;
-         (blk as ReliefObjects.TUvazka).Pos := Point(i, j);
+         (blk as TUvazka).Pos := Point(i, j);
          Self.Objects.Bloky.Add(blk);
          Self.Zahrnuto[i,j] := true;
          Inc(index);
@@ -207,13 +207,12 @@ begin
      if (not Self.Zahrnuto[i,j]) then
        if (Symbol = _Uvazka_Spr) then
         begin
-         blk           := ReliefObjects.TUvazkaSpr.Create();
-         blk.index     := index;
+         blk           := TUvazkaSpr.Create(index);
          blk.typ       := TBlkType.uvazka_spr;
          blk.Blok      := -1;
          blk.OblRizeni := 0;
-         (blk as ReliefObjects.TUvazkaSpr).Pos := Point(i, j);
-         (blk as ReliefObjects.TUvazkaSpr).spr_cnt := 1;
+         (blk as TUvazkaSpr).Pos := Point(i, j);
+         (blk as TUvazkaSpr).spr_cnt := 1;
          Self.Objects.Bloky.Add(blk);
          Self.Zahrnuto[i,j] := true;
          Inc(index);
@@ -231,12 +230,11 @@ begin
      if (not Self.Zahrnuto[i,j]) then
        if (Symbol = _Zamek) then
         begin
-         blk           := ReliefObjects.TZamek.Create();
-         blk.index     := index;
+         blk           := TZamek.Create(index);
          blk.typ       := TBlkType.zamek;
          blk.Blok      := -1;
          blk.OblRizeni := 0;
-         (blk as ReliefObjects.TZamek).Pos := Point(i, j);
+         (blk as TZamek).Pos := Point(i, j);
          Self.Objects.Bloky.Add(blk);
          Self.Zahrnuto[i,j] := true;
          Inc(index);
@@ -267,8 +265,7 @@ begin
        (blk as TPomocnyObj).Positions.Add(Point(i, j));
       end else begin
        // vytvorit novy blok
-       blk           := ReliefObjects.TPomocnyObj.Create();
-       blk.index     := index;
+       blk           := TPomocnyObj.Create(index);
        blk.typ       := TBlkType.pomocny_obj;
        blk.Blok      := -1;
        blk.OblRizeni := -1;
@@ -320,8 +317,7 @@ var usek:TUsek;
     cur:TPoint;
 begin
  //vytvoreni objektu a vlozeni do nej 1. symbolu
- usek           := TUsek.Create();
- usek.index     := index;
+ usek           := TUsek.Create(index);
  Inc(index);
  usek.typ       := TblkType.usek;
  usek.Root      := Point(-1, -1);
@@ -337,8 +333,7 @@ begin
  Symbol := Self.Bitmap.Symbols.GetSymbol(VychoziPos);
  if ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End)) then
   begin
-   vyhybka           := TVyhybka.Create();
-   vyhybka.index     := vyh_index;
+   vyhybka           := TVyhybka.Create(vyh_index);
    Inc(vyh_index);
    vyhybka.typ       := TBlkType.vyhybka;
    vyhybka.Blok      := -1;
@@ -402,8 +397,7 @@ begin
          //vedlejsi Symbol2 = vykolejka
          if ((Symbol2 >= _Vykol_Start) and (Symbol2 <= _Vykol_End)) then
           begin
-           vykol             := TVykol.Create();
-           vykol.index       := vykol_index;
+           vykol             := TVykol.Create(vykol_index);
            Inc(vykol_index);
            vykol.typ         := TBlkType.vykol;
            vykol.symbol      := Symbol2 - _Vykol_Start;
@@ -467,8 +461,7 @@ begin
               begin
                //ted vime, ze i navaznost z TempPos vede na cur.Pos - muzeme pridat Symbol2 do bloku
                // pridavame vyhybku
-               vyhybka           := TVyhybka.Create();
-               vyhybka.index     := vyh_index;
+               vyhybka           := TVyhybka.Create(vyh_index);
                Inc(vyh_index);
                vyhybka.typ       := TBlkType.vyhybka;
                vyhybka.Blok      := -1;
@@ -504,8 +497,7 @@ var blik:Boolean;
     blk:TGraphBlok;
     blik_point:TBlikPoint;
 begin
- blk           := ReliefObjects.TPrejezd.Create();
- blk.index     := index;
+ blk           := TPrejezd.Create(index);
  blk.typ       := TBlkType.prejezd;
  blk.Blok      := -1;
  blk.OblRizeni := 0;

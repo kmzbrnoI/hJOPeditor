@@ -2,7 +2,7 @@ unit ObjBlokText;
 
 interface
 
-uses ObjBlok, IniFiles;
+uses ObjBlok, IniFiles, Types;
 
 type
 
@@ -11,23 +11,20 @@ TText = class(TGraphBlok)
  Position:TPoint;
  Color:Integer;
 
- procedure Save(ini:TMemIniFile; key:string);
+ procedure Save(ini:TMemIniFile; key:string); override;
 end;
 
 implementation
 
 procedure TText.Save(ini: TMemIniFile; key: string);
 begin
- inifile.WriteString('T'+IntToStr(blok.Index),  'T', (blok as TText).Text);
- inifile.WriteInteger('T'+IntToStr(blok.Index), 'X', (blok as TText).Position.X);
- inifile.WriteInteger('T'+IntToStr(blok.Index), 'Y', (blok as TText).Position.Y);
- inifile.WriteInteger('T'+IntToStr(blok.Index), 'C', (blok as TText).Color);
+ if (Length(Self.Text) = 1) then
+   inherited;
 
- if (Length((blok as TText).Text) = 1) then
-  begin
-   inifile.WriteInteger('T'+IntToStr(blok.Index), 'B', blok.Blok);
-   inifile.WriteInteger('T'+IntToStr(blok.Index), 'OR', blok.OblRizeni);
-  end;
+ ini.WriteString(key, 'T', Self.Text);
+ ini.WriteInteger(key, 'X', Self.Position.X);
+ ini.WriteInteger(key, 'Y', Self.Position.Y);
+ ini.WriteInteger(key, 'C', Self.Color);
 end;
 
 end.
