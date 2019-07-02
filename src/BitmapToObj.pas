@@ -147,6 +147,7 @@ begin
    if (PopData.BlokPopisek) then
     begin
      blk.typ := TBlkType.blok_popisek;
+     blk.Blok := -2;
      Inc(popisek_index);
     end else
      Inc(index);

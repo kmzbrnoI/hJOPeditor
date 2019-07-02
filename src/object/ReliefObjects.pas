@@ -563,7 +563,7 @@ begin
  Result := TStringList.Create();
 
  DateTimeToString(str,'yyyy-mm-dd hh:nn:ss',Now);
- Result.Add('Validace objektu: '+str);
+ Result.Add('Validace objektù: '+str);
 
  Result.Add('Ovìøuji návaznost úseku na technologické bloky, návaznost na oblasti øízeni...');
  Result.Add('Ovìøuji návaznost výhybek na úseky...');

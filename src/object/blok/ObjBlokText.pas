@@ -34,6 +34,12 @@ procedure TText.Load(ini: TMemIniFile; key: string);
 begin
  inherited;
 
+ if (Self.typ = TBlkType.blok_popisek) then
+  begin
+   Self.Blok := -2;
+   Self.OblRizeni := 0;
+  end;
+
  Self.Text := ini.ReadString(key, 'T', 'text');
  Self.Position.X := ini.ReadInteger(key, 'X', 0);
  Self.Position.Y := ini.ReadInteger(key, 'Y', 0);
@@ -42,7 +48,7 @@ end;
 
 procedure TText.Save(ini: TMemIniFile; key: string);
 begin
- if (Length(Self.Text) = 1) then
+ if ((Length(Self.Text) = 1) and (Self.typ <> TBlkType.blok_popisek)) then
    inherited;
 
  ini.WriteString(key, 'T', Self.Text);
