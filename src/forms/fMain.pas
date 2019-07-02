@@ -636,7 +636,7 @@ begin
 
      if (Return <> 0) then
       begin
-       Application.MessageBox(PChar('Pri zmene modu se vykytla chyba - chyba: '+IntToStr(Return)),'Chyba',MB_OK OR MB_ICONWARNING);
+       Application.MessageBox(PChar('Pøi zmìnì módu se vykytla chyba - chyba: '+IntToStr(Return)),'Chyba',MB_OK OR MB_ICONWARNING);
        Exit;
       end;
 
@@ -669,22 +669,33 @@ begin
 
      if (Return <> 0) then
       begin
-       Application.MessageBox(PChar('Pri zmene modu se vyskytla chyba - chyba: '+IntToStr(Return)),'Chyba',MB_OK OR MB_ICONWARNING);
+       Application.MessageBox(PChar('Pøi zmìnì módu se vyskytla chyba - chyba: '+IntToStr(Return)),'Chyba',MB_OK OR MB_ICONWARNING);
        Exit;
       end;
 
      Self.TB_Oddelovac.Visible   := true;
      Self.TB_BitmapTools.Visible := true;
      Self.MI_Relief.Visible      := true;
-    end;//case 1
+    end;
 
   3:begin
      Return := 0;
+
+     if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
+      begin
+       if (Application.MessageBox(PChar('Po pøepnutí na režim bloky není možné se vrátit zpìt do bitmapového režimu. Zkontrolujte si, že máte uložený soubor s daty panelu.'+#13#10+'Pokraèovat?'),
+                                        'Zmìna režimu projektu', MB_YESNO OR MB_ICONQUESTION OR MB_DEFBUTTON2) <> mrYes) then
+        begin
+         Self.PM_BitmapClick(Self.PM_Bitmap);
+         Exit();
+        end;
+      end;
+
      if (Relief.Mode <> dmBloky) then Return := Relief.SwitchMode(dmBloky);
 
      if (Return <> 0) then
       begin
-       Application.MessageBox(PChar('Pri zmene modu se vyskytla chyba - chyba: '+IntToStr(Return)),'Chyba',MB_OK OR MB_ICONWARNING);
+       Application.MessageBox(PChar('Pøi zmìnì módu se vyskytla chyba - chyba: '+IntToStr(Return)),'Chyba',MB_OK OR MB_ICONWARNING);
        Exit;
       end;
 
@@ -700,7 +711,7 @@ begin
       end;
 
      Self.MI_Data.Visible := true;
-    end;//case 2
+    end;
 
   4:begin
      Return := 0;
@@ -714,7 +725,7 @@ begin
 
      F_BlockEdit.Close();
      Self.MI_Data.Visible := true;
-    end;//case 2
+    end;
  end;//case (Sender as TMenuItem).Tag
 
  Self.RepaintModes(Relief.Mode);
