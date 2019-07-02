@@ -565,24 +565,24 @@ begin
  DateTimeToString(str,'yyyy-mm-dd hh:nn:ss',Now);
  Result.Add('Validace objektu: '+str);
 
- Result.Add('Overuji navaznost useku na technologicke bloky, navaznost na oblasti rizeni...');
- Result.Add('Overuji navaznost vyhybek na useky...');
- Result.Add('Overuji pojmenovani koleji...');
- Result.Add('Overuji koreny...');
+ Result.Add('Ovìøuji návaznost úseku na technologické bloky, návaznost na oblasti øízeni...');
+ Result.Add('Ovìøuji návaznost výhybek na úseky...');
+ Result.Add('Ovìøuji pojmenování kolejí...');
+ Result.Add('Ovìøuji koøeny...');
 
  for i := 0 to Self.Bloky.Count-1 do
   begin
    if ((Self.Bloky[i].Blok = -1) and (Self.Bloky[i].typ <> TBlkType.pomocny_obj) and
        ((Self.Bloky[i].typ <> TBlkType.text) or (Length((Self.Bloky[i] as TText).Text) = 1))) then
     begin
-     Result.Add('ERR: blok '+IntToStr(i)+': neni navaznost na technologicky blok');
+     Result.Add('ERR: blok '+IntToStr(i)+': není návaznost na technologický blok');
      error_cnt := error_cnt + 1;
     end;
    if ((Self.Bloky[i].OblRizeni < 0) and
        ((Self.Bloky[i].typ <> TBlkType.pomocny_obj) xor ((Self.Bloky[i].typ = TBlkType.text) and
        (Length((Self.Bloky[i] as TText).Text) > 1)))) then
     begin
-     Result.Add('ERR: blok '+IntToStr(i)+': neni navaznost na oblast rizeni');
+     Result.Add('ERR: blok '+IntToStr(i)+': není návaznost na oblast øízení');
      error_cnt := error_cnt + 1;
     end;
 
@@ -591,13 +591,13 @@ begin
     TBlkType.usek:begin
      if (((Self.Bloky[i] as TUsek).KPopisek.Count > 0) and ((Self.Bloky[i] as TUsek).KpopisekStr = '')) then
       begin
-       Result.Add('ERR: blok '+IntToStr(i)+' (usek): kolej neni pojmenovana');
+       Result.Add('ERR: blok '+IntToStr(i)+' (úsek): kolej není pojmenována');
        error_cnt := error_cnt + 1;
       end;
 
      if (((Self.Bloky[i] as TUsek).IsVyhybka) and ((Self.Bloky[i] as TUsek).Root.X < 0)) then
       begin
-       Result.Add('ERR: blok '+IntToStr(i)+' (usek) : obsahuje vyhybky a presto nema koren');
+       Result.Add('ERR: blok '+IntToStr(i)+' (úsek) : obsahuje výhybky a pøesto nemá koøen');
        error_cnt := error_cnt + 1;
       end;
 
@@ -605,7 +605,7 @@ begin
       begin
        if (((vetev.node1.vyh >= 0) and ((vetev.node1.ref_plus = -1) or (vetev.node1.ref_minus = -1))) or
           ((vetev.node2.vyh >= 0) and ((vetev.node2.ref_plus = -1) or (vetev.node2.ref_minus = -1)))) then
-         Result.Add('WARN: blok '+IntToStr(i)+' (usek) : vetev ma navaznost na vyhybku, presto za vyhybkou nikam nepokracuje');
+         Result.Add('WARN: blok '+IntToStr(i)+' (úsek) : vìtev ma návaznost na výhybku, pøesto za výhybkou nikam nepokraèuje');
       end;
     end;
 
@@ -614,7 +614,7 @@ begin
     TBlkType.vyhybka:begin
      if ((Self.Bloky[i] as TVyhybka).obj < 0) then
       begin
-       Result.Add('ERR: blok '+IntToStr(i)+' (vyhybka) : neni navaznost na usek');
+       Result.Add('ERR: blok '+IntToStr(i)+' (výhybka) : není návaznost na úsek');
        error_cnt := error_cnt + 1;
       end;
     end;
