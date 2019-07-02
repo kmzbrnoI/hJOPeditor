@@ -402,10 +402,10 @@ object F_OREdit: TF_OREdit
         Width = 49
         Height = 21
         Alignment = taRightJustify
+        NumbersOnly = True
         TabOrder = 0
         Text = '[E_OsvAddr]'
         OnExit = E_OsvAddrExit
-        OnKeyPress = E_OsvPortKeyPress
       end
       object E_OsvPort: TEdit
         Left = 120
@@ -413,10 +413,10 @@ object F_OREdit: TF_OREdit
         Width = 49
         Height = 21
         Alignment = taRightJustify
+        NumbersOnly = True
         TabOrder = 1
         Text = '[E_OsvPort]'
         OnExit = E_OsvAddrExit
-        OnKeyPress = E_OsvPortKeyPress
       end
       object E_OsvName: TEdit
         Left = 88
@@ -516,6 +516,7 @@ object F_OREdit: TF_OREdit
     Width = 75
     Height = 25
     Caption = 'Pou'#382#237't'
+    Default = True
     TabOrder = 10
     OnClick = B_ApplyClick
   end

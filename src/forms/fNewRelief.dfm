@@ -22,6 +22,7 @@ object F_NewRelief: TF_NewRelief
     Width = 75
     Height = 25
     Caption = 'Vytvo'#345'it'
+    Default = True
     TabOrder = 2
     OnClick = B_CreateClick
   end
@@ -480,10 +481,10 @@ object F_NewRelief: TF_NewRelief
           Width = 49
           Height = 21
           Alignment = taRightJustify
+          NumbersOnly = True
           TabOrder = 0
           Text = '[E_OsvAddr]'
           OnExit = E_OsvAddrExit
-          OnKeyPress = E_WidthKeyPress
         end
         object E_OsvPort: TEdit
           Left = 120
@@ -491,10 +492,10 @@ object F_NewRelief: TF_NewRelief
           Width = 49
           Height = 21
           Alignment = taRightJustify
+          NumbersOnly = True
           TabOrder = 1
           Text = '[E_OsvPort]'
           OnExit = E_OsvAddrExit
-          OnKeyPress = E_WidthKeyPress
         end
         object E_OsvName: TEdit
           Left = 88
@@ -585,18 +586,18 @@ object F_NewRelief: TF_NewRelief
       Top = 24
       Width = 121
       Height = 21
+      NumbersOnly = True
       TabOrder = 0
       Text = '0'
-      OnKeyPress = E_WidthKeyPress
     end
     object E_Height: TEdit
       Left = 129
       Top = 56
       Width = 121
       Height = 21
+      NumbersOnly = True
       TabOrder = 1
       Text = '0'
-      OnKeyPress = E_WidthKeyPress
     end
   end
 end

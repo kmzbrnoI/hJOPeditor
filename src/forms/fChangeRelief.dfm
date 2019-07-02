@@ -63,6 +63,7 @@ object F_ReliefProperties: TF_ReliefProperties
     Width = 75
     Height = 25
     Caption = 'Pou'#382#237't'
+    Default = True
     TabOrder = 3
     OnClick = B_ApplyClick
   end

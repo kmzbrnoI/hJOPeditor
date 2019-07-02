@@ -55,7 +55,6 @@ procedure TF_ReliefProperties.E_WidthKeyPress(Sender: TObject;
 begin
  case Key of
   '0'..'9',#9,#8:;
-  #13:B_ApplyClick(Self);
   #$1B:B_StornoClick(Self);
   else
    Key := #0;

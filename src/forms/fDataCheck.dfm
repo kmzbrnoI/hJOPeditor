@@ -35,8 +35,6 @@ object F_DataCheck: TF_DataCheck
     TabOrder = 0
     ViewStyle = vsReport
     OnCustomDrawItem = LV_ErrorsCustomDrawItem
-    ExplicitTop = 56
-    ExplicitHeight = 244
   end
   object GB_Prop: TGroupBox
     Left = 0
@@ -51,6 +49,7 @@ object F_DataCheck: TF_DataCheck
       Width = 105
       Height = 25
       Caption = 'Aktualizovat'
+      Default = True
       TabOrder = 0
       OnClick = B_UpdateClick
     end

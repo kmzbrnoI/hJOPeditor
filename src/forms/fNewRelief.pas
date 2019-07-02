@@ -46,7 +46,6 @@ type
     StaticText2: TStaticText;
     procedure B_CreateClick(Sender: TObject);
     procedure B_StornoClick(Sender: TObject);
-    procedure E_WidthKeyPress(Sender: TObject; var Key: Char);
     procedure SE_OsvCntChange(Sender: TObject);
     procedure LB_OsvClick(Sender: TObject);
     procedure E_OsvAddrExit(Sender: TObject);
@@ -134,16 +133,6 @@ begin
  Self.firstOR.Osvetleni.Data[Self.LB_Osv.ItemIndex].port  := StrToInt(Self.E_OsvPort.Text);
  Self.firstOR.Osvetleni.Data[Self.LB_Osv.ItemIndex].name  := Self.E_OsvName.Text;
 end;//procedure
-
-procedure TF_NewRelief.E_WidthKeyPress(Sender: TObject; var Key: Char);
-begin
- case Key of
-  '0'..'9',#9,#8:begin
-                 end else begin
-                  Key := #0;
-                 end;
-  end;//case
-end;
 
 procedure TF_NewRelief.LB_OsvClick(Sender: TObject);
 begin
