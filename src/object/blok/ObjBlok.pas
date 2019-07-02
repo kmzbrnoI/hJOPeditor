@@ -6,7 +6,7 @@ uses IniFiles, Global, PGraphics;
 
 type
 
-TBlkType = (usek, navestidlo, vyhybka, prejezd, text, blok_popisek, pomocny_obj, uvazka,
+TBlkType = (usek, navestidlo, pomocny_obj, text, blok_popisek, vyhybka, prejezd, uvazka,
             uvazka_spr, zamek, vykol, rozp);
 
 TGraphBlok = class

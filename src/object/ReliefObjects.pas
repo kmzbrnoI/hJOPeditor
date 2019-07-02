@@ -294,17 +294,24 @@ begin
    for i := 0 to str_list.Count-1 do inifile.WriteString('OR',IntToStr(i),str_list[i]);
    str_list.Free;
 
-   // bloky
-   for blok in Self.Bloky do
+   // ulozit bloky v kanonickem poradi
+   for blkTyp := Low(TBlkType) to High(TBlkType) do
     begin
-     blok.Save(inifile, TGraphBlok.TypeToFileStr(blok.typ)+IntToStr(blok.index ));
-     if (not counts.ContainsKey(blok.typ)) then
-       counts.Add(blok.typ, 0);
-     counts[blok.typ] := counts[blok.typ] + 1;
+     for blok in Self.Bloky do
+      begin
+       if (blok.typ = blkTyp) then
+        begin
+         blok.Save(inifile, TGraphBlok.TypeToFileStr(blok.typ)+IntToStr(blok.index ));
+         if (not counts.ContainsKey(blok.typ)) then
+           counts.Add(blok.typ, 0);
+         counts[blok.typ] := counts[blok.typ] + 1;
+        end;
+      end;
     end;
 
-   for blkTyp in counts.Keys do
-     inifile.WriteInteger('P', TGraphBlok.TypeToFileStr(blkTyp), counts[blkTyp]);
+   for blkTyp := Low(TBlkType) to High(TBlkType) do
+     if (counts.ContainsKey(blkTyp)) then
+       inifile.WriteInteger('P', TGraphBlok.TypeToFileStr(blkTyp), counts[blkTyp]);
 
  finally
    inifile.UpdateFile();
