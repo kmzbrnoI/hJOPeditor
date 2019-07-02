@@ -312,7 +312,7 @@ begin
  finally
    CloseFile(myFile);
  end;
-end;//function
+end;
 
 procedure TPanelBitmap.FSave(aFile:string;const ORs:string);
 var myFile:File;
@@ -438,7 +438,7 @@ begin
  finally
    CloseFile(myFile);
  end;
-end;//function
+end;
 
 function TPanelBitmap.SetRozmery(aWidth,aHeight:Byte):Byte;
 begin
@@ -454,7 +454,7 @@ begin
  Self.Symbols.SetRozmery(aWidth,aHeight);
 
  Result := 0;
-end;//function
+end;
 
 constructor TPanelBitmap.Create(SymbolIL,TextIL:TImageList;DrawCanvas:TCanvas;Width,Height:Integer;Mode:TMode;Parent:TForm; Graphics:TPanelGraphics);
 begin
@@ -547,7 +547,7 @@ begin
  Self.SeparatorsVert.Paint;
  Self.SeparatorsHor.Paint;
  Self.Text.Paint(Self.fShowBlokPopisky);
-end;//procedure
+end;
 
 procedure TPanelBitmap.MouseUp(Position:TPoint;Button:TMouseButton);
 begin
@@ -568,7 +568,7 @@ begin
 
  Self.Operations.Disable := false;
  Self.CheckOperations;
-end;//procedure
+end;
 
 procedure TPanelBitmap.DblClick(Position:TPoint);
 begin
@@ -578,7 +578,7 @@ end;
 procedure TPanelBitmap.ShowEvent;
 begin
  if (Assigned(FOnShow)) then FOnShow;
-end;//procedure
+end;
 
 function TPanelBitmap.IsSymbolSymbolTextEvent(Pos:TPoint):boolean;
 begin
@@ -587,17 +587,17 @@ begin
  if (Self.Symbols.GetSymbol(Pos)  <> -1) then Exit(true);
  if (Self.Text.GetPopisek(Pos) <> -1) then Exit(true);
  if (Assigned(Self.FORAskEvent)) then Exit(Self.FORAskEvent(Pos));
-end;//function
+end;
 
 function TPanelBitmap.IsSymbolSeparVertEvent(Pos:TPoint):boolean;
 begin
  Result := (Self.SeparatorsVert.GetObject(Pos) <> -1);
-end;//function
+end;
 
 function TPanelBitmap.IsSymbolSeparHorEvent(Pos:TPoint):boolean;
 begin
  Result := (Self.SeparatorsHor.GetObject(Pos) <> -1);
-end;//function
+end;
 
 function TPanelBitmap.IsSymbolKPopiskyJCClickSoupravyEvent(Pos:TPoint):boolean;
 begin
@@ -606,32 +606,32 @@ begin
  if (Self.KPopisky.GetObject(Pos) <> -1) then Result := true
  else if (Self.JCClick.GetObject(Pos)  <> -1) then Result := true
  else if (Self.Soupravy.GetObject(Pos)  <> -1) then Result := true;
-end;//function
+end;
 
 procedure TPanelBitmap.NullOperationsEvent;
 begin
  Self.Escape(false);
-end;//procedure
+end;
 
 procedure TPanelBitmap.MoveActivateEvent;
 begin
  if (Self.Operations.Disable) then Self.Operations.OpType := 1 else Self.Move;
-end;//procedure
+end;
 
 procedure TPanelBitmap.DeleteActivateEvent;
 begin
  if (Self.Operations.Disable) then Self.Operations.OpType := 2 else Self.Delete;
-end;//procedure
+end;
 
 function TPanelBitmap.IsOperationEvent:boolean;
 begin
  Result := Self.IsOperation;
-end;//procedure
+end;
 
 procedure TPanelBitmap.SetGroup(State:boolean);
 begin
  if (Assigned(Self.Symbols)) then Self.Symbols.Group := State;
-end;//procedure
+end;
 
 function TPanelBitmap.GetGroup:boolean;
 begin
@@ -649,7 +649,7 @@ begin
  if (Assigned(Self.JCClick)) then Self.JCClick.Escape;
  if (Assigned(Self.Soupravy)) then Self.Soupravy.Escape;
  if (Assigned(Self.Text)) then Self.Text.Escape;
-end;//procedure
+end;
 
 procedure TPanelBitmap.ResetPanel;
 begin
@@ -660,7 +660,7 @@ begin
  if (Assigned(Self.JCClick)) then Self.JCClick.Reset;
  if (Assigned(Self.Soupravy)) then Self.Soupravy.Reset;
  if (Assigned(Self.Text)) then Self.Text.Reset;
-end;//procedure
+end;
 
 function TPanelBitmap.PaintCursor(CursorPos:TPoint):TCursorDraw;
 var Return:array [0..6] of TCursorDraw;
@@ -716,7 +716,7 @@ begin
  for i := 0 to 6 do
    if (Return[i].Color = 1) then
      Exit(Return[i]);
-end;//function
+end;
 
 function TPanelBitmap.IsOperation:Boolean;
 begin
@@ -727,7 +727,7 @@ begin
      (Self.JCClick.AddKrok <> 0) or (Self.JCClick.MoveKrok > 1) or (Self.JCClick.DeleteKrok > 1) or
      (Self.Soupravy.AddKrok <> 0) or (Self.Soupravy.MoveKrok > 1) or (Self.Soupravy.DeleteKrok > 1) or
      (Self.Text.AddKrok <> 0) or (Self.Text.MoveKrok > 1) or (Self.Text.DeleteKrok > 1)) then Result := true else Result := false;
-end;//function
+end;
 
 procedure TPanelBitmap.Move;
 begin
@@ -743,7 +743,7 @@ begin
   dmSepHor: if (Assigned(Self.SeparatorsHor)) then Self.SeparatorsHor.Move;
   dmSepVert: if (Assigned(Self.SeparatorsVert)) then Self.SeparatorsVert.Move;
  end;
-end;//procedure
+end;
 
 procedure TPanelBitmap.Delete;
 begin
@@ -758,7 +758,7 @@ begin
   dmSepHor: if (Assigned(Self.SeparatorsHor)) then Self.SeparatorsHor.Delete;
   dmSepVert: if (Assigned(Self.SeparatorsVert)) then Self.SeparatorsVert.Delete;
  end;
-end;//procedure
+end;
 
 procedure TPanelBitmap.PaintMove(CursorPos:TPoint);
 begin
@@ -769,7 +769,7 @@ begin
  if (Assigned(Self.JCClick)) then Self.JCClick.PaintMove(CursorPos);
  if (Assigned(Self.Soupravy)) then Self.Soupravy.PaintMove(CursorPos);
  if (Assigned(Self.Text)) then Self.Text.PaintTextMove(CursorPos);
-end;//procedure
+end;
 
 procedure TPanelBitmap.CheckOperations;
 begin
@@ -781,12 +781,12 @@ begin
    end;//case
    Self.Operations.OpType := 0;
   end;
-end;//procedure
+end;
 
 procedure TPanelBitmap.ChangeTextEvent(Sender:TObject; var popisek:TPopisek);
 begin
  if (Assigned(FOnTextEdit)) then FOnTextEdit(Self, popisek);
-end;//procedure
+end;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -799,7 +799,7 @@ begin
   begin
    Result := Self.ImportObj(Data);
   end;//if (Data.ClassType = TPanelBitmap)
-end;//function
+end;
 
 // import objektovych dat
 function TPanelBitmap.ImportObj(Data:TObject):Byte;
@@ -810,7 +810,7 @@ begin
  // tohleto zatim neni dodelano
 
  Result := 0;
-end;//procedure
+end;
 
 ///////////////////////////////////////////////////////////////////////////////
 

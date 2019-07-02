@@ -32,7 +32,7 @@ uses fMain;
 procedure TF_DataCheck.B_UpdateClick(Sender: TObject);
 begin
  F_Hlavni.MI_CheckDataClick(F_Hlavni.MI_CheckData);
-end;//procedure
+end;
 
 procedure TF_DataCheck.LV_ErrorsCustomDrawItem(Sender: TCustomListView;
   Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
@@ -45,7 +45,7 @@ begin
    Self.LV_Errors.Canvas.Brush.Color := $CCCCFF
  else if (LeftStr(Item.SubItems.Strings[0],2) = 'OK') then
    Self.LV_Errors.Canvas.Brush.Color := $CCFFCC;
-end;//procedure
+end;
 
 procedure TF_DataCheck.OpenForm(str:TStrings);
 var i:Integer;
@@ -62,6 +62,6 @@ begin
 
  str.Free;
  Self.Show();
-end;//procedure
+end;
 
 end.//unit

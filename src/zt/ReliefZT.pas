@@ -475,7 +475,7 @@ begin
  Result := 0;
 
  Self.Escape;
-end;//function
+end;
 
 procedure TPanelZT.FSave(aFile:string;const ORs:string);
 var i,j,k:Integer;
@@ -583,7 +583,7 @@ begin
 
  inifile.UpdateFile;
  inifile.Free;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -600,7 +600,7 @@ begin
  mem := TMemIniFile.Create(aFile, TEncoding.UTF8);
  Result := Self.ZTLoad(mem);
  mem.Free();
-end;//function
+end;
 
 //ulozit ZT do souboru
 procedure TPanelZT.ZTSave(aFIle:string);
@@ -610,7 +610,7 @@ begin
  Self.ZTSave(mem);
  mem.UpdateFile();
  mem.Free();
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -701,7 +701,7 @@ begin
    data[i].Free();
 
  Result := 0;
-end;//function
+end;
 
 //ulozit ZT do souboru
 procedure TPanelZT.ZTSave(mem:TMemIniFile);
@@ -737,7 +737,7 @@ begin
 
    mem.WriteString(_INI_ZT_SECT, IntToStr(i), line);
   end;//for i
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -745,19 +745,19 @@ end;//procedure
 procedure TPanelZT.Import(PanelObjects: TObject);
 begin
 
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 procedure TPanelZT.Paint();
 begin
 
-end;//procedure
+end;
 
 function TPanelZT.PaintCursor(CursorPos:TPoint):TCursorDraw;
 begin
 
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -765,12 +765,12 @@ end;//function
 procedure TPanelZT.ResetPanel();
 begin
 
-end;//procedure
+end;
 
 procedure TPanelZT.Escape();
 begin
 
-end;//procedure
+end;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -778,16 +778,16 @@ end;//procedure
 function TPanelZT.MouseUp(Position:TPoint;Button:TMouseButton):Byte;
 begin
  Result := 0;
-end;//function
+end;
 
 procedure TPanelZT.MouseMove(Position:TPoint);
 begin
-end;//procedure
+end;
 
 function TPanelZT.DblClick(Position:TPoint):Byte;
 begin
  Result := 0;
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -798,7 +798,7 @@ begin
  err := TStringList.Create;
  err.Clear;
  Result := err;
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

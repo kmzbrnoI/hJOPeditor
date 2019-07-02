@@ -44,7 +44,7 @@ end;//ctor
 procedure TPanelGraphics.TextOutputC(Pos:TPoint;Text:string;Popredi,Pozadi:TColor);
 begin
  Self.TextOutputI(Pos, Text, Self.GetColorIndex(Popredi), Pozadi);
-end;//procedure
+end;
 
 procedure TPanelGraphics.TextOutputI(Pos:TPoint;Text:string;Popredi:ShortInt;Pozadi:TColor; underline:boolean = false);
 var j:Integer;
@@ -104,7 +104,7 @@ begin
    Self.DrawObject.Surface.Canvas.Rectangle(Pos.X*_Symbol_Sirka, (Pos.Y+1)*_Symbol_Vyska-1,
                                             (Pos.X+Length(Text))*_Symbol_Sirka, (Pos.Y+1)*_Symbol_Vyska);
   end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -121,7 +121,7 @@ begin
      Break;
     end;
   end;//for i
-end;//function
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

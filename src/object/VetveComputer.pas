@@ -106,7 +106,7 @@ begin
      data[(po.Bloky[i] as TVyhybka).Position.X, (po.Bloky[i] as TVyhybka).Position.Y] := -1;
     end;
   end;//for i
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -264,7 +264,7 @@ begin
    symbols.Free();
    queue.Free();
  end;
-end;//procedure
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 

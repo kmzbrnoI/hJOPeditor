@@ -137,7 +137,7 @@ begin
  Self.Caption := 'Nový popisek';
  Self.ActiveControl := Self.E_Text;
  Self.ShowModal();
-end;//procedure
+end;
 
 procedure TF_Popisek.OpenPopisek(aText:string; popisek:TPopisek);
 begin
@@ -161,11 +161,11 @@ begin
  Self.Caption := 'Editovat popisek';
  Self.ActiveControl := Self.E_Text;
  Self.ShowModal();
-end;//procedure
+end;
 
 procedure TF_Popisek.RB_Col0Click(Sender: TObject);
 begin
  Self.PopisekColor := (Sender as TRadioButton).Tag;
-end;//procedure
+end;
 
 end.//unit

@@ -114,7 +114,7 @@ begin
  F_Hlavni.PM_BitmapClick(F_Hlavni.PM_Bitmap);
  ReliefOptions.UseData(F_Hlavni.Relief);
  F_Hlavni.DesignOpen('Nový projekt');
-end;//procedure
+end;
 
 procedure TF_NewRelief.B_StornoClick(Sender: TObject);
 begin
@@ -132,7 +132,7 @@ begin
  Self.firstOR.Osvetleni.Data[Self.LB_Osv.ItemIndex].board := StrToInt(Self.E_OsvAddr.Text);
  Self.firstOR.Osvetleni.Data[Self.LB_Osv.ItemIndex].port  := StrToInt(Self.E_OsvPort.Text);
  Self.firstOR.Osvetleni.Data[Self.LB_Osv.ItemIndex].name  := Self.E_OsvName.Text;
-end;//procedure
+end;
 
 procedure TF_NewRelief.LB_OsvClick(Sender: TObject);
 begin
@@ -147,7 +147,7 @@ begin
  Self.E_OsvName.Text := Self.firstOR.Osvetleni.Data[(Sender as TListBox).ItemIndex].name;
 
  Self.GB_OsvOne.Visible := true;
-end;//procedure
+end;
 
 procedure TF_NewRelief.OpenForm;
 var i:Integer;
@@ -184,6 +184,6 @@ begin
  Self.LB_Osv.Clear();
  for i := 0 to (Sender as TSpinEdit).Value-1 do Self.LB_Osv.Items.Add(IntToStr(i+1));
  Self.GB_OsvOne.Visible := false;
-end;//procedure
+end;
 
 end.//unit

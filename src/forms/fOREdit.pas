@@ -105,12 +105,12 @@ begin
   end;
 
  Self.Close();
-end;//procedure
+end;
 
 procedure TF_OREdit.B_StornoClick(Sender: TObject);
 begin
  Self.Close();
-end;//procedure
+end;
 
 procedure TF_OREdit.E_NameUniqKeyPress(Sender: TObject; var Key: Char);
 begin
@@ -123,7 +123,7 @@ begin
  Self.orData.Osvetleni.Data[Self.LB_Osv.ItemIndex].board := StrToInt(Self.E_OsvAddr.Text);
  Self.orData.Osvetleni.Data[Self.LB_Osv.ItemIndex].port  := StrToInt(Self.E_OsvPort.Text);
  Self.orData.Osvetleni.Data[Self.LB_Osv.ItemIndex].name  := Self.E_OsvName.Text;
-end;//procedure
+end;
 
 procedure TF_OREdit.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
@@ -148,13 +148,13 @@ begin
  Self.E_OsvName.Text := Self.orData.Osvetleni.Data[(Sender as TListBox).ItemIndex].name;
 
  Self.GB_OsvOne.Visible := true;
-end;//procedure
+end;
 
 procedure TF_OREdit.OpenForm(orindex:Integer);
 begin
  Self.openindex := orindex;
  Self.OpenForm(F_Hlavni.Relief.GetOR(orindex));
-end;//procedure
+end;
 
 procedure TF_OREdit.OpenForm(oblRizeni:TOR);
 begin
@@ -188,6 +188,6 @@ begin
  Self.LB_Osv.Clear();
  for i := 0 to (Sender as TSpinEdit).Value-1 do Self.LB_Osv.Items.Add(IntToStr(i+1));
  Self.GB_OsvOne.Visible := false;
-end;//procedure
+end;
 
 end.//unit

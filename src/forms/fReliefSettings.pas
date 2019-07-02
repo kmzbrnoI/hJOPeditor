@@ -70,7 +70,7 @@ begin
  end;
 
  Self.Close;
-end;//procedure
+end;
 
 procedure TF_ReliefOptions.B_ProchazetClick(Sender: TObject);
 begin
@@ -82,7 +82,7 @@ begin
    else
     Self.E_BlocksFileName.Text := Self.OD_Open.FileName;
   end;//(Self.OD_Open.Execute(Self.Handle))
-end;//procedure
+end;
 
 procedure TF_ReliefOptions.B_StornoClick(Sender: TObject);
 begin
@@ -97,7 +97,7 @@ begin
   Self.E_BlocksFileName.Text := ExpandFileName(Self.E_BlocksFileName.Text);
 end;
 
-//procedure
+
 
 procedure TF_ReliefOptions.OpenForm;
 begin
@@ -109,6 +109,6 @@ begin
  Self.E_BlocksFileName.Text       := ReliefOptions.BlockFile;
 
  Self.ShowModal;
-end;//procedure
+end;
 
 end.//unit

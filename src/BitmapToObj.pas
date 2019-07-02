@@ -279,7 +279,7 @@ begin
   begin
    for j := 0 to _MAX_HEIGHT-1 do Self.Zahrnuto[i,j] := false;
   end;//for i
-end;//procedure
+end;
 
 // Tato metoda dostane na vstup libovolny symbol libovolne koleje a expanduje
 // celou kolej, vcetne vyhybek.
@@ -447,7 +447,7 @@ begin
  finally
    s.Free();
  end;
-end;//function
+end;
 
 procedure AddNearest();
 begin
@@ -480,7 +480,7 @@ begin
   end;
 
  Self.Objects.Bloky.Add(blk);
-end;//procedure
+end;
 
 function TBitmapToObj.IsSeparator(from, dir:TPoint):Boolean;
 begin

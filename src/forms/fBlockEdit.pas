@@ -137,12 +137,12 @@ begin
    Self.iniFile.Free;
    str.Free();
  end;
-end;//procedure
+end;
 
 procedure TF_BlockEdit.B_ApplyClick(Sender: TObject);
 begin
  Self.Close;
-end;//procedure
+end;
 
 procedure TF_BlockEdit.B_StornoClick(Sender: TObject);
 begin
@@ -172,7 +172,7 @@ begin
    (Self.OpenBlok as TVyhybka).PolohaPlus  := (Sender as TComboBox).ItemIndex;
    Self.SaveData();
   end;
-end;//procedure
+end;
 
 procedure TF_BlockEdit.E_BlkChange(Sender: TObject);
 begin
@@ -242,7 +242,7 @@ begin
                   Key := #0;
                  end;
   end;//case
-end;//procedure
+end;
 
 procedure TF_BlockEdit.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
@@ -253,12 +253,12 @@ procedure TF_BlockEdit.FormCreate(Sender: TObject);
 begin
  Self.Bloky := TBloky.Create;
  Self.OpenBlok := nil;
-end;//procedure
+end;
 
 procedure TF_BlockEdit.FormDestroy(Sender: TObject);
 begin
  Self.Bloky.Free;
-end;//procedure
+end;
 
 procedure TF_BlockEdit.FormKeyPress(Sender: TObject; var Key: Char);
 begin
@@ -276,7 +276,7 @@ begin
    Self.LB_Blocks.ItemIndex := 0;
    Self.LB_BlocksClick(Self.LB_Blocks);
   end;
-end;//procedure
+end;
 
 procedure TF_BlockEdit.OpenForm(Blok:TGraphBlok);
 begin
@@ -368,12 +368,12 @@ begin
    Self.OpenBlok.Blok := id;
    Self.SaveData();
   end;
-end;//procedure
+end;
 
 procedure TF_BlockEdit.LB_BlocksDblClick(Sender: TObject);
 begin
  Self.B_ApplyClick(Self);
-end;//procedure
+end;
 
 procedure TF_BlockEdit.LB_BlocksKeyPress(Sender: TObject; var Key: Char);
 begin
@@ -395,7 +395,7 @@ procedure TF_BlockEdit.SaveData();
 begin
  if (Assigned(F_Hlavni.Relief)) then
    F_Hlavni.Relief.Show(Point(-1,-1));
-end;//procedure
+end;
 
 procedure TF_BlockEdit.UpdateLB(text:string);
 var i, index:Integer;
@@ -434,7 +434,7 @@ begin
    index := 2; // vybrat prvni filtrovany blok
 
  Self.LB_Blocks.ItemIndex := index;
-end;//procedure
+end;
 
 procedure TF_BlockEdit.OpenFormGlobal();
 begin
@@ -453,7 +453,7 @@ begin
    (Self.OpenBlok as TUvazka).defalt_dir := (Sender as TRadioButton).Tag;
    Self.SaveData();
   end;
-end;//procedure
+end;
 
 function TF_BlockEdit.GetTechBlokType(panel_type:TBlkType):Integer;
 begin
@@ -470,6 +470,6 @@ begin
  else
   Result := -1;
  end;
-end;//function
+end;
 
 end.//unit

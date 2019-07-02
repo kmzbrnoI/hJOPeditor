@@ -60,7 +60,7 @@ begin
  Self.FBlockFile              := Self.Files.IniFile.ReadString('Obecne','BlockFile','');
 
  Self.Files.IniFile.Free;
-end;//function
+end;
 
 procedure TReliefOptions.SaveData(FileName:string);
 begin
@@ -76,7 +76,7 @@ begin
 
  Self.Files.IniFile.UpdateFile;
  Self.Files.IniFile.Free;
-end;//procedure
+end;
 
 procedure TReliefOptions.UseData(Relief:TRelief);
 begin
@@ -86,6 +86,6 @@ begin
  Relief.KurzorOnObjectColor := Self.KurzorOnObjectColor;
  Relief.KurzorOperation     := Self.KurzorOperation;
  Relief.Mrizka              := Self.Mrizka;
-end;//procedure
+end;
 
 end.//unit

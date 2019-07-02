@@ -36,19 +36,19 @@ begin
  Self.E_Height.Text := IntToStr(F_Hlavni.Relief.PanelHeight);
 
  Self.ShowModal;
-end;//procedure
+end;
 
 procedure TF_ReliefProperties.B_ApplyClick(Sender: TObject);
 begin
  F_Hlavni.Relief.SetRozmery(StrToIntDef(E_Width.Text,0),StrToIntDef(E_Height.Text,0));
 
  Self.Close;
-end;//procedure
+end;
 
 procedure TF_ReliefProperties.B_StornoClick(Sender: TObject);
 begin
  Self.Close;
-end;//procedure
+end;
 
 procedure TF_ReliefProperties.E_WidthKeyPress(Sender: TObject;
   var Key: Char);
@@ -59,6 +59,6 @@ begin
   else
    Key := #0;
   end;
-end;//procedure
+end;
 
 end.//unit
