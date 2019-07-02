@@ -177,7 +177,7 @@ type
    procedure DeleteBitmapSymbol;
    procedure KeyPress(Key:Integer);     // accepts keys from ApplicationEvent component
 
-   function SwitchMode(aMode:TMode):Byte;
+   procedure SwitchMode(aMode:TMode);
    procedure HideMouse();
 
    //OR
@@ -564,7 +564,7 @@ begin
  Self.Show(LastPos);
 end;
 
-function TRelief.SwitchMode(aMode:TMode):Byte;
+procedure TRelief.SwitchMode(aMode:TMode);
 begin
  if (((Self.DrawMode = dmBitmap) or (Self.DrawMode = dmSepHor) or
       (Self.DrawMode = dmSepVert)) and (aMode = dmBloky)) then
@@ -573,13 +573,13 @@ begin
 
    Self.PanelObjects := TPanelObjects.Create(Self.IL_Symbols,Self.IL_Text,Self.DrawObject.Surface.Canvas,Self.Zobrazeni.PanelWidth,Self.Zobrazeni.PanelHeight, Self.DrawObject, Self.Graphics);
    Self.AssignObjectEvents();
-   Result := Self.PanelObjects.Import(Self.PanelBitmap);
 
-   if (Result <> 0) then
-    begin
+   try
+     Self.PanelObjects.Import(Self.PanelBitmap);
+   except
      FreeAndNil(Self.PanelObjects);
-     Exit;
-    end;
+     raise;
+   end;
 
    Self.PanelObjects.ShowBlokPopisky := Self.PanelBitmap.ShowBlokPopisky;
    FreeAndNil(Self.PanelBitmap);
@@ -598,7 +598,6 @@ begin
  DrawMode := aMode;
 
  Self.Show(Point(-1,-1));
- Result := 0;
 end;
 
 procedure TRelief.BitmapMouseUp(Position:TPoint;Button:TMouseButton);

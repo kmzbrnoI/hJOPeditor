@@ -432,8 +432,11 @@ procedure TF_Hlavni.PM_NewClick(Sender: TObject);
 begin
  if (Assigned(Relief)) then
   begin
-   if (Relief.FileStav <> 0) then if (Application.MessageBox('Otevøením nového projektu ztratíte všechna pøedešlá data, pokraèovat?','Pokraèovat?',MB_YESNO OR MB_ICONQUESTION) <> mrYes) then Exit;
-  end;//if Assigned(Relief)
+   if (Relief.FileStav <> 0) then
+     if (Application.MessageBox('Otevøením nového projektu ztratíte všechna neuložená data, pokraèovat?',
+                                'Pokraèovat?', MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
+       Exit();
+  end;
 
  if (Assigned(Relief)) then FreeAndNil(Relief);
 
@@ -480,7 +483,8 @@ end;
 procedure TF_Hlavni.PM_OpenClick(Sender: TObject);
 begin
  if (Assigned(Relief)) then
-   if (Application.MessageBox('Otevøením nového projektu ztratíte všechna pøedešlá data, pokraèovat?','Pokraèovat?',MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
+   if (Application.MessageBox('Otevøením nového projektu ztratíte všechna neuložená data, pokraèovat?',
+                              'Pokraèovat?', MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
      Exit();
 
  if (Self.OD_Open.Execute(Self.Handle)) then
@@ -489,7 +493,7 @@ begin
     begin
      if (Relief.FileStav <> 0) then
        FreeAndNil(Relief);
-    end;//if Assigned(Relief)
+    end;
 
    Self.OpenFile(Self.OD_Open.FileName);
   end;
@@ -534,7 +538,7 @@ procedure TF_Hlavni.PM_SaveAsClick(Sender: TObject);
 begin
  if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
   begin
-   Self.SD_Save.Filter := 'Bitmapove soubory panelu (*.bpnl)|*.bpnl';
+   Self.SD_Save.Filter := 'Bitmapové soubory panelu (*.bpnl)|*.bpnl';
 
    if (not Self.SD_Save.Execute(Self.Handle)) then Exit;
    if (RightStr(Self.SD_Save.FileName,5) <> '.bpnl') then Relief.Save(Self.SD_Save.FileName+'.bpnl') else Relief.Save(Self.SD_Save.FileName);
@@ -542,7 +546,7 @@ begin
 
  if (Relief.Mode = dmBloky) then
   begin
-   Self.SD_Save.Filter := 'Objektove soubory panelu (*.opnl)|*.opnl';
+   Self.SD_Save.Filter := 'Objektové soubory panelu (*.opnl)|*.opnl';
 
    if (not Self.SD_Save.Execute(Self.Handle)) then Exit;
    if (RightStr(Self.SD_Save.FileName,5) <> '.opnl') then Relief.Save(Self.SD_Save.FileName+'.opnl') else Relief.Save(Self.SD_Save.FileName);
@@ -558,7 +562,7 @@ begin
  try
    if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
     begin
-     Self.SD_Save.Filter := 'Bitmapove soubory panelu (*.bpnl)|*.bpnl';
+     Self.SD_Save.Filter := 'Bitmapové soubory panelu (*.bpnl)|*.bpnl';
 
      if (Relief.FileStav = 1) then
       begin
@@ -571,7 +575,7 @@ begin
 
    if ((Relief.Mode = dmBloky) or (Relief.Mode = dmRoots)) then
     begin
-     Self.SD_Save.Filter := 'Objektove soubory panelu (*.opnl)|*.opnl';
+     Self.SD_Save.Filter := 'Objektové soubory panelu (*.opnl)|*.opnl';
 
      if (Relief.FileStav = 1) then
       begin
@@ -595,7 +599,8 @@ end;
 
 procedure TF_Hlavni.PM_AboutClick(Sender: TObject);
 begin
- Application.MessageBox(PChar('hJOPeditor'+#13#10+'v'+GetVersion(Application.ExeName)+#13#10+'(c) Jan Horáèek 2011–2018'),'Info',MB_OK OR MB_ICONINFORMATION);
+ Application.MessageBox(PChar('hJOPeditor'+#13#10+'v'+GetVersion(Application.ExeName)+#13#10+'Vytvoøil Jan Horáèek 2011–2019'),
+                        'Info', MB_OK OR MB_ICONINFORMATION);
 end;
 
 procedure TF_Hlavni.PM_BitmapClick(Sender: TObject);
@@ -631,14 +636,16 @@ begin
        Exit;
       end;
 
-     Return := 0;
-     if (Relief.Mode <> dmBitmap) then Return := Relief.SwitchMode(dmBitmap);
-
-     if (Return <> 0) then
-      begin
-       Application.MessageBox(PChar('Pøi zmìnì módu se vykytla chyba - chyba: '+IntToStr(Return)),'Chyba',MB_OK OR MB_ICONWARNING);
-       Exit;
-      end;
+     try
+       if (Relief.Mode <> dmBitmap) then
+         Relief.SwitchMode(dmBitmap);
+     except
+       on E:Exception do
+        begin
+         Application.MessageBox(PChar(E), 'Chyba', MB_OK OR MB_ICONWARNING);
+         Exit();
+        end;
+     end;
 
      Self.TB_Vyhybka.Visible        := true;
      Self.TB_Usek.Visible           := true;
@@ -661,17 +668,18 @@ begin
        Exit;
       end;
 
-     Return := 0;
-     if ((TMenuItem(Sender).Tag = 1) and (Relief.Mode <> dmSepVert)) then
-       Return := Relief.SwitchMode(dmSepVert)
-     else if ((TMenuItem(Sender).Tag = 2) and (Relief.Mode <> dmSepHor)) then
-       Return := Relief.SwitchMode(dmSepHor);
-
-     if (Return <> 0) then
-      begin
-       Application.MessageBox(PChar('Pøi zmìnì módu se vyskytla chyba - chyba: '+IntToStr(Return)),'Chyba',MB_OK OR MB_ICONWARNING);
-       Exit;
-      end;
+     try
+       if ((TMenuItem(Sender).Tag = 1) and (Relief.Mode <> dmSepVert)) then
+         Relief.SwitchMode(dmSepVert)
+       else if ((TMenuItem(Sender).Tag = 2) and (Relief.Mode <> dmSepHor)) then
+         Relief.SwitchMode(dmSepHor);
+     except
+       on E:Exception do
+        begin
+         Application.MessageBox(PChar(E), 'Chyba', MB_OK OR MB_ICONWARNING);
+         Exit();
+        end;
+     end;
 
      Self.TB_Oddelovac.Visible   := true;
      Self.TB_BitmapTools.Visible := true;
@@ -691,7 +699,16 @@ begin
         end;
       end;
 
-     if (Relief.Mode <> dmBloky) then Return := Relief.SwitchMode(dmBloky);
+     try
+       if (Relief.Mode <> dmBloky) then
+         Relief.SwitchMode(dmBloky);
+     except
+       on E:Exception do
+        begin
+         Application.MessageBox(PChar(E), 'Chyba', MB_OK OR MB_ICONWARNING);
+         Exit();
+        end;
+     end;
 
      if (Return <> 0) then
       begin
@@ -714,14 +731,16 @@ begin
     end;
 
   4:begin
-     Return := 0;
-     if (Relief.Mode <> dmRoots) then Return := Relief.SwitchMode(dmRoots);
-
-     if (Return <> 0) then
-      begin
-       Application.MessageBox(PChar('Pri zmene modu se vyskytla chyba - chyba: '+IntToStr(Return)),'Chyba',MB_OK OR MB_ICONWARNING);
-       Exit;
-      end;
+     try
+       if (Relief.Mode <> dmRoots) then
+         Relief.SwitchMode(dmRoots);
+     except
+       on E:Exception do
+        begin
+         Application.MessageBox(PChar(E), 'Chyba', MB_OK OR MB_ICONWARNING);
+         Exit();
+        end;
+     end;
 
      F_BlockEdit.Close();
      Self.MI_Data.Visible := true;
@@ -869,13 +888,15 @@ end;
 
 procedure TF_Hlavni.MI_CloseFileClick(Sender: TObject);
 begin
- if (Application.MessageBox('Uzavøením projektu bez jeho uložení ztratíte projektová data, pøesto pokraèovat?','Uzavøení projektu',MB_YESNO OR MB_ICONQUESTION) = mrNo) then Exit;
+ if (Application.MessageBox('Uzavøením projektu ztratíte všechna neuložená data, pokraèovat?',
+                            'Uzavøení projektu', MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
+   Exit();
 
- if (Assigned(ReliefOptions)) then ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName))+_Config_File);
+ if (Assigned(ReliefOptions)) then
+   ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName))+_Config_File);
 
- Self.DesignClose;
-
- Self.DestroyReliefClasses;
+ Self.DesignClose();
+ Self.DestroyReliefClasses();
 end;
 
 procedure TF_Hlavni.DesignOpen(FName:string);
@@ -894,7 +915,7 @@ begin
  Self.Constraints.MinHeight := Self.DXD_main.Height + Self.DXD_main.Top + Self.SB_Main.Height + 70;
 end;
 
-procedure TF_Hlavni.DesignClose;
+procedure TF_Hlavni.DesignClose();
 begin
  Self.PM_Save.Enabled      := false;
  Self.PM_SaveAs.Enabled    := false;
@@ -913,6 +934,7 @@ begin
  Self.TB_Trat.Visible           := false;
  Self.TB_Usek.Visible           := false;
  Self.TB_Krizeni.Visible        := false;
+ Self.TB_Vykolejka.Visible      := false;
 
  if (Assigned(Self.pushedButton)) then
   Self.pushedButton.Down := false;

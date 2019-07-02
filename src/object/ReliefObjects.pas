@@ -62,7 +62,7 @@ TPanelObjects = class
     constructor Create(SymbolIL,TextIL:TImageList;DrawCanvas:TCanvas;Width,Height:Integer;Parent:TDXDraw; Graphics:TPanelGraphics);
     destructor Destroy; override;
 
-    function Import(Data:TObject):Byte;     // import dat zatim z PanelBitmap
+    procedure Import(Data:TObject);     // import dat zatim z PanelBitmap
 
     procedure FLoad(aFile:string;var ORs:string);
     procedure FSave(aFile:string;const ORs:string);
@@ -666,17 +666,14 @@ end;
 
 // import dat z jineho modu
 // zatim podporuje jen mod bitmap
-function TPanelObjects.Import(Data:TObject):Byte;
+procedure TPanelObjects.Import(Data:TObject);
 var BitmapToObj:TBitmapToObj;
 begin
- Result := 0;
-
  if (Data.ClassType = TPanelBitmap) then
   begin
    BitmapToObj := TBitmapToObj.Create;
-   Result := BitmapToObj.BitmapToObjects((Data as TPanelBitmap), Self);
-  end;//if (Data.ClassType = TPanelBitmap)
-
+   BitmapToObj.BitmapToObjects((Data as TPanelBitmap), Self);
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

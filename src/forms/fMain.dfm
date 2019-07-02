@@ -793,7 +793,7 @@ object F_Hlavni: TF_Hlavni
   end
   object OD_Open: TOpenDialog
     Filter = 
-      'Bitmapove soubory panelu (*.bpnl)|*.bpnl|Objektove soubory panel' +
+      'Bitmapov'#233' soubory panelu (*.bpnl)|*.bpnl|Objektov'#233' soubory panel' +
       'u (*.opnl)|*.opnl|V'#353'echny podporovan'#233' soubory|*.bpnl;*.opnl'
     FilterIndex = 3
     Title = 'Na'#269#237'st soubor'
@@ -802,7 +802,7 @@ object F_Hlavni: TF_Hlavni
   end
   object SD_Save: TSaveDialog
     Filter = 
-      'Bitmapove soubory panelu (*.bpnl)|*.bpnl|Objektove soubory panel' +
+      'Bitmapov'#233' soubory panelu (*.bpnl)|*.bpnl|Objektov'#233' soubory panel' +
       'u (*.opnl)|*.opnl'
     Title = 'Ulo'#382'it soubor'
     Left = 144

@@ -20,7 +20,7 @@ type
     function IsSeparator(from, dir:TPoint):Boolean;
 
   public
-    function BitmapToObjects(BitmapData:TPanelBitmap;ObjectData:TPanelObjects):Byte;
+    procedure BitmapToObjects(BitmapData:TPanelBitmap;ObjectData:TPanelObjects);
  end;//TConvert
 
 implementation
@@ -30,7 +30,7 @@ uses ObjBlok, ObjBlokRozp, ObjBlokUsek, ObjBlokNavestidlo, ObjBlokText,
      ObjBlokVykol, ObjBlokPrejezd;
 
 //tato funkce se vola zvnejsku
-function TBitmapToObj.BitmapToObjects(BitmapData:TPanelBitmap;ObjectData:TPanelObjects):Byte;
+procedure TBitmapToObj.BitmapToObjects(BitmapData:TPanelBitmap;ObjectData:TPanelObjects);
 var i,j:Integer;
     Symbol:ShortInt;
     blk:TGraphBlok;
@@ -268,9 +268,7 @@ begin
  pomocne.Free();
 
  Self.Objects.ComputePrjTechUsek();
-
- Result := 0;
-end;//function
+end;
 
 //resetuje data potrebna pro operaci BitmapToObject - vola se pri startu operace
 procedure TBitmapToObj.ResetData;
