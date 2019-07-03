@@ -336,7 +336,7 @@ begin
         ((Symbol >= _Vykol_Start) and (Symbol <= _Vykol_End)) or
         ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End))) then
       begin
-       //cyklus je kvuli dvou smerum navaznosti
+       //cyklus je kvuli dvema smerum navaznosti
        for j := 0 to 2 do
         begin
          // vykolejka je pro nase potreby rovna kolej
@@ -374,11 +374,6 @@ begin
            vykol.obj         := index-1;
            vykol.vetev       := -1;
            Self.Objects.Bloky.Add(vykol);
-
-           // symbol vykolejky pridame i do useku
-           sym.SymbolID := Symbol2;
-           sym.Position := TempPos;
-           usek.Symbols.Add(sym);
 
            Zahrnuto[TempPos.X, TempPos.Y] := true;
            s.Push(TempPos);
