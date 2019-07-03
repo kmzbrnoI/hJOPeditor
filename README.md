@@ -1,10 +1,10 @@
 # hJOPeditor
 
-Panel editor for hJOP.
+Panel editor for [hJOP project](https://hjop.kmz-brno.cz/).
 
-- Used programming language: Object Pascal
-- Used environment: Delphi 2009
-- Author: Jan Horacek (c) 2011-2015
+- Programming language: Object Pascal
+- Environment: Delphi 2009
+- Author: Jan Horacek
 
 ## Resource file
 
