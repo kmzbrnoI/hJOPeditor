@@ -796,6 +796,7 @@ object F_Hlavni: TF_Hlavni
       'Bitmapov'#233' soubory panelu (*.bpnl)|*.bpnl|Objektov'#233' soubory panel' +
       'u (*.opnl)|*.opnl|V'#353'echny podporovan'#233' soubory|*.bpnl;*.opnl'
     FilterIndex = 3
+    Options = [ofHideReadOnly, ofFileMustExist, ofEnableSizing]
     Title = 'Na'#269#237'st soubor'
     Left = 80
     Top = 504
@@ -804,6 +805,7 @@ object F_Hlavni: TF_Hlavni
     Filter = 
       'Bitmapov'#233' soubory panelu (*.bpnl)|*.bpnl|Objektov'#233' soubory panel' +
       'u (*.opnl)|*.opnl'
+    Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Title = 'Ulo'#382'it soubor'
     Left = 144
     Top = 504
@@ -814,7 +816,7 @@ object F_Hlavni: TF_Hlavni
     Left = 200
     Top = 504
     Bitmap = {
-      494C01012600E002000308000C00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C01012600E002040308000C00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       000000000000360000002800000020000000780000000100200000000000003C
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000000000000000000FF000000FF000000FF000000FF00
@@ -1326,7 +1328,7 @@ object F_Hlavni: TF_Hlavni
     Left = 312
     Top = 504
     Bitmap = {
-      494C010104000800840010000C00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010104000800880010000C00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001800000001002000000000000018
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
