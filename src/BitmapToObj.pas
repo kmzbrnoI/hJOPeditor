@@ -85,7 +85,8 @@ begin
        if ((not Self.Zahrnuto[i,j]) and
            (((Symbol >= _Usek_Start) and (Symbol <= _Usek_End)) or
             ((Symbol >= _Krizeni_Start) and (Symbol <= _Krizeni_End)) or
-            ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End)))) then
+            ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End)) or
+            (Symbol = _Zarazedlo_r) or (Symbol = _Zarazedlo_l))) then
          Self.ZpracujObject(Point(i,j), index, vyh_index, vykol_index);
       end;//if (Self.BitmapData.Symbols.GetSymbol(Point(i,j)) <> -1)
     end;//for j
@@ -330,13 +331,13 @@ begin
      cur := s.Pop();
      Symbol := Self.Bitmap.Symbols.GetSymbol(cur);
 
-     //pokud je symbol usek
      if (((Symbol >= _Usek_Start) and (Symbol <= _Usek_End)) or
         ((Symbol >= _Krizeni_Start) and (Symbol <= _Krizeni_End)) or
         ((Symbol >= _Vykol_Start) and (Symbol <= _Vykol_End)) or
-        ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End))) then
+        ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End)) or
+        (Symbol = _Zarazedlo_r) or (Symbol = _Zarazedlo_l)) then
       begin
-       //cyklus je kvuli dvema smerum navaznosti
+       //cyklus kvuli smerum navaznosti (vyhybka ma az 3 smery navaznosti)
        for j := 0 to 2 do
         begin
          // vykolejka je pro nase potreby rovna kolej
@@ -347,41 +348,41 @@ begin
           begin
            dir.X := _Vyh_Navaznost[((Symbol-_Vyhybka_Start)*6) + (j*2)];
            dir.Y := _Vyh_Navaznost[((Symbol-_Vyhybka_Start)*6) + (j*2) + 1];
-          end else begin
-           if (j = 2) then break; // usek ma jen 2 iterace, kdezto vyhybka 3 iterace           
+          end else begin // usek, krizeni
+           if (j = 2) then break; // usek ma jen 2 smery navaznosti
            dir := GetUsekNavaznost(Self.Bitmap.Symbols.GetSymbol(cur), TNavDir(j));
           end;
 
-         //TempPos = pozice teoreticky navaznych objektu
+         // TempPos = pozice teoreticky navaznych objektu
 
          if (Self.IsSeparator(cur, dir)) then
            continue;
 
-         TempPos.X := cur.X + dir.X;
-         TempPos.Y := cur.Y + dir.Y;
+         TempPos := Point(cur.X+dir.X, cur.Y+dir.Y);
          Symbol2 := Self.Bitmap.Symbols.GetSymbol(TempPos);
 
          if (Self.Zahrnuto[TempPos.X,TempPos.Y]) then
            continue;
 
-         //vedlejsi Symbol2 = vykolejka
+         // vedlejsi symbol je vykolejka
          if ((Symbol2 >= _Vykol_Start) and (Symbol2 <= _Vykol_End)) then
           begin
-           vykol             := TVykol.Create(vykol_index);
+           vykol := TVykol.Create(vykol_index);
            Inc(vykol_index);
-           vykol.symbol      := Symbol2 - _Vykol_Start;
-           vykol.Pos         := TempPos;
-           vykol.obj         := index-1;
-           vykol.vetev       := -1;
+           vykol.symbol := Symbol2 - _Vykol_Start;
+           vykol.Pos := TempPos;
+           vykol.obj := index-1;
+           vykol.vetev := -1;
            Self.Objects.Bloky.Add(vykol);
 
            Zahrnuto[TempPos.X, TempPos.Y] := true;
            s.Push(TempPos);
           end;
 
-         //vedlejsi Symbol2 = usek
+         // vedlejsi symbol je usek, krizeni nebo zarazedlo
          if (((Symbol2 >= _Usek_Start) and (Symbol2 <= _Usek_End)) or
-             ((Symbol2 >= _Krizeni_Start) and (Symbol2 <= _Krizeni_End))) then
+             ((Symbol2 >= _Krizeni_Start) and (Symbol2 <= _Krizeni_End)) or
+             (Symbol2 = _Zarazedlo_r) or (Symbol2 = _Zarazedlo_l)) then
           begin
            //ted vime, ze na NavaznostPos je usek
 
@@ -412,7 +413,7 @@ begin
           end;//if ((not Self.Zahrnuto[TempPos[j].X,TempPos[j].Y])...
 
 
-         //vedlejsi Symbol2 = vyhybka
+         // vedlejsi symbol je vyhybka
          if ((Symbol2 >= _Vyhybka_Start) and (Symbol2 <= _Vyhybka_End)) then
           begin
            //ted vime, ze na NavaznostPos je vyhybka
@@ -423,11 +424,11 @@ begin
               begin
                //ted vime, ze i navaznost z TempPos vede na cur.Pos - muzeme pridat Symbol2 do bloku
                // pridavame vyhybku
-               vyhybka           := TVyhybka.Create(vyh_index);
+               vyhybka := TVyhybka.Create(vyh_index);
                Inc(vyh_index);
-               vyhybka.Position  := TempPos;
-               vyhybka.SymbolID  := Symbol2;
-               vyhybka.obj       := index-1;
+               vyhybka.Position := TempPos;
+               vyhybka.SymbolID := Symbol2;
+               vyhybka.obj := index-1;
                Self.Objects.Bloky.Add(vyhybka);
 
                Zahrnuto[TempPos.X,TempPos.Y] := true;
@@ -442,11 +443,6 @@ begin
  finally
    s.Free();
  end;
-end;
-
-procedure AddNearest();
-begin
-
 end;
 
 // tato funkce predpoklada, ze jedeme odzhora dolu a narazime na prvni vyskyt symbolu uplne nahore
