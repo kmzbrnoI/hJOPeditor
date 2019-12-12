@@ -581,23 +581,25 @@ object F_NewRelief: TF_NewRelief
       Height = 13
       Caption = 'V'#253#353'ka reli'#233'fu :'
     end
-    object E_Width: TEdit
+    object SE_Width: TSpinEdit
       Left = 129
       Top = 24
       Width = 121
-      Height = 21
-      NumbersOnly = True
+      Height = 22
+      MaxValue = 255
+      MinValue = 5
       TabOrder = 0
-      Text = '0'
+      Value = 5
     end
-    object E_Height: TEdit
+    object SE_Height: TSpinEdit
       Left = 129
       Top = 56
       Width = 121
-      Height = 21
-      NumbersOnly = True
+      Height = 22
+      MaxValue = 255
+      MinValue = 5
       TabOrder = 1
-      Text = '0'
+      Value = 5
     end
   end
 end

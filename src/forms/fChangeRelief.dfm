@@ -30,31 +30,13 @@ object F_ReliefProperties: TF_ReliefProperties
     Height = 13
     Caption = 'V'#253#353'ka reli'#233'fu :'
   end
-  object E_Width: TEdit
-    Left = 121
-    Top = 8
-    Width = 121
-    Height = 21
-    TabOrder = 0
-    Text = '0'
-    OnKeyPress = E_WidthKeyPress
-  end
-  object E_Height: TEdit
-    Left = 121
-    Top = 40
-    Width = 121
-    Height = 21
-    TabOrder = 1
-    Text = '0'
-    OnKeyPress = E_WidthKeyPress
-  end
   object B_Storno: TButton
     Left = 85
     Top = 80
     Width = 75
     Height = 25
     Caption = 'Storno'
-    TabOrder = 2
+    TabOrder = 0
     OnClick = B_StornoClick
   end
   object B_Apply: TButton
@@ -64,7 +46,27 @@ object F_ReliefProperties: TF_ReliefProperties
     Height = 25
     Caption = 'Pou'#382#237't'
     Default = True
-    TabOrder = 3
+    TabOrder = 1
     OnClick = B_ApplyClick
+  end
+  object SE_Width: TSpinEdit
+    Left = 120
+    Top = 8
+    Width = 121
+    Height = 22
+    MaxValue = 255
+    MinValue = 5
+    TabOrder = 2
+    Value = 0
+  end
+  object SE_Height: TSpinEdit
+    Left = 120
+    Top = 40
+    Width = 121
+    Height = 22
+    MaxValue = 255
+    MinValue = 5
+    TabOrder = 3
+    Value = 0
   end
 end

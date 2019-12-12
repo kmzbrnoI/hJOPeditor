@@ -33,8 +33,6 @@ type
     E_OsvName: TEdit;
     GB_Relief: TGroupBox;
     Label2: TLabel;
-    E_Width: TEdit;
-    E_Height: TEdit;
     Label1: TLabel;
     Label10: TLabel;
     CB_Lichy: TComboBox;
@@ -44,6 +42,8 @@ type
     RB_OR2: TRadioButton;
     StaticText1: TStaticText;
     StaticText2: TStaticText;
+    SE_Width: TSpinEdit;
+    SE_Height: TSpinEdit;
     procedure B_CreateClick(Sender: TObject);
     procedure B_StornoClick(Sender: TObject);
     procedure SE_OsvCntChange(Sender: TObject);
@@ -67,7 +67,7 @@ uses fMain, ReliefObjects, ReliefBitmap;
 
 procedure TF_NewRelief.B_CreateClick(Sender: TObject);
 begin
- if ((StrToIntDef(Self.E_Height.Text,0) > 255) or (StrToIntDef(Self.E_Width.Text,0) > 255)) then
+ if ((Self.SE_Height.Value > 255) or (Self.SE_Width.Value > 255)) then
   begin
    Application.MessageBox('Maximální rozmìry panelu jsou 255x255', 'Nelze pokraèovat', MB_OK OR MB_ICONERROR);
    Exit();
@@ -110,7 +110,7 @@ begin
  F_Hlavni.AssignReliefEvents();
 
  try
-   F_Hlavni.Relief.New(Point(StrToIntDef(Self.E_Width.Text,10), StrToIntDef(Self.E_Height.Text,10)), firstOR);
+   F_Hlavni.Relief.New(Point(Self.SE_Width.Value, Self.SE_Height.Value), firstOR);
  except
    on E:Exception do
     begin
@@ -161,8 +161,8 @@ end;
 procedure TF_NewRelief.OpenForm;
 var i:Integer;
 begin
- Self.E_Height.Text := '20';
- Self.E_Width.Text  := '40';
+ Self.SE_Height.Value := 20;
+ Self.SE_Width.Value  := 40;
 
  Self.firstOR.Osvetleni.Cnt := 0;
  for i := 0 to _MAX_OSV-1 do

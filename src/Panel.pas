@@ -158,7 +158,7 @@ type
 
    procedure Show(CursorPos:TPoint);
    procedure Escape(Group:boolean);
-   function SetRozmery(aWidth,aHeight:Byte):Byte;
+   procedure SetRozmery(aWidth,aHeight:Byte);
 
    procedure AddSymbol(SymbolID:Integer);
    procedure AddText(Text:string; Color:Integer; popisekBlok:boolean);
@@ -626,19 +626,12 @@ begin
  end;
 end;
 
-function TRelief.SetRozmery(aWidth,aHeight:Byte):Byte;
+procedure TRelief.SetRozmery(aWidth,aHeight:Byte);
 begin
  if (Self.Mode <> dmBitmap) then
-  begin
-   Result := 1;
-   Exit;
-  end;
+   raise Exception.Create('Rozmìny lze mìnit jen v režimu bitmapy!');
 
- if (PanelBitmap.SetRozmery(aWidth,aHeight) <> 0) then
-  begin
-   Result := 2;
-   Exit;
-  end;
+ PanelBitmap.SetRozmery(aWidth, aHeight);
 
  Self.Zobrazeni.PanelWidth  := aWidth;
  Self.Zobrazeni.PanelHeight := aHeight;
@@ -647,8 +640,6 @@ begin
  Self.DrawObject.Height := aHeight * _Symbol_Vyska;
 
  Self.Show(LastPos);
-
- Result := 0;
 end;
 
 procedure TRelief.SetMrizka(aMrizka:Boolean);
