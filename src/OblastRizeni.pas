@@ -50,17 +50,6 @@ type
   Poss:TPoss;
  end;
 
- //vsechny OR
- TORs=record
-  Data:array [0.._MAX_OR-1] of TOR;
-  Cnt:Integer;
- end;
-
- TORList=record
-  Data:array [0.._MAX_OR-1] of string;
-  Cnt:Integer;
- end;
-
  //pouzivao pri presunech OR apod.
  TORGraf=record
   MovingOR:Integer;   //index v poli

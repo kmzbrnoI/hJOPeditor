@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, IniFiles, ReliefSettings, ReliefObjects, ExtCtrls, Global,
-  StrUtils, Spin, ObjBlok;
+  StrUtils, Spin, ObjBlok, Generics.Collections;
 
 type
   TBlok=record
@@ -382,13 +382,11 @@ begin
 end;
 
 procedure TF_BlockEdit.LoadOR();
-var ORs:TORList;
-    i:Integer;
+var oblr:TOR;
 begin
- //nacteni OR
  Self.CB_OR.Clear();
- ORs := F_Hlavni.Relief.GetORList();
- for i := 0 to ORs.Cnt-1 do Self.CB_OR.Items.Add(ORs.Data[i]);
+ for oblr in F_Hlavni.Relief.ORs do
+   Self.CB_OR.Items.Add(oblr.Name);
 end;
 
 procedure TF_BlockEdit.SaveData();

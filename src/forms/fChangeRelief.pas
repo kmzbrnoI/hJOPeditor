@@ -40,9 +40,13 @@ end;
 
 procedure TF_ReliefProperties.B_ApplyClick(Sender: TObject);
 begin
- F_Hlavni.Relief.SetRozmery(StrToIntDef(E_Width.Text,0),StrToIntDef(E_Height.Text,0));
-
- Self.Close;
+ try
+   F_Hlavni.Relief.SetRozmery(StrToIntDef(E_Width.Text,0), StrToIntDef(E_Height.Text,0));
+   Self.Close();
+ except
+   on E:Exception do
+     Application.MessageBox(PChar('Chyba: ' + E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
+ end;
 end;
 
 procedure TF_ReliefProperties.B_StornoClick(Sender: TObject);

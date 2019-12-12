@@ -5,7 +5,7 @@ interface
 uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
      ReliefObjects, Forms, StdCtrls, ExtCtrls, ReliefBitmap, Menus, ReliefText,
      Global, BitmapToObj, OblastRizeni, StrUtils, DirectX, PGraphics,
-     ObjBlok, symbolHelper;
+     ObjBlok, symbolHelper, Generics.Collections;
 
 type
  TObjectPointer=record
@@ -88,9 +88,6 @@ type
    FileCesta:string;
   end;
 
-  //oblasti rizeni
-  ORs:TOrs;
-
   DK_Menu:TPopUpMenu;
 
   ORMove:TORGraf;
@@ -154,15 +151,17 @@ type
 
 
   public
+   ORs: TList<TOr>;
+
    constructor Create(DDRaw:TDXDraw;aParentForm:TForm);
    destructor Destroy; override;
 
-   function New(size:TPoint;firstOR:TOR):Byte;
+   procedure New(size:TPoint;firstOR:TOR);
    procedure Open(aFile:string);
    procedure Save(aFile:string);
 
    procedure Show(CursorPos:TPoint);
-   function Escape(Group:boolean):Byte;
+   procedure Escape(Group:boolean);
    function SetRozmery(aWidth,aHeight:Byte):Byte;
 
    procedure AddSymbol(SymbolID:Integer);
@@ -181,12 +180,8 @@ type
    procedure HideMouse();
 
    //OR
-   function GetORList():TORList;
-   function GetOR(index:Integer):TOR;
-   function SetOR(index:Integer;data:TOR):Byte;
-   function AddOR(data:TOR):Byte;
-   function DeleteOR(index:Integer):Byte; overload;
-   function DeleteOR(pos:TPoint):Byte; overload;
+   procedure AddOR(oblr:TOR);
+   procedure DeleteOR(pos:TPoint);
 
    function CheckValid(var error_cnt:Byte):TStrings;     //overi validitu naeditovanych dat a vrati chybove hlasky
 
@@ -222,9 +217,11 @@ implementation
 
 uses fOREdit, fMain, ownStrUtils;
 
-constructor TRelief.Create(DDRaw:TDXDraw;aParentForm:TForm);
+constructor TRelief.Create(DDRaw:TDXDraw; aParentForm:TForm);
 begin
  inherited Create;
+
+ Self.ORs := TList<TOR>.Create();
 
  Self.DrawObject := DDraw;
  Self.ParentForm := aParentForm;
@@ -252,8 +249,7 @@ begin
  Self.Zobrazeni.Mrizka  := _Def_Mrizka;
  Self.Panel.FileStav    := 1;
 
-
- Self.ORs.Cnt := 0;
+ Self.ORs.Clear();
  Self.ORMove.MovingOR  := -1;
  Self.ORClick.MovingOR := -1;
  Self.FMove := false;
@@ -286,16 +282,10 @@ begin
 end;
 
 //novy relief
-function TRelief.New(size:TPoint;firstOR:TOR):Byte;
+procedure TRelief.New(size:TPoint;firstOR:TOR);
 begin
  Self.Initialize(size,dmBitmap);
- if (Self.AddOR(firstOR) <> 0) then
-  begin
-   Result := 2;
-   Exit;
-  end;
-
- Result := 0;
+ Self.AddOR(firstOR);
 end;
 
 procedure TRelief.Open(aFile:string);
@@ -333,6 +323,7 @@ begin
  Self.Graphics.Free();
 
  Self.DK_Menu.Free();
+ Self.ORs.Free();
 
  inherited Destroy;
 end;//destructor
@@ -548,19 +539,18 @@ begin
  end;
 end;
 
-function TRelief.Escape(Group:boolean):Byte;
+procedure TRelief.Escape(Group:boolean);
 begin
- Result := 0;
-
  case (Self.DrawMode) of
   dmBitmap, dmSepVert, dmSepHor:
-    if (Assigned(Self.PanelBitmap)) then Self.PanelBitmap.Escape(Group) else Result := 1;
+    if (Assigned(Self.PanelBitmap)) then
+      Self.PanelBitmap.Escape(Group);
   dmBloky, dmRoots:
-    if (Assigned(Self.PanelObjects)) then Self.PanelObjects.Escape else Result := 1;
+    if (Assigned(Self.PanelObjects)) then
+      Self.PanelObjects.Escape();
  end;
 
  Self.FMove := false;
-
  Self.Show(LastPos);
 end;
 
@@ -653,7 +643,6 @@ begin
    Result := 2;
    Exit;
   end;
-// PanelObjects.SetRozmery(aWidth,aHeight);
 
  Self.Zobrazeni.PanelWidth  := aWidth;
  Self.Zobrazeni.PanelHeight := aHeight;
@@ -799,102 +788,48 @@ end;
 ////////////////////////////////////////////////////////////////////////////////
 //operace s oblastmi rizeni:
 
-function TRelief.GetORList():TORList;
-var i:Integer;
+procedure TRelief.AddOR(oblr:TOR);
 begin
- Result.Cnt := Self.ORs.Cnt;
- for i := 0 to Self.ORs.Cnt-1 do Result.data[i] := Self.ORs.Data[i].Name;   
-end;
-
-function TRelief.GetOR(index:Integer):TOR;
-begin
- if (index < 0) or (index >= Self.ORs.Cnt) then Exit;
-
- Result := Self.ORs.Data[index];
-end;
-
-function TRelief.SetOR(index:Integer;data:TOR):Byte;
-begin
- if (index < 0) or (index >= Self.ORs.Cnt) then
-  begin
-   Result := 1;
-   Exit;
-  end;
-
- Self.ORs.Data[index] := data;
- Result := 0;
-end;
-
-function TRelief.AddOR(data:TOR):Byte;
-begin
- if (Self.ORs.Cnt >= _MAX_OR) then
-  begin
-   Result := 1;
-   Exit;
-  end;
-
- Self.ORs.Cnt := Self.ORs.Cnt + 1;
- Self.ORs.Data[Self.ORs.Cnt-1] := data;
-
- Self.ORMove.MovingOR     := Self.ORs.Cnt-1;
+ Self.ORs.Add(oblr);
+ Self.ORMove.MovingOR := Self.ORs.Count-1;
  Self.ORMove.MovingSymbol := 0; //0 = dopravni kancelar
-
- Result := 0;
 end;
 
-function TRelief.DeleteOR(index:Integer):Byte;
+procedure TRelief.DeleteOR(pos:TPoint);
 var i:Integer;
 begin
- if (index < 0) or (index >= Self.ORs.Cnt) then
-  begin
-   Result := 1;
-   Exit;
-  end;
-
- for i := index to Self.ORs.Cnt-2 do Self.ORs.Data[i] := Self.ORs.Data[i+1];
- Self.ORs.Cnt := Self.ORs.Cnt - 1;
-
- Result := 0;
-end;
-
-function TRelief.DeleteOR(pos:TPoint):Byte;
-var i:Integer;
-begin
- for i := 0 to Self.ORs.Cnt-1 do
-  begin
-   if ((Self.ORs.Data[i].Poss.DK.X = pos.X) and (Self.ORs.Data[i].Poss.DK.Y = pos.Y)) then
-    begin
-     Self.DeleteOR(i);
-     Result := 0;
-     Exit;
-    end;
-  end;
-
- Result := 1;
+ for i := Self.ORs.Count-1 downto 0 do
+   if ((Self.ORs[i].Poss.DK.X = pos.X) and (Self.ORs[i].Poss.DK.Y = pos.Y)) then
+     Self.ORs.Delete(i);
 end;
 
 //vykresli vsechny oblasti rizeni
 //zatim jen baracky
 //bereme ohled na posun
 procedure TRelief.PaintOR();
-var i:Integer;
+var oblr:TOR;
+    i:Integer;
 begin
- for i := 0 to Self.ORs.Cnt-1 do
+ for i := 0 to Self.ORs.Count-1 do
   begin
+   oblr := Self.ORs[i];
    if (Self.ORMove.MovingOR = i) then
     begin
      case (Self.ORMove.MovingSymbol) of
-      0:Self.ORs.Data[i].Poss.DK    := Self.LastPos;
-      1:Self.ORs.Data[i].Poss.Queue := Self.LastPos;
-      2:Self.ORs.Data[i].Poss.Time  := Self.LastPos;
+      0: oblr.Poss.DK    := Self.LastPos;
+      1: oblr.Poss.Queue := Self.LastPos;
+      2: oblr.Poss.Time  := Self.LastPos;
      end;
+     Self.ORs[i] := oblr;
     end;
 
-   Self.IL_DK.Draw(Self.DrawObject.Surface.Canvas,Self.ORs.Data[i].Poss.DK.X*_Symbol_Sirka,Self.ORs.Data[i].Poss.DK.Y*_Symbol_Vyska,(Self.ORs.Data[i].Poss.DKOr*10)+1);
+   Self.IL_DK.Draw(Self.DrawObject.Surface.Canvas,
+                   oblr.Poss.DK.X*_Symbol_Sirka, oblr.Poss.DK.Y*_Symbol_Vyska,
+                   (oblr.Poss.DKOr*10)+1);
 
-   Self.Graphics.TextOutputI(Self.ORs.Data[i].Poss.Queue, '00 VZ PV EZ 00', 1, clBlack);
-   Self.Graphics.TextOutputI(Self.ORs.Data[i].Poss.Time, 'MER CASU', 1, clBlack);
-   Self.Graphics.TextOutputC(Point(Self.ORs.Data[i].Poss.Time.X+8, Self.ORs.Data[i].Poss.Time.Y), '        ', clBlack, clWhite);
+   Self.Graphics.TextOutputI(oblr.Poss.Queue, '00 VZ PV EZ 00', 1, clBlack);
+   Self.Graphics.TextOutputI(oblr.Poss.Time, 'MER CASU', 1, clBlack);
+   Self.Graphics.TextOutputC(Point(oblr.Poss.Time.X+8, oblr.Poss.Time.Y), '        ', clBlack, clWhite);
   end;//for i
 end;
 
@@ -915,22 +850,22 @@ begin
 
    case (tmp_or.MovingSymbol) of
     0:begin
-       Result.Pos1.X := (Self.ORs.Data[tmp_or.MovingOR].Poss.DK.X)*_Symbol_Sirka;
-       Result.Pos1.Y := (Self.ORs.Data[tmp_or.MovingOR].Poss.DK.Y)*_Symbol_Vyska;
-       Result.Pos2.X := (Self.ORs.Data[tmp_or.MovingOR].Poss.DK.X+_OR_Size[tmp_or.MovingSymbol*2]-1)*_Symbol_Sirka;
-       Result.Pos2.Y := (Self.ORs.Data[tmp_or.MovingOR].Poss.DK.Y+_OR_Size[tmp_or.MovingSymbol*2+1]-1)*_Symbol_Vyska;
+       Result.Pos1.X := (Self.ORs[tmp_or.MovingOR].Poss.DK.X)*_Symbol_Sirka;
+       Result.Pos1.Y := (Self.ORs[tmp_or.MovingOR].Poss.DK.Y)*_Symbol_Vyska;
+       Result.Pos2.X := (Self.ORs[tmp_or.MovingOR].Poss.DK.X+_OR_Size[tmp_or.MovingSymbol*2]-1)*_Symbol_Sirka;
+       Result.Pos2.Y := (Self.ORs[tmp_or.MovingOR].Poss.DK.Y+_OR_Size[tmp_or.MovingSymbol*2+1]-1)*_Symbol_Vyska;
     end;
     1:begin
-       Result.Pos1.X := (Self.ORs.Data[tmp_or.MovingOR].Poss.Queue.X)*_Symbol_Sirka;
-       Result.Pos1.Y := (Self.ORs.Data[tmp_or.MovingOR].Poss.Queue.Y)*_Symbol_Vyska;
-       Result.Pos2.X := (Self.ORs.Data[tmp_or.MovingOR].Poss.Queue.X+_OR_Size[tmp_or.MovingSymbol*2]-1)*_Symbol_Sirka;
-       Result.Pos2.Y := (Self.ORs.Data[tmp_or.MovingOR].Poss.Queue.Y+_OR_Size[tmp_or.MovingSymbol*2+1]-1)*_Symbol_Vyska;
+       Result.Pos1.X := (Self.ORs[tmp_or.MovingOR].Poss.Queue.X)*_Symbol_Sirka;
+       Result.Pos1.Y := (Self.ORs[tmp_or.MovingOR].Poss.Queue.Y)*_Symbol_Vyska;
+       Result.Pos2.X := (Self.ORs[tmp_or.MovingOR].Poss.Queue.X+_OR_Size[tmp_or.MovingSymbol*2]-1)*_Symbol_Sirka;
+       Result.Pos2.Y := (Self.ORs[tmp_or.MovingOR].Poss.Queue.Y+_OR_Size[tmp_or.MovingSymbol*2+1]-1)*_Symbol_Vyska;
     end;
     2:begin
-       Result.Pos1.X := (Self.ORs.Data[tmp_or.MovingOR].Poss.Time.X)*_Symbol_Sirka;
-       Result.Pos1.Y := (Self.ORs.Data[tmp_or.MovingOR].Poss.Time.Y)*_Symbol_Vyska;
-       Result.Pos2.X := (Self.ORs.Data[tmp_or.MovingOR].Poss.Time.X+_OR_Size[tmp_or.MovingSymbol*2]-1)*_Symbol_Sirka;
-       Result.Pos2.Y := (Self.ORs.Data[tmp_or.MovingOR].Poss.Time.Y+_OR_Size[tmp_or.MovingSymbol*2+1]-1)*_Symbol_Vyska;
+       Result.Pos1.X := (Self.ORs[tmp_or.MovingOR].Poss.Time.X)*_Symbol_Sirka;
+       Result.Pos1.Y := (Self.ORs[tmp_or.MovingOR].Poss.Time.Y)*_Symbol_Vyska;
+       Result.Pos2.X := (Self.ORs[tmp_or.MovingOR].Poss.Time.X+_OR_Size[tmp_or.MovingSymbol*2]-1)*_Symbol_Sirka;
+       Result.Pos2.Y := (Self.ORs[tmp_or.MovingOR].Poss.Time.Y+_OR_Size[tmp_or.MovingSymbol*2+1]-1)*_Symbol_Vyska;
     end;
    end;//case
   end else begin
@@ -981,7 +916,7 @@ begin
       end else begin
        tmp_or := Self.GetORGraf(Position);
        if (tmp_or.MovingOR > -1) then
-         Self.MessageEvent(Self, 'OØ : '+ORs.Data[tmp_or.MovingOR].Name+' (id = '+ORs.Data[tmp_or.MovingOR].id+')');
+         Self.MessageEvent(Self, 'OØ : '+ORs[tmp_or.MovingOR].Name+' (id = '+ORs[tmp_or.MovingOR].id+')');
 
        //zacatek pohybu
        if (Self.FMove) then
@@ -1007,24 +942,24 @@ begin
  Result.MovingOR     := -1;
  Result.MovingSymbol := 0;
 
- for i := 0 to Self.ORs.Cnt-1 do
+ for i := 0 to Self.ORs.Count-1 do
   begin
-   if ((pos.X >= Self.ORs.Data[i].Poss.DK.X) and (pos.Y >= Self.ORs.Data[i].Poss.DK.Y)
-      and (Self.ORs.Data[i].Poss.DK.X+_OR_Size[0] > pos.X) and (Self.ORs.Data[i].Poss.DK.Y+_OR_Size[1] > pos.Y)) then
+   if ((pos.X >= Self.ORs[i].Poss.DK.X) and (pos.Y >= Self.ORs[i].Poss.DK.Y)
+      and (Self.ORs[i].Poss.DK.X+_OR_Size[0] > pos.X) and (Self.ORs[i].Poss.DK.Y+_OR_Size[1] > pos.Y)) then
     begin
      Result.MovingOR     := i;
      Result.MovingSymbol := 0;
      Exit;
     end;
-   if ((pos.X >= Self.ORs.Data[i].Poss.Queue.X) and (pos.Y >= Self.ORs.Data[i].Poss.Queue.Y)
-      and (Self.ORs.Data[i].Poss.Queue.X+_OR_Size[2] > pos.X) and (Self.ORs.Data[i].Poss.Queue.Y+_OR_Size[3] > pos.Y)) then
+   if ((pos.X >= Self.ORs[i].Poss.Queue.X) and (pos.Y >= Self.ORs[i].Poss.Queue.Y)
+      and (Self.ORs[i].Poss.Queue.X+_OR_Size[2] > pos.X) and (Self.ORs[i].Poss.Queue.Y+_OR_Size[3] > pos.Y)) then
     begin
      Result.MovingOR     := i;
      Result.MovingSymbol := 1;
      Exit;
     end;
-   if ((pos.X >= Self.ORs.Data[i].Poss.Time.X) and (pos.Y >= Self.ORs.Data[i].Poss.Time.Y)
-      and (Self.ORs.Data[i].Poss.Time.X+_OR_Size[4] > pos.X) and (Self.ORs.Data[i].Poss.Time.Y+_OR_Size[5] > pos.Y)) then
+   if ((pos.X >= Self.ORs[i].Poss.Time.X) and (pos.Y >= Self.ORs[i].Poss.Time.Y)
+      and (Self.ORs[i].Poss.Time.X+_OR_Size[4] > pos.X) and (Self.ORs[i].Poss.Time.Y+_OR_Size[5] > pos.Y)) then
     begin
      Result.MovingOR     := i;
      Result.MovingSymbol := 2;
@@ -1057,37 +992,38 @@ end;
 
 procedure TRelief.DKDeleteClick(Sender:TObject);
 begin
- if (Self.ORs.Cnt <= 1) then
+ if (Self.ORs.Count <= 1) then
   begin
    Application.MessageBox('Poslední OØ nelze smazat!','Nelze pokraèovat',MB_OK OR MB_ICONSTOP);
    Exit;
   end;
 
  if (Application.MessageBox('Opravdu smazat?','Otázka',MB_YESNO OR MB_ICONQUESTION) = mrYes) then
-  begin
-   Self.DeleteOR(Self.ORClick.MovingOR);
-  end;
+   Self.ORs.Delete(Self.ORClick.MovingOR);
 end;
 
 //na kazdem radku je ulozena jedna oblast rizeni ve formatu:
 //  nazev;nazev_zkratka;id;lichy_smer(0,1);orientace_DK(0,1);ModCasStart(0,1);ModCasStop(0,1);ModCasSet(0,1);dkposx;dkposy;qposx;qposy;timeposx;timeposy;osv_mtb|osv_port|osv_name;
-function TRelief.ORSave:string;
-var i,j:Integer;
+function TRelief.ORSave():string;
+var j:Integer;
+    oblr:TOR;
 begin
- for i := 0 to Self.ORs.Cnt-1 do
+ for oblr in Self.ORs do
   begin
-   Result := Result + Self.ORs.Data[i].Name+';'+Self.ORs.Data[i].ShortName+';'+Self.ORs.Data[i].id+';'+
-             IntToStr(Self.ORs.Data[i].Lichy)+';'+IntToStr(Self.ORs.Data[i].Poss.DKOr)+';'+
-             BoolToStr(Self.ORs.Data[i].Rights.ModCasStart)+';'+BoolToStr(Self.ORs.Data[i].Rights.ModCasStop)+';'+BoolToStr(Self.ORs.Data[i].Rights.ModCasSet)+';'+
-             IntToStr(Self.ORs.Data[i].Poss.DK.X)+';'+IntToStr(Self.ORs.Data[i].Poss.DK.Y)+';'+
-             IntToStr(Self.ORs.Data[i].Poss.Queue.X)+';'+IntToStr(Self.ORs.Data[i].Poss.Queue.Y)+';'+
-             IntToStr(Self.ORs.Data[i].Poss.Time.X)+';'+IntToStr(Self.ORs.Data[i].Poss.Time.Y)+';';
+   Result := Result + oblr.Name+';'+oblr.ShortName+';'+oblr.id+';'+
+             IntToStr(oblr.Lichy)+';'+IntToStr(oblr.Poss.DKOr)+';'+
+             BoolToStr(oblr.Rights.ModCasStart)+';'+BoolToStr(oblr.Rights.ModCasStop)+';'+
+             BoolToStr(oblr.Rights.ModCasSet)+';'+
+             IntToStr(oblr.Poss.DK.X)+';'+IntToStr(oblr.Poss.DK.Y)+';'+
+             IntToStr(oblr.Poss.Queue.X)+';'+IntToStr(oblr.Poss.Queue.Y)+';'+
+             IntToStr(oblr.Poss.Time.X)+';'+IntToStr(oblr.Poss.Time.Y)+';';
 
-   for j := 0 to Self.ORs.Data[i].Osvetleni.Cnt-1 do
-    Result := Result + IntToStr(Self.ORs.Data[i].Osvetleni.Data[j].board)+'#'+IntToStr(Self.ORs.Data[i].Osvetleni.Data[j].port)+'#'+Self.ORs.Data[i].Osvetleni.Data[j].name+'|';
+   for j := 0 to oblr.Osvetleni.Cnt-1 do
+    Result := Result + IntToStr(oblr.Osvetleni.Data[j].board)+'#'+
+              IntToStr(oblr.Osvetleni.Data[j].port)+'#'+oblr.Osvetleni.Data[j].name+'|';
 
    Result := Result + #13;
-  end;//for i
+  end;
 
  Result := Result + #13;
 end;
@@ -1096,73 +1032,80 @@ end;
 //  nazev;nazev_zkratka;id;lichy_smer(0,1);orientace_DK(0,1);ModCasStart(0,1);ModCasStop(0,1);ModCasSet(0,1);dkposx;dkposy;qposx;qposy;timeposx;timeposy;osv_mtb|osv_port|osv_name;
 procedure TRelief.ORLoad(data:string);
 var lines,data_main,data_osv,data_osv2:TStrings;
-    i,j:Integer;
+    j:Integer;
+    oblr:TOR;
+    line:string;
 begin
- Self.ORs.Cnt := 0;
+ Self.ORs.Clear();
 
  lines := TStringList.Create();
  data_main := TStringList.Create();
  data_osv  := TStringList.Create();
  data_osv2 := TStringList.Create();
 
- if (RightStr(data,2) <> #13#13) then
-   raise EORLoad.Create('OR data nekonèí dvìma symboly nového øádku!');
+ try
+   if (RightStr(data,2) <> #13#13) then
+     raise EORLoad.Create('OR data nekonèí dvìma symboly nového øádku!');
 
- ExtractStringsEx([#13], [], LeftStr(data,Length(data)-2), lines);
+   ExtractStringsEx([#13], [], LeftStr(data,Length(data)-2), lines);
 
- for i := 0 to Lines.Count-1 do
-  begin
-   data_main.Clear();
-   ExtractStringsEx([';'], [], lines[i], data_main);
-
-   if (data_main.Count < 14) then
-     raise EORLoad.Create('Málo položek definující OØ!');
-
-   Self.ORs.Cnt := Self.ORs.Cnt + 1;
-   Self.ORs.Data[Self.ORs.Cnt-1].Name       := data_main[0];
-   Self.ORs.Data[Self.ORs.Cnt-1].ShortName  := data_main[1];
-   Self.ORs.Data[Self.ORs.Cnt-1].id         := data_main[2];
-   Self.ORs.Data[Self.ORs.Cnt-1].Lichy      := StrToInt(data_main[3]);
-   Self.ORs.Data[Self.ORs.Cnt-1].Poss.DKOr  := StrToInt(data_main[4]);
-
-   Self.ORs.Data[Self.ORs.Cnt-1].Rights.ModCasStart := StrToBool(data_main[5]);
-   Self.ORs.Data[Self.ORs.Cnt-1].Rights.ModCasStop  := StrToBool(data_main[6]);
-   Self.ORs.Data[Self.ORs.Cnt-1].Rights.ModCasSet   := StrToBool(data_main[7]);
-
-   Self.ORs.Data[Self.ORs.Cnt-1].Poss.DK.X := StrToInt(data_main[8]);
-   Self.ORs.Data[Self.ORs.Cnt-1].Poss.DK.Y := StrToInt(data_main[9]);
-
-   Self.ORs.Data[Self.ORs.Cnt-1].Poss.Queue.X := StrToInt(data_main[10]);
-   Self.ORs.Data[Self.ORs.Cnt-1].Poss.Queue.Y := StrToInt(data_main[11]);
-
-   Self.ORs.Data[Self.ORs.Cnt-1].Poss.Time.X := StrToInt(data_main[12]);
-   Self.ORs.Data[Self.ORs.Cnt-1].Poss.Time.Y := StrToInt(data_main[13]);
-
-   Self.ORs.Data[Self.ORs.Cnt-1].Osvetleni.Cnt := 0;
-   data_osv.Clear();
-   if (data_main.Count < 15) then continue;
-   
-   ExtractStringsEx(['|'], [], data_main[14], data_osv);
-   for j := 0 to data_osv.Count-1 do
+   for line in lines do
     begin
-     data_osv2.Clear();
-     ExtractStringsEx(['#'], [], data_osv[j], data_osv2);
+     data_main.Clear();
+     ExtractStringsEx([';'], [], line, data_main);
 
-     if (data_osv2.Count < 2) then
-       raise EORLoad.Create('Málo položek definující osvìtlení!');
+     if (data_main.Count < 14) then
+       raise EORLoad.Create('Málo položek definující OØ!');
 
-     Self.ORs.Data[Self.ORs.Cnt-1].Osvetleni.Cnt := Self.ORs.Data[Self.ORs.Cnt-1].Osvetleni.Cnt + 1;
-     Self.ORs.Data[Self.ORs.Cnt-1].Osvetleni.Data[Self.ORs.Data[Self.ORs.Cnt-1].Osvetleni.Cnt-1].board := StrToInt(data_osv2[0]);
-     Self.ORs.Data[Self.ORs.Cnt-1].Osvetleni.Data[Self.ORs.Data[Self.ORs.Cnt-1].Osvetleni.Cnt-1].port  := StrToInt(data_osv2[1]);
-     if (data_osv2.Count > 2) then Self.ORs.Data[Self.ORs.Cnt-1].Osvetleni.Data[Self.ORs.Data[Self.ORs.Cnt-1].Osvetleni.Cnt-1].name := data_osv2[2] else
-         Self.ORs.Data[Self.ORs.Cnt-1].Osvetleni.Data[Self.ORs.Data[Self.ORs.Cnt-1].Osvetleni.Cnt-1].name := '';
-    end;//for j
-  end;//for i
+     oblr.Name       := data_main[0];
+     oblr.ShortName  := data_main[1];
+     oblr.id         := data_main[2];
+     oblr.Lichy      := StrToInt(data_main[3]);
+     oblr.Poss.DKOr  := StrToInt(data_main[4]);
 
- FreeAndNil(lines);
- FreeAndNil(data_main);
- FreeAndNil(data_osv);
- FreeAndNil(data_osv2);
+     oblr.Rights.ModCasStart := StrToBool(data_main[5]);
+     oblr.Rights.ModCasStop  := StrToBool(data_main[6]);
+     oblr.Rights.ModCasSet   := StrToBool(data_main[7]);
+
+     oblr.Poss.DK.X := StrToInt(data_main[8]);
+     oblr.Poss.DK.Y := StrToInt(data_main[9]);
+
+     oblr.Poss.Queue.X := StrToInt(data_main[10]);
+     oblr.Poss.Queue.Y := StrToInt(data_main[11]);
+
+     oblr.Poss.Time.X := StrToInt(data_main[12]);
+     oblr.Poss.Time.Y := StrToInt(data_main[13]);
+
+     oblr.Osvetleni.Cnt := 0;
+     data_osv.Clear();
+     if (data_main.Count >= 15) then
+      begin
+       ExtractStringsEx(['|'], [], data_main[14], data_osv);
+       oblr.Osvetleni.Cnt := 0;
+       for j := 0 to data_osv.Count-1 do
+        begin
+         data_osv2.Clear();
+         ExtractStringsEx(['#'], [], data_osv[j], data_osv2);
+
+         if (data_osv2.Count < 2) then
+           raise EORLoad.Create('Málo položek definující osvìtlení!');
+
+         oblr.Osvetleni.Cnt := oblr.Osvetleni.Cnt + 1;
+         oblr.Osvetleni.Data[oblr.Osvetleni.Cnt-1].board := StrToInt(data_osv2[0]);
+         oblr.Osvetleni.Data[oblr.Osvetleni.Cnt-1].port  := StrToInt(data_osv2[1]);
+         if (data_osv2.Count > 2) then oblr.Osvetleni.Data[oblr.Osvetleni.Cnt-1].name := data_osv2[2] else
+             oblr.Osvetleni.Data[oblr.Osvetleni.Cnt-1].name := '';
+        end;
+      end;
+
+     Self.ORs.Add(oblr);
+    end;
+ finally
+   FreeAndNil(lines);
+   FreeAndNil(data_main);
+   FreeAndNil(data_osv);
+   FreeAndNil(data_osv2);
+ end;
 end;
 
 //konec operaci s oblastmi rizeni
@@ -1200,31 +1143,21 @@ end;
 // vola se z bitmapoveho modu
 // vraci true, pokud je na dane pozici DK, zasobnik, ci mereni casu
 function TRelief.IsOREvent(Pos:TPoint):boolean;
-var i:Integer;
+var oblr: TOR;
 begin
- for i := 0 to Self.ORs.Cnt-1 do
+ for oblr in Self.ORs do
   begin
-   if ((Pos.X >= Self.ORs.Data[i].Poss.DK.X) and (Pos.X <= Self.ORs.Data[i].Poss.DK.X+4)
-    and (Pos.Y >= Self.ORs.Data[i].Poss.DK.Y) and (Pos.Y <= Self.ORs.Data[i].Poss.DK.Y+2)) then
-    begin
-     Result := true;
-     Exit;
-    end;
+   if ((Pos.X >= oblr.Poss.DK.X) and (Pos.X <= oblr.Poss.DK.X+4)
+    and (Pos.Y >= oblr.Poss.DK.Y) and (Pos.Y <= oblr.Poss.DK.Y+2)) then
+     Exit(true);
 
-   if ((Pos.X >= Self.ORs.Data[i].Poss.Queue.X) and (Pos.X <= Self.ORs.Data[i].Poss.Queue.X+13)
-    and (Pos.Y = Self.ORs.Data[i].Poss.Queue.Y)) then
-    begin
-     Result := true;
-     Exit;
-    end;
+   if ((Pos.X >= oblr.Poss.Queue.X) and (Pos.X <= oblr.Poss.Queue.X+13)
+    and (Pos.Y = oblr.Poss.Queue.Y)) then
+     Exit(true);
 
-   if ((Pos.X >= Self.ORs.Data[i].Poss.Time.X) and (Pos.X <= Self.ORs.Data[i].Poss.Time.X+15)
-    and (Pos.Y = Self.ORs.Data[i].Poss.Time.Y)) then
-    begin
-     Result := true;
-     Exit;
-    end;
-
+   if ((Pos.X >= oblr.Poss.Time.X) and (Pos.X <= oblr.Poss.Time.X+15)
+    and (Pos.Y = oblr.Poss.Time.Y)) then
+     Exit(true);
   end;
 
  Result := false;

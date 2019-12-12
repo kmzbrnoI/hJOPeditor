@@ -104,12 +104,16 @@ begin
 
  F_Hlavni.AssignReliefEvents();
 
- Return := F_Hlavni.Relief.New(Point(StrToIntDef(Self.E_Width.Text,10),StrToIntDef(Self.E_Height.Text,10)),firstOR);
- if (Return <> 0) then
-  begin
-   Application.MessageBox(PChar('Vyskytla se chyba pri inicializaci panelu - chyba '+IntToStr(Return)),'Chyba',MB_OK OR MB_ICONWARNING);
-   Exit;
-  end;
+ try
+   F_Hlavni.Relief.New(Point(StrToIntDef(Self.E_Width.Text,10), StrToIntDef(Self.E_Height.Text,10)), firstOR);
+ except
+   on E:Exception do
+    begin
+     Application.MessageBox(PChar('Vyskytla se chyba pri inicializaci panelu:#13#10'+e.Message),
+                            'Chyba', MB_OK OR MB_ICONWARNING);
+     Exit();
+    end;
+ end;
 
  F_Hlavni.PM_BitmapClick(F_Hlavni.PM_Bitmap);
  ReliefOptions.UseData(F_Hlavni.Relief);

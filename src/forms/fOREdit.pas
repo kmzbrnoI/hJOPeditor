@@ -91,17 +91,11 @@ begin
 
  if (Self.openindex = -1) then
   begin
-    //vytvorit nove OR
-    return := F_Hlavni.Relief.AddOR(Self.orData);
-    if (return <> 0) then
-     begin
-      Application.MessageBox(PChar('Chyba pøi pøidávání OØ - chyba '+IntToStr(return)),'Chyba',MB_OK OR MB_ICONERROR);
-      Exit;
-     end;
-
+   //vytvorit nove OR
+   F_Hlavni.Relief.AddOR(Self.orData);
   end else begin
    //aktualizovat exsitujici OR
-   F_Hlavni.Relief.SetOR(openindex,Self.orData);
+   F_Hlavni.Relief.ORs[openindex] := Self.orData;
   end;
 
  Self.Close();
@@ -153,7 +147,7 @@ end;
 procedure TF_OREdit.OpenForm(orindex:Integer);
 begin
  Self.openindex := orindex;
- Self.OpenForm(F_Hlavni.Relief.GetOR(orindex));
+ Self.OpenForm(F_Hlavni.Relief.ORs[orindex]);
 end;
 
 procedure TF_OREdit.OpenForm(oblRizeni:TOR);
