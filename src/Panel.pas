@@ -48,14 +48,10 @@ type
 
     _Separator_BitmapIndex = 352;
     _Symbols_DefColor      = clBlack;
-    //barvy symbolu
-//    _Symbol_Navaznost: array [0..23] of ShortInt = (-1,0,1,0,0,-1,0,1,0,1,1,0,-1,0,0,-1,-1,0,0,1,0,-1,1,0);
-     //zde jsou ulozeny navaznosti na objekty useku: navaznost 1:XY;navaznost 2:XY atd.
-     //kazdy objekt zabira 4 polozky
 
-     //pripony bitmapoveho a vektoroveho formatu souboru
-     _Suf_bmp = '.bpnl';
-     _Suf_obj = '.opnl';
+    //pripony bitmapoveho a vektoroveho formatu souboru
+    _Suf_bmp = '.bpnl';
+    _Suf_obj = '.opnl';
 
   private
    DrawObject:TDXDraw;
