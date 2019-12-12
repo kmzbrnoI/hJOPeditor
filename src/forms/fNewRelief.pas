@@ -66,22 +66,27 @@ uses fMain, ReliefObjects, ReliefBitmap;
 {$R *.dfm}
 
 procedure TF_NewRelief.B_CreateClick(Sender: TObject);
-var Return:ShortInt;
 begin
  if ((StrToIntDef(Self.E_Height.Text,0) > 255) or (StrToIntDef(Self.E_Width.Text,0) > 255)) then
   begin
-   Application.MessageBox('Maximální rozmìry panelu jsou 255x255','Nelze pokraèovat',MB_OK OR MB_ICONERROR);
-   Exit;
+   Application.MessageBox('Maximální rozmìry panelu jsou 255x255', 'Nelze pokraèovat', MB_OK OR MB_ICONERROR);
+   Exit();
+  end;
+ if ((Self.E_Name.Text = '') or (Self.E_NameShort.Text = '') or (Self.E_NameUniq.Text = '')) then
+  begin
+   Application.MessageBox('Název, zkratka názvu a unikátní název (ID) oblasti øízení musí být vyplnìno!',
+                          'Nelze pokraèovat', MB_OK OR MB_ICONERROR);
+   Exit();
   end;
  if (Self.CB_Lichy.ItemIndex = -1) then
   begin
-   Application.MessageBox('Vyberte lichý smìr','Nelze pokraèovat',MB_OK OR MB_ICONERROR);
-   Exit;
+   Application.MessageBox('Vyberte lichý smìr', 'Nelze pokraèovat', MB_OK OR MB_ICONERROR);
+   Exit();
   end;
 
  if ((not Self.RB_OR1.Checked) and (not Self.RB_OR2.Checked)) then
   begin
-   Application.MessageBox('Vyberte orientaci DK!','Nelze pokraèovat',MB_OK OR MB_ICONERROR);
+   Application.MessageBox('Vyberte orientaci DK!', 'Nelze pokraèovat', MB_OK OR MB_ICONERROR);
    Exit;
   end;
 

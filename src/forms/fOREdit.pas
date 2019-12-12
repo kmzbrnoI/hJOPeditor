@@ -63,8 +63,13 @@ uses fMain;
 
 //ulozi vsechna data
 procedure TF_OREdit.B_ApplyClick(Sender: TObject);
-var return:Integer;
 begin
+ if ((Self.E_Name.Text = '') or (Self.E_NameShort.Text = '') or (Self.E_NameUniq.Text = '')) then
+  begin
+   Application.MessageBox('Název, zkratka názvu a unikátní název (ID) oblasti øízení musí být vyplnìno!',
+                          'Nelze pokraèovat', MB_OK OR MB_ICONERROR);
+   Exit();
+  end;
  if (Self.CB_Lichy.ItemIndex = -1) then
   begin
    Application.MessageBox('Vyberte lichý smìr','Nelze pokraèovat',MB_OK OR MB_ICONERROR);

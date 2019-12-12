@@ -315,9 +315,9 @@ object F_OREdit: TF_OREdit
   object Label5: TLabel
     Left = 16
     Top = 70
-    Width = 74
+    Width = 96
     Height = 13
-    Caption = 'Unik'#225'tn'#237' n'#225'zev:'
+    Caption = 'Unik'#225'tn'#237' n'#225'zev (ID):'
   end
   object Label10: TLabel
     Left = 16
