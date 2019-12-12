@@ -74,7 +74,7 @@ type
     function PaintCursor(CursorPos:TPoint):TCursorDraw;
     procedure PaintMove(CursorPos:TPoint);
 
-    function SetRozmery(aWidth,aHeight:Byte):Byte;
+    procedure SetRozmery(aWidth,aHeight:Byte);
 
     procedure Escape(Group:Boolean);
     procedure ResetPanel;
@@ -440,20 +440,15 @@ begin
  end;
 end;
 
-function TPanelBitmap.SetRozmery(aWidth,aHeight:Byte):Byte;
+procedure TPanelBitmap.SetRozmery(aWidth,aHeight:Byte);
 begin
  if (Self.IsOperation) then
-  begin
-   Result := 1;
-   Exit;
-  end;
+   raise Exception.Create('Právì probíhá jiná operace!');
 
  Self.FPanelWidth  := aWidth;
  Self.FPanelHeight := aHeight;
 
  Self.Symbols.SetRozmery(aWidth,aHeight);
-
- Result := 0;
 end;
 
 constructor TPanelBitmap.Create(SymbolIL,TextIL:TImageList;DrawCanvas:TCanvas;Width,Height:Integer;Mode:TMode;Parent:TForm; Graphics:TPanelGraphics);
