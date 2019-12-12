@@ -117,7 +117,7 @@ implementation
 
 uses ReliefBitmap, BitmapToObj, VetveComputer, ObjBlokUsek, ObjBlokVyhybka,
      ObjBlokPomocny, ObjBlokNavestidlo, ObjBlokText, ObjBlokPrejezd, ObjBlokUvazka,
-     ObjBlokUvazkaSpr, ObjBlokZamek, ObjBlokVykol, ObjBlokRozp;
+     ObjBlokUvazkaSpr, ObjBlokZamek, ObjBlokVykol, ObjBlokRozp, ownStrUtils;
 
 //vytvoreni objektu
 constructor TPanelObjects.Create(SymbolIL,TextIL:TImageList;DrawCanvas:TCanvas;Width,Height:Integer;Parent:TDXDraw; Graphics:TPanelGraphics);
@@ -290,7 +290,7 @@ begin
 
    // oblasti rizeni
    str_list := TStringList.Create();
-   ExtractStrings([#13],[],PChar(LeftStr(ORs,Length(ORs)-1)),str_list);
+   ExtractStringsEx([#13], [], LeftStr(ORs,Length(ORs)-1), str_list);
    for i := 0 to str_list.Count-1 do inifile.WriteString('OR',IntToStr(i),str_list[i]);
    str_list.Free;
 

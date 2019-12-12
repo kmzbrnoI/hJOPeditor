@@ -51,6 +51,8 @@ function GetPos(data:TPoint):string; overload;
 
 implementation
 
+uses ownStrUtils;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 function GetVersion(const FileName: string): string;//cteni verze z nastaveni
@@ -83,18 +85,15 @@ end;
 function GetPos(data:string):TPoint;
 var list:TStrings;
 begin
- list := TStringList.Create;
- ExtractStrings([';'], [], PChar(data), list);
-
- if (list.Count < 2) then
-  begin
-   Result := Point(-1,-1);
-   Exit;
-  end;
-
- Result := Point(StrToIntDef(list[0],-1), StrToIntDef(list[1],-1));
-
- list.Free;
+ list := TStringList.Create();
+ try
+   ExtractStringsEx([';'], [], data, list);
+   if (list.Count < 2) then
+     Exit(Point(-1,-1));
+   Result := Point(StrToIntDef(list[0],-1), StrToIntDef(list[1],-1));
+ finally
+   list.Free();
+ end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

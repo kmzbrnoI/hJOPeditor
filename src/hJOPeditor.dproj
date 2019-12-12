@@ -99,6 +99,7 @@
 			<DCCReference Include="object\blok\ObjBlokZamek.pas"/>
 			<DCCReference Include="object\blok\ObjBlokRozp.pas"/>
 			<DCCReference Include="object\blok\ObjBlokVykol.pas"/>
+			<DCCReference Include="helpers\ownStrUtils.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>

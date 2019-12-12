@@ -38,7 +38,8 @@ uses
   ObjBlokUvazka in 'object\blok\ObjBlokUvazka.pas',
   ObjBlokZamek in 'object\blok\ObjBlokZamek.pas',
   ObjBlokRozp in 'object\blok\ObjBlokRozp.pas',
-  ObjBlokVykol in 'object\blok\ObjBlokVykol.pas';
+  ObjBlokVykol in 'object\blok\ObjBlokVykol.pas',
+  ownStrUtils in 'helpers\ownStrUtils.pas';
 
 {$R *.res}
 

@@ -220,7 +220,7 @@ type
 implementation
 {$R Resource.res}
 
-uses fOREdit, fMain;
+uses fOREdit, fMain, ownStrUtils;
 
 constructor TRelief.Create(DDRaw:TDXDraw;aParentForm:TForm);
 begin
@@ -1108,12 +1108,12 @@ begin
  if (RightStr(data,2) <> #13#13) then
    raise EORLoad.Create('OR data nekonèí dvìma symboly nového øádku!');
 
- ExtractStrings([#13],[],PChar(LeftStr(data,Length(data)-2)),lines);
+ ExtractStringsEx([#13], [], LeftStr(data,Length(data)-2), lines);
 
  for i := 0 to Lines.Count-1 do
   begin
    data_main.Clear();
-   ExtractStrings([';'],[],PChar(lines[i]),data_main);
+   ExtractStringsEx([';'], [], lines[i], data_main);
 
    if (data_main.Count < 14) then
      raise EORLoad.Create('Málo položek definující OØ!');
@@ -1142,11 +1142,11 @@ begin
    data_osv.Clear();
    if (data_main.Count < 15) then continue;
    
-   ExtractStrings(['|'],[],PChar(data_main[14]),data_osv);
+   ExtractStringsEx(['|'], [], data_main[14], data_osv);
    for j := 0 to data_osv.Count-1 do
     begin
      data_osv2.Clear();
-     ExtractStrings(['#'],[],PChar(data_osv[j]),data_osv2);
+     ExtractStringsEx(['#'], [], data_osv[j], data_osv2);
 
      if (data_osv2.Count < 2) then
        raise EORLoad.Create('Málo položek definující osvìtlení!');

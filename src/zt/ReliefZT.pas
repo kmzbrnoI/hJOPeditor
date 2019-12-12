@@ -7,7 +7,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
-  StrUtils, symbolHelper, Menus, Forms, DXDraws, Global;
+  StrUtils, symbolHelper, Menus, Forms, DXDraws, Global, ownStrUtils;
 
 const
  _MAX_USEK          = 256;       //maximalni pocet useku
@@ -502,8 +502,9 @@ begin
 
  //Oblasti rizeni
  str_list := TStringList.Create();
- ExtractStrings([#13],[],PChar(RightStr(LeftStr(ORs,Length(ORs)-1),Length(ORs)-3)),str_list);
- for i := 0 to str_list.Count-1 do inifile.WriteString('OR',IntToStr(i),str_list[i]);
+ ExtractStringsEx([#13], [], RightStr(LeftStr(ORs,Length(ORs)-1),Length(ORs)-3), str_list);
+ for i := 0 to str_list.Count-1 do
+   inifile.WriteString('OR',IntToStr(i),str_list[i]);
  str_list.Free;
 
  //useky
@@ -631,7 +632,7 @@ begin
   begin
    //nacitani jednotlivych sekci
    data[1].Clear;
-   ExtractStrings(['|'],[], PChar(data[0][0]), data[1]);
+   ExtractStringsEx(['|'], [], data[0][0], data[1]);
 
    if (data[1].Count < 12) then
     begin
@@ -651,19 +652,19 @@ begin
 
    //useky:
    data[2].Clear;
-   ExtractStrings([';'], [], PChar(data[1][9]), data[2]);
+   ExtractStringsEx([';'], [], data[1][9], data[2]);
    SetLength(Self.JCs.data[i].Useky, data[2].Count);
    for j := 0 to data[2].Count-1 do
      Self.JCs.data[i].Useky[j] := StrToInt(data[2][j]);
 
    //vyhybky
    data[2].Clear;
-   ExtractStrings([';'], [], PChar(data[1][10]), data[2]);
+   ExtractStringsEx([';'], [], data[1][10], data[2]);
    SetLength(Self.JCs.data[i].vyhybky, data[2].Count);
    for j := 0 to data[2].Count-1 do
     begin
      data[3].Clear;
-     ExtractStrings([','], [], PChar(data[2][j]), data[3]);
+     ExtractStringsEx([','], [], data[2][j], data[3]);
 
      if (data[3].Count < 2) then
       begin
@@ -677,12 +678,12 @@ begin
 
    //odvraty
    data[2].Clear;
-   ExtractStrings([';'], [], PChar(data[1][11]), data[2]);
+   ExtractStringsEx([';'], [], data[1][11], data[2]);
    SetLength(Self.JCs.data[i].odvraty, data[2].Count);
    for j := 0 to data[2].Count-1 do
     begin
      data[3].Clear;
-     ExtractStrings([','], [], PChar(data[2][j]), data[3]);
+     ExtractStringsEx([','], [], data[2][j], data[3]);
 
      if (data[3].Count < 2) then
       begin
