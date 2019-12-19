@@ -1,4 +1,4 @@
-unit fNewRelief;
+ï»¿unit fNewRelief;
 
 interface
 
@@ -69,24 +69,24 @@ procedure TF_NewRelief.B_CreateClick(Sender: TObject);
 begin
  if ((Self.SE_Height.Value > 255) or (Self.SE_Width.Value > 255)) then
   begin
-   Application.MessageBox('Maximální rozmìry panelu jsou 255x255', 'Nelze pokraèovat', MB_OK OR MB_ICONERROR);
+   Application.MessageBox('MaximÃ¡lnÃ­ rozmÄ›ry panelu jsou 255x255', 'Nelze pokraÄovat', MB_OK OR MB_ICONERROR);
    Exit();
   end;
  if ((Self.E_Name.Text = '') or (Self.E_NameShort.Text = '') or (Self.E_NameUniq.Text = '')) then
   begin
-   Application.MessageBox('Název, zkratka názvu a unikátní název (ID) oblasti øízení musí bıt vyplnìno!',
-                          'Nelze pokraèovat', MB_OK OR MB_ICONERROR);
+   Application.MessageBox('NÃ¡zev, zkratka nÃ¡zvu a unikÃ¡tnÃ­ nÃ¡zev (ID) oblasti Å™Ã­zenÃ­ musÃ­ bÃ½t vyplnÄ›no!',
+                          'Nelze pokraÄovat', MB_OK OR MB_ICONERROR);
    Exit();
   end;
  if (Self.CB_Lichy.ItemIndex = -1) then
   begin
-   Application.MessageBox('Vyberte lichı smìr', 'Nelze pokraèovat', MB_OK OR MB_ICONERROR);
+   Application.MessageBox('Vyberte lichÃ½ smÄ›r', 'Nelze pokraÄovat', MB_OK OR MB_ICONERROR);
    Exit();
   end;
 
  if ((not Self.RB_OR1.Checked) and (not Self.RB_OR2.Checked)) then
   begin
-   Application.MessageBox('Vyberte orientaci DK!', 'Nelze pokraèovat', MB_OK OR MB_ICONERROR);
+   Application.MessageBox('Vyberte orientaci DK!', 'Nelze pokraÄovat', MB_OK OR MB_ICONERROR);
    Exit;
   end;
 
@@ -122,7 +122,7 @@ begin
 
  F_Hlavni.PM_BitmapClick(F_Hlavni.PM_Bitmap);
  ReliefOptions.UseData(F_Hlavni.Relief);
- F_Hlavni.DesignOpen('Novı projekt');
+ F_Hlavni.DesignOpen('NovÃ½ projekt');
 end;
 
 procedure TF_NewRelief.B_StornoClick(Sender: TObject);

@@ -1,4 +1,4 @@
-unit ReliefText;
+Ôªøunit ReliefText;
 
 interface
 
@@ -150,13 +150,13 @@ procedure TText.AddToStructure(aPos:TPoint; aText:string; aColor:ShortInt; aBlok
 var p:TPopisek;
 begin
  if ((aPos.X < 0) or (aPos.Y < 0) or (aPos.X > (_MAX_WIDTH-1)) or (aPos.Y > (_MAX_HEIGHT-1))) then
-   raise EInvalidPosition.Create('Neplatn· pozice!');
+   raise EInvalidPosition.Create('Neplatn√° pozice!');
  if (Self.GetPopisek(aPos) <> -1) then
-   raise ENonemptyField.Create('Na pozici je jiû symbol!');
+   raise ENonemptyField.Create('Na pozici je ji≈æ symbol!');
  if (Self.Count >= _MAX_POPISKY) then
-   raise EMaxReached.Create('Dosaûeno maxim·lnÌho poËtu text˘!');
+   raise EMaxReached.Create('Dosa≈æeno maxim√°ln√≠ho poƒçtu text≈Ø!');
  if (Length(aText) > _MAX_TEXT_LENGTH) then
-   raise ETooLongText.Create('Text je p¯Ìliö dlouh˝!');
+   raise ETooLongText.Create('Text je p≈ô√≠li≈° dlouh√Ω!');
 
  p.Position := aPos;
  p.Text := aText;
@@ -171,11 +171,11 @@ procedure TText.DeleteFromStructure(aPos:TPoint);
 var PIndex:Integer;
 begin
  if ((aPos.X < 0) or (aPos.Y < 0) or (aPos.X > (_MAX_WIDTH-1)) or (aPos.Y > (_MAX_HEIGHT-1))) then
-   raise EInvalidPosition.Create('Neplatn· pozice!');
+   raise EInvalidPosition.Create('Neplatn√° pozice!');
 
  PIndex := Self.GetPopisek(aPos);
  if (PIndex = -1) then
-   raise ENoSymbol.Create('Na tÈto pozici nenÌ û·dn˝ symbol!');
+   raise ENoSymbol.Create('Na t√©to pozici nen√≠ ≈æ√°dn√Ω symbol!');
 
  Self.Data.Delete(PIndex);
 end;
@@ -350,10 +350,10 @@ begin
  if (Assigned(FIsSymbol)) then
    for i := Position.X to Position.X+Length(Self.Operations.TextProperties.Text)-1 do
      if (FIsSymbol(Point(i,Position.Y))) then
-       raise ENonemptyField.Create('Na pozici je jiû symbol!');
+       raise ENonemptyField.Create('Na pozici je ji≈æ symbol!');
 
  if (Self.IsObsazeno(Position,Point(Position.X+Length(Self.Operations.TextProperties.Text),Position.Y))) then
-   raise ENonemptyField.Create('Na pozici je jiû symbol!');
+   raise ENonemptyField.Create('Na pozici je ji≈æ symbol!');
 
  Self.AddToStructure(Position, Self.Operations.TextProperties.Text,
                      Self.Operations.TextProperties.Color, Self.Operations.TextProperties.blokPopisek);
@@ -449,7 +449,7 @@ end;
 procedure TText.Add(aText:string; aColor:ShortInt; popisekBlok:boolean);
 begin
  if (Length(aText) > _MAX_TEXT_LENGTH) then
-   raise ETooLongText.Create('Text je p¯Ìliö dlouh˝!');
+   raise ETooLongText.Create('Text je p≈ô√≠li≈° dlouh√Ω!');
 
  Self.CheckOpInProgressAndExcept();
 
@@ -574,10 +574,10 @@ begin
  if (Assigned(Self.FOPAsk)) then
   begin
    if (Self.FOPAsk) then
-     raise EOperationInProgress.Create('Pr·vÏ probÌh· operace!');
+     raise EOperationInProgress.Create('Pr√°vƒõ prob√≠h√° operace!');
   end else begin
    if ((Self.Operations.FAddKrok > 0) or (Self.Operations.FMoveKrok > 0) or (Self.Operations.FDeleteKrok > 0)) then
-     raise EOperationInProgress.Create('Pr·vÏ probÌh· operace!');
+     raise EOperationInProgress.Create('Pr√°vƒõ prob√≠h√° operace!');
   end;
 end;
 

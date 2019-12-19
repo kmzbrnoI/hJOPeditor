@@ -1,4 +1,4 @@
-unit fPopiskek;
+ï»¿unit fPopiskek;
 
 interface
 
@@ -86,37 +86,37 @@ begin
   #97..#126:;    // mala pismena, specialni znaky
   #8,#32:;       // backspace, space
 
-  'š',
-  '',
-  '',
-  'á',
-  'è',
-  'é',
-  'ì',
-  'í',
-  'ï',
-  'ò',
-  'ó',
-  'ø',
-  'ù',
-  'ú',
-  'ı',
+  'Å¡',
+  'Å¥',
+  'Å¾',
+  'Ã¡',
+  'Ä',
+  'Ã©',
+  'Ä›',
+  'Ã­',
+  'Ä',
+  'Åˆ',
+  'Ã³',
+  'Å™',
+  'Å¯',
+  'Ãº',
+  'Ã½',
 
-  'Š',
-  '',
-  '',
-  'Á',
-  'È',
-  'É',
-  'Ì',
-  'Í',
-  'Ï',
-  'Ò',
-  'Ó',
-  'Ø',
-  'Ù',
-  'Ú',
-  'İ':;
+  'Å ',
+  'Å¤',
+  'Å½',
+  'Ã',
+  'ÄŒ',
+  'Ã‰',
+  'Äš',
+  'Ã',
+  'Ä',
+  'Å‡',
+  'Ã“',
+  'Å˜',
+  'Å®',
+  'Ãš',
+  'Ã':;
 
   #13:B_ApplyClick(Self);
  else//case
@@ -134,7 +134,7 @@ begin
  Self.E_Text.Text := '';
  Self.PopisekText := '';
 
- Self.Caption := 'Novı popisek';
+ Self.Caption := 'NovÃ½ popisek';
  Self.ActiveControl := Self.E_Text;
  Self.ShowModal();
 end;

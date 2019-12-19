@@ -1,4 +1,4 @@
-unit ReliefBitmap;
+ï»¿unit ReliefBitmap;
 //tato unita pracuje s bitmapovymi daty reliefu
 
 interface
@@ -135,18 +135,18 @@ begin
  try
    BlockRead(myFile,Buffer,7,aCount);
    if (aCount < 7) then
-     raise EFileLoad.Create('Nesprávná délka hlavièky!');
+     raise EFileLoad.Create('NesprÃ¡vnÃ¡ dÃ©lka hlaviÄky!');
 
    //--- hlavicka zacatek ---
    //kontrola identifikace
    if ((Buffer[0] <> ord('b')) or (Buffer[1] <> ord('r'))) then
-     raise EFileLoad.Create('Nesprávná identifika v hlavièce!');
+     raise EFileLoad.Create('NesprÃ¡vnÃ¡ identifika v hlaviÄce!');
 
    //kontrola verze
    version := Buffer[2];
    if ((version <> $21) and (version <> $30) and (version <> $31) and (version <> $32)) then
-     Application.MessageBox(PChar('Otevíráte soubor s verzí '+IntToHex(version, 2)+', která není aplikací plnì podporována!'),
-                            'Varování', MB_OK OR MB_ICONWARNING);
+     Application.MessageBox(PChar('OtevÃ­rÃ¡te soubor s verzÃ­ '+IntToHex(version, 2)+', kterÃ¡ nenÃ­ aplikacÃ­ plnÄ› podporovÃ¡na!'),
+                            'VarovÃ¡nÃ­', MB_OK OR MB_ICONWARNING);
 
    BitmapData.Width  := Buffer[3];
    BitmapData.Height := Buffer[4];
@@ -155,21 +155,21 @@ begin
 
    //kontrola 2x #255
    if ((Buffer[5] <> 255) or (Buffer[6] <> 255)) then
-     raise EFileLoad.Create('Chybí oddìlovací sekvence mezi hlavièkou a bitmapovımi daty!');
+     raise EFileLoad.Create('ChybÃ­ oddÄ›lovacÃ­ sekvence mezi hlaviÄkou a bitmapovÃ½mi daty!');
 
    //--- hlavicka konec ---
    //-------------------------------------------
    //nacitani bitmapovych dat
    BlockRead(myFile,BitmapData.Data,BitmapData.Width*BitmapData.Height,aCount);
    if (aCount < BitmapData.Width*BitmapData.Height) then
-     raise EFileLoad.Create('Málo bitmapovıch dat!');
+     raise EFileLoad.Create('MÃ¡lo bitmapovÃ½ch dat!');
 
    Self.Symbols.SetLoadedData(BitmapData);
 
    //prazdny radek
    BlockRead(myFile,Buffer,2,aCount);
    if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
-     raise EFileLoad.Create('Chybí oddìlovací sekvence mezi bitmapovımi daty a popisky!');
+     raise EFileLoad.Create('ChybÃ­ oddÄ›lovacÃ­ sekvence mezi bitmapovÃ½mi daty a popisky!');
    //-------------------------------------------
 
    if (version >= $32) then
@@ -196,7 +196,7 @@ begin
    //prazdny radek
    BlockRead(myFile,Buffer,2,aCount);
    if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
-     raise EFileLoad.Create('Chybí oddìlovací sekvence mezi popisky a separátory!');
+     raise EFileLoad.Create('ChybÃ­ oddÄ›lovacÃ­ sekvence mezi popisky a separÃ¡tory!');
    //-------------------------------------------
 
    //nacteni poctu vertikalnich separatoru
@@ -213,7 +213,7 @@ begin
    //prazdny radek
    BlockRead(myFile,Buffer,2,aCount);
    if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
-     raise EFileLoad.Create('Chybí oddìlovací sekvence mezi separátory!');
+     raise EFileLoad.Create('ChybÃ­ oddÄ›lovacÃ­ sekvence mezi separÃ¡tory!');
    //-------------------------------------------
 
    if (version >= $30) then
@@ -232,7 +232,7 @@ begin
      //prazdny radek
      BlockRead(myFile,Buffer,2,aCount);
      if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
-       raise EFileLoad.Create('Chybí oddìlovací sekvence mezi hor. separátory a kpopisky!');
+       raise EFileLoad.Create('ChybÃ­ oddÄ›lovacÃ­ sekvence mezi hor. separÃ¡tory a kpopisky!');
     end else begin
      Self.SeparatorsHor.Reset();
     end;
@@ -253,7 +253,7 @@ begin
    //prazdny radek
    BlockRead(myFile,Buffer,2,aCount);
    if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
-     raise EFileLoad.Create('Chybí oddìlovací sekvence mezi kolejovımi popisky a JCClick!');
+     raise EFileLoad.Create('ChybÃ­ oddÄ›lovacÃ­ sekvence mezi kolejovÃ½mi popisky a JCClick!');
    //-------------------------------------------
 
    //nacteni poctu JCClick
@@ -270,7 +270,7 @@ begin
    //prazdny radek
    BlockRead(myFile,Buffer,2,aCount);
    if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
-     raise EFileLoad.Create('Chybí oddìlovací sekvence mezi JCClick a pozicemi pro souupravy!');
+     raise EFileLoad.Create('ChybÃ­ oddÄ›lovacÃ­ sekvence mezi JCClick a pozicemi pro souupravy!');
    //-------------------------------------------
 
    if (version >= $31) then
@@ -289,7 +289,7 @@ begin
      //prazdny radek
      BlockRead(myFile, Buffer, 2, aCount);
      if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
-       raise EFileLoad.Create('Chybí oddìlovací sekvence mezi pozicemi pro soupravy a oblastmi øízení!');
+       raise EFileLoad.Create('ChybÃ­ oddÄ›lovacÃ­ sekvence mezi pozicemi pro soupravy a oblastmi Å™Ã­zenÃ­!');
     end;
    //-------------------------------------------
 
@@ -302,7 +302,7 @@ begin
 
    //pokud je delka 0, je neco spatne
    if (aCount = 0) then
-     raise EFileLoad.Create('Prázdné oblasti øízení!');
+     raise EFileLoad.Create('PrÃ¡zdnÃ© oblasti Å™Ã­zenÃ­!');
 
    len := (Buffer[0] shl 8)+Buffer[1];
 
@@ -443,7 +443,7 @@ end;
 procedure TPanelBitmap.SetRozmery(aWidth,aHeight:Byte);
 begin
  if (Self.IsOperation) then
-   raise Exception.Create('Právì probíhá jiná operace!');
+   raise Exception.Create('PrÃ¡vÄ› probÃ­hÃ¡ jinÃ¡ operace!');
 
  Self.FPanelWidth  := aWidth;
  Self.FPanelHeight := aHeight;

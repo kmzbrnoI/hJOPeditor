@@ -1,4 +1,4 @@
-unit fMain;
+Ôªøunit fMain;
 
 interface
 
@@ -139,8 +139,8 @@ type
     pushedButton:TToolButton;                   // last pushed button
 
    const
-    _PanelErrors: array [0..4] of string = ('VybÌrat lze pouze zleva doprava a zhora dol˘','Pr·zdnÈ pole (nenÌ s ËÌm operovat)',
-                                            'Chyba externÌ funkce','CÌlovÈ pole obsazeno','P¯ekroËeny maxim·lnÌ limity');
+    _PanelErrors: array [0..4] of string = ('Vyb√≠rat lze pouze zleva doprava a zhora dol≈Ø','Pr√°zdn√© pole (nen√≠ s ƒç√≠m operovat)',
+                                            'Chyba extern√≠ funkce','C√≠lov√© pole obsazeno','P≈ôekroƒçeny maxim√°ln√≠ limity');
     _Caption = 'hJOPeditor';
     _Config_File = 'Config.ini';
 
@@ -295,7 +295,7 @@ procedure TF_Hlavni.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
  if (Assigned(Relief)) then
   begin
-   if (Application.MessageBox('Uzav¯enÌm projektu bez jeho uloûenÌ ztratÌte projektov· data, p¯esto pokraËovat?','Uzav¯enÌ projektu',MB_YESNO OR MB_ICONQUESTION) = mrNo) then CanClose := false;
+   if (Application.MessageBox('Uzav≈ôen√≠m projektu bez jeho ulo≈æen√≠ ztrat√≠te projektov√° data, p≈ôesto pokraƒçovat?','Uzav≈ôen√≠ projektu',MB_YESNO OR MB_ICONQUESTION) = mrNo) then CanClose := false;
   end;//if (Assigned(Relief))
 end;
 
@@ -433,8 +433,8 @@ begin
  if (Assigned(Relief)) then
   begin
    if (Relief.FileStav <> 0) then
-     if (Application.MessageBox('Otev¯enÌm novÈho projektu ztratÌte vöechna neuloûen· data, pokraËovat?',
-                                'PokraËovat?', MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
+     if (Application.MessageBox('Otev≈ôen√≠m nov√©ho projektu ztrat√≠te v≈°echna neulo≈æen√° data, pokraƒçovat?',
+                                'Pokraƒçovat?', MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
        Exit();
   end;
 
@@ -457,7 +457,7 @@ begin
     begin
      if (Assigned(Relief)) then FreeAndNil(Relief);
      Self.DesignClose();
-     Application.MessageBox(PChar('Otev¯enÌ suboru skonËilo s chybou:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONERROR);
+     Application.MessageBox(PChar('Otev≈ôen√≠ suboru skonƒçilo s chybou:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONERROR);
      Exit();
     end;
  end;
@@ -483,8 +483,8 @@ end;
 procedure TF_Hlavni.PM_OpenClick(Sender: TObject);
 begin
  if (Assigned(Relief)) then
-   if (Application.MessageBox('Otev¯enÌm novÈho projektu ztratÌte vöechna neuloûen· data, pokraËovat?',
-                              'PokraËovat?', MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
+   if (Application.MessageBox('Otev≈ôen√≠m nov√©ho projektu ztrat√≠te v≈°echna neulo≈æen√° data, pokraƒçovat?',
+                              'Pokraƒçovat?', MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
      Exit();
 
  if (Self.OD_Open.Execute(Self.Handle)) then
@@ -524,11 +524,11 @@ begin
    F_BlockEdit.Bloky.LoadData(ReliefOptions.BlockFile);
    if (F_BlockEdit.Showing) then
      F_BlockEdit.FormShow(F_BlockEdit);
-   Application.MessageBox(PChar('Soubor '+ReliefOptions.BlockFile+' ˙spÏönÏ naËten.'),
+   Application.MessageBox(PChar('Soubor '+ReliefOptions.BlockFile+' √∫spƒõ≈°nƒõ naƒçten.'),
                           'Info', MB_OK OR MB_ICONINFORMATION);
  except
    on E:Exception do
-     Application.MessageBox(PChar('Chyba p¯i naËÌt·ni souboru s bloky technologie:'+#13#10+E.Message),
+     Application.MessageBox(PChar('Chyba p≈ôi naƒç√≠t√°ni souboru s bloky technologie:'+#13#10+E.Message),
                             'Chyba', MB_OK OR MB_ICONWARNING);
  end;
 end;
@@ -538,7 +538,7 @@ procedure TF_Hlavni.PM_SaveAsClick(Sender: TObject);
 begin
  if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
   begin
-   Self.SD_Save.Filter := 'BitmapovÈ soubory panelu (*.bpnl)|*.bpnl';
+   Self.SD_Save.Filter := 'Bitmapov√© soubory panelu (*.bpnl)|*.bpnl';
 
    if (not Self.SD_Save.Execute(Self.Handle)) then Exit;
    if (RightStr(Self.SD_Save.FileName,5) <> '.bpnl') then Relief.Save(Self.SD_Save.FileName+'.bpnl') else Relief.Save(Self.SD_Save.FileName);
@@ -546,13 +546,13 @@ begin
 
  if (Relief.Mode = dmBloky) then
   begin
-   Self.SD_Save.Filter := 'ObjektovÈ soubory panelu (*.opnl)|*.opnl';
+   Self.SD_Save.Filter := 'Objektov√© soubory panelu (*.opnl)|*.opnl';
 
    if (not Self.SD_Save.Execute(Self.Handle)) then Exit;
    if (RightStr(Self.SD_Save.FileName,5) <> '.opnl') then Relief.Save(Self.SD_Save.FileName+'.opnl') else Relief.Save(Self.SD_Save.FileName);
   end;//objektovy mod
 
- Self.SB_Main.Panels.Items[1].Text := 'Soubor uloûen';
+ Self.SB_Main.Panels.Items[1].Text := 'Soubor ulo≈æen';
  Self.Caption := ExtractFileName(Self.SD_Save.FileName)+' - '+_Caption + '     v' + GetVersion(Application.ExeName);
 end;
 
@@ -562,7 +562,7 @@ begin
  try
    if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
     begin
-     Self.SD_Save.Filter := 'BitmapovÈ soubory panelu (*.bpnl)|*.bpnl';
+     Self.SD_Save.Filter := 'Bitmapov√© soubory panelu (*.bpnl)|*.bpnl';
 
      if (Relief.FileStav = 1) then
       begin
@@ -575,7 +575,7 @@ begin
 
    if ((Relief.Mode = dmBloky) or (Relief.Mode = dmRoots)) then
     begin
-     Self.SD_Save.Filter := 'ObjektovÈ soubory panelu (*.opnl)|*.opnl';
+     Self.SD_Save.Filter := 'Objektov√© soubory panelu (*.opnl)|*.opnl';
 
      if (Relief.FileStav = 1) then
       begin
@@ -588,18 +588,18 @@ begin
  except
    on E:Exception do
     begin
-     Application.MessageBox(PChar('UloûenÌ suboru skonËilo s chybou:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONERROR);
+     Application.MessageBox(PChar('Ulo≈æen√≠ suboru skonƒçilo s chybou:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONERROR);
      Exit();
     end;
  end;
 
- Self.SB_Main.Panels.Items[1].Text := 'Soubor uloûen';
+ Self.SB_Main.Panels.Items[1].Text := 'Soubor ulo≈æen';
  Self.Caption := ExtractFileName(Relief.FileCesta)+' - '+_Caption + '     v' + GetVersion(Application.ExeName);
 end;
 
 procedure TF_Hlavni.PM_AboutClick(Sender: TObject);
 begin
- Application.MessageBox(PChar('hJOPeditor'+#13#10+'v'+GetVersion(Application.ExeName)+#13#10+'Vytvo¯il Jan Hor·Ëek 2011ñ2019'),
+ Application.MessageBox(PChar('hJOPeditor'+#13#10+'v'+GetVersion(Application.ExeName)+#13#10+'Vytvo≈ôil Jan Hor√°ƒçek 2011‚Äì2019'),
                         'Info', MB_OK OR MB_ICONINFORMATION);
 end;
 
@@ -631,7 +631,7 @@ begin
   0:begin
      if (Relief.Mode = dmBloky) then
       begin
-       Application.MessageBox('Tato funkce zatÌm nenÌ dostupn·', 'Nelze p¯evÈst', MB_OK OR MB_ICONERROR);
+       Application.MessageBox('Tato funkce zat√≠m nen√≠ dostupn√°', 'Nelze p≈ôev√©st', MB_OK OR MB_ICONERROR);
        Self.PM_Bloky.Checked := true;
        Exit;
       end;
@@ -663,7 +663,7 @@ begin
   1, 2:begin
      if (Relief.Mode = dmBloky) then
       begin
-       Application.MessageBox('Tato funkce zatÌm nenÌ dostupn·', 'Nelze p¯evÈst', MB_OK OR MB_ICONERROR);
+       Application.MessageBox('Tato funkce zat√≠m nen√≠ dostupn√°', 'Nelze p≈ôev√©st', MB_OK OR MB_ICONERROR);
        Self.PM_Bloky.Checked := true;
        Exit;
       end;
@@ -691,8 +691,8 @@ begin
 
      if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
       begin
-       if (Application.MessageBox(PChar('Po p¯epnutÌ na reûim bloky nenÌ moûnÈ se vr·tit zpÏt do bitmapovÈho reûimu. Zkontrolujte si, ûe m·te uloûen˝ soubor s daty panelu.'+#13#10+'PokraËovat?'),
-                                        'ZmÏna reûimu projektu', MB_YESNO OR MB_ICONQUESTION OR MB_DEFBUTTON2) <> mrYes) then
+       if (Application.MessageBox(PChar('Po p≈ôepnut√≠ na re≈æim bloky nen√≠ mo≈æn√© se vr√°tit zpƒõt do bitmapov√©ho re≈æimu. Zkontrolujte si, ≈æe m√°te ulo≈æen√Ω soubor s daty panelu.'+#13#10+'Pokraƒçovat?'),
+                                        'Zmƒõna re≈æimu projektu', MB_YESNO OR MB_ICONQUESTION OR MB_DEFBUTTON2) <> mrYes) then
         begin
          Self.PM_BitmapClick(Self.PM_Bitmap);
          Exit();
@@ -712,7 +712,7 @@ begin
 
      if (Return <> 0) then
       begin
-       Application.MessageBox(PChar('P¯i zmÏnÏ mÛdu se vyskytla chyba - chyba: '+IntToStr(Return)),'Chyba',MB_OK OR MB_ICONWARNING);
+       Application.MessageBox(PChar('P≈ôi zmƒõnƒõ m√≥du se vyskytla chyba - chyba: '+IntToStr(Return)),'Chyba',MB_OK OR MB_ICONWARNING);
        Exit;
       end;
 
@@ -722,7 +722,7 @@ begin
          F_BlockEdit.Bloky.LoadData(ReliefOptions.BlockFile);
        except
          on E:Exception do
-           Application.MessageBox(PChar('Chyba p¯i naËÌt·ni souboru s bloky technologie:'+#13#10+E.Message),
+           Application.MessageBox(PChar('Chyba p≈ôi naƒç√≠t√°ni souboru s bloky technologie:'+#13#10+E.Message),
                                   'Chyba', MB_OK OR MB_ICONWARNING);
        end;
       end;
@@ -765,9 +765,9 @@ begin
    LI := F_DataCheck.LV_Errors.Items.Add;
    LI.Caption := IntToStr(F_DataCheck.LV_Errors.Items.Count);
    if (error_cnt = 0) then
-     LI.SubItems.Add('OK: Zkouöka validity probÏhla ˙spÏönÏ')
+     LI.SubItems.Add('OK: Zkou≈°ka validity probƒõhla √∫spƒõ≈°nƒõ')
    else
-     LI.SubItems.Add('ERR: Zkouöka validity skonËila s '+IntToStr(error_cnt)+' chybami!');
+     LI.SubItems.Add('ERR: Zkou≈°ka validity skonƒçila s '+IntToStr(error_cnt)+' chybami!');
   end;
 end;
 
@@ -801,7 +801,7 @@ begin
    Relief.AddSeparatorHor();
  except
    on E:Exception do
-     Application.MessageBox(PChar('Chyba p¯i p¯id·v·nÌ objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
+     Application.MessageBox(PChar('Chyba p≈ôi p≈ôid√°v√°n√≠ objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
  end;
 end;
 
@@ -814,7 +814,7 @@ begin
    Relief.AddSeparatorVert();
  except
    on E:Exception do
-     Application.MessageBox(PChar('Chyba p¯i p¯id·v·nÌ objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
+     Application.MessageBox(PChar('Chyba p≈ôi p≈ôid√°v√°n√≠ objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
  end;
 end;
 
@@ -825,7 +825,7 @@ begin
    Relief.AddSymbol((Sender as TToolButton).Tag);
  except
    on E:Exception do
-     Application.MessageBox(PChar('Chyba p¯i p¯id·v·nÌ symbolu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
+     Application.MessageBox(PChar('Chyba p≈ôi p≈ôid√°v√°n√≠ symbolu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
  end;
 
  if (Assigned(Self.pushedButton)) then
@@ -851,7 +851,7 @@ begin
    Relief.AddJCClick();
  except
    on E:Exception do
-     Application.MessageBox(PChar('Chyba p¯i p¯id·v·nÌ objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
+     Application.MessageBox(PChar('Chyba p≈ôi p≈ôid√°v√°n√≠ objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
  end;
 end;
 
@@ -862,7 +862,7 @@ begin
    Relief.AddKPopisek();
  except
    on E:Exception do
-     Application.MessageBox(PChar('Chyba p¯i p¯id·v·nÌ objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
+     Application.MessageBox(PChar('Chyba p≈ôi p≈ôid√°v√°n√≠ objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
  end;
 end;
 
@@ -874,7 +874,7 @@ begin
    Relief.AddSouprava();
  except
    on E:Exception do
-     Application.MessageBox(PChar('Chyba p¯i p¯id·v·nÌ objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
+     Application.MessageBox(PChar('Chyba p≈ôi p≈ôid√°v√°n√≠ objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
  end;
 end;
 
@@ -888,8 +888,8 @@ end;
 
 procedure TF_Hlavni.MI_CloseFileClick(Sender: TObject);
 begin
- if (Application.MessageBox('Uzav¯enÌm projektu ztratÌte vöechna neuloûen· data, pokraËovat?',
-                            'Uzav¯enÌ projektu', MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
+ if (Application.MessageBox('Uzav≈ôen√≠m projektu ztrat√≠te v≈°echna neulo≈æen√° data, pokraƒçovat?',
+                            'Uzav≈ôen√≠ projektu', MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
    Exit();
 
  if (Assigned(ReliefOptions)) then
@@ -905,10 +905,10 @@ begin
  Self.PM_SaveAs.Enabled    := true;
  Self.MI_Draw.Visible      := true;
  Self.MI_CloseFile.Enabled := true;
- Self.SB_Main.Panels.Items[0].Text := 'Soubor otev¯en';
- Self.SB_Main.Panels.Items[1].Text := 'Soubor nenÌ uloûen';
+ Self.SB_Main.Panels.Items[0].Text := 'Soubor otev≈ôen';
+ Self.SB_Main.Panels.Items[1].Text := 'Soubor nen√≠ ulo≈æen';
 
- Self.Caption := FName+' ñ '+_Caption + '     v' + GetVersion(Application.ExeName);
+ Self.Caption := FName+' ‚Äì '+_Caption + '     v' + GetVersion(Application.ExeName);
 
  Self.Constraints.MinWidth := Max(Self.DXD_main.Width + 2*Self.DXD_main.Left + 20,
                                   Self.TB_BitmapTools.Left + Self.TB_BitmapTools.Width + 30);
@@ -942,7 +942,7 @@ begin
  Self.SB_Main.Panels.Items[2].Text := '---;---';
  Self.SB_Main.Panels.Items[3].Text := '';
 
- Self.SB_Main.Panels.Items[0].Text := 'Soubor uzav¯en';
+ Self.SB_Main.Panels.Items[0].Text := 'Soubor uzav≈ôen';
  Self.SB_Main.Panels.Items[1].Text := '';
  Self.Caption := _Caption + '     v' + GetVersion(Application.ExeName);
 

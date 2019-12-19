@@ -1,4 +1,4 @@
-unit fReliefSettings;
+Ôªøunit fReliefSettings;
 
 interface
 
@@ -65,7 +65,7 @@ begin
    F_BlockEdit.Bloky.LoadData(ReliefOptions.BlockFile);
  except
    on E:Exception do
-     Application.MessageBox(PChar('Chyba p¯i naËÌt·ni souboru s bloky technologie:'+#13#10+E.Message),
+     Application.MessageBox(PChar('Chyba p≈ôi naƒç√≠t√°ni souboru s bloky technologie:'+#13#10+E.Message),
                             'Chyba', MB_OK OR MB_ICONWARNING);
  end;
 

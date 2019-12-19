@@ -1,4 +1,4 @@
-unit VektorBasedObject;
+Ôªøunit VektorBasedObject;
 
 interface
 
@@ -134,11 +134,11 @@ end;
 procedure TVBO.Add(Position:TPoint);
 begin
  if ((Position.X < 0) or (Position.Y < 0)) then
-   raise EInvalidPosition.Create('Neplatn· pozice!');
+   raise EInvalidPosition.Create('Neplatn√° pozice!');
  if (Self.GetObject(Position) <> -1) then
-   raise ENonemptyField.Create('Na pozici je jiû symbol!');
+   raise ENonemptyField.Create('Na pozici je ji≈æ symbol!');
  if (Self.Data.Count >= _MAX_DATA) then
-   raise EMaxReached.Create('Dosaûeno maxim·lnÌho poËtu symbol˘!');
+   raise EMaxReached.Create('Dosa≈æeno maxim√°ln√≠ho poƒçtu symbol≈Ø!');
 
  Self.Data.Add(Position);
 end;
@@ -147,11 +147,11 @@ procedure TVBO.Delete(Position:TPoint);
 var OIndex:Integer;
 begin
  if ((Position.X < 0) or (Position.Y < 0)) then
-   raise EInvalidPosition.Create('Neplatn· pozice!');
+   raise EInvalidPosition.Create('Neplatn√° pozice!');
 
  OIndex := Self.GetObject(Position);
  if (OIndex = -1) then
-   raise ENoSymbol.Create('Na tÈto pozici nenÌ û·dn˝ symbol!');
+   raise ENoSymbol.Create('Na t√©to pozici nen√≠ ≈æ√°dn√Ω symbol!');
 
  Self.Data.Remove(Position);
 end;
@@ -210,10 +210,10 @@ begin
  if (Assigned(FIsSymbol)) then
   begin
    if (FIsSymbol(Position)) then
-     raise ENonemptyField.Create('Na tÈto pozici je jiû symbol!');
+     raise ENonemptyField.Create('Na t√©to pozici je ji≈æ symbol!');
   end else begin
    if (Self.GetObject(Position) <> -1) then
-     raise ENonemptyField.Create('Na tÈto pozici je jiû symbol!');
+     raise ENonemptyField.Create('Na t√©to pozici je ji≈æ symbol!');
   end;
 
  if (Assigned(FNullOperations)) then FNullOperations();
@@ -248,10 +248,10 @@ begin
      if (Assigned(FIsSymbol)) then
       begin
        if (FIsSymbol(Position)) then
-         raise ENonemptyField.Create('Na tÈto pozici je jiû symbol!');
+         raise ENonemptyField.Create('Na t√©to pozici je ji≈æ symbol!');
       end else begin
        if (Self.GetObject(Position) <> -1) then
-         raise ENonemptyField.Create('Na tÈto pozici je jiû symbol!');
+         raise ENonemptyField.Create('Na t√©to pozici je ji≈æ symbol!');
       end;
 
      Self.Add(Position);
@@ -366,10 +366,10 @@ begin
  if (Assigned(Self.FOPAsk)) then
   begin
    if (Self.FOPAsk) then
-     raise EOperationInProgress.Create('Pr·vÏ probÌh· operace!');
+     raise EOperationInProgress.Create('Pr√°vƒõ prob√≠h√° operace!');
   end else begin
    if ((Self.Operations.FAddKrok > 0) or (Self.Operations.FMoveKrok > 0) or (Self.Operations.FDeleteKrok > 0)) then
-     raise EOperationInProgress.Create('Pr·vÏ probÌh· operace!');
+     raise EOperationInProgress.Create('Pr√°vƒõ prob√≠h√° operace!');
   end;
 end;
 

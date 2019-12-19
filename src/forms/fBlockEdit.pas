@@ -1,4 +1,4 @@
-unit fBlockEdit;
+Ôªøunit fBlockEdit;
 
 interface
 
@@ -296,22 +296,22 @@ begin
        Self.E_KPopisek.Visible := false;
       end;//else KPopisek.Count > 0
      Self.E_KPopisek.Text := (Blok as TUsek).KpopisekStr;
-     Self.Caption := 'Editace ˙seku';
+     Self.Caption := 'Editace √∫seku';
   end;
 
   TBlkType.navestidlo:begin
-     Self.Caption := 'Editace n·vÏstidla';
+     Self.Caption := 'Editace n√°vƒõstidla';
   end;
 
   TBlkType.vyhybka:begin
      Self.GB_Vyhybka.Visible := true;
      Self.CB_VyhPlus.ItemIndex := (Blok as TVyhybka).PolohaPlus;
      Self.CB_OR.ItemIndex      := (Blok as TVyhybka).OblRizeni;
-     Self.Caption := 'Editace v˝hybky';
+     Self.Caption := 'Editace v√Ωhybky';
   end;
 
   TBlkType.prejezd:begin
-     Self.Caption := 'Editace p¯ejezdu';
+     Self.Caption := 'Editace p≈ôejezdu';
   end;
 
   TBlkType.text:begin
@@ -324,7 +324,7 @@ begin
       0: Self.RB_UvazkaSmer1.Checked := true;
       1: Self.RB_UvazkaSmer2.Checked := true;
      end;
-     Self.Caption    := 'Editace ˙vazky';
+     Self.Caption    := 'Editace √∫vazky';
   end;
 
   TBlkType.uvazka_spr:begin
@@ -334,15 +334,15 @@ begin
   end;
 
   TBlkType.zamek:begin
-     Self.Caption := 'Editace z·mku';
+     Self.Caption := 'Editace z√°mku';
   end;
 
   TBlkType.vykol:begin
-     Self.Caption := 'Editace v˝kolejky';
+     Self.Caption := 'Editace v√Ωkolejky';
   end;
 
   TBlkType.rozp:begin
-     Self.Caption := 'Editace rozpojovaËe';
+     Self.Caption := 'Editace rozpojovaƒçe';
   end;
 
  end;//case Blok.typ
@@ -402,8 +402,8 @@ begin
 
  if (Self.OpenBlok = nil) then Exit();
 
- Self.LB_Blocks.Items.Add('--- é·dn˝ blok ---');
- Self.LB_Blocks.Items.Add('--- é·dn˝ blok z·mÏrnÏ ---');
+ Self.LB_Blocks.Items.Add('--- ≈Ω√°dn√Ω blok ---');
+ Self.LB_Blocks.Items.Add('--- ≈Ω√°dn√Ω blok z√°mƒõrnƒõ ---');
  Self.LB_BlocksIndexes[0] := -1;
  Self.LB_BlocksIndexes[1] := -2;
 

@@ -1,4 +1,4 @@
-unit ReliefObjects;
+ï»¿unit ReliefObjects;
 // tato unita pracuje s objektovymi daty reliefu
 
 interface
@@ -203,10 +203,10 @@ begin
 
    if (not versionOk) then
     begin
-     if (Application.MessageBox(PChar('Naèítáte soubor s verzí '+ver+#13#10+
-         'Aplikace momentálnì podporuje verze '+Self.FileSupportedVersionsStr()+#13#10+'Chcete pokraèovat?'),
-         'Varování', MB_YESNO OR MB_ICONQUESTION) = mrNo) then
-       raise EFileLoad.Create('Uivatel zrušil naèítání souboru!');
+     if (Application.MessageBox(PChar('NaÄÃ­tÃ¡te soubor s verzÃ­ '+ver+#13#10+
+         'Aplikace momentÃ¡lnÄ› podporuje verze '+Self.FileSupportedVersionsStr()+#13#10+'Chcete pokraÄovat?'),
+         'VarovÃ¡nÃ­', MB_YESNO OR MB_ICONQUESTION) = mrNo) then
+       raise EFileLoad.Create('UÅ¾ivatel zruÅ¡il naÄÃ­tÃ¡nÃ­ souboru!');
     end;
 
    Self.DrawObject.Height := inifile.ReadInteger('P','H',0);
@@ -458,18 +458,18 @@ begin
  if (Assigned(Self.FOnMsg)) then
   begin
    case (Self.Selected.typ) of
-    TBlkType.usek         : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (úsek '+IntToStr(Self.Selected.index)+')');
-    TBlkType.navestidlo   : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (návìstidlo '+IntToStr(Self.Selected.index)+')');
-    TBlkType.vyhybka      : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (vıhybka '+IntToStr(Self.Selected.index)+'), pøiøazen úseku '+IntToStr((Self.Selected as TVyhybka).obj));
-    TBlkType.prejezd      : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (pøejezd '+IntToStr(Self.Selected.index)+')');
+    TBlkType.usek         : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (Ãºsek '+IntToStr(Self.Selected.index)+')');
+    TBlkType.navestidlo   : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (nÃ¡vÄ›stidlo '+IntToStr(Self.Selected.index)+')');
+    TBlkType.vyhybka      : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (vÃ½hybka '+IntToStr(Self.Selected.index)+'), pÅ™iÅ™azen Ãºseku '+IntToStr((Self.Selected as TVyhybka).obj));
+    TBlkType.prejezd      : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (pÅ™ejezd '+IntToStr(Self.Selected.index)+')');
     TBlkType.text         : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (popisek '+IntToStr(Self.Selected.index)+')');
     TBlkType.blok_popisek : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (popisek bloku '+IntToStr(Self.Selected.index)+')');
-    TBlkType.pomocny_obj  : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (pomocnı objekt '+IntToStr(Self.Selected.index)+')');
-    TBlkType.uvazka       : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (úvazka '+IntToStr(Self.Selected.index)+')');
-    TBlkType.uvazka_spr   : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (úvazka spr. '+IntToStr(Self.Selected.index)+')');
-    TBlkType.zamek        : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (zámek '+IntToStr(Self.Selected.index)+')');
-    TBlkType.vykol        : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (vıkolejka '+IntToStr(Self.Selected.index)+'), pøiøazena úseku '+IntToStr((Self.Selected as TVykol).obj));
-    TBlkType.rozp         : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (rozpojovaè '+IntToStr(Self.Selected.index)+')');
+    TBlkType.pomocny_obj  : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (pomocnÃ½ objekt '+IntToStr(Self.Selected.index)+')');
+    TBlkType.uvazka       : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (Ãºvazka '+IntToStr(Self.Selected.index)+')');
+    TBlkType.uvazka_spr   : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (Ãºvazka spr. '+IntToStr(Self.Selected.index)+')');
+    TBlkType.zamek        : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (zÃ¡mek '+IntToStr(Self.Selected.index)+')');
+    TBlkType.vykol        : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (vÃ½kolejka '+IntToStr(Self.Selected.index)+'), pÅ™iÅ™azena Ãºseku '+IntToStr((Self.Selected as TVykol).obj));
+    TBlkType.rozp         : Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (rozpojovaÄ '+IntToStr(Self.Selected.index)+')');
    end;//case
   end;//if Assigned(FOnMsg)
 
@@ -512,7 +512,7 @@ begin
  end else
   Self.Selected := nil;
 
- if (Assigned(Self.FOnMsg)) then Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (úsek)');
+ if (Assigned(Self.FOnMsg)) then Self.FOnMsg(Self, 'Blok '+IntToStr(blk)+ ' (Ãºsek)');
  if ((not Assigned(Self.Selected)) or (not (Self.Selected as TUsek).IsVyhybka)) then Exit;
  (Self.Selected as TUsek).Root := Position;
 end;
@@ -563,26 +563,26 @@ begin
  Result := TStringList.Create();
 
  DateTimeToString(str,'yyyy-mm-dd hh:nn:ss',Now);
- Result.Add('Validace objektù: '+str);
+ Result.Add('Validace objektÅ¯: '+str);
 
- Result.Add('Ovìøuji návaznost úseku na technologické bloky, návaznost na oblasti øízeni...');
- Result.Add('Ovìøuji návaznost vıhybek na úseky...');
- Result.Add('Ovìøuji pojmenování kolejí...');
- Result.Add('Ovìøuji koøeny...');
+ Result.Add('OvÄ›Å™uji nÃ¡vaznost Ãºseku na technologickÃ© bloky, nÃ¡vaznost na oblasti Å™Ã­zeni...');
+ Result.Add('OvÄ›Å™uji nÃ¡vaznost vÃ½hybek na Ãºseky...');
+ Result.Add('OvÄ›Å™uji pojmenovÃ¡nÃ­ kolejÃ­...');
+ Result.Add('OvÄ›Å™uji koÅ™eny...');
 
  for i := 0 to Self.Bloky.Count-1 do
   begin
    if ((Self.Bloky[i].Blok = -1) and (Self.Bloky[i].typ <> TBlkType.pomocny_obj) and
        ((Self.Bloky[i].typ <> TBlkType.text) or (Length((Self.Bloky[i] as TText).Text) = 1))) then
     begin
-     Result.Add('ERR: blok '+IntToStr(i)+': není návaznost na technologickı blok');
+     Result.Add('ERR: blok '+IntToStr(i)+': nenÃ­ nÃ¡vaznost na technologickÃ½ blok');
      error_cnt := error_cnt + 1;
     end;
    if ((Self.Bloky[i].OblRizeni < 0) and
        ((Self.Bloky[i].typ <> TBlkType.pomocny_obj) xor ((Self.Bloky[i].typ = TBlkType.text) and
        (Length((Self.Bloky[i] as TText).Text) > 1)))) then
     begin
-     Result.Add('ERR: blok '+IntToStr(i)+': není návaznost na oblast øízení');
+     Result.Add('ERR: blok '+IntToStr(i)+': nenÃ­ nÃ¡vaznost na oblast Å™Ã­zenÃ­');
      error_cnt := error_cnt + 1;
     end;
 
@@ -591,13 +591,13 @@ begin
     TBlkType.usek:begin
      if (((Self.Bloky[i] as TUsek).KPopisek.Count > 0) and ((Self.Bloky[i] as TUsek).KpopisekStr = '')) then
       begin
-       Result.Add('ERR: blok '+IntToStr(i)+' (úsek): kolej není pojmenována');
+       Result.Add('ERR: blok '+IntToStr(i)+' (Ãºsek): kolej nenÃ­ pojmenovÃ¡na');
        error_cnt := error_cnt + 1;
       end;
 
      if (((Self.Bloky[i] as TUsek).IsVyhybka) and ((Self.Bloky[i] as TUsek).Root.X < 0)) then
       begin
-       Result.Add('ERR: blok '+IntToStr(i)+' (úsek) : obsahuje vıhybky a pøesto nemá koøen');
+       Result.Add('ERR: blok '+IntToStr(i)+' (Ãºsek) : obsahuje vÃ½hybky a pÅ™esto nemÃ¡ koÅ™en');
        error_cnt := error_cnt + 1;
       end;
 
@@ -605,7 +605,7 @@ begin
       begin
        if (((vetev.node1.vyh >= 0) and ((vetev.node1.ref_plus = -1) or (vetev.node1.ref_minus = -1))) or
           ((vetev.node2.vyh >= 0) and ((vetev.node2.ref_plus = -1) or (vetev.node2.ref_minus = -1)))) then
-         Result.Add('WARN: blok '+IntToStr(i)+' (úsek) : vìtev ma návaznost na vıhybku, pøesto za vıhybkou nikam nepokraèuje');
+         Result.Add('WARN: blok '+IntToStr(i)+' (Ãºsek) : vÄ›tev ma nÃ¡vaznost na vÃ½hybku, pÅ™esto za vÃ½hybkou nikam nepokraÄuje');
       end;
     end;
 
@@ -614,7 +614,7 @@ begin
     TBlkType.vyhybka:begin
      if ((Self.Bloky[i] as TVyhybka).obj < 0) then
       begin
-       Result.Add('ERR: blok '+IntToStr(i)+' (vıhybka) : není návaznost na úsek');
+       Result.Add('ERR: blok '+IntToStr(i)+' (vÃ½hybka) : nenÃ­ nÃ¡vaznost na Ãºsek');
        error_cnt := error_cnt + 1;
       end;
     end;

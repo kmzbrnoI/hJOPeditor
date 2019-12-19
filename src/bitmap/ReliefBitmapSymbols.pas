@@ -1,4 +1,4 @@
-unit ReliefBitmapSymbols;
+Ôªøunit ReliefBitmapSymbols;
 
 interface
 
@@ -145,9 +145,9 @@ end;
 procedure TBitmapSymbols.AddToStructure(aPos:TPoint;SymbolID:Integer);
 begin
  if ((aPos.X < 0) or (aPos.Y < 0) or (aPos.X > Self.Panel.Width) or (aPos.Y > Self.Panel.Height)) then
-   raise EInvalidPosition.Create('Neplatn· pozice!');
+   raise EInvalidPosition.Create('Neplatn√° pozice!');
  if (Self.Bitmap[aPos.X,aPos.Y] <> -1) then
-   raise ENonemptyField.Create('Na pozici je jiû symbol!');
+   raise ENonemptyField.Create('Na pozici je ji≈æ symbol!');
 
  Self.Bitmap[aPos.X,aPos.Y] := SymbolID;
 end;
@@ -156,9 +156,9 @@ end;
 procedure TBitmapSymbols.DeleteFromStructure(aPos:TPoint);
 begin
  if ((aPos.X < 0) or (aPos.Y < 0) or (aPos.X > _MAX_WIDTH) or (aPos.Y > _MAX_HEIGHT)) then
-   raise EInvalidPosition.Create('Neplatn· pozice!');
+   raise EInvalidPosition.Create('Neplatn√° pozice!');
  if (Self.Bitmap[aPos.X,aPos.Y] = -1) then
-   raise ENonemptyField.Create('Na pozici je jiû symbol!');
+   raise ENonemptyField.Create('Na pozici je ji≈æ symbol!');
 
  Self.Bitmap[aPos.X,aPos.Y] := -1;
 end;
@@ -258,7 +258,7 @@ begin
        //pokud jsme na 2. bode
        //kontrola zapornych limitu vyberu
        if (not Self.ControlCursorPos(Self.Operations.Group.Start,Position)) then
-         raise EInvalidPosition.Create('V˝bÏr musÌ b˝t zleva doprava a shora dol˘!');
+         raise EInvalidPosition.Create('V√Ωbƒõr mus√≠ b√Ωt zleva doprava a shora dol≈Ø!');
 
        //kontrola obsazenosti
        for i := Self.Operations.Group.Start.X to Position.X do
@@ -268,10 +268,10 @@ begin
             if Assigned(FIsSymbol) then
              begin
               if (FIsSymbol(Point(i,j))) then
-               raise ENonemptyField.Create('Na pozici je jiû symbol!');
+               raise ENonemptyField.Create('Na pozici je ji≈æ symbol!');
              end else begin
               if (Self.GetSymbol(Point(i,j)) <> -1) then
-                raise ENonemptyField.Create('Na pozici je jiû symbol!');
+                raise ENonemptyField.Create('Na pozici je ji≈æ symbol!');
              end;//else Assigned(FIsOperation)
            end;//for j
         end;//for i
@@ -303,10 +303,10 @@ begin
    if Assigned(FIsSymbol) then
     begin
      if (FIsSymbol(Position)) then
-      raise ENonemptyField.Create('Na pozici je jiû symbol!');
+      raise ENonemptyField.Create('Na pozici je ji≈æ symbol!');
     end else begin
      if (Self.GetSymbol(Position) <> -1) then
-      raise ENonemptyField.Create('Na pozici je jiû symbol!');
+      raise ENonemptyField.Create('Na pozici je ji≈æ symbol!');
     end;//else Assigned(FIsOperation)
 
    if (Assigned(FNullOperations)) then FNullOperations;
@@ -342,11 +342,11 @@ begin
     2:begin
        //kontrola zapornych limitu vyberu
        if (not Self.ControlCursorPos(Self.Operations.Group.Start,Position)) then
-         raise EInvalidPosition.Create('V˝bÏr musÌ b˝t zleva doprava a shora dol˘!');
+         raise EInvalidPosition.Create('V√Ωbƒõr mus√≠ b√Ωt zleva doprava a shora dol≈Ø!');
 
        //kontrola limitu pole
        if (((Position.X - Self.Operations.Group.Start.X + 1) > _MAX_MOVE) or (Position.Y - Self.Operations.Group.Start.Y + 1 > _MAX_MOVE)) then
-         raise EInvalidPosition.Create('P¯es·hnuta maxim·lnÌ velikosti v˝bÏru!');
+         raise EInvalidPosition.Create('P≈ôes√°hnuta maxim√°ln√≠ velikosti v√Ωbƒõru!');
 
        //prevzeti objektu do .Symbols[] a smazani puvodnich objektu
        Self.Operations.Move.aWidth  := Position.X - Self.Operations.Group.Start.X + 1;
@@ -372,10 +372,10 @@ begin
            if (Assigned(FIsSymbol)) then
             begin
              if (FIsSymbol(Point(i+(Position.X - Self.Operations.Move.aWidth)+1,j+(Position.Y - Self.Operations.Move.aHeight)+1))) then
-               raise ENonemptyField.Create('Na pozici je jiû symbol!');
+               raise ENonemptyField.Create('Na pozici je ji≈æ symbol!');
             end else begin
              if ((Self.GetSymbol(Point(i+(Position.X - Self.Operations.Move.aWidth)+1,j+(Position.Y - Self.Operations.Move.aHeight)+1)) <> -1)) then
-               raise ENonemptyField.Create('Na pozici je jiû symbol!');
+               raise ENonemptyField.Create('Na pozici je ji≈æ symbol!');
             end;//else (Assigned(FIsOperation))
           end;//for j
         end;//for i
@@ -429,10 +429,10 @@ begin
        if (Assigned(FIsSymbol)) then
         begin
          if (FIsSymbol(Position)) then
-           raise ENonemptyField.Create('Na pozici je jiû symbol!');
+           raise ENonemptyField.Create('Na pozici je ji≈æ symbol!');
         end else begin
          if (Self.GetSymbol(Position) <> -1) then
-           raise ENonemptyField.Create('Na pozici je jiû symbol!');
+           raise ENonemptyField.Create('Na pozici je ji≈æ symbol!');
         end;
 
        Self.AddToStructure(Position,Self.Operations.Move.Symbols[0,0]);
@@ -471,7 +471,7 @@ begin
     2:begin
        //kontrola zapornych limitu vyberu
        if (not Self.ControlCursorPos(Self.Operations.Group.Start,Position)) then
-         raise EInvalidPosition.Create('V˝bÏr musÌ b˝t zleva doprava a shora dol˘!');
+         raise EInvalidPosition.Create('V√Ωbƒõr mus√≠ b√Ωt zleva doprava a shora dol≈Ø!');
 
        //pokud jsme na 2. bode
        for i := Self.Operations.Group.Start.X to Position.X do
@@ -663,10 +663,10 @@ begin
  if (Assigned(Self.FOPAsk)) then
   begin
    if (Self.FOPAsk) then
-     raise EOperationInProgress.Create('Pr·vÏ probÌh· operace!');
+     raise EOperationInProgress.Create('Pr√°vƒõ prob√≠h√° operace!');
   end else begin
    if ((Self.Operations.Add.Krok > 0) or (Self.Operations.Move.Krok > 0) or (Self.Operations.FDeleteKrok > 0)) then
-     raise EOperationInProgress.Create('Pr·vÏ probÌh· operace!');
+     raise EOperationInProgress.Create('Pr√°vƒõ prob√≠h√° operace!');
   end;
 end;
 

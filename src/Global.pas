@@ -1,4 +1,4 @@
-unit Global;
+ï»¿unit Global;
 //global function, constants and types
 
 interface
@@ -63,7 +63,7 @@ var
   pinfo: ^VS_FIXEDFILEINFO;
   Major, Minor, Release: word;
 begin
-  Result:='Verze není dostupná';
+  Result:='Verze nenÃ­ dostupnÃ¡';
   size := GetFileVersionInfoSize(Pointer(FileName), handle);
   if size > 0 then begin
     GetMem(buffer, size);

@@ -1,4 +1,4 @@
-unit fOREdit;
+Ôªøunit fOREdit;
 
 interface
 
@@ -66,19 +66,19 @@ procedure TF_OREdit.B_ApplyClick(Sender: TObject);
 begin
  if ((Self.E_Name.Text = '') or (Self.E_NameShort.Text = '') or (Self.E_NameUniq.Text = '')) then
   begin
-   Application.MessageBox('N·zev, zkratka n·zvu a unik·tnÌ n·zev (ID) oblasti ¯ÌzenÌ musÌ b˝t vyplnÏno!',
-                          'Nelze pokraËovat', MB_OK OR MB_ICONERROR);
+   Application.MessageBox('N√°zev, zkratka n√°zvu a unik√°tn√≠ n√°zev (ID) oblasti ≈ô√≠zen√≠ mus√≠ b√Ωt vyplnƒõno!',
+                          'Nelze pokraƒçovat', MB_OK OR MB_ICONERROR);
    Exit();
   end;
  if (Self.CB_Lichy.ItemIndex = -1) then
   begin
-   Application.MessageBox('Vyberte lich˝ smÏr','Nelze pokraËovat',MB_OK OR MB_ICONERROR);
+   Application.MessageBox('Vyberte lich√Ω smƒõr','Nelze pokraƒçovat',MB_OK OR MB_ICONERROR);
    Exit;
   end;
 
  if ((not Self.RB_OR1.Checked) and (not Self.RB_OR2.Checked)) then
   begin
-   Application.MessageBox('Vyberte orientaci DK!','Nelze pokraËovat',MB_OK OR MB_ICONERROR);
+   Application.MessageBox('Vyberte orientaci DK!','Nelze pokraƒçovat',MB_OK OR MB_ICONERROR);
    Exit;
   end;
 
@@ -176,7 +176,7 @@ begin
  Self.SE_OsvCnt.Value := Self.orData.Osvetleni.Cnt;
  Self.SE_OsvCntChange(Self.SE_OsvCnt);
 
- Self.Caption := 'Oÿ '+Self.orData.id;
+ Self.Caption := 'O≈ò '+Self.orData.id;
  Self.ShowModal();
 end;
 

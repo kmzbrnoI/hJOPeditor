@@ -1,4 +1,4 @@
-unit ReliefZT;
+Ôªøunit ReliefZT;
 //mod reliefu Zaverova tabulka
 //tento mod umoznuje editaci jizdnich cest
 //pri vstupu do nej dochazi k vyhodoceni useku podle jejich korene
@@ -345,7 +345,7 @@ begin
  ver := inifile.ReadString('G','ver',_ZT_FileVersion);
  if (_ZT_FileVersion <> ver) then
   begin
-   if (Application.MessageBox(PChar('NaËÌt·te soubor s verzÌ '+ver+#13#10+'Aplikace moment·lnÏ podporuje verzi '+_ZT_FileVersion+#13#10+'Chcete pokraËovat?'), 'Varov·nÌ', MB_YESNO OR MB_ICONQUESTION) = mrNo) then
+   if (Application.MessageBox(PChar('Naƒç√≠t√°te soubor s verz√≠ '+ver+#13#10+'Aplikace moment√°lnƒõ podporuje verzi '+_ZT_FileVersion+#13#10+'Chcete pokraƒçovat?'), 'Varov√°n√≠', MB_YESNO OR MB_ICONQUESTION) = mrNo) then
     begin
      Result := 2;
      Exit;

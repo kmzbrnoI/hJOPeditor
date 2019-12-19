@@ -1,4 +1,4 @@
-unit PGraphics;
+Ôªøunit PGraphics;
 
 // panel graphics
 //  je trida, ktera obsahuje vykreslovaci nastroje dostupne pro vsechny podtridy panelu
@@ -58,37 +58,37 @@ begin
    case (Text[j+1]) of
     #32..#90:  TextIndex := ord(Text[j+1])-32;
     #97..#122: TextIndex := ord(Text[j+1])-97+59;
-    'ö' : TextIndex := 90;
-    'ù' : TextIndex := 91;
-    'û' : TextIndex := 92;
-    '·' : TextIndex := 93;
-    'Ë' : TextIndex := 94;
-    'È' : TextIndex := 95;
-    'Ï' : TextIndex := 96;
-    'Ì' : TextIndex := 97;
-    'Ô' : TextIndex := 98;
-    'Ú' : TextIndex := 99;
-    'Û' : TextIndex := 100;
-    '¯' : TextIndex := 101;
-    '˘' : TextIndex := 102;
-    '˙' : TextIndex := 103;
-    '˝' : TextIndex := 104;
+    '≈°' : TextIndex := 90;
+    '≈•' : TextIndex := 91;
+    '≈æ' : TextIndex := 92;
+    '√°' : TextIndex := 93;
+    'ƒç' : TextIndex := 94;
+    '√©' : TextIndex := 95;
+    'ƒõ' : TextIndex := 96;
+    '√≠' : TextIndex := 97;
+    'ƒè' : TextIndex := 98;
+    '≈à' : TextIndex := 99;
+    '√≥' : TextIndex := 100;
+    '≈ô' : TextIndex := 101;
+    '≈Ø' : TextIndex := 102;
+    '√∫' : TextIndex := 103;
+    '√Ω' : TextIndex := 104;
 
-    'ä' : TextIndex := 105;
-    'ç' : TextIndex := 106;
-    'é' : TextIndex := 107;
-    '¡' : TextIndex := 108;
-    '»' : TextIndex := 109;
-    '…' : TextIndex := 110;
-    'Ã' : TextIndex := 111;
-    'Õ' : TextIndex := 112;
-    'œ' : TextIndex := 113;
-    '“' : TextIndex := 114;
-    '”' : TextIndex := 115;
-    'ÿ' : TextIndex := 116;
-    'Ÿ' : TextIndex := 117;
-    '⁄' : TextIndex := 118;
-    '›' : TextIndex := 119;
+    '≈†' : TextIndex := 105;
+    '≈§' : TextIndex := 106;
+    '≈Ω' : TextIndex := 107;
+    '√Å' : TextIndex := 108;
+    'ƒå' : TextIndex := 109;
+    '√â' : TextIndex := 110;
+    'ƒö' : TextIndex := 111;
+    '√ç' : TextIndex := 112;
+    'ƒé' : TextIndex := 113;
+    '≈á' : TextIndex := 114;
+    '√ì' : TextIndex := 115;
+    '≈ò' : TextIndex := 116;
+    '≈Æ' : TextIndex := 117;
+    '√ö' : TextIndex := 118;
+    '√ù' : TextIndex := 119;
    else
     TextIndex := 0;
    end;

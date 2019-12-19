@@ -1,4 +1,4 @@
-unit Panel;
+Ôªøunit Panel;
 
 interface
 
@@ -290,7 +290,7 @@ begin
  if (RightStr(aFile, 5) = _Suf_bmp) then Mode := dmBitmap
  else if (RightStr(aFile, 5) = _Suf_obj) then Mode := dmBloky
  else
-   raise EGeneralFileOpen.Create('Soubor s nepodporovanou p¯Ìponou!');
+   raise EGeneralFileOpen.Create('Soubor s nepodporovanou p≈ô√≠ponou!');
 
  Self.Initialize(Point(0,0), Mode);
  Self.FLoad(aFile);
@@ -629,7 +629,7 @@ end;
 procedure TRelief.SetRozmery(aWidth,aHeight:Byte);
 begin
  if (Self.Mode <> dmBitmap) then
-   raise Exception.Create('RozmÏny lze mÏnit jen v reûimu bitmapy!');
+   raise Exception.Create('Rozmƒõny lze mƒõnit jen v re≈æimu bitmapy!');
 
  PanelBitmap.SetRozmery(aWidth, aHeight);
 
@@ -903,7 +903,7 @@ begin
       end else begin
        tmp_or := Self.GetORGraf(Position);
        if (tmp_or.MovingOR > -1) then
-         Self.MessageEvent(Self, 'Oÿ : '+ORs[tmp_or.MovingOR].Name+' (id = '+ORs[tmp_or.MovingOR].id+')');
+         Self.MessageEvent(Self, 'O≈ò : '+ORs[tmp_or.MovingOR].Name+' (id = '+ORs[tmp_or.MovingOR].id+')');
 
        //zacatek pohybu
        if (Self.FMove) then
@@ -967,7 +967,7 @@ begin
  Self.DK_Menu.Items.Add(MI);
 
  MI := TMenuItem.Create(Self.DK_Menu);
- MI.Caption := 'Smazat Oÿ';
+ MI.Caption := 'Smazat O≈ò';
  MI.OnClick := Self.DKDeleteClick;
  Self.DK_Menu.Items.Add(MI);
 end;
@@ -981,11 +981,11 @@ procedure TRelief.DKDeleteClick(Sender:TObject);
 begin
  if (Self.ORs.Count <= 1) then
   begin
-   Application.MessageBox('PoslednÌ Oÿ nelze smazat!','Nelze pokraËovat',MB_OK OR MB_ICONSTOP);
+   Application.MessageBox('Posledn√≠ O≈ò nelze smazat!','Nelze pokraƒçovat',MB_OK OR MB_ICONSTOP);
    Exit;
   end;
 
- if (Application.MessageBox('Opravdu smazat?','Ot·zka',MB_YESNO OR MB_ICONQUESTION) = mrYes) then
+ if (Application.MessageBox('Opravdu smazat?','Ot√°zka',MB_YESNO OR MB_ICONQUESTION) = mrYes) then
    Self.ORs.Delete(Self.ORClick.MovingOR);
 end;
 
@@ -1032,7 +1032,7 @@ begin
 
  try
    if (RightStr(data,2) <> #13#13) then
-     raise EORLoad.Create('OR data nekonËÌ dvÏma symboly novÈho ¯·dku!');
+     raise EORLoad.Create('OR data nekonƒç√≠ dvƒõma symboly nov√©ho ≈ô√°dku!');
 
    ExtractStringsEx([#13], [], LeftStr(data,Length(data)-2), lines);
 
@@ -1042,7 +1042,7 @@ begin
      ExtractStringsEx([';'], [], line, data_main);
 
      if (data_main.Count < 14) then
-       raise EORLoad.Create('M·lo poloûek definujÌcÌ Oÿ!');
+       raise EORLoad.Create('M√°lo polo≈æek definuj√≠c√≠ O≈ò!');
 
      oblr.Name       := data_main[0];
      oblr.ShortName  := data_main[1];
@@ -1075,7 +1075,7 @@ begin
          ExtractStringsEx(['#'], [], data_osv[j], data_osv2);
 
          if (data_osv2.Count < 2) then
-           raise EORLoad.Create('M·lo poloûek definujÌcÌ osvÏtlenÌ!');
+           raise EORLoad.Create('M√°lo polo≈æek definuj√≠c√≠ osvƒõtlen√≠!');
 
          oblr.Osvetleni.Cnt := oblr.Osvetleni.Cnt + 1;
          oblr.Osvetleni.Data[oblr.Osvetleni.Cnt-1].board := StrToInt(data_osv2[0]);
