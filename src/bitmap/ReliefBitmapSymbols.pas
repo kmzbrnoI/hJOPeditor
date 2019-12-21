@@ -158,7 +158,7 @@ begin
  if ((aPos.X < 0) or (aPos.Y < 0) or (aPos.X > _MAX_WIDTH) or (aPos.Y > _MAX_HEIGHT)) then
    raise EInvalidPosition.Create('Neplatná pozice!');
  if (Self.Bitmap[aPos.X,aPos.Y] = -1) then
-   raise ENonemptyField.Create('Na pozici je již symbol!');
+   raise ENonemptyField.Create('Na pozici není žádný symbol!');
 
  Self.Bitmap[aPos.X,aPos.Y] := -1;
 end;
@@ -357,7 +357,8 @@ begin
          for j := Self.Operations.Group.Start.Y to Position.Y do
           begin
            Self.Operations.Move.Symbols[i-Self.Operations.Group.Start.X,j-Self.Operations.Group.Start.Y] := Self.GetSymbol(Point(i,j));
-           Self.DeleteFromStructure(Point(i,j));
+           if (Self.Bitmap[i,j] <> -1) then
+             Self.DeleteFromStructure(Point(i,j));
           end;//for j
         end;//for i
 
@@ -475,9 +476,9 @@ begin
 
        //pokud jsme na 2. bode
        for i := Self.Operations.Group.Start.X to Position.X do
-        begin
-         for j := Self.Operations.Group.Start.Y to Position.Y do Self.DeleteFromStructure(Point(i,j));
-        end;//for i
+         for j := Self.Operations.Group.Start.Y to Position.Y do
+           if (Self.Bitmap[i,j] <> -1) then
+             Self.DeleteFromStructure(Point(i,j));
 
        Self.Operations.Group.Start.X := -1;
        Self.Operations.Group.Start.Y := -1;
