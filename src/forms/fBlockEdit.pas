@@ -178,6 +178,9 @@ procedure TF_BlockEdit.E_BlkChange(Sender: TObject);
 begin
  Self.UpdateLB(Self.E_Blk.Text);
  Self.LB_BlocksClick(Self.LB_Blocks);
+
+ if ((Self.E_Blk.Text <> '') and (Self.LB_Blocks.ItemIndex <= 0) and (Self.OpenBlok.Blok = -1)) then
+   Self.LB_Blocks.ItemIndex := 2; // vybrat prvni filtrovany blok
 end;
 
 procedure TF_BlockEdit.E_BlkKeyDown(Sender: TObject; var Key: Word;
@@ -267,9 +270,8 @@ end;
 
 procedure TF_BlockEdit.FormShow(Sender: TObject);
 begin
- Self.E_Blk.Text := '';
- Self.E_BlkChange(Self.E_Blk);
- Self.E_Blk.SetFocus;
+ Self.UpdateLB(Self.E_Blk.Text);
+ Self.E_Blk.SetFocus();
 
  if (Self.OpenBlok = nil) then
   begin
@@ -358,7 +360,9 @@ end;//procedur
 procedure TF_BlockEdit.LB_BlocksClick(Sender: TObject);
 var id:Integer;
 begin
- if (((Sender as TListBox).ItemIndex < 0) or (Self.LB_BlocksIndexes[(Sender as TListBox).ItemIndex] < 0)) then
+ if ((Sender as TListBox).ItemIndex < 0) then Exit();
+
+ if (Self.LB_BlocksIndexes[(Sender as TListBox).ItemIndex] < 0) then
   id := Self.LB_BlocksIndexes[(Sender as TListBox).ItemIndex]
  else
   id := Self.Bloky.Bloky[Self.LB_BlocksIndexes[(Sender as TListBox).ItemIndex]].id;
@@ -427,9 +431,6 @@ begin
       index := Self.LB_Blocks.Items.Count-1;
     end;
   end;//for i
-
- if ((Self.E_Blk.Text <> '') and (index <= 0)) then
-   index := 2; // vybrat prvni filtrovany blok
 
  Self.LB_Blocks.ItemIndex := index;
 end;
