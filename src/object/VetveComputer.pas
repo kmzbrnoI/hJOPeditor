@@ -345,6 +345,10 @@ begin
    for i := 0 to r.symbols.Count-1 do vetev.Symbols[i] := r.symbols[i];
    vetve.Add(vetev);
 
+   // 4) odstranit vyhybky
+   data[vlPos.X, vlPos.Y] := -1;
+   data[vrPos.X, vrPos.Y] := -1;
+
    // 4) hledame navazujici levou vetev
    ComputeNormalBlokVetve(po, data, Point(vlPos.X-1, vlPos.Y), vetve);
 
