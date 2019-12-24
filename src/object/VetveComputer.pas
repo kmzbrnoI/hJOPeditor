@@ -64,13 +64,15 @@ begin
     data[(po.Bloky[i] as TUsek).Symbols[j].Position.X,
          (po.Bloky[i] as TUsek).Symbols[j].Position.Y] := (po.Bloky[i] as TUsek).Symbols[j].SymbolID;
 
-   // do tohoto pole take musime ulozit vyhybky
+   // do tohoto pole take musime ulozit vyhybky a vykolejky
    for j := 0 to po.Bloky.Count-1 do
     begin
-     if ((po.Bloky[j].typ <> TBlkType.vyhybka) or
-         ((po.Bloky[j] as TVyhybka).obj <> po.Bloky[i].index)) then continue;
-     data[(po.Bloky[j] as TVyhybka).Position.X,
-          (po.Bloky[j] as TVyhybka).Position.Y] := (po.Bloky[j] as TVyhybka).SymbolID;
+     if ((po.Bloky[j].typ = TBlkType.vyhybka) and ((po.Bloky[j] as TVyhybka).obj = po.Bloky[i].index)) then
+       data[(po.Bloky[j] as TVyhybka).Position.X,
+            (po.Bloky[j] as TVyhybka).Position.Y] := (po.Bloky[j] as TVyhybka).SymbolID;
+     if ((po.Bloky[j].typ = TBlkType.vykol) and ((po.Bloky[j] as TVykol).obj = po.Bloky[i].index)) then
+       data[(po.Bloky[j] as TVykol).Pos.X,
+            (po.Bloky[j] as TVykol).Pos.Y] := (po.Bloky[j] as TVykol).symbol + _Vykol_Start;
     end;
 
    if (data[TUsek(po.Bloky[i]).Root.X, TUsek(po.Bloky[i]).Root.Y] = _DKS_Top) then
@@ -166,7 +168,8 @@ begin
             ((data[new.X, new.Y] >= _Krizeni_Start) and (data[new.X, new.Y] <=_Krizeni_End))) do
         begin
          // pridam symbol do seznamu symbolu
-         if (((new.X <> first.X) or (new.Y <> first.Y)) or (j = 1)) then
+         if ((((new.X <> first.X) or (new.Y <> first.Y)) or (j = 1)) and
+             ((data[new.X, new.Y] < _Vykol_Start) or (data[new.X, new.Y] > _Vykol_End))) then
           begin
            symbol.Position := new;
            symbol.SymbolID := data[new.X, new.Y];
