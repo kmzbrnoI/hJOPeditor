@@ -557,7 +557,7 @@ end;
 //checking data valid
 function TPanelObjects.CheckValid(var error_cnt:Byte):TStrings;
 var str:string;
-    i:Integer;
+    i, j:Integer;
     vetev:TVetev;
 begin
  Result := TStringList.Create();
@@ -601,8 +601,11 @@ begin
        error_cnt := error_cnt + 1;
       end;
 
-     for vetev in (Self.Bloky[i] as TUsek).Vetve do
+     for j := 0 to (Self.Bloky[i] as TUsek).Vetve.Count-1 do
       begin
+       vetev := (Self.Bloky[i] as TUsek).Vetve[j];
+       if (((Self.Bloky[i] as TUsek).DKStype <> TDKSType.dksNone) and (j < 3)) then
+         continue;
        if (((vetev.node1.vyh >= 0) and ((vetev.node1.ref_plus = -1) or (vetev.node1.ref_minus = -1))) or
           ((vetev.node2.vyh >= 0) and ((vetev.node2.ref_plus = -1) or (vetev.node2.ref_minus = -1)))) then
          Result.Add('WARN: blok '+IntToStr(i)+' (úsek) : větev ma návaznost na výhybku, přesto za výhybkou nikam nepokračuje');
