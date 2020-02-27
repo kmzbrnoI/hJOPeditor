@@ -55,9 +55,6 @@ type
       end;
      end;//Operations
 
-    procedure AddToStructure(aPos:TPoint; aText:string; aColor:ShortInt; aBlokDesc:boolean);
-    procedure DeleteFromStructure(aPos:TPoint);
-
     procedure Adding(Position:TPoint);
     procedure Moving(Position:TPoint);
     procedure Deleting(Position:TPoint);
@@ -79,6 +76,9 @@ type
 
      constructor Create(DrawCanvas:TCanvas;TextIL:TImageList;Parent:TForm; Graphics:TPanelGraphics);
      destructor Destroy; override;
+
+     procedure AddToStructure(aPos:TPoint; aText:string; aColor:ShortInt; aBlokDesc:boolean);
+     procedure DeleteFromStructure(aPos:TPoint);
 
      function GetPopisekData(Index:Integer):TPopisek;
      function SetPopisekData(Index:Integer;Data:TPopisek):Byte;

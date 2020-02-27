@@ -299,7 +299,17 @@ end;
 
 procedure TRelief.Import(aFile:string);
 begin
+ if (RightStr(aFile, 4) <> ReliefBitmap._IMPORT_MYJOP_SUFFIX) then
+   raise EGeneralFileOpen.Create('Soubor s nepodporovanou příponou!');
+ Self.Initialize(Point(0,0), dmBitmap);
+ Self.PanelBitmap.ImportMyJOP(aFile);
 
+ Self.Panel.FileStav := Self.PanelBitmap.FileStav;
+ Self.Zobrazeni.PanelWidth := Self.PanelBitmap.PanelWidth;
+ Self.Zobrazeni.PanelHeight := Self.PanelBitmap.PanelHeight;
+
+ Self.DrawObject.Width  := Self.Zobrazeni.PanelWidth*_Symbol_Sirka;
+ Self.DrawObject.Height := Self.Zobrazeni.PanelHeight*_Symbol_Vyska;
 end;
 
 destructor TRelief.Destroy();

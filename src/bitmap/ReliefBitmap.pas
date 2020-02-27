@@ -6,7 +6,10 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
   StrUtils, ReliefText, VektorBasedObject, ReliefBitmapSymbols, Global, Forms,
-  OblastRizeni, PGraphics, symbolHelper;
+  OblastRizeni, PGraphics, symbolHelper, IBUtils;
+
+const
+ _IMPORT_MYJOP_SUFFIX = '.pnj';
 
 type
  TORAskEvent = function(Pos:TPoint):Boolean of object;
@@ -50,11 +53,9 @@ type
     function IsOperationEvent:boolean;
     procedure ChangeTextEvent(Sender:TObject; var popisek:TPopisek);
 
-    function ImportObj(Data:TObject):Byte;
-
   public
 
-   Symbols        :  TBitmapSymbols;
+   Symbols        : TBitmapSymbols;
    SeparatorsVert : TVBO;
    SeparatorsHor  : TVBO;
    KPopisky       : TVBO;
@@ -85,7 +86,7 @@ type
     procedure MouseUp(Position:TPoint;Button:TMouseButton);
     procedure DblClick(Position:TPoint);
 
-    function Import(Data:TObject):Byte;     // import dat zatim z TPanelObjects
+    procedure ImportMyJOP(fn:string);
 
     property Soubor:string read FSoubor;
     property Stav:ShortInt read FStav;
@@ -108,7 +109,7 @@ type
 
 implementation
 
-uses ReliefObjects;
+uses ReliefObjects, ownStrUtils;
 
 //nacitani souboru s bitmapovymi daty
 procedure TPanelBitmap.FLoad(aFile:string;var ORs:string);
@@ -785,26 +786,96 @@ end;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// import dat zatim z TPanelObjects
-function TPanelBitmap.Import(Data:TObject):Byte;
+procedure TPanelBitmap.ImportMyJOP(fn:string);
+var f: TextFile;
+    line: string;
+    splitted: TStrings;
+    i, x, y, popx, popy, width, height: Integer;
 begin
- Result := 0;
+ AssignFile(f, fn);
+ Reset(f);
 
- if (Data.ClassType = TPanelObjects) then
-  begin
-   Result := Self.ImportObj(Data);
-  end;//if (Data.ClassType = TPanelBitmap)
-end;
+ splitted := TStringList.Create();
+ try
+   while (not Eof(f)) do
+    begin
+     ReadLn(f, line);
 
-// import objektovych dat
-function TPanelBitmap.ImportObj(Data:TObject):Byte;
-//var obj:TPanelObjects;
-begin
-// obj := (Data as TPanelObjects);
+     splitted.Clear();
+     ExtractStringsEx([';'], [], line, splitted);
 
- // tohleto zatim neni dodelano
+     if (splitted[0] = 'JOP') then begin
+       Self.FPanelWidth := StrToInt(splitted[4]);
+       Self.FPanelHeight := StrToInt(splitted[5]);
+       Self.Symbols.SetRozmery(Self.FPanelWidth, Self.FPanelHeight);
 
- Result := 0;
+     end else if (splitted[0] = 'G') then
+      begin
+       { x := StrToInt(splitted[10]);
+       y := StrToInt(splitted[11]); }
+
+     end else if (splitted[0] = 'E') then
+      begin
+       x := StrToInt(splitted[5]);
+       y := StrToInt(splitted[6]);
+       popx := StrToInt(splitted[8]);
+       popy := StrToInt(splitted[9]);
+
+       if (splitted[3] = '1') then
+         Self.Symbols.Bitmap[x][y] := _Usek_Start + StrToInt(splitted[12])
+       else if (splitted[3] = '2') then
+         Self.Symbols.Bitmap[x][y] := _Usek_Start + 6 + StrToInt(splitted[12])
+       else if (splitted[3] = '3') then
+         Self.Symbols.Bitmap[x][y] := _Zarazedlo_r + StrToInt(splitted[12])
+       else if (splitted[3] = '4') then
+         Self.Symbols.Bitmap[x][y] := _SCom_Start + StrToInt(splitted[12])
+       else if (splitted[3] = '5') then
+         Self.Symbols.Bitmap[x][y] := _SCom_Start + 4 + StrToInt(splitted[12])
+       else if (splitted[3] = '6') then begin
+         Self.Symbols.Bitmap[x][y] := _Vyhybka_Start + StrToInt(splitted[12]);
+         Self.Text.AddToStructure(Point(popx, popy), splitted[7], 4, true);
+       end else if (splitted[3] = '10') then
+         Self.Symbols.Bitmap[x][y] := _Zamek
+       else if (splitted[3] = '7') then begin
+         if (splitted[12] = '0') then
+            Self.Symbols.Bitmap[x][y] := _Vykol_Start
+         else
+           Self.Symbols.Bitmap[x][y] := _Vykol_Start + 1;
+       end else if (splitted[3] = '11') then begin
+         width := StrToInt(splitted[15]);
+         for i := 0 to width-1 do
+           Self.Symbols.Bitmap[x+i][y] := _Peron_Start + StrToInt(splitted[12])
+       end else if (splitted[3] = '20') then
+         Self.Symbols.Bitmap[x][y] := _Uvazka_Start
+       else if (splitted[3] = '21') then
+         Self.Symbols.Bitmap[x][y] := _Uvazka_Spr
+       else if (splitted[3] = '50') then begin
+         height := StrToInt(splitted[15]);
+         for i := 0 to height-1 do
+           Self.Symbols.Bitmap[x][y+i] := _Prj
+       end else if (splitted[3] = '80') then
+         Self.Text.AddToStructure(Point(x, y), splitted[7], 1, false);
+
+       if ((splitted[3] = '0') or (splitted[3] = '1')) then
+        begin
+         if (StrToBoolDef(splitted[22], False)) then
+           Self.SeparatorsVert.Add(Point(x, y));
+         if (StrToBoolDef(splitted[23], False)) then
+           Self.SeparatorsHor.Add(Point(x, y));
+         if (StrToBoolDef(splitted[35], False)) then
+          begin
+           Self.KPopisky.Add(Point(x, y));
+           Self.JCClick.Add(Point(x-1, y));
+           Self.JCClick.Add(Point(x+1, y));
+          end;
+        end;
+     end;
+    end;
+ finally
+   splitted.Free();
+ end;
+
+ Close(f);
 end;
 
 ///////////////////////////////////////////////////////////////////////////////

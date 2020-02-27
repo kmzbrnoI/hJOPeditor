@@ -30,6 +30,7 @@ const
   _SCom_End         = 29;
   _Zarazedlo_r      = 30;
   _Zarazedlo_l      = 31;
+  _Peron_Start      = 32;
   _Prj              = 40;
   _Uvazka           = 43;
   _Uvazka_Spr       = 45;

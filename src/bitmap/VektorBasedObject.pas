@@ -43,9 +43,6 @@ type
 
     Separ:TSeparType;
 
-    procedure Add(Position:TPoint); overload;
-    procedure Delete(Position:TPoint); overload;
-
     procedure Adding(Position:TPoint);
     procedure Moving(Position:TPoint);
     procedure Deleting(Position:TPoint);
@@ -63,6 +60,9 @@ type
 
     constructor Create(DrawCanvas:TCanvas;SymbolIL:TImageList;SymbolIndex:Integer;Separ:TSeparType = stNone);
     destructor Destroy(); override;
+
+    procedure Add(Position:TPoint); overload;
+    procedure Delete(Position:TPoint); overload;
 
     function GetObject(Position:TPoint):Integer;
 
