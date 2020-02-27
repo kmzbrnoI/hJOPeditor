@@ -104,6 +104,8 @@ type
     N6: TMenuItem;
     PM_Reload_Blocks: TMenuItem;
     PM_Show_Blk_Descriptions: TMenuItem;
+    OD_Import: TOpenDialog;
+    MI_Import: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure PM_NewClick(Sender: TObject);
@@ -135,6 +137,7 @@ type
     procedure TB_SoupravaPosClick(Sender: TObject);
     procedure PM_Reload_BlocksClick(Sender: TObject);
     procedure PM_Show_Blk_DescriptionsClick(Sender: TObject);
+    procedure MI_ImportClick(Sender: TObject);
   private
     pushedButton:TToolButton;                   // last pushed button
 
@@ -155,7 +158,9 @@ type
     procedure DestroyClasses;
     procedure DestroyReliefClasses;
 
+    procedure LoadFileUpdateGUI(fname:string);
     procedure OpenFile(fname:string);
+    procedure ImportFile(fname:string);
     procedure DesignOpen(FName:string);
     procedure DesignClose;
 
@@ -443,25 +448,8 @@ begin
  F_NewRelief.OpenForm;
 end;
 
-//otevirani souboru
-procedure TF_Hlavni.OpenFile(fname:string);
+procedure TF_Hlavni.LoadFileUpdateGUI(fname:string);
 begin
- Relief := TRelief.Create(Self.DXD_Main, Self);
-
- Self.AssignReliefEvents();
-
- try
-   Relief.Open(fname);
- except
-   on E:Exception do
-    begin
-     if (Assigned(Relief)) then FreeAndNil(Relief);
-     Self.DesignClose();
-     Application.MessageBox(PChar('Otevření suboru skončilo s chybou:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONERROR);
-     Exit();
-    end;
- end;
-
  Self.RepaintModes(Relief.Mode);
 
  case (Self.Relief.Mode) of
@@ -478,6 +466,46 @@ begin
 
  ReliefOptions.UseData(F_Hlavni.Relief);
  Self.DesignOpen(ExtractFileName(fname));
+end;
+
+procedure TF_Hlavni.OpenFile(fname:string);
+begin
+ Relief := TRelief.Create(Self.DXD_Main, Self);
+ Self.AssignReliefEvents();
+
+ try
+   Relief.Open(fname);
+ except
+   on E:Exception do
+    begin
+     if (Assigned(Relief)) then FreeAndNil(Relief);
+     Self.DesignClose();
+     Application.MessageBox(PChar('Otevření souboru skončilo s chybou:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONERROR);
+     Exit();
+    end;
+ end;
+
+ Self.LoadFileUpdateGUI(fname);
+end;
+
+procedure TF_Hlavni.ImportFile(fname:string);
+begin
+ Relief := TRelief.Create(Self.DXD_Main, Self);
+ Self.AssignReliefEvents();
+
+ try
+   Relief.Import(fname);
+ except
+   on E:Exception do
+    begin
+     if (Assigned(Relief)) then FreeAndNil(Relief);
+     Self.DesignClose();
+     Application.MessageBox(PChar('Import suboru skončil s chybou:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONERROR);
+     Exit();
+    end;
+ end;
+
+ Self.LoadFileUpdateGUI('Nový projekt');
 end;
 
 procedure TF_Hlavni.PM_OpenClick(Sender: TObject);
@@ -897,6 +925,23 @@ begin
 
  Self.DesignClose();
  Self.DestroyReliefClasses();
+end;
+
+procedure TF_Hlavni.MI_ImportClick(Sender: TObject);
+begin
+ if (Assigned(Relief)) then
+   if (Application.MessageBox('Importováním projektu ztratíte všechna neuložená data, pokračovat?',
+                              'Pokračovat?', MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
+     Exit();
+
+ if (Self.OD_Import.Execute(Self.Handle)) then
+  begin
+   if (Assigned(Relief)) then
+     if (Relief.FileStav <> 0) then
+       FreeAndNil(Relief);
+
+   Self.ImportFile(Self.OD_Import.FileName);
+  end;
 end;
 
 procedure TF_Hlavni.DesignOpen(FName:string);

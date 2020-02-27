@@ -155,6 +155,7 @@ type
    procedure New(size:TPoint;firstOR:TOR);
    procedure Open(aFile:string);
    procedure Save(aFile:string);
+   procedure Import(aFile:string);
 
    procedure Show(CursorPos:TPoint);
    procedure Escape(Group:boolean);
@@ -294,6 +295,11 @@ begin
 
  Self.Initialize(Point(0,0), Mode);
  Self.FLoad(aFile);
+end;
+
+procedure TRelief.Import(aFile:string);
+begin
+
 end;
 
 destructor TRelief.Destroy();
