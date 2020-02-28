@@ -6,7 +6,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
   StrUtils, ReliefText, VektorBasedObject, ReliefBitmapSymbols, Global, Forms,
-  OblastRizeni, PGraphics, symbolHelper, IBUtils;
+  OblastRizeni, PGraphics, symbolHelper, IBUtils, Generics.Collections;
 
 const
  _IMPORT_MYJOP_SUFFIX = '.pnj';
@@ -789,13 +789,16 @@ end;
 procedure TPanelBitmap.ImportMyJOP(fn:string);
 var f: TextFile;
     line: string;
-    splitted: TStrings;
-    i, x, y, popx, popy, width, height: Integer;
+    splitted, gsplitted: TStrings;
+    i, x, y, popx, popy, width, height, gref: Integer;
+    g: TDictionary<Integer, string>;
 begin
  AssignFile(f, fn);
  Reset(f);
 
+ g := TDictionary<Integer, string>.Create();
  splitted := TStringList.Create();
+ gsplitted := TStringList.Create();
  try
    while (not Eof(f)) do
     begin
@@ -809,13 +812,9 @@ begin
        Self.FPanelHeight := StrToInt(splitted[5]);
        Self.Symbols.SetRozmery(Self.FPanelWidth, Self.FPanelHeight);
 
-     end else if (splitted[0] = 'G') then
-      begin
-       { x := StrToInt(splitted[10]);
-       y := StrToInt(splitted[11]); }
-
-     end else if (splitted[0] = 'E') then
-      begin
+     end else if (splitted[0] = 'G') then begin
+       g.AddOrSetValue(StrToInt(splitted[1]), line);
+     end else if (splitted[0] = 'E') then begin
        x := StrToInt(splitted[5]);
        y := StrToInt(splitted[6]);
        popx := StrToInt(splitted[8]);
@@ -869,10 +868,29 @@ begin
            Self.JCClick.Add(Point(x+1, y));
           end;
         end;
+       if ((splitted[3] = '4') or (splitted[3] = '5')) then
+        begin
+         gref := StrToInt(splitted[17]);
+         gsplitted.Clear();
+         ExtractStringsEx([';'], [], g[gref], gsplitted);
+         if ((gsplitted[12] = '0') and (gsplitted[13] = '0')) then
+          begin
+           popx := StrToInt(gsplitted[10]);
+           popy := StrToInt(gsplitted[11]);
+          end else begin
+           popx := StrToInt(gsplitted[12]);
+           popy := StrToInt(gsplitted[13]);
+          end;
+         if (Self.Text.GetPopisek(Point(popx, popy)) = -1) then
+           Self.Text.AddToStructure(Point(popx, popy), gsplitted[8], 1, true);
+        end;
+
      end;
     end;
  finally
    splitted.Free();
+   gsplitted.Free();
+   g.Free();
  end;
 
  Close(f);
