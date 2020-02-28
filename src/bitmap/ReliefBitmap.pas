@@ -900,7 +900,7 @@ begin
            Self.JCClick.Add(Point(x+1, y));
           end;
         end;
-       if ((splitted[3] = '4') or (splitted[3] = '5')) then
+       if ((splitted[3] = '4') or (splitted[3] = '5') or (splitted[3] = '10')) then
         begin
          gref := StrToInt(splitted[17]);
          gsplitted.Clear();
