@@ -846,6 +846,7 @@ begin
             Self.Symbols.Bitmap[x][y] := _Vykol_Start
          else
            Self.Symbols.Bitmap[x][y] := _Vykol_Start + 1;
+         Self.Text.AddToStructure(Point(popx, popy), splitted[7], 4, true);
        end else if (splitted[3] = '11') then begin
          width := StrToInt(splitted[15]);
          for i := 0 to width-1 do
