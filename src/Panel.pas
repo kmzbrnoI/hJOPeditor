@@ -147,7 +147,7 @@ type
 
 
   public
-   ORs: TList<TOr>;
+   ORs: TList<TOR>;
 
    constructor Create(DDRaw:TDXDraw;aParentForm:TForm);
    destructor Destroy; override;
@@ -302,7 +302,7 @@ begin
  if (RightStr(aFile, 4) <> ReliefBitmap._IMPORT_MYJOP_SUFFIX) then
    raise EGeneralFileOpen.Create('Soubor s nepodporovanou příponou!');
  Self.Initialize(Point(0,0), dmBitmap);
- Self.PanelBitmap.ImportMyJOP(aFile);
+ Self.PanelBitmap.ImportMyJOP(aFile, Self.ORs);
 
  Self.Panel.FileStav := Self.PanelBitmap.FileStav;
  Self.Zobrazeni.PanelWidth := Self.PanelBitmap.PanelWidth;

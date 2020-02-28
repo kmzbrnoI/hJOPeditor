@@ -86,7 +86,7 @@ type
     procedure MouseUp(Position:TPoint;Button:TMouseButton);
     procedure DblClick(Position:TPoint);
 
-    procedure ImportMyJOP(fn:string);
+    procedure ImportMyJOP(fn:string; ORs:TList<TOR>);
 
     property Soubor:string read FSoubor;
     property Stav:ShortInt read FStav;
@@ -786,18 +786,21 @@ end;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-procedure TPanelBitmap.ImportMyJOP(fn:string);
+procedure TPanelBitmap.ImportMyJOP(fn:string; ORs:TList<TOR>);
 var f: TextFile;
     line: string;
     splitted, gsplitted: TStrings;
     i, x, y, popx, popy, width, height, gref: Integer;
     g: TDictionary<Integer, string>;
+    OblR: TOR;
 const
     OFFSET_X = 0;
     OFFSET_Y = 0;
 begin
+ Self.FStav := 1;
  AssignFile(f, fn);
  Reset(f);
+ ORs.Clear();
 
  g := TDictionary<Integer, string>.Create();
  splitted := TStringList.Create();
@@ -851,7 +854,30 @@ begin
          Self.Symbols.Bitmap[x][y] := _Uvazka_Start
        else if (splitted[3] = '21') then
          Self.Symbols.Bitmap[x][y] := _Uvazka_Spr
-       else if (splitted[3] = '50') then begin
+       else if (splitted[3] = '30') then begin
+         gref := StrToInt(splitted[17]);
+         gsplitted.Clear();
+         ExtractStringsEx([';'], [], g[gref], gsplitted);
+
+         OblR.Name := gsplitted[7];
+         OblR.id := gsplitted[9];
+         OblR.ShortName := gsplitted[9];
+         OblR.Poss.DK := Point(x, y);
+         OblR.Poss.Queue := Point(OblR.Poss.DK.X+10, OblR.Poss.DK.Y);
+         OblR.Poss.Time := Point(OblR.Poss.DK.X+10, OblR.Poss.DK.Y+1);
+
+         if ((gsplitted[12] = '0') and (gsplitted[13] = '0')) then
+          begin
+           popx := StrToInt(gsplitted[10]) + OFFSET_X;
+           popy := StrToInt(gsplitted[11]) + OFFSET_Y;
+          end else begin
+           popx := StrToInt(gsplitted[12]) + OFFSET_X;
+           popy := StrToInt(gsplitted[13]) + OFFSET_Y;
+          end;
+
+         Self.Text.AddToStructure(Point(popx, popy), OblR.Name, 4, False);
+         ORs.Add(OblR);
+       end else if (splitted[3] = '50') then begin
          height := StrToInt(splitted[15]);
          for i := 0 to height-1 do
            Self.Symbols.Bitmap[x][y+i] := _Prj
