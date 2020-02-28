@@ -852,6 +852,8 @@ begin
            Self.Symbols.Bitmap[x+i][y] := _Peron_Start + StrToInt(splitted[12])
        end else if (splitted[3] = '20') then
          Self.Symbols.Bitmap[x][y] := _Uvazka_Start
+       else if (splitted[3] = '12') then
+         Self.Symbols.Bitmap[x][y] := _Rozp_Start
        else if (splitted[3] = '21') then
          Self.Symbols.Bitmap[x][y] := _Uvazka_Spr
        else if (splitted[3] = '30') then begin
