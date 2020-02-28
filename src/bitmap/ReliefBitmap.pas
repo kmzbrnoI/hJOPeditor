@@ -792,6 +792,9 @@ var f: TextFile;
     splitted, gsplitted: TStrings;
     i, x, y, popx, popy, width, height, gref: Integer;
     g: TDictionary<Integer, string>;
+const
+    OFFSET_X = 0;
+    OFFSET_Y = 0;
 begin
  AssignFile(f, fn);
  Reset(f);
@@ -815,10 +818,10 @@ begin
      end else if (splitted[0] = 'G') then begin
        g.AddOrSetValue(StrToInt(splitted[1]), line);
      end else if (splitted[0] = 'E') then begin
-       x := StrToInt(splitted[5]);
-       y := StrToInt(splitted[6]);
-       popx := StrToInt(splitted[8]);
-       popy := StrToInt(splitted[9]);
+       x := StrToInt(splitted[5]) + OFFSET_X;
+       y := StrToInt(splitted[6]) + OFFSET_Y;
+       popx := StrToInt(splitted[8]) + OFFSET_X;
+       popy := StrToInt(splitted[9]) + OFFSET_Y;
 
        if (splitted[3] = '1') then
          Self.Symbols.Bitmap[x][y] := _Usek_Start + StrToInt(splitted[12])
@@ -875,11 +878,11 @@ begin
          ExtractStringsEx([';'], [], g[gref], gsplitted);
          if ((gsplitted[12] = '0') and (gsplitted[13] = '0')) then
           begin
-           popx := StrToInt(gsplitted[10]);
-           popy := StrToInt(gsplitted[11]);
+           popx := StrToInt(gsplitted[10]) + OFFSET_X;
+           popy := StrToInt(gsplitted[11]) + OFFSET_Y;
           end else begin
-           popx := StrToInt(gsplitted[12]);
-           popy := StrToInt(gsplitted[13]);
+           popx := StrToInt(gsplitted[12]) + OFFSET_X;
+           popy := StrToInt(gsplitted[13]) + OFFSET_Y;
           end;
          if (Self.Text.GetPopisek(Point(popx, popy)) = -1) then
            Self.Text.AddToStructure(Point(popx, popy), gsplitted[8], 1, true);
