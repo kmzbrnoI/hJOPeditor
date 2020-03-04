@@ -814,8 +814,8 @@ begin
      ExtractStringsEx([';'], [], line, splitted);
 
      if (splitted[0] = 'JOP') then begin
-       Self.FPanelWidth := StrToInt(splitted[4]);
-       Self.FPanelHeight := StrToInt(splitted[5]);
+       Self.FPanelWidth := StrToInt(splitted[4]) + OFFSET_X;
+       Self.FPanelHeight := StrToInt(splitted[5]) + OFFSET_Y;
        Self.Symbols.SetRozmery(Self.FPanelWidth, Self.FPanelHeight);
 
      end else if (splitted[0] = 'G') then begin
@@ -838,7 +838,11 @@ begin
          Self.Symbols.Bitmap[x][y] := _SCom_Start + 4 + StrToInt(splitted[12])
        else if (splitted[3] = '6') then begin
          Self.Symbols.Bitmap[x][y] := _Vyhybka_Start + StrToInt(splitted[12]);
-         Self.Text.AddToStructure(Point(popx, popy), splitted[7], 4, true);
+         try
+           Self.Text.AddToStructure(Point(popx, popy), splitted[7], 4, true);
+         except
+
+         end;
        end else if (splitted[3] = '10') then
          Self.Symbols.Bitmap[x][y] := _Zamek
        else if (splitted[3] = '7') then begin
@@ -846,7 +850,11 @@ begin
             Self.Symbols.Bitmap[x][y] := _Vykol_Start
          else
            Self.Symbols.Bitmap[x][y] := _Vykol_Start + 1;
-         Self.Text.AddToStructure(Point(popx, popy), splitted[7], 4, true);
+         try
+           Self.Text.AddToStructure(Point(popx, popy), splitted[7], 4, true);
+         except
+
+         end;
        end else if (splitted[3] = '11') then begin
          width := StrToInt(splitted[15]);
          for i := 0 to width-1 do
@@ -878,14 +886,22 @@ begin
            popy := StrToInt(gsplitted[13]) + OFFSET_Y;
           end;
 
-         Self.Text.AddToStructure(Point(popx, popy), OblR.Name, 4, False);
+         try
+           Self.Text.AddToStructure(Point(popx, popy), OblR.Name, 4, False);
+         except
+
+         end;
          ORs.Add(OblR);
        end else if (splitted[3] = '50') then begin
          height := StrToInt(splitted[15]);
          for i := 0 to height-1 do
            Self.Symbols.Bitmap[x][y+i] := _Prj
        end else if (splitted[3] = '80') then
-         Self.Text.AddToStructure(Point(x, y), splitted[7], 1, false);
+         try
+           Self.Text.AddToStructure(Point(x, y), splitted[7], 1, false);
+         except
+
+         end;
 
        if ((splitted[3] = '0') or (splitted[3] = '1')) then
         begin
@@ -914,7 +930,13 @@ begin
            popy := StrToInt(gsplitted[13]) + OFFSET_Y;
           end;
          if (Self.Text.GetPopisek(Point(popx, popy)) = -1) then
-           Self.Text.AddToStructure(Point(popx, popy), gsplitted[8], 1, true);
+          begin
+           try
+             Self.Text.AddToStructure(Point(popx, popy), gsplitted[8], 1, true);
+           except
+
+           end;
+          end;
         end;
 
      end;
