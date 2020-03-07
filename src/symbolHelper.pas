@@ -6,7 +6,7 @@ unit symbolHelper;
 
 interface
 
-uses Types;
+uses Types, SysUtils;
 
 const
  _Symbol_Sirka = 8;
@@ -15,8 +15,8 @@ const
   _Usek_Navaznost: array [0..47] of ShortInt =
     (-1,0,1,0,0,-1,0,1,0,1,1,0,-1,0,0,-1,-1,0,0,1,0,-1,1,0,-1,0,1,0,0,-1,0,1,
     0,1,1,0,-1,0,0,-1,-1,0,0,1,0,-1,1,0);
-  _Krizeni_Navaznost: array [0..7] of ShortInt =
-    (-1,0,1,0,-1,0,1,0);
+  _Krizeni_Navaznost: array [0..11] of ShortInt =
+    (-1,0, 1,0, 0,1, -1,0, 1,0, 0, -1);
   _Vyh_Navaznost : array [0..23] of ShortInt =
     (-1,0,0,-1,1,0,-1,0,0,1,1,0,-1,0,0,-1,1,0,-1,0,0,1,1,0);
 
@@ -61,7 +61,7 @@ const
     1,1,1,1,1,1);
 
 type
-  TNavDir = (ndPositive = 0, ndNegative = 1);
+  TNavDir = (ndPositive = 0, ndNegative = 1, ndThird = 2);
 
   TReliefSym=record
    Position:TPoint;
@@ -76,12 +76,15 @@ implementation
 
 function GetUsekNavaznost(symbol:Integer; dir:TNavDir):TPoint;
 begin
+ if (((symbol < _Krizeni_Start) or (symbol > _Krizeni_End)) and (dir = ndThird)) then
+   raise Exception.Create('Unsupported direction!');
+
  if ((symbol >= _Usek_Start) and (symbol <= _Usek_End)) then
    Result := Point( _Usek_Navaznost[(symbol - _Usek_Start) * 4 + (2*Integer(dir))],
                     _Usek_Navaznost[(symbol - _Usek_Start) * 4 + (2*Integer(dir)) + 1] )
  else if ((symbol >= _Krizeni_Start) and (symbol <= _Krizeni_End)) then
-   Result := Point( _Krizeni_Navaznost[(symbol - _Krizeni_Start) * 4 + (2*Integer(dir))],
-                    _Krizeni_Navaznost[(symbol - _Krizeni_Start) * 4 + (2*Integer(dir)) + 1] )
+   Result := Point( _Krizeni_Navaznost[(symbol - _Krizeni_Start) * 6 + (2*Integer(dir))],
+                    _Krizeni_Navaznost[(symbol - _Krizeni_Start) * 6 + (2*Integer(dir)) + 1] )
  else if ((symbol = _Zarazedlo_r) and (dir = ndNegative)) then
    Result := Point( 1, 0 )
  else if ((symbol = _Zarazedlo_l) and (dir = ndPositive)) then

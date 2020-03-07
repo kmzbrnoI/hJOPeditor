@@ -348,7 +348,9 @@ begin
           begin
            dir.X := _Vyh_Navaznost[((Symbol-_Vyhybka_Start)*6) + (j*2)];
            dir.Y := _Vyh_Navaznost[((Symbol-_Vyhybka_Start)*6) + (j*2) + 1];
-          end else begin // usek, krizeni
+          end else if ((Symbol >= _Krizeni_Start) and (Symbol <= _Krizeni_End)) then begin
+           dir := GetUsekNavaznost(Self.Bitmap.Symbols.GetSymbol(cur), TNavDir(j));
+          end else begin // usek
            if (j = 2) then break; // usek ma jen 2 smery navaznosti
            dir := GetUsekNavaznost(Self.Bitmap.Symbols.GetSymbol(cur), TNavDir(j));
           end;
@@ -389,7 +391,10 @@ begin
            if (((TempPos.X + GetUsekNavaznost(Symbol2, ndPositive).X = cur.X) and
                 (TempPos.Y + GetUsekNavaznost(Symbol2, ndPositive).Y = cur.Y)) or
                ((TempPos.X + GetUsekNavaznost(Symbol2, ndNegative).X = cur.X) and
-                (TempPos.Y + GetUsekNavaznost(Symbol2, ndNegative).Y = cur.Y))) then
+                (TempPos.Y + GetUsekNavaznost(Symbol2, ndNegative).Y = cur.Y)) or
+                ((Symbol2 >= _Krizeni_Start) and (Symbol2 <= _Krizeni_End) and
+                 ((TempPos.X + GetUsekNavaznost(Symbol2, ndThird).X = cur.X) and
+                 (TempPos.Y + GetUsekNavaznost(Symbol2, ndThird).Y = cur.Y)))) then
             begin
              //ted vime, ze i navaznost z TempPos vede na cur.Pos - muzeme pridat Symbol2 do bloku
 
