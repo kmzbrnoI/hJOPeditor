@@ -6,7 +6,7 @@ unit VetveComputer;
 
 interface
 
-uses symbolHelper, Types, Generics.Collections, ReliefObjects, vetev;
+uses symbolHelper, Types, Generics.Collections, ReliefObjects, vetev, SysUtils;
 
 const
   // vedjesi symboly vyhybek ulozeny ve formatu: rovna_x,rovna_y,odbocka_x,odbocka_y,zpet_x,zpet_y ...
@@ -25,6 +25,8 @@ procedure ComputeVetve(po:TPanelObjects);
 procedure ComputeNormalBlokVetve(po:TPanelObjects; var data:TVetveData; start:TPoint; Vetve:TList<TVetev>);
 procedure GetUsekTillVyhybka(var data:TVetveData; start:TPoint; initDir:TNavDir; var res:TVetevReturner);
 procedure ComputeDKSBlokVetve(po:TPanelObjects; var data:TVetveData; start:TPoint; vetve:TList<TVetev>);
+function IsSecondCross(var data:TVetveData; start:TPoint):Boolean;
+function SecondCrossPos(var data:TVetveData; start:TPoint):TPoint;
 
 implementation
 
@@ -279,8 +281,8 @@ procedure ComputeDKSBlokVetve(po:TPanelObjects; var data:TVetveData; start:TPoin
 var vetev:TVetev;
     r:TVetevReturner;
     i:Integer;
-    vlPos, vrPos:TPoint;
-    symbol:Integer;
+    vlPos, vrPos, pos:TPoint;
+    symbol, addI:Integer;
 begin
  r.symbols := TList<TReliefSym>.Create();
  vlPos := Point(-1, -1);
@@ -358,6 +360,31 @@ begin
    // 5) hledame navazujici pravou vetev
    ComputeNormalBlokVetve(po, data, Point(vrPos.X+1, vrPos.Y), vetve);
 
+   // 6) kontrolujeme krizeni "obe casti DKS v jednom bloku"
+   if (IsSecondCross(data, start)) then
+    begin
+     pos := SecondCrossPos(data, start);
+     data[pos.X, pos.Y] := -1;
+
+     addI := vetve.Count;
+     ComputeNormalBlokVetve(po, data, Point(pos.X-1, pos.Y), vetve);
+     if (addI <> vetve.Count) then
+      begin
+       vetev := vetve[1];
+       vetev.node1.ref_minus := addI;
+       vetve[1] := vetev;
+      end;
+
+     addI := vetve.Count;
+     ComputeNormalBlokVetve(po, data, Point(pos.X+1, pos.Y), vetve);
+     if (addI <> vetve.Count) then
+      begin
+       vetev := vetve[0];
+       vetev.node1.ref_minus := addI;
+       vetve[0] := vetev;
+      end;
+    end;
+
  finally
    r.symbols.Free();
  end;
@@ -414,6 +441,30 @@ begin
    first := false;
    res.next := new;
   end;//while
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function IsSecondCross(var data:TVetveData; start:TPoint):Boolean;
+begin
+ Result := false;
+
+ if ((data[start.X, start.Y] = _Krizeni_Start) and (data[start.X, start.Y+1] = _Krizeni_End)) then
+   Result := true;
+ if ((data[start.X, start.Y] = _Krizeni_End) and (data[start.X, start.Y-1] = _Krizeni_Start)) then
+   Result := true;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function SecondCrossPos(var data:TVetveData; start:TPoint):TPoint;
+begin
+ if ((data[start.X, start.Y] = _Krizeni_Start) and (data[start.X, start.Y+1] = _Krizeni_End)) then
+   Result := Point(start.X, start.Y+1)
+ else if ((data[start.X, start.Y] = _Krizeni_End) and (data[start.X, start.Y-1] = _Krizeni_Start)) then
+   Result := Point(start.X, start.Y-1)
+ else
+   raise Exception.Create('No second cross!');
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
