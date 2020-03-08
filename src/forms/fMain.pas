@@ -185,7 +185,7 @@ var
 implementation
 
 uses fNewRelief, fChangeRelief, fReliefSettings, fPopiskek, OblastRizeni,
-  fOREdit, fDataCheck, IBUtils;
+  fOREdit, fDataCheck, IBUtils, fImportLog;
 
 {$R *.dfm}
 
@@ -489,12 +489,13 @@ begin
 end;
 
 procedure TF_Hlavni.ImportFile(fname:string);
+var log:string;
 begin
  Relief := TRelief.Create(Self.DXD_Main, Self);
  Self.AssignReliefEvents();
 
  try
-   Relief.Import(fname);
+   log := Relief.Import(fname);
  except
    on E:Exception do
     begin
@@ -506,6 +507,7 @@ begin
  end;
 
  Self.LoadFileUpdateGUI('Nový projekt');
+ F_ImportLog.Open(log);
 end;
 
 procedure TF_Hlavni.PM_OpenClick(Sender: TObject);

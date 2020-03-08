@@ -155,7 +155,7 @@ type
    procedure New(size:TPoint;firstOR:TOR);
    procedure Open(aFile:string);
    procedure Save(aFile:string);
-   procedure Import(aFile:string);
+   function Import(aFile:string):string;
 
    procedure Show(CursorPos:TPoint);
    procedure Escape(Group:boolean);
@@ -297,12 +297,15 @@ begin
  Self.FLoad(aFile);
 end;
 
-procedure TRelief.Import(aFile:string);
+function TRelief.Import(aFile:string):string;
+var log:string;
 begin
  if (RightStr(aFile, 4) <> ReliefBitmap._IMPORT_MYJOP_SUFFIX) then
    raise EGeneralFileOpen.Create('Soubor s nepodporovanou příponou!');
+
+ log := FormatDateTime('yyyy-mm-dd hh:nn:ss', Now) + ': spouštím import souboru '+aFile+' ...'+#13#10;
  Self.Initialize(Point(0,0), dmBitmap);
- Self.PanelBitmap.ImportMyJOP(aFile, Self.ORs);
+ log := log + Self.PanelBitmap.ImportMyJOP(aFile, Self.ORs);
 
  Self.Panel.FileStav := Self.PanelBitmap.FileStav;
  Self.Zobrazeni.PanelWidth := Self.PanelBitmap.PanelWidth;
@@ -310,6 +313,9 @@ begin
 
  Self.DrawObject.Width  := Self.Zobrazeni.PanelWidth*_Symbol_Sirka;
  Self.DrawObject.Height := Self.Zobrazeni.PanelHeight*_Symbol_Vyska;
+
+ log := log + 'Import dat proběhl úspěšně.'+#13#10;
+ Result := log;
 end;
 
 destructor TRelief.Destroy();

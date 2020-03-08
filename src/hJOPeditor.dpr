@@ -39,7 +39,8 @@ uses
   ObjBlokZamek in 'object\blok\ObjBlokZamek.pas',
   ObjBlokRozp in 'object\blok\ObjBlokRozp.pas',
   ObjBlokVykol in 'object\blok\ObjBlokVykol.pas',
-  ownStrUtils in 'helpers\ownStrUtils.pas';
+  ownStrUtils in 'helpers\ownStrUtils.pas',
+  fImportLog in 'forms\fImportLog.pas' {F_ImportLog};
 
 {$R *.res}
 
@@ -55,6 +56,7 @@ begin
   Application.CreateForm(TF_BlockEdit, F_BlockEdit);
   Application.CreateForm(TF_OREdit, F_OREdit);
   Application.CreateForm(TF_DataCheck, F_DataCheck);
+  Application.CreateForm(TF_ImportLog, F_ImportLog);
   if (ParamCount = 1) then
    begin
     //open the file

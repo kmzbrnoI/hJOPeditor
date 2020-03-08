@@ -86,7 +86,7 @@ type
     procedure MouseUp(Position:TPoint;Button:TMouseButton);
     procedure DblClick(Position:TPoint);
 
-    procedure ImportMyJOP(fn:string; ORs:TList<TOR>);
+    function ImportMyJOP(fn:string; ORs:TList<TOR>):string;
 
     property Soubor:string read FSoubor;
     property Stav:ShortInt read FStav;
@@ -786,17 +786,20 @@ end;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-procedure TPanelBitmap.ImportMyJOP(fn:string; ORs:TList<TOR>);
+function TPanelBitmap.ImportMyJOP(fn:string; ORs:TList<TOR>):string;
 var f: TextFile;
     line: string;
     splitted, gsplitted: TStrings;
-    i, x, y, popx, popy, width, height, gref: Integer;
+    i, x, y, popx, popy, width, height, gref, linei, eloaded: Integer;
     g: TDictionary<Integer, string>;
     OblR: TOR;
 const
     OFFSET_X = 0;
     OFFSET_Y = 0;
 begin
+ Result := 'INFO: OFFSET_X:' + IntToStr(OFFSET_X) + ', OFFSET_Y:' + IntToStr(OFFSET_Y) + #13#10;
+
+ eLoaded := 0;
  Self.FStav := 1;
  AssignFile(f, fn);
  Reset(f);
@@ -805,6 +808,7 @@ begin
  g := TDictionary<Integer, string>.Create();
  splitted := TStringList.Create();
  gsplitted := TStringList.Create();
+ linei := 1;
  try
    while (not Eof(f)) do
     begin
@@ -817,6 +821,7 @@ begin
        Self.FPanelWidth := StrToInt(splitted[4]) + OFFSET_X;
        Self.FPanelHeight := StrToInt(splitted[5]) + OFFSET_Y;
        Self.Symbols.SetRozmery(Self.FPanelWidth, Self.FPanelHeight);
+       Result := 'INFO: Width: ' + IntToStr(Self.FPanelWidth) + ', height: ' + IntToStr(Self.FPanelHeight) + #13#10;
 
      end else if (splitted[0] = 'G') then begin
        g.AddOrSetValue(StrToInt(splitted[1]), line);
@@ -841,7 +846,7 @@ begin
          try
            Self.Text.AddToStructure(Point(popx, popy), splitted[7], 4, true);
          except
-
+           Result := Result + 'WARN: nepodařilo se přidat popisek bloku ' + splitted[7] + #13#10;
          end;
        end else if (splitted[3] = '10') then
          Self.Symbols.Bitmap[x][y] := _Zamek
@@ -853,7 +858,7 @@ begin
          try
            Self.Text.AddToStructure(Point(popx, popy), splitted[7], 4, true);
          except
-
+           Result := Result + 'WARN: nepodařilo se přidat popisek bloku ' + splitted[7] + #13#10;
          end;
        end else if (splitted[3] = '11') then begin
          width := StrToInt(splitted[15]);
@@ -889,19 +894,23 @@ begin
          try
            Self.Text.AddToStructure(Point(popx, popy), OblR.Name, 4, False);
          except
-
+           Result := Result + 'WARN: nepodařilo se přidat název OŘ ' + OblR.Name + #13#10;
          end;
          ORs.Add(OblR);
        end else if (splitted[3] = '50') then begin
          height := StrToInt(splitted[15]);
          for i := 0 to height-1 do
            Self.Symbols.Bitmap[x][y+i] := _Prj
-       end else if (splitted[3] = '80') then
+       end else if (splitted[3] = '80') then begin
          try
            Self.Text.AddToStructure(Point(x, y), splitted[7], 1, false);
          except
-
+           Result := Result + 'WARN: nepodařilo se přidat popisek bloku ' + splitted[7] + #13#10;
          end;
+       end else begin
+         Result := Result + 'WARN: řádek ' + IntToStr(linei) + ': nerozpoznaný typ bloku: ' + splitted[3] + #13#10;
+         Dec(eLoaded);
+       end;
 
        if ((splitted[3] = '0') or (splitted[3] = '1')) then
         begin
@@ -929,17 +938,17 @@ begin
            popx := StrToInt(gsplitted[12]) + OFFSET_X;
            popy := StrToInt(gsplitted[13]) + OFFSET_Y;
           end;
-         if (Self.Text.GetPopisek(Point(popx, popy)) = -1) then
-          begin
-           try
-             Self.Text.AddToStructure(Point(popx, popy), gsplitted[8], 1, true);
-           except
-
-           end;
-          end;
+         try
+           Self.Text.AddToStructure(Point(popx, popy), gsplitted[8], 1, true);
+         except
+           Result := Result + 'WARN: nepodařilo se přidat popisek bloku ' + gsplitted[8] + #13#10;
+         end;
         end;
 
+       Inc(eLoaded);
      end;
+
+     Inc(linei);
     end;
  finally
    splitted.Free();
@@ -948,6 +957,7 @@ begin
  end;
 
  Close(f);
+ Result := Result + 'INFO: Načteno ' + IntToStr(eLoaded) + ' E řádků.' + #13#10;
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
