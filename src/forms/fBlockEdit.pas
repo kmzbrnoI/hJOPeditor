@@ -141,6 +141,7 @@ end;
 
 procedure TF_BlockEdit.B_ApplyClick(Sender: TObject);
 begin
+ Self.LB_BlocksClick(Self.LB_Blocks);
  Self.Close;
 end;
 
