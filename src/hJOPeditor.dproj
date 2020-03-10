@@ -133,8 +133,8 @@
 						<VersionInfo Name="IncludeVerInfo">True</VersionInfo>
 						<VersionInfo Name="AutoIncBuild">True</VersionInfo>
 						<VersionInfo Name="MajorVer">2</VersionInfo>
-						<VersionInfo Name="MinorVer">10</VersionInfo>
-						<VersionInfo Name="Release">4</VersionInfo>
+						<VersionInfo Name="MinorVer">11</VersionInfo>
+						<VersionInfo Name="Release">0</VersionInfo>
 						<VersionInfo Name="Build">0</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
@@ -147,7 +147,7 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName"/>
 						<VersionInfoKeys Name="FileDescription"/>
-						<VersionInfoKeys Name="FileVersion">2.10.4.0</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">2.11.0.0</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName">hJOPeditor</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalCopyright">Jan Horáček</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks">Jan Horáček</VersionInfoKeys>
