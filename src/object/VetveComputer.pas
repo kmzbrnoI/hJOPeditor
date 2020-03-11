@@ -22,11 +22,12 @@ type
 
 
 procedure ComputeVetve(po:TPanelObjects);
-procedure ComputeNormalBlokVetve(po:TPanelObjects; var data:TVetveData; start:TPoint; Vetve:TList<TVetev>);
+procedure ComputeNormalBlokVetve(po:TPanelObjects; var data:TVetveData; start:TPoint; Vetve:TList<TVetev>; future_offset: Integer = 0);
 procedure GetUsekTillVyhybka(var data:TVetveData; start:TPoint; initDir:TNavDir; var res:TVetevReturner);
 procedure ComputeDKSBlokVetve(po:TPanelObjects; var data:TVetveData; start:TPoint; vetve:TList<TVetev>);
 function IsSecondCross(var data:TVetveData; start:TPoint):Boolean;
 function SecondCrossPos(var data:TVetveData; start:TPoint):TPoint;
+procedure OffsetVetve(vetve: TList<TVetev>; offset: Integer);
 
 implementation
 
@@ -127,7 +128,7 @@ end;
   Pozor: deti pridavame jen v pripade, ze existuji (muze se taky stat, ze za
   vyhybkou nic neni)!
 }
-procedure ComputeNormalBlokVetve(po:TPanelObjects; var data:TVetveData; start:TPoint; Vetve:TList<TVetev>);
+procedure ComputeNormalBlokVetve(po:TPanelObjects; var data:TVetveData; start:TPoint; Vetve:TList<TVetev>; future_offset: Integer);
 var queue:TQueue<TPoint>;
     first, temp, new:TPoint;
     i, j, up:Integer;
@@ -157,7 +158,7 @@ begin
 
      // dodelat kontrolu toho, jestli nahodou nejsem na vyhybce
 
-     // do pole symbols si ulzoim useku aktualni vetve a pak je pouze predelam do dynamickeho pole vetev.symbols
+     // do pole symbols si ulozim useku aktualni vetve a pak je pouze predelam do dynamickeho pole vetev.symbols
      symbols.Clear();
 
      // expanduji oba smery z prvniho symbolu, dalsi symboly maji vzdy jen jeden smer k expanzi
@@ -183,7 +184,7 @@ begin
          // vypocitam prvni vedlejsi pole
          if ((data[new.X, new.Y] >= _Vykol_Start) and (data[new.X, new.Y] <=_Vykol_End)) then
           begin
-           (po.Bloky[po.GetObject(new)] as TVykol).vetev := Vetve.Count;
+           (po.Bloky[po.GetObject(new)] as TVykol).vetev := Vetve.Count + future_offset;
            data[new.X, new.Y] := _Usek_Start;
           end;
 
@@ -203,9 +204,17 @@ begin
            temp.Y := new.Y + GetUsekNavaznost(data[new.X, new.Y], ndNegative).Y;
           end;
 
+         if ((data[temp.X, temp.Y] = _Zarazedlo_l) or (data[temp.X, temp.Y] = _Zarazedlo_r)) then
+          begin
+           symbol.Position := temp;
+           symbol.SymbolID := data[temp.X, temp.Y];
+           symbols.Add(symbol);
+          end;
+
          // pokud je na druhem vedlejsim poli symbol, expanduji ho; pokud tam neni, while cyklus prochazeni utne
          if (((new.X <> first.X) or (new.Y <> first.Y)) or (j = 1)) then
            data[new.X, new.Y] := -1;
+
          new := temp;
         end;//while
 
@@ -283,8 +292,10 @@ var vetev:TVetev;
     i:Integer;
     vlPos, vrPos, pos:TPoint;
     symbol, addI:Integer;
+    tempVetve:TList<TVetev>;
 begin
  r.symbols := TList<TReliefSym>.Create();
+ tempVetve := TList<TVetev>.Create();
  vlPos := Point(-1, -1);
  vrPos := Point(-1, -1);
 
@@ -355,10 +366,22 @@ begin
    data[vrPos.X, vrPos.Y] := -1;
 
    // 4) hledame navazujici levou vetev
-   ComputeNormalBlokVetve(po, data, Point(vlPos.X-1, vlPos.Y), vetve);
+   tempVetve.Clear();
+   ComputeNormalBlokVetve(po, data, Point(vlPos.X-1, vlPos.Y), tempVetve, 4);
+   OffsetVetve(tempVetve, 4);
+
+   vetve.Add(tempVetve[0]);
+   vetve.Add(tempVetve[0]); // docasne i prava vetev
+   tempVetve.Delete(0);
+   vetve.AddRange(tempVetve);
 
    // 5) hledame navazujici pravou vetev
-   ComputeNormalBlokVetve(po, data, Point(vrPos.X+1, vrPos.Y), vetve);
+   tempVetve.Clear();
+   ComputeNormalBlokVetve(po, data, Point(vrPos.X+1, vrPos.Y), tempVetve, vetve.Count-1);
+   OffsetVetve(tempVetve, vetve.Count-1);
+   vetve[4] := tempVetve[0];
+   tempVetve.Delete(0);
+   vetve.AddRange(tempVetve);
 
    // 6) kontrolujeme krizeni "obe casti DKS v jednom bloku"
    if (IsSecondCross(data, start)) then
@@ -387,6 +410,7 @@ begin
 
  finally
    r.symbols.Free();
+   tempVetve.Free();
  end;
 end;
 
@@ -465,6 +489,30 @@ begin
    Result := Point(start.X, start.Y-1)
  else
    raise Exception.Create('No second cross!');
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure OffsetVetve(vetve: TList<TVetev>; offset: Integer);
+var vetev: TVetev;
+    i: Integer;
+begin
+ for i := 0 to vetve.Count-1 do
+  begin
+   vetev := vetve[i];
+
+   if (vetev.node1.ref_plus > -1) then
+     vetev.node1.ref_plus := vetev.node1.ref_plus + offset;
+   if (vetev.node1.ref_minus > -1) then
+     vetev.node1.ref_minus := vetev.node1.ref_minus + offset;
+
+   if (vetev.node2.ref_plus > -1) then
+     vetev.node2.ref_plus := vetev.node2.ref_plus + offset;
+   if (vetev.node2.ref_minus > -1) then
+     vetev.node2.ref_minus := vetev.node2.ref_minus + offset;
+
+   vetve[i] := vetev;
+  end;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
