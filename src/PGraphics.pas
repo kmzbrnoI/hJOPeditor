@@ -22,8 +22,8 @@ type
 
       constructor Create(drawObject:TDXDraw; IL_Text:TImageList);
 
-      procedure TextOutputC(Pos:TPoint;Text:string;Popredi,Pozadi:TColor);
-      procedure TextOutputI(Pos:TPoint;Text:string;Popredi:ShortInt;Pozadi:TColor; underline:boolean = false);
+      procedure TextOutputC(Pos:TPoint;Text:string;Popredi,Pozadi:TColor; underline:boolean = false; transparent: boolean = false);
+      procedure TextOutputI(Pos:TPoint;Text:string;Popredi:ShortInt;Pozadi:TColor; underline:boolean = false; transparent: boolean = false);
 
       function GetColorIndex(Color:TColor):integer;
   end;
@@ -41,15 +41,27 @@ end;//ctor
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPanelGraphics.TextOutputC(Pos:TPoint;Text:string;Popredi,Pozadi:TColor);
+procedure TPanelGraphics.TextOutputC(Pos:TPoint;Text:string;Popredi,Pozadi:TColor; underline:boolean = false; transparent: boolean = false);
 begin
- Self.TextOutputI(Pos, Text, Self.GetColorIndex(Popredi), Pozadi);
+ Self.TextOutputI(Pos, Text, Self.GetColorIndex(Popredi), Pozadi, underline, transparent);
 end;
 
-procedure TPanelGraphics.TextOutputI(Pos:TPoint;Text:string;Popredi:ShortInt;Pozadi:TColor; underline:boolean = false);
+procedure TPanelGraphics.TextOutputI(Pos:TPoint;Text:string;Popredi:ShortInt;Pozadi:TColor; underline:boolean = false; transparent: boolean = false);
 var j:Integer;
     TextIndex:Integer;
 begin
+ // transparent is faster
+
+ if (not transparent) then
+  begin
+   Self.DrawObject.Surface.Canvas.Pen.Color := Pozadi;
+   Self.DrawObject.Surface.Canvas.Brush.Color := Pozadi;
+   Self.DrawObject.Surface.Canvas.Rectangle(pos.X * _Symbol_Sirka,
+                                            pos.Y * _Symbol_Vyska,
+                                            (pos.X+Length(Text)) * _Symbol_Sirka,
+                                            (pos.Y+1) * _Symbol_Vyska);
+  end;
+
  for j := 0 to Length(Text)-1 do
   begin
    //prevedeni textu na indexy v ImageListu
@@ -93,7 +105,6 @@ begin
     TextIndex := 0;
    end;
 
-   Self.IL_Text.BkColor := Pozadi;
    Self.IL_Text.Draw(Self.DrawObject.Surface.Canvas,Pos.X*_Symbol_Sirka+(j*_Symbol_Sirka),
                      Pos.Y*_Symbol_Vyska,(TextIndex*10)+Popredi)
   end;//for j
