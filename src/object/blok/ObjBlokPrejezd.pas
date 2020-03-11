@@ -18,7 +18,7 @@ TPrejezd = class(TGraphBlok)
 
  constructor Create(index:Integer);
  destructor Destroy(); override;
- procedure Load(ini:TMemIniFile; key:string); override;
+ procedure Load(ini:TMemIniFile; key:string; version: string); override;
  procedure Save(ini:TMemIniFile; key:string); override;
  procedure Paint(DrawObject:TDrawObject; panelGraphics:TPanelGraphics; colors:TObjColors;
                   selected:boolean; mode:TMode); override;
@@ -45,7 +45,7 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TPrejezd.Load(ini:TMemIniFile; key:string);
+procedure TPrejezd.Load(ini:TMemIniFile; key:string; version: string);
 var obj:string;
     pos:TPoint;
     j:Integer;

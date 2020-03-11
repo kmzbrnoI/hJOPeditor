@@ -10,7 +10,7 @@ TZamek = class(TGraphBlok)
   Pos:TPoint;
 
   constructor Create(index:Integer);
-  procedure Load(ini:TMemIniFile; key:string); override;
+  procedure Load(ini:TMemIniFile; key:string; version: Word); override;
   procedure Save(ini:TMemIniFile; key:string); override;
   procedure Paint(DrawObject:TDrawObject; panelGraphics:TPanelGraphics; colors:TObjColors;
                   selected:boolean; mode:TMode); override;
@@ -28,7 +28,7 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TZamek.Load(ini:TMemIniFile; key:string);
+procedure TZamek.Load(ini:TMemIniFile; key:string; version: Word);
 begin
  inherited;
 

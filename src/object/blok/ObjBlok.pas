@@ -17,7 +17,7 @@ TGraphBlok = class
   index:Integer;  // index bloku daneho typu v poli vsech bloku (tzn. kazdy typ ma svou indexaci - pocinaje 0)
 
   constructor Create(index:Integer);
-  procedure Load(ini:TMemIniFile; key:string); virtual;
+  procedure Load(ini:TMemIniFile; key:string; version: Word); virtual;
   procedure Save(ini:TMemIniFile; key:string); virtual;
   procedure Paint(DrawObject:TDrawObject; panelGraphics:TPanelGraphics; colors:TObjColors;
                   selected:boolean; mode:TMode); virtual; abstract;
@@ -37,7 +37,7 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TGraphBlok.Load(ini:TMemIniFile; key:string);
+procedure TGraphBlok.Load(ini:TMemIniFile; key:string; version: Word);
 begin
  Self.Blok := ini.ReadInteger(key, 'B', -1);
  Self.OblRizeni := ini.ReadInteger(key, 'OR', -1);

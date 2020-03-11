@@ -13,7 +13,7 @@ TVyhybka = class(TGraphBlok)
  obj:integer;               //index useku, na kterem vyhybka je
 
  constructor Create(index:Integer);
- procedure Load(ini:TMemIniFile; key:string); override;
+ procedure Load(ini:TMemIniFile; key:string; version: Word); override;
  procedure Save(ini:TMemIniFile; key:string); override;
  procedure Paint(DrawObject:TDrawObject; panelGraphics:TPanelGraphics; colors:TObjColors;
                   selected:boolean; mode:TMode); override;
@@ -31,7 +31,7 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TVyhybka.Load(ini: TMemIniFile; key: string);
+procedure TVyhybka.Load(ini: TMemIniFile; key: string; version: Word);
 begin
  inherited;
 

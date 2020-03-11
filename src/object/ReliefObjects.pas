@@ -14,9 +14,14 @@ const
  _Def_Color_Alert         = 5;
  _Def_Color_IntUnassigned = 4;
 
- _FileVersion = '1.2';
- _FileVersion_accept : array[0..1] of string = (
-    '1.1', '1.2'
+ _FILEVERSION_10 = $0100;
+ _FILEVERSION_11 = $0101;
+ _FILEVERSION_12 = $0102;
+ _FILEVERSION_13 = $0103;
+
+ _FileVersion = '1.3';
+ _FileVersion_accept : array[0..2] of string = (
+    '1.1', '1.2', '1.3'
  );
 
 type
@@ -175,11 +180,13 @@ procedure TPanelObjects.FLoad(aFile:string;var ORs:string);
 var i:Integer;
     inifile:TMemIniFile;
     ver:string;
+    verWord: Word;
     sect_str:TStrings;
     blok:TGraphBlok;
     count:Integer;
     blkTyp:TBlkType;
     versionOk:boolean;
+    strs: TStrings;
 begin
  Self.FStav := 2;
  Self.FSoubor := aFile;
@@ -191,13 +198,14 @@ begin
  try
    //kontrola verze
    ver := inifile.ReadString('G', 'ver', _FileVersion);
+
    versionOk := false;
    for i := 0 to Length(_FileVersion_accept)-1 do
     begin
      if (ver = _FileVersion_accept[i]) then
       begin
        versionOk := true;
-       Break;
+       break;
       end;
     end;
 
@@ -208,6 +216,14 @@ begin
          'Varování', MB_YESNO OR MB_ICONQUESTION) = mrNo) then
        raise EFileLoad.Create('Uživatel zrušil načítání souboru!');
     end;
+
+   strs := TStringList.Create();
+   try
+     ExtractStringsEx(['.'], [], ver, strs);
+     verWord := (StrToInt(strs[0]) shl 8) + StrToInt(strs[1]);
+   finally
+     strs.Free();
+   end;
 
    Self.DrawObject.Height := inifile.ReadInteger('P','H',0);
    Self.DrawObject.Width  := inifile.ReadInteger('P','W',0);
@@ -248,7 +264,7 @@ begin
           blok := nil;
          end;
 
-         blok.Load(inifile, TGraphBlok.TypeToFileStr(blkTyp)+IntToStr(i));
+         blok.Load(inifile, TGraphBlok.TypeToFileStr(blkTyp)+IntToStr(i), verWord);
          Self.Bloky.Add(blok);
        except
 
