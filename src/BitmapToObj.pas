@@ -453,26 +453,44 @@ end;
 // tato funkce predpoklada, ze jedeme odzhora dolu a narazime na prvni vyskyt symbolu uplne nahore
 // tato funkce prida kazdy druhy symbol do blikajicich
 procedure TBitmapToObj.AddPrj(Pos:TPoint; Index:Integer);
-var blik:Boolean;
-    blk:TGraphBlok;
+var blk:TGraphBlok;
     blik_point:TBlikPoint;
+    height: Integer;
+    y: Integer;
+    lefts: Integer;
 begin
  blk := TPrejezd.Create(index);
 
- blik := false;
- while (Self.Bitmap.Symbols.GetSymbol(Pos) = _Prj) do
-  begin
-   if (blik) then
-    begin
-     blik_point.Pos      := Pos;
-     blik_point.TechUsek := -1;
-     (blk as TPrejezd).BlikPositions.Add(blik_point);
-    end else
-     (blk as TPrejezd).StaticPositions.Add(Point(Pos.X, Pos.Y));
+ height := 0;
+ while (Self.Bitmap.Symbols.GetSymbol(Point(Pos.X, Pos.Y+height)) = _Prj) do
+   Inc(height);
 
-   Self.Zahrnuto[Pos.X, Pos.Y] := true;
-   Pos.Y := Pos.Y + 1;
-   blik := not blik;
+ // edges are always static
+ (blk as TPrejezd).StaticPositions.Add(Point(Pos.X, Pos.Y));
+ (blk as TPrejezd).StaticPositions.Add(Point(Pos.X, Pos.Y+height-1));
+ Self.Zahrnuto[Pos.X, Pos.Y] := true;
+ Self.Zahrnuto[Pos.X, Pos.Y+height-1] := true;
+
+ if (height = 3) then
+  begin
+   // special case
+   blik_point.Pos := Point(Pos.X, Pos.Y+1);
+   blik_point.TechUsek := -1;
+   (blk as TPrejezd).BlikPositions.Add(blik_point);
+   Self.Zahrnuto[Pos.X, Pos.Y+1] := true;
+  end else begin
+   for y := 1 to height-2 do
+    begin
+     lefts := Self.Bitmap.Symbols.GetSymbol(Point(Pos.X-1, Pos.Y+y));
+     if ((lefts >= _Usek_Start) and (lefts <= _Usek_End) and
+         (lefts <> 15) and (lefts <> 16) and (lefts <> 21) and (lefts <> 22)) then begin
+       blik_point.Pos := Point(Pos.X, Pos.Y+y);
+       blik_point.TechUsek := -1;
+       (blk as TPrejezd).BlikPositions.Add(blik_point)
+     end else
+       (blk as TPrejezd).StaticPositions.Add(Point(Pos.X, Pos.Y+y));
+     Self.Zahrnuto[Pos.X, Pos.Y+y] := true;
+    end;
   end;
 
  Self.Objects.Bloky.Add(blk);

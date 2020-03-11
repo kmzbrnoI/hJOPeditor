@@ -684,7 +684,7 @@ end;
 // pri ukladani dat je vypocteno, jakemu techologickemu useku patri prislusny prejezd
 //  resp. jaky usek prejezd obsluhuje
 //  jedna se o prostredni usek prejezdu
-// tento usek se pripradi na zaklade leveho useku prejezdu
+// tento usek se priradi na zaklade leveho useku prejezdu
 procedure TPanelObjects.ComputePrjTechUsek();
 var i, j, usek:Integer;
     blik_point:TBlikPoint;
