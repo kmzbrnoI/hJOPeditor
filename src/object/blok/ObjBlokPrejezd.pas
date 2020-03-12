@@ -52,14 +52,18 @@ var obj:string;
     pos:TPoint;
     j:Integer;
     blik_pos:TBlikPoint;
-    count, section_len: Integer;
+    count, section_len, usek_id_length: Integer;
 begin
  inherited;
 
  if (version >= _FILEVERSION_13) then
-   section_len := 16
- else
+  begin
+   section_len := 16;
+   usek_id_length := 10;
+  end else begin
    section_len := 9;
+   usek_id_length := 3;
+  end;
 
  obj := ini.ReadString(key, 'BP', '');
  Self.BlikPositions.Clear();
@@ -70,7 +74,7 @@ begin
    try
      blik_pos.Pos.X    := StrToInt(copy(obj, j*section_len+1, 3));
      blik_pos.Pos.Y    := StrToInt(copy(obj, j*section_len+4, 3));
-     blik_pos.TechUsek := StrToInt(copy(obj, j*section_len+7, 3));
+     blik_pos.TechUsek := StrToInt(copy(obj, j*section_len+7, usek_id_length));
    except
      continue;
    end;
