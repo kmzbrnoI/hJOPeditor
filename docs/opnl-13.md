@@ -1,7 +1,6 @@
 # Specifikace formátu souboru opnl v1.3
 
-*v1.3 oproti v1.2 mění počet polí pro ID bloku v definici bloku přejezdu. Tato
-změna umožňuje vyšší id bloků a je zpětně nekompatibilní.*
+*v1.3 oproti v1.2 mění význam pole odkazu na blok blikajících částí přejezdu.*
 
 Soubor `.opnl` je textový ini soubor, který definuje reliéf. Definuje logické
 spojení symbolů do bloků a umožňuje blokům na panelu přiřazovat technologické
@@ -120,7 +119,7 @@ Skládá se z několika sekcí.
 
 ## Přejezdy `[PRJ0]`-`[PRJn-1]`
  - B= [asociovaný blok technologie]
- - BP= [blik_pozice] - 3*X;3*Y;10*U... = X,T, tech_usek (bez stredniku - pevne delky)
+ - BP= [blik_pozice] - 3*X;3*Y;3*U... = X,T, panel_usek (bez stredniku - pevne delky)
  - SP= [static_pozice] - 3*X;3*Y;... (bez stredniku - pevne delky)
  - OR= [oblast rizeni] integer 0-n
  - U= [technologicky usek] - blok typu usek, ktery prejezd zobrazuje (prostredni usek prejezdu)
