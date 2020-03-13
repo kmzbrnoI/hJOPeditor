@@ -269,7 +269,7 @@ begin
 
  pomocne.Free();
 
- Self.Objects.ComputePrjTechUsek();
+ Self.Objects.ComputePrjPanelUsek();
 end;
 
 //resetuje data potrebna pro operaci BitmapToObject - vola se pri startu operace
@@ -475,7 +475,7 @@ begin
   begin
    // special case
    blik_point.Pos := Point(Pos.X, Pos.Y+1);
-   blik_point.TechUsek := -1;
+   blik_point.PanelUsek := -1;
    (blk as TPrejezd).BlikPositions.Add(blik_point);
    Self.Zahrnuto[Pos.X, Pos.Y+1] := true;
   end else begin
@@ -485,7 +485,7 @@ begin
      if ((lefts >= _Usek_Start) and (lefts <= _Usek_End) and
          (lefts <> 15) and (lefts <> 16) and (lefts <> 21) and (lefts <> 22)) then begin
        blik_point.Pos := Point(Pos.X, Pos.Y+y);
-       blik_point.TechUsek := -1;
+       blik_point.PanelUsek := -1;
        (blk as TPrejezd).BlikPositions.Add(blik_point)
      end else
        (blk as TPrejezd).StaticPositions.Add(Point(Pos.X, Pos.Y+y));

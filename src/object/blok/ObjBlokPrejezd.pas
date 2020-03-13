@@ -9,7 +9,7 @@ type
 
 TBlikPoint = record
  Pos:TPoint;
- TechUsek:Integer;     // jaky technologicky usek ma tato cast prejezdu
+ PanelUsek:Integer;     // jaky usek panelu (v ciselne radu useku) ma tato cast prejezdu
 end;
 
 TPrejezd = class(TGraphBlok)
@@ -56,14 +56,8 @@ var obj:string;
 begin
  inherited;
 
- if (version >= _FILEVERSION_13) then
-  begin
-   section_len := 16;
-   usek_id_length := 10;
-  end else begin
-   section_len := 9;
-   usek_id_length := 3;
-  end;
+ section_len := 9;
+ usek_id_length := 3;
 
  obj := ini.ReadString(key, 'BP', '');
  Self.BlikPositions.Clear();
@@ -72,9 +66,9 @@ begin
  for j := 0 to count-1 do
   begin
    try
-     blik_pos.Pos.X    := StrToInt(copy(obj, j*section_len+1, 3));
-     blik_pos.Pos.Y    := StrToInt(copy(obj, j*section_len+4, 3));
-     blik_pos.TechUsek := StrToInt(copy(obj, j*section_len+7, usek_id_length));
+     blik_pos.Pos.X := StrToInt(copy(obj, j*section_len+1, 3));
+     blik_pos.Pos.Y := StrToInt(copy(obj, j*section_len+4, 3));
+     blik_pos.PanelUsek := StrToInt(copy(obj, j*section_len+7, usek_id_length));
    except
      continue;
    end;
@@ -105,12 +99,7 @@ begin
 
  obj := '';
  for bp in Self.BlikPositions do
-  begin
-   if (bp.TechUsek >= 0) then
-     obj := obj + Format('%.3d%.3d%.10d',[bp.Pos.X, bp.Pos.Y, bp.TechUsek])
-   else
-     obj := obj + Format('%.3d%.3d-000000001',[bp.Pos.X, bp.Pos.Y]);
-  end;
+   obj := obj + Format('%.3d%.3d%.3d',[bp.Pos.X, bp.Pos.Y, bp.PanelUsek]);
  ini.WriteString(key, 'BP', obj);
 
  obj := '';

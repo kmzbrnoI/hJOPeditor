@@ -91,7 +91,7 @@ TPanelObjects = class
 
     function CheckValid(var error_cnt:Byte):TStrings;     //overi validitu naeditovanych dat a vrati chybove hlasky
 
-    procedure ComputePrjTechUsek();
+    procedure ComputePrjPanelUsek();
 
     property PanelWidth:Integer read DrawObject.Width;
     property PanelHeight:Integer read DrawObject.Height;
@@ -302,7 +302,7 @@ begin
    inifile.WriteInteger('P', 'H', Self.DrawObject.Height);
    inifile.WriteInteger('P', 'W', Self.DrawObject.Width);
 
-   Self.ComputePrjTechUsek();
+   Self.ComputePrjPanelUsek();
 
    // oblasti rizeni
    str_list := TStringList.Create();
@@ -697,11 +697,11 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// pri ukladani dat je vypocteno, jakemu techologickemu useku patri prislusny prejezd
+// pri ukladani dat je vypocteno, jakemu useku patri kazdy prejezd
 //  resp. jaky usek prejezd obsluhuje
 //  jedna se o prostredni usek prejezdu
 // tento usek se priradi na zaklade leveho useku prejezdu
-procedure TPanelObjects.ComputePrjTechUsek();
+procedure TPanelObjects.ComputePrjPanelUsek();
 var i, j, usek:Integer;
     blik_point:TBlikPoint;
 begin
@@ -711,12 +711,12 @@ begin
    
    for j := 0 to (Self.Bloky[i] as TPrejezd).BlikPositions.Count-1 do
     begin
-     usek := Self.GetObject(Point((Self.Bloky[i] as TPrejezd).BlikPositions[j].Pos.X - 1, (Self.Bloky[i] as TPrejezd).BlikPositions[j].Pos.Y));
+     usek := Self.GetObject(Point(
+      (Self.Bloky[i] as TPrejezd).BlikPositions[j].Pos.X - 1,
+      (Self.Bloky[i] as TPrejezd).BlikPositions[j].Pos.Y)
+     );
      blik_point := (Self.Bloky[i] as TPrejezd).BlikPositions[j];
-     if (usek = -1) then
-       blik_point.TechUsek := -1
-      else
-       blik_point.TechUsek := (Self.Bloky[usek] as TUsek).Blok;
+     blik_point.PanelUsek := usek;
      (Self.Bloky[i] as TPrejezd).BlikPositions[j] := blik_point;
     end;//for j
   end;//for i
