@@ -5,6 +5,8 @@ interface
 uses ObjBlok, IniFiles, Generics.Collections, Types, SysUtils, Global, PGraphics,
      symbolHelper;
 
+const BLK_ASSIGN_SYMBOLS = [_Kolecko];
+
 type
 
 TPomocnyObj = class(TGraphBlok)
@@ -43,11 +45,9 @@ var obj:string;
     pos:TPoint;
     j:Integer;
 begin
- // No inherited
- Self.Blok      := -1;
- Self.OblRizeni := -1;
+ inherited;
 
- Self.Symbol :=  ini.ReadInteger(key, 'S', 0);
+ Self.Symbol := ini.ReadInteger(key, 'S', 0);
 
  obj := ini.ReadString(key, 'P', '');
  Self.Positions.Clear();
@@ -63,6 +63,9 @@ procedure TPomocnyObj.Save(ini: TMemIniFile; key: string);
 var obj:string;
     point:TPoint;
 begin
+ if (Self.Symbol in BLK_ASSIGN_SYMBOLS) then
+   inherited;
+
  ini.WriteInteger(key, 'S', Self.Symbol);
  obj := '';
  for point in Self.Positions do
@@ -75,13 +78,30 @@ end;
 procedure TPomocnyObj.Paint(DrawObject:TDrawObject; panelGraphics:TPanelGraphics; colors:TObjColors;
                             selected:boolean; mode:TMode);
 var pos:TPoint;
+    color:Integer;
 begin
+ if (Self.Symbol in BLK_ASSIGN_SYMBOLS) then
+  begin
+   if (selected) then
+    begin
+     color := colors.Selected;
+    end else begin
+     case (Self.blok) of
+      -1: color := colors.Alert;
+      -2: color := colors.IntUnassigned;
+     else
+       color := colors.Normal;
+     end;
+    end;
+  end else begin
+    color := _Bitmap_DrawColors[Self.Symbol];
+  end;
+
  for pos in Self.Positions do
    DrawObject.SymbolIL.Draw(DrawObject.Canvas,
                             pos.X*_Symbol_Sirka,
                             pos.Y*_Symbol_Vyska,
-                            (Self.Symbol*10)+_Bitmap_DrawColors[Self.Symbol]);
-
+                            (Self.Symbol*10)+color);
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

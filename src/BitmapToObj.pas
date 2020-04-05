@@ -248,17 +248,17 @@ begin
      Symbol := Self.Bitmap.Symbols.GetSymbol(Point(i,j));
      if (Symbol = -1) then continue;
 
-     if (pomocne.TryGetValue(Symbol, blk)) then
+     if ((pomocne.TryGetValue(Symbol, blk)) and (not (Symbol in ObjBlokPomocny.BLK_ASSIGN_SYMBOLS))) then
       begin
-       // prudat do exsitujiciho bloku
+       // pridat do existujiciho bloku
        (blk as TPomocnyObj).Positions.Add(Point(i, j));
       end else begin
        // vytvorit novy blok
        blk := TPomocnyObj.Create(index);
-       (blk as TPomocnyObj).Symbol    := Symbol;
+       (blk as TPomocnyObj).Symbol := Symbol;
        (blk as TPomocnyObj).Positions.Add(Point(i, j));
 
-       pomocne.Add(Symbol, blk);
+       pomocne.AddOrSetValue(Symbol, blk);
        Self.Objects.Bloky.Add(blk);
        Inc(index);
       end;

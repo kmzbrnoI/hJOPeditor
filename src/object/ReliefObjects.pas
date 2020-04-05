@@ -125,7 +125,8 @@ uses ReliefBitmap, BitmapToObj, VetveComputer, ObjBlokUsek, ObjBlokVyhybka,
      ObjBlokUvazkaSpr, ObjBlokZamek, ObjBlokVykol, ObjBlokRozp, ownStrUtils;
 
 //vytvoreni objektu
-constructor TPanelObjects.Create(SymbolIL,TextIL:TImageList;DrawCanvas:TCanvas;Width,Height:Integer;Parent:TDXDraw; Graphics:TPanelGraphics);
+constructor TPanelObjects.Create(SymbolIL,TextIL:TImageList; DrawCanvas:TCanvas;
+                                 Width,Height:Integer; Parent:TDXDraw; Graphics:TPanelGraphics);
 begin
  Self.DrawObject.Canvas := DrawCanvas;
 
@@ -382,49 +383,60 @@ end;
 
 function TPanelObjects.GetObject(Pos:TPoint):Integer;
 var i,j, tmp:Integer;
+    objBlok: TGraphBlok;
+    bpos: TPoint;
 begin
  tmp := -1;
  for i := 0 to Self.Bloky.Count-1 do
   begin
-   case (Self.Bloky[i].typ) of
+   objBlok := Self.Bloky[i];
+
+   case (objBlok.typ) of
     TBlkType.usek:begin
-     for j := 0 to (Self.Bloky[i] as TUsek).Symbols.Count-1 do
-       if ((Pos.X = (Self.Bloky[i] as TUsek).Symbols[j].Position.X) and (Pos.Y = (Self.Bloky[i] as TUsek).Symbols[j].Position.Y)) then
+     for j := 0 to (objBlok as TUsek).Symbols.Count-1 do
+       if ((Pos.X = (objBlok as TUsek).Symbols[j].Position.X) and (Pos.Y = (objBlok as TUsek).Symbols[j].Position.Y)) then
          tmp := i;      // usek nema prioritu (napriklad nad rozpojovacem)
     end;
 
-    TBlkType.navestidlo : if ((Pos.X = (Self.Bloky[i] as TNavestidlo).Position.X) and (Pos.Y = (Self.Bloky[i] as TNavestidlo).Position.Y)) then Exit(i);
+    TBlkType.navestidlo : if ((Pos.X = (objBlok as TNavestidlo).Position.X) and (Pos.Y = (objBlok as TNavestidlo).Position.Y)) then Exit(i);
 
-    TBlkType.vyhybka : if ((Pos.X = (Self.Bloky[i] as TVyhybka).Position.X) and (Pos.Y = (Self.Bloky[i] as TVyhybka).Position.Y)) then Exit(i);
+    TBlkType.vyhybka : if ((Pos.X = (objBlok as TVyhybka).Position.X) and (Pos.Y = (objBlok as TVyhybka).Position.Y)) then Exit(i);
 
     TBlkType.prejezd:begin
-     for j := 0 to (Self.Bloky[i] as TPrejezd).StaticPositions.Count-1 do
-       if ((Self.Bloky[i] as TPrejezd).StaticPositions[j].X = Pos.X) and ((Self.Bloky[i] as TPrejezd).StaticPositions[j].Y = Pos.Y) then
+     for bpos in (objBlok as TPrejezd).StaticPositions do
+       if (bpos.X = Pos.X) and (bpos.Y = Pos.Y) then
          Exit(i);
-     for j := 0 to (Self.Bloky[i] as TPrejezd).BlikPositions.Count-1 do
-       if ((Self.Bloky[i] as TPrejezd).BlikPositions[j].Pos.X = Pos.X) and ((Self.Bloky[i] as TPrejezd).BlikPositions[j].Pos.Y = Pos.Y) then
+     for j := 0 to (objBlok as TPrejezd).BlikPositions.Count-1 do
+       if ((objBlok as TPrejezd).BlikPositions[j].Pos.X = Pos.X) and ((objBlok as TPrejezd).BlikPositions[j].Pos.Y = Pos.Y) then
          Exit(i);
     end;
 
     TBlkType.text, TBlkType.blok_popisek:begin
-     if ((Pos.Y = (Self.Bloky[i] as TText).Position.Y) and (Pos.X >= (Self.Bloky[i] as TText).Position.X)
-      and (Pos.X < (Self.Bloky[i] as TText).Position.X+Length((Self.Bloky[i] as TText).Text)) and (Length((Self.Bloky[i] as TText).Text) = 1)) then
+     if ((Pos.Y = (objBlok as TText).Position.Y) and (Pos.X >= (objBlok as TText).Position.X)
+      and (Pos.X < (objBlok as TText).Position.X+Length((objBlok as TText).Text)) and (Length((objBlok as TText).Text) = 1)) then
        Exit(i);
     end;
 
     TBlkType.pomocny_obj:begin
       // klik na pomocny objekt nas nezajima
+      if ((objBlok as TPomocnyObj).Symbol in ObjBlokPomocny.BLK_ASSIGN_SYMBOLS) then
+       begin
+        for bpos in (objBlok as TPomocnyObj).Positions do
+          if ((bpos.X = pos.X) and (bpos.Y = pos.Y)) then
+            Exit(i);
+       end;
+
     end;
 
-    TBlkType.uvazka : if (((Self.Bloky[i] as TUvazka).Pos.Y = Pos.Y) and (Pos.X >= (Self.Bloky[i] as TUvazka).Pos.X) and (Pos.X <= (Self.Bloky[i] as TUvazka).Pos.X+1)) then Exit(i);
+    TBlkType.uvazka : if (((objBlok as TUvazka).Pos.Y = Pos.Y) and (Pos.X >= (objBlok as TUvazka).Pos.X) and (Pos.X <= (objBlok as TUvazka).Pos.X+1)) then Exit(i);
 
-    TBlkType.uvazka_spr : if (((Self.Bloky[i] as TUvazkaSpr).Pos.Y = Pos.Y) and (Pos.X = (Self.Bloky[i] as TUvazkaSpr).Pos.X)) then Exit(i);
+    TBlkType.uvazka_spr : if (((objBlok as TUvazkaSpr).Pos.Y = Pos.Y) and (Pos.X = (objBlok as TUvazkaSpr).Pos.X)) then Exit(i);
 
-    TBlkType.zamek : if (((Self.Bloky[i] as TZamek).Pos.Y = Pos.Y) and (Pos.X = (Self.Bloky[i] as TZamek).Pos.X)) then Exit(i);
+    TBlkType.zamek : if (((objBlok as TZamek).Pos.Y = Pos.Y) and (Pos.X = (objBlok as TZamek).Pos.X)) then Exit(i);
 
-    TBlkType.vykol : if (((Self.Bloky[i] as TVykol).Pos.Y = Pos.Y) and (Pos.X = (Self.Bloky[i] as TVykol).Pos.X)) then Exit(i);
+    TBlkType.vykol : if (((objBlok as TVykol).Pos.Y = Pos.Y) and (Pos.X = (objBlok as TVykol).Pos.X)) then Exit(i);
 
-    TBlkType.rozp : if (((Self.Bloky[i] as TRozp).Pos.Y = Pos.Y) and (Pos.X = (Self.Bloky[i] as TRozp).Pos.X)) then Exit(i);
+    TBlkType.rozp : if (((objBlok as TRozp).Pos.Y = Pos.Y) and (Pos.X = (objBlok as TRozp).Pos.X)) then Exit(i);
 
    end;//case
   end;
@@ -503,7 +515,8 @@ begin
 
  //leve tlacitko mysi
  if (Button = mbLeft) then
-   if (Self.Selected.typ <> TBlkType.pomocny_obj) then
+   if ((Self.Selected.typ <> TBlkType.pomocny_obj) or
+       ((Self.Selected as TPomocnyObj).Symbol in ObjBlokPomocny.BLK_ASSIGN_SYMBOLS)) then
      Self.PMPropertiesClick(self);
 end;
 

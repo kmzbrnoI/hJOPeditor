@@ -106,6 +106,7 @@ type
     PM_Show_Blk_Descriptions: TMenuItem;
     OD_Import: TOpenDialog;
     MI_Import: TMenuItem;
+    ToolButton56: TToolButton;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure PM_NewClick(Sender: TObject);
@@ -672,7 +673,7 @@ begin
      except
        on E:Exception do
         begin
-         Application.MessageBox(PChar(E), 'Chyba', MB_OK OR MB_ICONWARNING);
+         Application.MessageBox(PChar(E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
          Exit();
         end;
      end;
@@ -706,7 +707,7 @@ begin
      except
        on E:Exception do
         begin
-         Application.MessageBox(PChar(E), 'Chyba', MB_OK OR MB_ICONWARNING);
+         Application.MessageBox(PChar(E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
          Exit();
         end;
      end;
@@ -735,7 +736,7 @@ begin
      except
        on E:Exception do
         begin
-         Application.MessageBox(PChar(E), 'Chyba', MB_OK OR MB_ICONWARNING);
+         Application.MessageBox(PChar(E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
          Exit();
         end;
      end;
@@ -767,7 +768,7 @@ begin
      except
        on E:Exception do
         begin
-         Application.MessageBox(PChar(E), 'Chyba', MB_OK OR MB_ICONWARNING);
+         Application.MessageBox(PChar(E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
          Exit();
         end;
      end;
@@ -1092,6 +1093,7 @@ begin
 
   48: Self.ToolButton48.OnClick(Self.ToolButton48);
   55: Self.ToolButton55.OnClick(Self.ToolButton55);
+  56: Self.ToolButton56.OnClick(Self.ToolButton56);
 
   49: Self.ToolButton49.OnClick(Self.ToolButton49);
   50: Self.ToolButton50.OnClick(Self.ToolButton50);

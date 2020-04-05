@@ -32,6 +32,8 @@ const
   _Zarazedlo_l      = 31;
   _Peron_Start      = 32;
   _Prj              = 40;
+  _Osvetleni        = 41;
+  _Kolecko          = 42;
   _Uvazka           = 43;
   _Uvazka_Spr       = 45;
   _Zamek            = 48;
