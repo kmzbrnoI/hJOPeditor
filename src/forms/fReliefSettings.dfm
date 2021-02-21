@@ -71,7 +71,6 @@ object F_ReliefOptions: TF_ReliefOptions
       Width = 145
       Height = 22
       Style = [cbStandardColors]
-      ItemHeight = 16
       TabOrder = 0
     end
     object CB_Kurzor: TColorBox
@@ -80,7 +79,6 @@ object F_ReliefOptions: TF_ReliefOptions
       Width = 145
       Height = 22
       Style = [cbStandardColors]
-      ItemHeight = 16
       TabOrder = 1
     end
     object CB_KurzorOperation: TColorBox
@@ -89,7 +87,6 @@ object F_ReliefOptions: TF_ReliefOptions
       Width = 145
       Height = 22
       Style = [cbStandardColors]
-      ItemHeight = 16
       TabOrder = 2
     end
     object CB_Pozadi: TColorBox
@@ -98,7 +95,6 @@ object F_ReliefOptions: TF_ReliefOptions
       Width = 145
       Height = 22
       Style = [cbStandardColors]
-      ItemHeight = 16
       TabOrder = 3
     end
     object CB_KurzorOnObject: TColorBox
@@ -107,7 +103,6 @@ object F_ReliefOptions: TF_ReliefOptions
       Width = 145
       Height = 22
       Style = [cbStandardColors]
-      ItemHeight = 16
       TabOrder = 4
     end
   end

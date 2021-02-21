@@ -15,7 +15,7 @@ type
   private
     { Private declarations }
   public
-    procedure Open(log:string);
+    procedure Open(log: string);
   end;
 
 var
@@ -27,14 +27,14 @@ implementation
 
 procedure TF_ImportLog.B_OKClick(Sender: TObject);
 begin
- Self.Close();
+  Self.Close();
 end;
 
-procedure TF_ImportLog.Open(log:string);
+procedure TF_ImportLog.Open(log: string);
 begin
- Self.M_Log.Text := log;
- Self.Show();
- Self.B_OK.SetFocus();
+  Self.M_Log.Text := log;
+  Self.Show();
+  Self.B_OK.SetFocus();
 end;
 
 end.

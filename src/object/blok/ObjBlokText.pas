@@ -6,85 +6,87 @@ uses ObjBlok, IniFiles, Types, Global, PGraphics, Graphics;
 
 type
 
-TText = class(TGraphBlok)
- Text:string;
- Position:TPoint;
- Color:Integer;
+  TText = class(TGraphBlok)
+    Text: string;
+    Position: TPoint;
+    Color: Integer;
 
- constructor Create(index:Integer);
- procedure Load(ini:TMemIniFile; key:string; version: Word); override;
- procedure Save(ini:TMemIniFile; key:string); override;
- procedure Paint(DrawObject:TDrawObject; panelGraphics:TPanelGraphics; colors:TObjColors;
-                  selected:boolean; mode:TMode); override;
-end;
+    constructor Create(index: Integer);
+    procedure Load(ini: TMemIniFile; key: string; version: Word); override;
+    procedure Save(ini: TMemIniFile; key: string); override;
+    procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
+      mode: TMode); override;
+  end;
 
 implementation
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
-constructor TText.Create(index:Integer);
+constructor TText.Create(index: Integer);
 begin
- inherited;
- Self.typ := TBlkType.text;
+  inherited;
+  Self.typ := TBlkType.Text;
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
 procedure TText.Load(ini: TMemIniFile; key: string; version: Word);
 begin
- inherited;
+  inherited;
 
- if (Self.typ = TBlkType.blok_popisek) then
+  if (Self.typ = TBlkType.blok_popisek) then
   begin
-   Self.Blok := -2;
-   Self.OblRizeni := 0;
+    Self.Blok := -2;
+    Self.OblRizeni := 0;
   end;
 
- Self.Text := ini.ReadString(key, 'T', 'text');
- Self.Position.X := ini.ReadInteger(key, 'X', 0);
- Self.Position.Y := ini.ReadInteger(key, 'Y', 0);
- Self.Color := ini.ReadInteger(key, 'C', 0);
+  Self.Text := ini.ReadString(key, 'T', 'text');
+  Self.Position.X := ini.ReadInteger(key, 'X', 0);
+  Self.Position.Y := ini.ReadInteger(key, 'Y', 0);
+  Self.Color := ini.ReadInteger(key, 'C', 0);
 end;
 
 procedure TText.Save(ini: TMemIniFile; key: string);
 begin
- if ((Length(Self.Text) = 1) and (Self.typ <> TBlkType.blok_popisek)) then
-   inherited;
+  if ((Length(Self.Text) = 1) and (Self.typ <> TBlkType.blok_popisek)) then
+    inherited;
 
- ini.WriteString(key, 'T', Self.Text);
- ini.WriteInteger(key, 'X', Self.Position.X);
- ini.WriteInteger(key, 'Y', Self.Position.Y);
- ini.WriteInteger(key, 'C', Self.Color);
+  ini.WriteString(key, 'T', Self.Text);
+  ini.WriteInteger(key, 'X', Self.Position.X);
+  ini.WriteInteger(key, 'Y', Self.Position.Y);
+  ini.WriteInteger(key, 'C', Self.Color);
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
-procedure TText.Paint(DrawObject:TDrawObject; panelGraphics:TPanelGraphics; colors:TObjColors;
-                      selected:boolean; mode:TMode);
+procedure TText.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
+  mode: TMode);
 begin
- if ((Length(Self.Text) = 1) and (Self.typ = TBlkType.text)) then
+  if ((Length(Self.Text) = 1) and (Self.typ = TBlkType.Text)) then
   begin
-   if (selected) then
+    if (selected) then
     begin
-     color := colors.Selected;
+      Color := colors.selected;
     end else begin
-     case (Self.blok) of
-      -1: color := colors.Alert;
-      -2: color := colors.IntUnassigned;
-     else
-       color := colors.Normal;
-     end;
-    end;//else (Self.Selected > 255)
+      case (Self.Blok) of
+        - 1:
+          Color := colors.Alert;
+        -2:
+          Color := colors.IntUnassigned;
+      else
+        Color := colors.Normal;
+      end;
+    end; // else (Self.Selected > 255)
   end else begin
-    color := Self.Color;
+    Color := Self.Color;
   end;
 
- if (Self.typ = TBlkType.blok_popisek) then
-   panelGraphics.TextOutputI(Self.Position, Self.Text, Self.Color, clBlack, true)
- else
-   panelGraphics.TextOutputI(Self.Position, Self.Text, color, clBlack);
+  if (Self.typ = TBlkType.blok_popisek) then
+    panelGraphics.TextOutputI(Self.Position, Self.Text, Self.Color, clBlack, true)
+  else
+    panelGraphics.TextOutputI(Self.Position, Self.Text, Color, clBlack);
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
 end.

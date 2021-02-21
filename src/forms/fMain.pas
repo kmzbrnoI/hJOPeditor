@@ -141,48 +141,47 @@ type
     procedure PM_Show_Blk_DescriptionsClick(Sender: TObject);
     procedure MI_ImportClick(Sender: TObject);
   private
-    pushedButton:TToolButton;                   // last pushed button
+    pushedButton: TToolButton; // last pushed button
 
-   const
-    _PanelErrors: array [0..4] of string = ('Vybírat lze pouze zleva doprava a zhora dolů','Prázdné pole (není s čím operovat)',
-                                            'Chyba externí funkce','Cílové pole obsazeno','Překročeny maximální limity');
+  const
+    _PanelErrors: array [0 .. 4] of string = ('Vybírat lze pouze zleva doprava a zhora dolů',
+      'Prázdné pole (není s čím operovat)', 'Chyba externí funkce', 'Cílové pole obsazeno',
+      'Překročeny maximální limity');
     _Caption = 'hJOPeditor';
     _Config_File = 'Config.ini';
 
-    procedure ActivateSymbol(index:Integer);
+    procedure ActivateSymbol(index: Integer);
 
   public
-   DXD_main:TDXDraw;
-   Relief:TRelief;
+    DXD_main: TDXDraw;
+    Relief: TRelief;
 
     procedure CreateClasses;
     procedure CreateReliefClasses;
     procedure DestroyClasses;
     procedure DestroyReliefClasses;
 
-    procedure LoadFileUpdateGUI(fname:string);
-    procedure OpenFile(fname:string);
-    procedure ImportFile(fname:string);
-    procedure DesignOpen(FName:string);
+    procedure LoadFileUpdateGUI(fname: string);
+    procedure OpenFile(fname: string);
+    procedure ImportFile(fname: string);
+    procedure DesignOpen(fname: string);
     procedure DesignClose;
 
-    procedure RepaintModes(cur:TMode);
+    procedure RepaintModes(cur: TMode);
 
     procedure AssignReliefEvents();
 
-    procedure ReliefErrorEvent(Sender:TObject; err:string);
-    procedure ReliefMoveEvent(Sender:TObject; Position:TPoint);
-    procedure ReliefChangeTextEvent(Sender:TObject; var popisek:TPopisek);
-    procedure BlokEditEvent(Sender:TObject; Blok:TGraphBlok);
+    procedure ReliefErrorEvent(Sender: TObject; err: string);
+    procedure ReliefMoveEvent(Sender: TObject; Position: TPoint);
+    procedure ReliefChangeTextEvent(Sender: TObject; var popisek: TPopisek);
+    procedure BlokEditEvent(Sender: TObject; Blok: TGraphBlok);
 
-    procedure MessageEvent(Sender:TObject; msg:string);
-    procedure FormBlkCloseEvent(Sender:TObject);
+    procedure MessageEvent(Sender: TObject; Msg: string);
+    procedure FormBlkCloseEvent(Sender: TObject);
   end;
-
 
 var
   F_Hlavni: TF_Hlavni;
-
 
 implementation
 
@@ -193,928 +192,1059 @@ uses fNewRelief, fChangeRelief, fReliefSettings, fPopiskek, OblastRizeni,
 
 procedure TF_Hlavni.AE_MainMessage(var Msg: tagMSG; var Handled: Boolean);
 begin
- if (msg.message = WM_KeyDown) then                          //pokud je stisknuta klavesa
+  if (Msg.message = WM_KeyDown) then // pokud je stisknuta klavesa
   begin
-   case msg.wParam of                                     //case moznosti stisknutych klaves
-     VK_ESCAPE:begin
-                Self.CHB_Group.Checked := false;
-                if (Assigned(Relief)) then Relief.Escape(true);
-                Self.SB_Main.Panels.Items[3].Text := '';
+    case Msg.wParam of // case moznosti stisknutych klaves
+      VK_ESCAPE:
+        begin
+          Self.CHB_Group.Checked := false;
+          if (Assigned(Relief)) then
+            Relief.Escape(true);
+          Self.SB_Main.Panels.Items[3].Text := '';
 
-                if (Assigned(Self.pushedButton)) then
-                 Self.pushedButton.Down := false;
-               end;//VK_Escape
-    end;//case
+          if (Assigned(Self.pushedButton)) then
+            Self.pushedButton.Down := false;
+        end; // VK_Escape
+    end; // case
 
-   if ((Assigned(Self.Relief)) and (Self.Active)) then
+    if ((Assigned(Self.Relief)) and (Self.Active)) then
     begin
-     Self.ActiveControl := nil;
-     Self.Relief.KeyPress(msg.wParam);
+      Self.ActiveControl := nil;
+      Self.Relief.KeyPress(Msg.wParam);
     end;
-  end else if (msg.message = WM_MOUSELEAVE) then begin
-    if (msg.hwnd = Self.DXD_Main.Handle) then
-     begin
+  end else if (Msg.message = WM_MOUSELEAVE) then
+  begin
+    if (Msg.hwnd = Self.DXD_main.Handle) then
+    begin
       Self.SB_Main.Panels.Items[2].Text := '---;---';
       if (Assigned(Self.Relief)) then
         Self.Relief.HideMouse();
-     end;
+    end;
   end;
 end;
 
 procedure TF_Hlavni.B_DeleteClick(Sender: TObject);
 begin
- Relief.Escape(false);
+  Relief.Escape(false);
 
- if (Assigned(Self.pushedButton)) then
-  Self.pushedButton.Down := false;
+  if (Assigned(Self.pushedButton)) then
+    Self.pushedButton.Down := false;
 
- case (Relief.Mode) of
-  dmBitmap, dmSepVert, dmSepHor: Relief.DeleteBitmapSymbol;
- end;//case
+  case (Relief.Mode) of
+    dmBitmap, dmSepVert, dmSepHor:
+      Relief.DeleteBitmapSymbol;
+  end; // case
 end;
 
-//move
+// move
 procedure TF_Hlavni.B_MoveClick(Sender: TObject);
 begin
- Relief.Escape(false);
+  Relief.Escape(false);
 
- if (Assigned(Self.pushedButton)) then
-  Self.pushedButton.Down := false;
+  if (Assigned(Self.pushedButton)) then
+    Self.pushedButton.Down := false;
 
- case (Relief.Mode) of
-  dmBitmap, dmSepVert, dmSepHor: Relief.MoveBitmapSymbol;
- end;//case
+  case (Relief.Mode) of
+    dmBitmap, dmSepVert, dmSepHor:
+      Relief.MoveBitmapSymbol;
+  end; // case
 end;
 
 procedure TF_Hlavni.CHB_GroupClick(Sender: TObject);
 begin
- Relief.Skupina := Self.CHB_Group.Checked;
+  Relief.Skupina := Self.CHB_Group.Checked;
 end;
 
 procedure TF_Hlavni.CreateClasses;
 begin
- Self.DXD_main := TDXDraw.Create(Self);
- Self.DXD_main.Parent  := Self;
- Self.DXD_main.Left    := 8;
- Self.DXD_main.Top     := 80;
- Self.DXD_main.Visible := false;
- Self.DXD_main.Initialize;               // tohleto tady musi byt, jinak nefunguje nacitani souboru jako argumentu !!
+  Self.DXD_main := TDXDraw.Create(Self);
+  Self.DXD_main.Parent := Self;
+  Self.DXD_main.Left := 8;
+  Self.DXD_main.Top := 80;
+  Self.DXD_main.Visible := false;
+  Self.DXD_main.Initialize; // tohleto tady musi byt, jinak nefunguje nacitani souboru jako argumentu !!
 
- Self.CreateReliefClasses;
+  Self.CreateReliefClasses;
 end;
 
 procedure TF_Hlavni.CreateReliefClasses;
 begin
- ReliefOptions  := TReliefOptions.Create;
+  ReliefOptions := TReliefOptions.Create;
 end;
 
 procedure TF_Hlavni.DestroyClasses;
 begin
- if (Assigned(ReliefOptions)) then
+  if (Assigned(ReliefOptions)) then
   begin
-   ReliefOptions.Destroy;
-   ReliefOptions := nil;
+    ReliefOptions.Destroy;
+    ReliefOptions := nil;
   end;
 
- Self.DestroyReliefClasses;
+  Self.DestroyReliefClasses;
 
- if (Assigned(Self.DXD_main)) then
-   FreeAndNil(Self.DXD_main);
+  if (Assigned(Self.DXD_main)) then
+    FreeAndNil(Self.DXD_main);
 end;
 
 procedure TF_Hlavni.DestroyReliefClasses;
 begin
- if (Assigned(Relief)) then
+  if (Assigned(Relief)) then
   begin
-   Relief.Destroy;
-   Relief := nil;
+    Relief.Destroy;
+    Relief := nil;
   end;
 end;
 
 procedure TF_Hlavni.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
- if (Assigned(ReliefOptions)) then ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName))+_Config_File);
+  if (Assigned(ReliefOptions)) then
+    ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + _Config_File);
 
- DestroyClasses;
+  DestroyClasses;
 end;
 
 procedure TF_Hlavni.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
- if (Assigned(Relief)) then
+  if (Assigned(Relief)) then
   begin
-   if (Application.MessageBox('Uzavřením projektu bez jeho uložení ztratíte projektová data, přesto pokračovat?','Uzavření projektu',MB_YESNO OR MB_ICONQUESTION) = mrNo) then CanClose := false;
-  end;//if (Assigned(Relief))
+    if (Application.MessageBox('Uzavřením projektu bez jeho uložení ztratíte projektová data, přesto pokračovat?',
+      'Uzavření projektu', MB_YESNO OR MB_ICONQUESTION) = mrNo) then
+      CanClose := false;
+  end; // if (Assigned(Relief))
 end;
 
 procedure TF_Hlavni.FormCreate(Sender: TObject);
 begin
- CreateClasses;
+  CreateClasses;
 
- ReliefOptions.LoadData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName))+'Config.ini');
- Self.MI_Mrizka.Checked := ReliefOptions.Mrizka;
+  ReliefOptions.LoadData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + 'Config.ini');
+  Self.MI_Mrizka.Checked := ReliefOptions.Mrizka;
 
- Self.DXD_Main.Cursor := crNone;
- Self.Caption := _Caption + '     v' + GetVersion(Application.ExeName);
+  Self.DXD_main.Cursor := crNone;
+  Self.Caption := _Caption + '     v' + GetVersion(Application.ExeName);
 
- Self.pushedButton := nil;
+  Self.pushedButton := nil;
 end;
 
 procedure TF_Hlavni.FormKeyPress(Sender: TObject; var Key: Char);
-var index:Integer;
+var index: Integer;
 begin
- case (Key) of
-  'g':begin
-    // group
-    if (not Assigned(Self.Relief)) then Exit;
-    if (Self.Relief.Mode <> dmBitmap) then Exit;
+  case (Key) of
+    'g':
+      begin
+        // group
+        if (not Assigned(Self.Relief)) then
+          Exit;
+        if (Self.Relief.Mode <> dmBitmap) then
+          Exit;
 
-    Self.CHB_Group.Checked := not Self.CHB_Group.Checked;
-    Self.CHB_GroupClick(Self);
-  end;
-
-  'd':begin
-    // delete
-    if (not Assigned(Self.Relief)) then Exit;
-    if (Self.Relief.Mode = dmBitmap) then
-      Self.B_DeleteClick(Self);
-  end;
-
-  'm':begin
-    // move
-    if (not Assigned(Self.Relief)) then Exit;
-    if (Self.Relief.Mode = dmBitmap) then
-      Self.B_MoveClick(Self);
-  end;
-
-  'r':begin
-    // rotate symbol
-    if (not Assigned(Self.pushedButton)) then Exit;
-    index := Self.pushedButton.Tag;   // index of the symbol
-
-    case (index) of
-      0..3:begin
-        // vyhybky
-        index := index + 1;
-        if (index > 3) then index := 0;
-        Self.ActivateSymbol(index);
+        Self.CHB_Group.Checked := not Self.CHB_Group.Checked;
+        Self.CHB_GroupClick(Self);
       end;
 
-      12..17:begin
-        // detekovany usek
-        index := index + 1;
-        if (index > 17) then index := 12;
-        Self.ActivateSymbol(index);
+    'd':
+      begin
+        // delete
+        if (not Assigned(Self.Relief)) then
+          Exit;
+        if (Self.Relief.Mode = dmBitmap) then
+          Self.B_DeleteClick(Self);
       end;
 
-      18..23:begin
-        // nedetekovany usek
-        index := index + 1;
-        if (index > 23) then index := 18;
-        Self.ActivateSymbol(index);
+    'm':
+      begin
+        // move
+        if (not Assigned(Self.Relief)) then
+          Exit;
+        if (Self.Relief.Mode = dmBitmap) then
+          Self.B_MoveClick(Self);
       end;
 
-      // jizdni navestidla
-      24:Self.ActivateSymbol(25);
-      25:Self.ActivateSymbol(24);
+    'r':
+      begin
+        // rotate symbol
+        if (not Assigned(Self.pushedButton)) then
+          Exit;
+        index := Self.pushedButton.Tag; // index of the symbol
 
-      // manipulacni navestidla
-      28:Self.ActivateSymbol(29);
-      29:Self.ActivateSymbol(28);
+        case (index) of
+          0 .. 3:
+            begin
+              // vyhybky
+              index := index + 1;
+              if (index > 3) then
+                index := 0;
+              Self.ActivateSymbol(index);
+            end;
 
-      // zarazedla
-      30:Self.ActivateSymbol(31);
-      31:Self.ActivateSymbol(30);
+          12 .. 17:
+            begin
+              // detekovany usek
+              index := index + 1;
+              if (index > 17) then
+                index := 12;
+              Self.ActivateSymbol(index);
+            end;
 
-      32..34:begin
-        // peron
-        index := index + 1;
-        if (index > 34) then index := 32;
-        Self.ActivateSymbol(index);
+          18 .. 23:
+            begin
+              // nedetekovany usek
+              index := index + 1;
+              if (index > 23) then
+                index := 18;
+              Self.ActivateSymbol(index);
+            end;
+
+          // jizdni navestidla
+          24:
+            Self.ActivateSymbol(25);
+          25:
+            Self.ActivateSymbol(24);
+
+          // manipulacni navestidla
+          28:
+            Self.ActivateSymbol(29);
+          29:
+            Self.ActivateSymbol(28);
+
+          // zarazedla
+          30:
+            Self.ActivateSymbol(31);
+          31:
+            Self.ActivateSymbol(30);
+
+          32 .. 34:
+            begin
+              // peron
+              index := index + 1;
+              if (index > 34) then
+                index := 32;
+              Self.ActivateSymbol(index);
+            end;
+
+          // vykolejka
+          49:
+            Self.ActivateSymbol(50);
+          50:
+            Self.ActivateSymbol(49);
+
+        end;
       end;
 
-      // vykolejka
-      49: Self.ActivateSymbol(50);
-      50: Self.ActivateSymbol(49);
+    's':
+      begin
+        // change symbol
+        if (not Assigned(Self.Relief)) then
+          Exit;
+        if (Self.Relief.Mode <> dmBitmap) then
+          Exit;
 
-    end;
+        if (Assigned(Self.pushedButton)) then
+          index := Self.pushedButton.Tag
+        else
+          index := -1;
+
+        case (index) of
+          0 .. 3:
+            Self.ActivateSymbol(12);
+          12 .. 17:
+            Self.ActivateSymbol(18);
+          18 .. 23:
+            Self.ActivateSymbol(24);
+          24 .. 25:
+            Self.ActivateSymbol(28);
+          28 .. 29:
+            Self.ActivateSymbol(49);
+          30 .. 31:
+            Self.ActivateSymbol(32);
+          32 .. 34:
+            Self.ActivateSymbol(35);
+          40:
+            Self.ActivateSymbol(48);
+          48:
+            Self.ActivateSymbol(55);
+          49 .. 50:
+            Self.ActivateSymbol(30);
+          35:
+            Self.ActivateSymbol(30);
+        else
+          Self.ActivateSymbol(0);
+        end;
+      end; // 's'
+
+    't':
+      begin
+        if (not Assigned(Self.Relief)) then
+          Exit;
+        if (Self.Relief.Mode <> dmBitmap) then
+          Exit;
+        Self.TB_TextClick(Self.TB_Text);
+      end;
+
   end;
-
-  's':begin
-    // change symbol
-    if (not Assigned(Self.Relief)) then Exit;
-    if (Self.Relief.Mode <> dmBitmap) then Exit;
-
-    if (Assigned(Self.pushedButton)) then
-      index := Self.pushedButton.Tag
-    else index := -1;
-
-    case (index) of
-     0..3  : Self.ActivateSymbol(12);
-     12..17: Self.ActivateSymbol(18);
-     18..23: Self.ActivateSymbol(24);
-     24..25: Self.ActivateSymbol(28);
-     28..29: Self.ActivateSymbol(49);
-     30..31: Self.ActivateSymbol(32);
-     32..34: Self.ActivateSymbol(35);
-     40:     Self.ActivateSymbol(48);
-     48:     Self.ActivateSymbol(55);
-     49..50: Self.ActivateSymbol(30);
-     35    : Self.ActivateSymbol(30);
-    else
-     Self.ActivateSymbol(0);
-    end;
-  end;//'s'
-
-  't':begin
-    if (not Assigned(Self.Relief)) then Exit;
-    if (Self.Relief.Mode <> dmBitmap) then Exit;
-    Self.TB_TextClick(Self.TB_Text);
-  end;
-
- end;
 end;
 
-//novy soubor
+// novy soubor
 procedure TF_Hlavni.PM_NewClick(Sender: TObject);
 begin
- if (Assigned(Relief)) then
+  if (Assigned(Relief)) then
   begin
-   if (Relief.FileStav <> 0) then
-     if (Application.MessageBox('Otevřením nového projektu ztratíte všechna neuložená data, pokračovat?',
-                                'Pokračovat?', MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
-       Exit();
+    if (Relief.FileStav <> 0) then
+      if (Application.MessageBox('Otevřením nového projektu ztratíte všechna neuložená data, pokračovat?',
+        'Pokračovat?', MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
+        Exit();
   end;
 
- if (Assigned(Relief)) then FreeAndNil(Relief);
+  if (Assigned(Relief)) then
+    FreeAndNil(Relief);
 
- F_NewRelief.OpenForm;
+  F_NewRelief.OpenForm;
 end;
 
-procedure TF_Hlavni.LoadFileUpdateGUI(fname:string);
+procedure TF_Hlavni.LoadFileUpdateGUI(fname: string);
 begin
- Self.RepaintModes(Relief.Mode);
+  Self.RepaintModes(Relief.Mode);
 
- case (Self.Relief.Mode) of
-  dmBitmap:begin
-   Self.PM_BitmapClick(Self.PM_Bitmap);
-   Self.PM_ORAdd.Enabled := true;
+  case (Self.Relief.Mode) of
+    dmBitmap:
+      begin
+        Self.PM_BitmapClick(Self.PM_Bitmap);
+        Self.PM_ORAdd.Enabled := true;
+      end;
+
+    dmBloky:
+      begin
+        Self.PM_ORAdd.Enabled := false;
+        Self.PM_BitmapClick(Self.PM_Bloky);
+      end;
   end;
 
-  dmBloky:begin
-   Self.PM_ORAdd.Enabled := false;
-   Self.PM_BitmapClick(Self.PM_Bloky);
-  end;
- end;
-
- ReliefOptions.UseData(F_Hlavni.Relief);
- Self.DesignOpen(ExtractFileName(fname));
+  ReliefOptions.UseData(F_Hlavni.Relief);
+  Self.DesignOpen(ExtractFileName(fname));
 end;
 
-procedure TF_Hlavni.OpenFile(fname:string);
+procedure TF_Hlavni.OpenFile(fname: string);
 begin
- Relief := TRelief.Create(Self.DXD_Main, Self);
- Self.AssignReliefEvents();
+  Relief := TRelief.Create(Self.DXD_main, Self);
+  Self.AssignReliefEvents();
 
- try
-   Relief.Open(fname);
- except
-   on E:Exception do
+  try
+    Relief.Open(fname);
+  except
+    on E: Exception do
     begin
-     if (Assigned(Relief)) then FreeAndNil(Relief);
-     Self.DesignClose();
-     Application.MessageBox(PChar('Otevření souboru skončilo s chybou:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONERROR);
-     Exit();
+      if (Assigned(Relief)) then
+        FreeAndNil(Relief);
+      Self.DesignClose();
+      Application.MessageBox(PChar('Otevření souboru skončilo s chybou:' + #13#10 + E.message), 'Chyba',
+        MB_OK OR MB_ICONERROR);
+      Exit();
     end;
- end;
+  end;
 
- Self.LoadFileUpdateGUI(fname);
+  Self.LoadFileUpdateGUI(fname);
 end;
 
-procedure TF_Hlavni.ImportFile(fname:string);
-var log:string;
+procedure TF_Hlavni.ImportFile(fname: string);
+var log: string;
 begin
- Relief := TRelief.Create(Self.DXD_Main, Self);
- Self.AssignReliefEvents();
+  Relief := TRelief.Create(Self.DXD_main, Self);
+  Self.AssignReliefEvents();
 
- try
-   log := Relief.Import(fname);
- except
-   on E:Exception do
+  try
+    log := Relief.Import(fname);
+  except
+    on E: Exception do
     begin
-     if (Assigned(Relief)) then FreeAndNil(Relief);
-     Self.DesignClose();
-     Application.MessageBox(PChar('Import suboru skončil s chybou:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONERROR);
-     Exit();
+      if (Assigned(Relief)) then
+        FreeAndNil(Relief);
+      Self.DesignClose();
+      Application.MessageBox(PChar('Import suboru skončil s chybou:' + #13#10 + E.message), 'Chyba',
+        MB_OK OR MB_ICONERROR);
+      Exit();
     end;
- end;
+  end;
 
- Self.LoadFileUpdateGUI('Nový projekt');
- F_ImportLog.Open(log);
+  Self.LoadFileUpdateGUI('Nový projekt');
+  F_ImportLog.Open(log);
 end;
 
 procedure TF_Hlavni.PM_OpenClick(Sender: TObject);
 begin
- if (Assigned(Relief)) then
-   if (Application.MessageBox('Otevřením nového projektu ztratíte všechna neuložená data, pokračovat?',
-                              'Pokračovat?', MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
-     Exit();
+  if (Assigned(Relief)) then
+    if (Application.MessageBox('Otevřením nového projektu ztratíte všechna neuložená data, pokračovat?', 'Pokračovat?',
+      MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
+      Exit();
 
- if (Self.OD_Open.Execute(Self.Handle)) then
+  if (Self.OD_Open.Execute(Self.Handle)) then
   begin
-   if (Assigned(Relief)) then
+    if (Assigned(Relief)) then
     begin
-     if (Relief.FileStav <> 0) then
-       FreeAndNil(Relief);
+      if (Relief.FileStav <> 0) then
+        FreeAndNil(Relief);
     end;
 
-   Self.OpenFile(Self.OD_Open.FileName);
+    Self.OpenFile(Self.OD_Open.FileName);
   end;
 end;
 
 procedure TF_Hlavni.PM_ORAddClick(Sender: TObject);
-var tmpOR:TOR;
+var tmpOR: TOR;
 begin
- tmpOR.Osvetleni.Cnt := 0;
- tmpOR.Poss.DK    := Point(0,0);
- tmpOR.Poss.Queue := Point(0,0);
- tmpOR.Poss.Time  := Point(0,0);
- tmpOR.Rights.ModCasStart := true;
- tmpOR.Rights.ModCasStop  := true;
- tmpOR.Rights.ModCasSet   := true;
+  tmpOR.Osvetleni.Cnt := 0;
+  tmpOR.Poss.DK := Point(0, 0);
+  tmpOR.Poss.Queue := Point(0, 0);
+  tmpOR.Poss.Time := Point(0, 0);
+  tmpOR.Rights.ModCasStart := true;
+  tmpOR.Rights.ModCasStop := true;
+  tmpOR.Rights.ModCasSet := true;
 
- F_OREdit.OpenForm(tmpOR);
+  F_OREdit.OpenForm(tmpOR);
 end;
 
 procedure TF_Hlavni.PM_ReliefOptionsClick(Sender: TObject);
 begin
- F_ReliefOptions.OpenForm;
+  F_ReliefOptions.OpenForm;
 end;
 
 procedure TF_Hlavni.PM_Reload_BlocksClick(Sender: TObject);
 begin
- try
-   F_BlockEdit.Bloky.LoadData(ReliefOptions.BlockFile);
-   if (F_BlockEdit.Showing) then
-     F_BlockEdit.FormShow(F_BlockEdit);
-   Application.MessageBox(PChar('Soubor '+ReliefOptions.BlockFile+' úspěšně načten.'),
-                          'Info', MB_OK OR MB_ICONINFORMATION);
- except
-   on E:Exception do
-     Application.MessageBox(PChar('Chyba při načítáni souboru s bloky technologie:'+#13#10+E.Message),
-                            'Chyba', MB_OK OR MB_ICONWARNING);
- end;
+  try
+    F_BlockEdit.Bloky.LoadData(ReliefOptions.BlockFile);
+    if (F_BlockEdit.Showing) then
+      F_BlockEdit.FormShow(F_BlockEdit);
+    Application.MessageBox(PChar('Soubor ' + ReliefOptions.BlockFile + ' úspěšně načten.'), 'Info',
+      MB_OK OR MB_ICONINFORMATION);
+  except
+    on E: Exception do
+      Application.MessageBox(PChar('Chyba při načítáni souboru s bloky technologie:' + #13#10 + E.message), 'Chyba',
+        MB_OK OR MB_ICONWARNING);
+  end;
 end;
 
-//ukladani souboru jako
+// ukladani souboru jako
 procedure TF_Hlavni.PM_SaveAsClick(Sender: TObject);
 begin
- if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
+  if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
   begin
-   Self.SD_Save.Filter := 'Bitmapové soubory panelu (*.bpnl)|*.bpnl';
+    Self.SD_Save.Filter := 'Bitmapové soubory panelu (*.bpnl)|*.bpnl';
 
-   if (not Self.SD_Save.Execute(Self.Handle)) then Exit;
-   if (RightStr(Self.SD_Save.FileName,5) <> '.bpnl') then Relief.Save(Self.SD_Save.FileName+'.bpnl') else Relief.Save(Self.SD_Save.FileName);
-  end;//bitmapovy mod
+    if (not Self.SD_Save.Execute(Self.Handle)) then
+      Exit;
+    if (RightStr(Self.SD_Save.FileName, 5) <> '.bpnl') then
+      Relief.Save(Self.SD_Save.FileName + '.bpnl')
+    else
+      Relief.Save(Self.SD_Save.FileName);
+  end; // bitmapovy mod
 
- if (Relief.Mode = dmBloky) then
+  if (Relief.Mode = dmBloky) then
   begin
-   Self.SD_Save.Filter := 'Objektové soubory panelu (*.opnl)|*.opnl';
+    Self.SD_Save.Filter := 'Objektové soubory panelu (*.opnl)|*.opnl';
 
-   if (not Self.SD_Save.Execute(Self.Handle)) then Exit;
-   if (RightStr(Self.SD_Save.FileName,5) <> '.opnl') then Relief.Save(Self.SD_Save.FileName+'.opnl') else Relief.Save(Self.SD_Save.FileName);
-  end;//objektovy mod
+    if (not Self.SD_Save.Execute(Self.Handle)) then
+      Exit;
+    if (RightStr(Self.SD_Save.FileName, 5) <> '.opnl') then
+      Relief.Save(Self.SD_Save.FileName + '.opnl')
+    else
+      Relief.Save(Self.SD_Save.FileName);
+  end; // objektovy mod
 
- Self.SB_Main.Panels.Items[1].Text := 'Soubor uložen';
- Self.Caption := ExtractFileName(Self.SD_Save.FileName)+' - '+_Caption + '     v' + GetVersion(Application.ExeName);
+  Self.SB_Main.Panels.Items[1].Text := 'Soubor uložen';
+  Self.Caption := ExtractFileName(Self.SD_Save.FileName) + ' - ' + _Caption + '     v' +
+    GetVersion(Application.ExeName);
 end;
 
-//ukladani souboru
+// ukladani souboru
 procedure TF_Hlavni.PM_SaveClick(Sender: TObject);
 begin
- try
-   if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
+  try
+    if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
     begin
-     Self.SD_Save.Filter := 'Bitmapové soubory panelu (*.bpnl)|*.bpnl';
+      Self.SD_Save.Filter := 'Bitmapové soubory panelu (*.bpnl)|*.bpnl';
 
-     if (Relief.FileStav = 1) then
+      if (Relief.FileStav = 1) then
       begin
-       if (not Self.SD_Save.Execute(Self.Handle)) then Exit;
-       if (RightStr(Self.SD_Save.FileName,5) <> '.bpnl') then Relief.Save(Self.SD_Save.FileName+'.bpnl') else Relief.Save(Self.SD_Save.FileName);
+        if (not Self.SD_Save.Execute(Self.Handle)) then
+          Exit;
+        if (RightStr(Self.SD_Save.FileName, 5) <> '.bpnl') then
+          Relief.Save(Self.SD_Save.FileName + '.bpnl')
+        else
+          Relief.Save(Self.SD_Save.FileName);
       end else begin
-       if (Relief.FileStav = 2) then Relief.Save(Relief.FileCesta);
-      end;//else .Stav = 1
-    end;//bitmapovy mod
+        if (Relief.FileStav = 2) then
+          Relief.Save(Relief.FileCesta);
+      end; // else .Stav = 1
+    end; // bitmapovy mod
 
-   if ((Relief.Mode = dmBloky) or (Relief.Mode = dmRoots)) then
+    if ((Relief.Mode = dmBloky) or (Relief.Mode = dmRoots)) then
     begin
-     Self.SD_Save.Filter := 'Objektové soubory panelu (*.opnl)|*.opnl';
+      Self.SD_Save.Filter := 'Objektové soubory panelu (*.opnl)|*.opnl';
 
-     if (Relief.FileStav = 1) then
+      if (Relief.FileStav = 1) then
       begin
-       if (not Self.SD_Save.Execute(Self.Handle)) then Exit;
-       if (RightStr(Self.SD_Save.FileName,5) <> '.opnl') then Relief.Save(Self.SD_Save.FileName+'.opnl') else Relief.Save(Self.SD_Save.FileName);
+        if (not Self.SD_Save.Execute(Self.Handle)) then
+          Exit;
+        if (RightStr(Self.SD_Save.FileName, 5) <> '.opnl') then
+          Relief.Save(Self.SD_Save.FileName + '.opnl')
+        else
+          Relief.Save(Self.SD_Save.FileName);
       end else begin
-       if (Relief.FileStav = 2) then Relief.Save(Relief.FileCesta);
-      end;//else .Stav = 1
-    end;//objektovy mod
- except
-   on E:Exception do
+        if (Relief.FileStav = 2) then
+          Relief.Save(Relief.FileCesta);
+      end; // else .Stav = 1
+    end; // objektovy mod
+  except
+    on E: Exception do
     begin
-     Application.MessageBox(PChar('Uložení suboru skončilo s chybou:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONERROR);
-     Exit();
+      Application.MessageBox(PChar('Uložení suboru skončilo s chybou:' + #13#10 + E.message), 'Chyba',
+        MB_OK OR MB_ICONERROR);
+      Exit();
     end;
- end;
+  end;
 
- Self.SB_Main.Panels.Items[1].Text := 'Soubor uložen';
- Self.Caption := ExtractFileName(Relief.FileCesta)+' - '+_Caption + '     v' + GetVersion(Application.ExeName);
+  Self.SB_Main.Panels.Items[1].Text := 'Soubor uložen';
+  Self.Caption := ExtractFileName(Relief.FileCesta) + ' - ' + _Caption + '     v' + GetVersion(Application.ExeName);
 end;
 
 procedure TF_Hlavni.PM_AboutClick(Sender: TObject);
 begin
- Application.MessageBox(PChar('hJOPeditor'+#13#10+'v'+GetVersion(Application.ExeName)+#13#10+'Vytvořil Jan Horáček 2011–2021'),
-                        'Info', MB_OK OR MB_ICONINFORMATION);
+  Application.MessageBox(PChar('hJOPeditor' + #13#10 + 'v' + GetVersion(Application.ExeName) + #13#10 +
+    'Vytvořil Jan Horáček 2011–2021'), 'Info', MB_OK OR MB_ICONINFORMATION);
 end;
 
 procedure TF_Hlavni.PM_BitmapClick(Sender: TObject);
-var Return:Integer;
+var Return: Integer;
 begin
- (Sender as TMenuItem).Checked := true;
+  (Sender as TMenuItem).Checked := true;
 
- if (Assigned(Self.pushedButton)) then
-  Self.pushedButton.Down := false;
+  if (Assigned(Self.pushedButton)) then
+    Self.pushedButton.Down := false;
 
- F_BlockEdit.Close();
+  F_BlockEdit.Close();
 
- Self.TB_Vyhybka.Visible        := false;
- Self.TB_Usek.Visible           := false;
- Self.TB_SCom.Visible           := false;
- Self.TB_BitmapTools.Visible    := false;
- Self.TB_Oddelovac.Visible      := false;
- Self.TB_BitmapOstatni.Visible  := false;
- Self.TB_Trat.Visible           := false;
- Self.TB_Vykolejka.Visible      := false;
- Self.TB_Krizeni.Visible        := false;
- Self.CHB_Group.Enabled         := false;
- Self.TB_Other.Visible          := false;
- Self.MI_Relief.Visible         := false;
- Self.MI_Data.Visible           := false;
+  Self.TB_Vyhybka.Visible := false;
+  Self.TB_Usek.Visible := false;
+  Self.TB_SCom.Visible := false;
+  Self.TB_BitmapTools.Visible := false;
+  Self.TB_Oddelovac.Visible := false;
+  Self.TB_BitmapOstatni.Visible := false;
+  Self.TB_Trat.Visible := false;
+  Self.TB_Vykolejka.Visible := false;
+  Self.TB_Krizeni.Visible := false;
+  Self.CHB_Group.Enabled := false;
+  Self.TB_Other.Visible := false;
+  Self.MI_Relief.Visible := false;
+  Self.MI_Data.Visible := false;
 
- case (Sender as TMenuItem).Tag of
-  0:begin
-     if (Relief.Mode = dmBloky) then
+  case (Sender as TMenuItem).Tag of
+    0:
       begin
-       Application.MessageBox('Tato funkce zatím není dostupná', 'Nelze převést', MB_OK OR MB_ICONERROR);
-       Self.PM_Bloky.Checked := true;
-       Exit;
+        if (Relief.Mode = dmBloky) then
+        begin
+          Application.MessageBox('Tato funkce zatím není dostupná', 'Nelze převést', MB_OK OR MB_ICONERROR);
+          Self.PM_Bloky.Checked := true;
+          Exit;
+        end;
+
+        try
+          if (Relief.Mode <> dmBitmap) then
+            Relief.SwitchMode(dmBitmap);
+        except
+          on E: Exception do
+          begin
+            Application.MessageBox(PChar(E.message), 'Chyba', MB_OK OR MB_ICONWARNING);
+            Exit();
+          end;
+        end;
+
+        Self.TB_Vyhybka.Visible := true;
+        Self.TB_Usek.Visible := true;
+        Self.TB_SCom.Visible := true;
+        Self.TB_BitmapTools.Visible := true;
+        Self.TB_BitmapOstatni.Visible := true;
+        Self.TB_Trat.Visible := true;
+        Self.TB_Krizeni.Visible := true;
+        Self.CHB_Group.Enabled := true;
+        Self.TB_Other.Visible := true;
+        Self.MI_Relief.Visible := true;
+        Self.TB_Vykolejka.Visible := true;
+      end; // case 0
+
+    1, 2:
+      begin
+        if (Relief.Mode = dmBloky) then
+        begin
+          Application.MessageBox('Tato funkce zatím není dostupná', 'Nelze převést', MB_OK OR MB_ICONERROR);
+          Self.PM_Bloky.Checked := true;
+          Exit;
+        end;
+
+        try
+          if ((TMenuItem(Sender).Tag = 1) and (Relief.Mode <> dmSepVert)) then
+            Relief.SwitchMode(dmSepVert)
+          else if ((TMenuItem(Sender).Tag = 2) and (Relief.Mode <> dmSepHor)) then
+            Relief.SwitchMode(dmSepHor);
+        except
+          on E: Exception do
+          begin
+            Application.MessageBox(PChar(E.message), 'Chyba', MB_OK OR MB_ICONWARNING);
+            Exit();
+          end;
+        end;
+
+        Self.TB_Oddelovac.Visible := true;
+        Self.TB_BitmapTools.Visible := true;
+        Self.MI_Relief.Visible := true;
       end;
 
-     try
-       if (Relief.Mode <> dmBitmap) then
-         Relief.SwitchMode(dmBitmap);
-     except
-       on E:Exception do
-        begin
-         Application.MessageBox(PChar(E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
-         Exit();
-        end;
-     end;
-
-     Self.TB_Vyhybka.Visible        := true;
-     Self.TB_Usek.Visible           := true;
-     Self.TB_SCom.Visible           := true;
-     Self.TB_BitmapTools.Visible    := true;
-     Self.TB_BitmapOstatni.Visible  := true;
-     Self.TB_Trat.Visible           := true;
-     Self.TB_Krizeni.Visible        := true;
-     Self.CHB_Group.Enabled         := true;
-     Self.TB_Other.Visible          := true;
-     Self.MI_Relief.Visible         := true;
-     Self.TB_Vykolejka.Visible      := true;
-    end;//case 0
-
-  1, 2:begin
-     if (Relief.Mode = dmBloky) then
+    3:
       begin
-       Application.MessageBox('Tato funkce zatím není dostupná', 'Nelze převést', MB_OK OR MB_ICONERROR);
-       Self.PM_Bloky.Checked := true;
-       Exit;
+        Return := 0;
+
+        if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
+        begin
+          if (Application.MessageBox
+            (PChar('Po přepnutí na režim bloky není možné se vrátit zpět do bitmapového režimu. Zkontrolujte si, že máte uložený soubor s daty panelu.'
+            + #13#10 + 'Pokračovat?'), 'Změna režimu projektu', MB_YESNO OR MB_ICONQUESTION OR MB_DEFBUTTON2) <> mrYes)
+          then
+          begin
+            Self.PM_BitmapClick(Self.PM_Bitmap);
+            Exit();
+          end;
+        end;
+
+        try
+          if (Relief.Mode <> dmBloky) then
+            Relief.SwitchMode(dmBloky);
+        except
+          on E: Exception do
+          begin
+            Application.MessageBox(PChar(E.message), 'Chyba', MB_OK OR MB_ICONWARNING);
+            Exit();
+          end;
+        end;
+
+        if (Return <> 0) then
+        begin
+          Application.MessageBox(PChar('Při změně módu se vyskytla chyba - chyba: ' + IntToStr(Return)), 'Chyba',
+            MB_OK OR MB_ICONWARNING);
+          Exit;
+        end;
+
+        if (not F_BlockEdit.Bloky.triedLoad) then
+        begin
+          try
+            F_BlockEdit.Bloky.LoadData(ReliefOptions.BlockFile);
+          except
+            on E: Exception do
+              Application.MessageBox(PChar('Chyba při načítáni souboru s bloky technologie:' + #13#10 + E.message),
+                'Chyba', MB_OK OR MB_ICONWARNING);
+          end;
+        end;
+
+        Self.MI_Data.Visible := true;
       end;
 
-     try
-       if ((TMenuItem(Sender).Tag = 1) and (Relief.Mode <> dmSepVert)) then
-         Relief.SwitchMode(dmSepVert)
-       else if ((TMenuItem(Sender).Tag = 2) and (Relief.Mode <> dmSepHor)) then
-         Relief.SwitchMode(dmSepHor);
-     except
-       on E:Exception do
-        begin
-         Application.MessageBox(PChar(E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
-         Exit();
-        end;
-     end;
-
-     Self.TB_Oddelovac.Visible   := true;
-     Self.TB_BitmapTools.Visible := true;
-     Self.MI_Relief.Visible      := true;
-    end;
-
-  3:begin
-     Return := 0;
-
-     if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
+    4:
       begin
-       if (Application.MessageBox(PChar('Po přepnutí na režim bloky není možné se vrátit zpět do bitmapového režimu. Zkontrolujte si, že máte uložený soubor s daty panelu.'+#13#10+'Pokračovat?'),
-                                        'Změna režimu projektu', MB_YESNO OR MB_ICONQUESTION OR MB_DEFBUTTON2) <> mrYes) then
-        begin
-         Self.PM_BitmapClick(Self.PM_Bitmap);
-         Exit();
+        try
+          if (Relief.Mode <> dmRoots) then
+            Relief.SwitchMode(dmRoots);
+        except
+          on E: Exception do
+          begin
+            Application.MessageBox(PChar(E.message), 'Chyba', MB_OK OR MB_ICONWARNING);
+            Exit();
+          end;
         end;
+
+        F_BlockEdit.Close();
+        Self.MI_Data.Visible := true;
       end;
+  end; // case (Sender as TMenuItem).Tag
 
-     try
-       if (Relief.Mode <> dmBloky) then
-         Relief.SwitchMode(dmBloky);
-     except
-       on E:Exception do
-        begin
-         Application.MessageBox(PChar(E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
-         Exit();
-        end;
-     end;
-
-     if (Return <> 0) then
-      begin
-       Application.MessageBox(PChar('Při změně módu se vyskytla chyba - chyba: '+IntToStr(Return)),'Chyba',MB_OK OR MB_ICONWARNING);
-       Exit;
-      end;
-
-     if (not F_BlockEdit.Bloky.triedLoad) then
-      begin
-       try
-         F_BlockEdit.Bloky.LoadData(ReliefOptions.BlockFile);
-       except
-         on E:Exception do
-           Application.MessageBox(PChar('Chyba při načítáni souboru s bloky technologie:'+#13#10+E.Message),
-                                  'Chyba', MB_OK OR MB_ICONWARNING);
-       end;
-      end;
-
-     Self.MI_Data.Visible := true;
-    end;
-
-  4:begin
-     try
-       if (Relief.Mode <> dmRoots) then
-         Relief.SwitchMode(dmRoots);
-     except
-       on E:Exception do
-        begin
-         Application.MessageBox(PChar(E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
-         Exit();
-        end;
-     end;
-
-     F_BlockEdit.Close();
-     Self.MI_Data.Visible := true;
-    end;
- end;//case (Sender as TMenuItem).Tag
-
- Self.RepaintModes(Relief.Mode);
+  Self.RepaintModes(Relief.Mode);
 end;
 
 procedure TF_Hlavni.PM_ChangeRozmeryClick(Sender: TObject);
 begin
- F_ReliefProperties.OpenForm;
+  F_ReliefProperties.OpenForm;
 end;
 
 procedure TF_Hlavni.MI_CheckDataClick(Sender: TObject);
-var error_cnt:Byte;
-    LI:TListItem;
+var error_cnt: Byte;
+  LI: TListItem;
 begin
- if ((Assigned(Self.Relief)) and ((Self.Relief.Mode = dmBloky) or (Self.Relief.Mode = dmRoots))) then
+  if ((Assigned(Self.Relief)) and ((Self.Relief.Mode = dmBloky) or (Self.Relief.Mode = dmRoots))) then
   begin
-   F_DataCheck.OpenForm(Self.Relief.CheckValid(error_cnt));
-   LI := F_DataCheck.LV_Errors.Items.Add;
-   LI.Caption := IntToStr(F_DataCheck.LV_Errors.Items.Count);
-   if (error_cnt = 0) then
-     LI.SubItems.Add('OK: Zkouška validity proběhla úspěšně')
-   else
-     LI.SubItems.Add('ERR: Zkouška validity skončila s '+IntToStr(error_cnt)+' chybami!');
+    F_DataCheck.OpenForm(Self.Relief.CheckValid(error_cnt));
+    LI := F_DataCheck.LV_Errors.Items.Add;
+    LI.Caption := IntToStr(F_DataCheck.LV_Errors.Items.Count);
+    if (error_cnt = 0) then
+      LI.SubItems.Add('OK: Zkouška validity proběhla úspěšně')
+    else
+      LI.SubItems.Add('ERR: Zkouška validity skončila s ' + IntToStr(error_cnt) + ' chybami!');
   end;
 end;
 
 procedure TF_Hlavni.PM_CloseAppClick(Sender: TObject);
 begin
- Self.Close;
+  Self.Close;
 end;
 
 procedure TF_Hlavni.MI_MrizkaClick(Sender: TObject);
 begin
- (Sender as TMenuItem).Checked := not (Sender as TMenuItem).Checked;
+  (Sender as TMenuItem).Checked := not(Sender as TMenuItem).Checked;
 
- ReliefOptions.Mrizka := (Sender as TMenuItem).Checked;
- ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName))+'Config.ini');
+  ReliefOptions.Mrizka := (Sender as TMenuItem).Checked;
+  ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + 'Config.ini');
 
- if (Assigned(Relief)) then
-   ReliefOptions.UseData(F_Hlavni.Relief);
+  if (Assigned(Relief)) then
+    ReliefOptions.UseData(F_Hlavni.Relief);
 end;
 
 procedure TF_Hlavni.MI_SaveShowOptionsClick(Sender: TObject);
 begin
- ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName))+_Config_File);
+  ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + _Config_File);
 end;
 
 procedure TF_Hlavni.TB_Separator_HorizClick(Sender: TObject);
 begin
- if (Relief.Mode <> dmSepHor) then Self.PM_BitmapClick(Self.PM_Sep_Hor);
+  if (Relief.Mode <> dmSepHor) then
+    Self.PM_BitmapClick(Self.PM_Sep_Hor);
 
- Relief.Escape(false);
- try
-   Relief.AddSeparatorHor();
- except
-   on E:Exception do
-     Application.MessageBox(PChar('Chyba při přidávání objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
- end;
+  Relief.Escape(false);
+  try
+    Relief.AddSeparatorHor();
+  except
+    on E: Exception do
+      Application.MessageBox(PChar('Chyba při přidávání objektu:' + #13#10 + E.message), 'Chyba',
+        MB_OK OR MB_ICONWARNING);
+  end;
 end;
 
 procedure TF_Hlavni.TB_Separator_VertClick(Sender: TObject);
 begin
- if (Relief.Mode <> dmSepVert) then Self.PM_BitmapClick(Self.PM_Sep_Vert);
+  if (Relief.Mode <> dmSepVert) then
+    Self.PM_BitmapClick(Self.PM_Sep_Vert);
 
- Relief.Escape(false);
- try
-   Relief.AddSeparatorVert();
- except
-   on E:Exception do
-     Application.MessageBox(PChar('Chyba při přidávání objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
- end;
+  Relief.Escape(false);
+  try
+    Relief.AddSeparatorVert();
+  except
+    on E: Exception do
+      Application.MessageBox(PChar('Chyba při přidávání objektu:' + #13#10 + E.message), 'Chyba',
+        MB_OK OR MB_ICONWARNING);
+  end;
 end;
 
 procedure TF_Hlavni.ToolButton0Click(Sender: TObject);
 begin
- Relief.Escape(false);
- try
-   Relief.AddSymbol((Sender as TToolButton).Tag);
- except
-   on E:Exception do
-     Application.MessageBox(PChar('Chyba při přidávání symbolu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
- end;
+  Relief.Escape(false);
+  try
+    Relief.AddSymbol((Sender as TToolButton).Tag);
+  except
+    on E: Exception do
+      Application.MessageBox(PChar('Chyba při přidávání symbolu:' + #13#10 + E.message), 'Chyba',
+        MB_OK OR MB_ICONWARNING);
+  end;
 
- if (Assigned(Self.pushedButton)) then
-   Self.pushedButton.Down := false;
+  if (Assigned(Self.pushedButton)) then
+    Self.pushedButton.Down := false;
 
- (Sender as TToolButton).Down := true;
- Self.pushedButton := (Sender as TToolButton);
+  (Sender as TToolButton).Down := true;
+  Self.pushedButton := (Sender as TToolButton);
 end;
 
 procedure TF_Hlavni.TB_TextClick(Sender: TObject);
 begin
- Relief.Escape(false);
- F_Popisek.NewPopisek();
+  Relief.Escape(false);
+  F_Popisek.NewPopisek();
 
- if (F_Popisek.PopisekColor <> -1) then
-   Relief.AddText(F_Popisek.PopisekText, F_Popisek.PopisekColor, F_Popisek.PopisekBlok);
+  if (F_Popisek.PopisekColor <> -1) then
+    Relief.AddText(F_Popisek.PopisekText, F_Popisek.PopisekColor, F_Popisek.PopisekBlok);
 end;
 
 procedure TF_Hlavni.TB_EndJCClick(Sender: TObject);
 begin
- Relief.Escape(false);
- try
-   Relief.AddJCClick();
- except
-   on E:Exception do
-     Application.MessageBox(PChar('Chyba při přidávání objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
- end;
+  Relief.Escape(false);
+  try
+    Relief.AddJCClick();
+  except
+    on E: Exception do
+      Application.MessageBox(PChar('Chyba při přidávání objektu:' + #13#10 + E.message), 'Chyba',
+        MB_OK OR MB_ICONWARNING);
+  end;
 end;
 
 procedure TF_Hlavni.TB_KCisloClick(Sender: TObject);
 begin
- Relief.Escape(false);
- try
-   Relief.AddKPopisek();
- except
-   on E:Exception do
-     Application.MessageBox(PChar('Chyba při přidávání objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
- end;
+  Relief.Escape(false);
+  try
+    Relief.AddKPopisek();
+  except
+    on E: Exception do
+      Application.MessageBox(PChar('Chyba při přidávání objektu:' + #13#10 + E.message), 'Chyba',
+        MB_OK OR MB_ICONWARNING);
+  end;
 end;
 
 procedure TF_Hlavni.TB_SoupravaPosClick(Sender: TObject);
 begin
- Relief.Escape(false);
+  Relief.Escape(false);
 
- try
-   Relief.AddSouprava();
- except
-   on E:Exception do
-     Application.MessageBox(PChar('Chyba při přidávání objektu:'+#13#10+E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
- end;
+  try
+    Relief.AddSouprava();
+  except
+    on E: Exception do
+      Application.MessageBox(PChar('Chyba při přidávání objektu:' + #13#10 + E.message), 'Chyba',
+        MB_OK OR MB_ICONWARNING);
+  end;
 end;
 
 procedure TF_Hlavni.PM_Show_Blk_DescriptionsClick(Sender: TObject);
 begin
- (Sender as TMenuItem).Checked := not (Sender as TMenuItem).Checked;
+  (Sender as TMenuItem).Checked := not(Sender as TMenuItem).Checked;
 
- if (Assigned(Relief)) then
-   Relief.ShowBlokPopisky := (Sender as TMenuItem).Checked;
+  if (Assigned(Relief)) then
+    Relief.ShowBlokPopisky := (Sender as TMenuItem).Checked;
 end;
 
 procedure TF_Hlavni.MI_CloseFileClick(Sender: TObject);
 begin
- if (Application.MessageBox('Uzavřením projektu ztratíte všechna neuložená data, pokračovat?',
-                            'Uzavření projektu', MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
-   Exit();
+  if (Application.MessageBox('Uzavřením projektu ztratíte všechna neuložená data, pokračovat?', 'Uzavření projektu',
+    MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
+    Exit();
 
- if (Assigned(ReliefOptions)) then
-   ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName))+_Config_File);
+  if (Assigned(ReliefOptions)) then
+    ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + _Config_File);
 
- Self.DesignClose();
- Self.DestroyReliefClasses();
+  Self.DesignClose();
+  Self.DestroyReliefClasses();
 end;
 
 procedure TF_Hlavni.MI_ImportClick(Sender: TObject);
 begin
- if (Assigned(Relief)) then
-   if (Application.MessageBox('Importováním projektu ztratíte všechna neuložená data, pokračovat?',
-                              'Pokračovat?', MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
-     Exit();
+  if (Assigned(Relief)) then
+    if (Application.MessageBox('Importováním projektu ztratíte všechna neuložená data, pokračovat?', 'Pokračovat?',
+      MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
+      Exit();
 
- if (Self.OD_Import.Execute(Self.Handle)) then
+  if (Self.OD_Import.Execute(Self.Handle)) then
   begin
-   if (Assigned(Relief)) then
-     if (Relief.FileStav <> 0) then
-       FreeAndNil(Relief);
+    if (Assigned(Relief)) then
+      if (Relief.FileStav <> 0) then
+        FreeAndNil(Relief);
 
-   Self.ImportFile(Self.OD_Import.FileName);
+    Self.ImportFile(Self.OD_Import.FileName);
   end;
 end;
 
-procedure TF_Hlavni.DesignOpen(FName:string);
+procedure TF_Hlavni.DesignOpen(fname: string);
 begin
- Self.PM_Save.Enabled      := true;
- Self.PM_SaveAs.Enabled    := true;
- Self.MI_Draw.Visible      := true;
- Self.MI_CloseFile.Enabled := true;
- Self.SB_Main.Panels.Items[0].Text := 'Soubor otevřen';
- Self.SB_Main.Panels.Items[1].Text := 'Soubor není uložen';
+  Self.PM_Save.Enabled := true;
+  Self.PM_SaveAs.Enabled := true;
+  Self.MI_Draw.Visible := true;
+  Self.MI_CloseFile.Enabled := true;
+  Self.SB_Main.Panels.Items[0].Text := 'Soubor otevřen';
+  Self.SB_Main.Panels.Items[1].Text := 'Soubor není uložen';
 
- Self.Caption := FName+' – '+_Caption + '     v' + GetVersion(Application.ExeName);
+  Self.Caption := fname + ' – ' + _Caption + '     v' + GetVersion(Application.ExeName);
 
- Self.Constraints.MinWidth := Max(Self.DXD_main.Width + 2*Self.DXD_main.Left + 20,
-                                  Self.TB_BitmapTools.Left + Self.TB_BitmapTools.Width + 30);
- Self.Constraints.MinHeight := Self.DXD_main.Height + Self.DXD_main.Top + Self.SB_Main.Height + 70;
+  Self.Constraints.MinWidth := Max(Self.DXD_main.Width + 2 * Self.DXD_main.Left + 20,
+    Self.TB_BitmapTools.Left + Self.TB_BitmapTools.Width + 30);
+  Self.Constraints.MinHeight := Self.DXD_main.Height + Self.DXD_main.Top + Self.SB_Main.Height + 70;
 end;
 
 procedure TF_Hlavni.DesignClose();
 begin
- Self.PM_Save.Enabled      := false;
- Self.PM_SaveAs.Enabled    := false;
- Self.MI_Draw.Visible      := false;
- Self.MI_Relief.Visible    := false;
- Self.MI_CloseFile.Enabled := false;
- Self.MI_Data.Visible      := false;
+  Self.PM_Save.Enabled := false;
+  Self.PM_SaveAs.Enabled := false;
+  Self.MI_Draw.Visible := false;
+  Self.MI_Relief.Visible := false;
+  Self.MI_CloseFile.Enabled := false;
+  Self.MI_Data.Visible := false;
 
- Self.TB_Vyhybka.Visible        := false;
- Self.TB_Usek.Visible           := false;
- Self.TB_SCom.Visible           := false;
- Self.TB_BitmapTools.Visible    := false;
- Self.TB_Oddelovac.Visible      := false;
- Self.TB_BitmapOstatni.Visible  := false;
- Self.TB_Other.Visible          := false;
- Self.TB_Trat.Visible           := false;
- Self.TB_Usek.Visible           := false;
- Self.TB_Krizeni.Visible        := false;
- Self.TB_Vykolejka.Visible      := false;
+  Self.TB_Vyhybka.Visible := false;
+  Self.TB_Usek.Visible := false;
+  Self.TB_SCom.Visible := false;
+  Self.TB_BitmapTools.Visible := false;
+  Self.TB_Oddelovac.Visible := false;
+  Self.TB_BitmapOstatni.Visible := false;
+  Self.TB_Other.Visible := false;
+  Self.TB_Trat.Visible := false;
+  Self.TB_Usek.Visible := false;
+  Self.TB_Krizeni.Visible := false;
+  Self.TB_Vykolejka.Visible := false;
 
- if (Assigned(Self.pushedButton)) then
-  Self.pushedButton.Down := false;
+  if (Assigned(Self.pushedButton)) then
+    Self.pushedButton.Down := false;
 
- Self.SB_Main.Panels.Items[2].Text := '---;---';
- Self.SB_Main.Panels.Items[3].Text := '';
+  Self.SB_Main.Panels.Items[2].Text := '---;---';
+  Self.SB_Main.Panels.Items[3].Text := '';
 
- Self.SB_Main.Panels.Items[0].Text := 'Soubor uzavřen';
- Self.SB_Main.Panels.Items[1].Text := '';
- Self.Caption := _Caption + '     v' + GetVersion(Application.ExeName);
+  Self.SB_Main.Panels.Items[0].Text := 'Soubor uzavřen';
+  Self.SB_Main.Panels.Items[1].Text := '';
+  Self.Caption := _Caption + '     v' + GetVersion(Application.ExeName);
 
- F_BlockEdit.Close();
+  F_BlockEdit.Close();
 end;
 
-procedure TF_Hlavni.ReliefErrorEvent(Sender:TObject; err:string);
+procedure TF_Hlavni.ReliefErrorEvent(Sender: TObject; err: string);
 begin
- Self.SB_Main.Panels.Items[3].Text := 'Chyba: '+err;
+  Self.SB_Main.Panels.Items[3].Text := 'Chyba: ' + err;
 end;
 
-procedure TF_Hlavni.ReliefMoveEvent(Sender:TObject; Position:TPoint);
+procedure TF_Hlavni.ReliefMoveEvent(Sender: TObject; Position: TPoint);
 begin
- Self.SB_Main.Panels.Items[2].Text := Format('%.3d',[Position.X])+' ; '+Format('%.3d',[Position.Y]);
- Self.SB_Main.Panels.Items[3].Text := '';
+  Self.SB_Main.Panels.Items[2].Text := Format('%.3d', [Position.X]) + ' ; ' + Format('%.3d', [Position.Y]);
+  Self.SB_Main.Panels.Items[3].Text := '';
 end;
 
-procedure TF_Hlavni.ReliefChangeTextEvent(Sender:TObject; var popisek:TPopisek);
+procedure TF_Hlavni.ReliefChangeTextEvent(Sender: TObject; var popisek: TPopisek);
 begin
- F_Popisek.OpenPopisek(Text, popisek);
+  F_Popisek.OpenPopisek(Text, popisek);
 
- if (F_Popisek.PopisekColor = -1) then Exit;
- popisek.Text := F_Popisek.PopisekText;
- popisek.Color := F_Popisek.PopisekColor;
- popisek.BlokPopisek := F_Popisek.PopisekBlok;
+  if (F_Popisek.PopisekColor = -1) then
+    Exit;
+  popisek.Text := F_Popisek.PopisekText;
+  popisek.Color := F_Popisek.PopisekColor;
+  popisek.BlokPopisek := F_Popisek.PopisekBlok;
 end;
 
-procedure TF_Hlavni.BlokEditEvent(Sender:TObject; Blok:TGraphBlok);
+procedure TF_Hlavni.BlokEditEvent(Sender: TObject; Blok: TGraphBlok);
 begin
- F_BlockEdit.OpenForm(Blok);
+  F_BlockEdit.OpenForm(Blok);
 end;
 
-procedure TF_Hlavni.MessageEvent(Sender:TObject; msg:string);
+procedure TF_Hlavni.MessageEvent(Sender: TObject; Msg: string);
 begin
- Self.SB_Main.Panels.Items[3].Text := msg;
+  Self.SB_Main.Panels.Items[3].Text := Msg;
 end;
 
-procedure TF_Hlavni.RepaintModes(cur:TMode);
+procedure TF_Hlavni.RepaintModes(cur: TMode);
 begin
- case (cur) of
-   dmBitmap, dmSepVert, dmSepHor:begin
-    Self.PM_Bitmap.Enabled    := true;
-    Self.PM_Sep_Vert.Enabled  := true;
-    Self.PM_Sep_Hor.Enabled   := true;
-    Self.PM_Bloky.Enabled     := true;
-    Self.PM_Roots.Enabled     := false;
-   end;
+  case (cur) of
+    dmBitmap, dmSepVert, dmSepHor:
+      begin
+        Self.PM_Bitmap.Enabled := true;
+        Self.PM_Sep_Vert.Enabled := true;
+        Self.PM_Sep_Hor.Enabled := true;
+        Self.PM_Bloky.Enabled := true;
+        Self.PM_Roots.Enabled := false;
+      end;
 
-   dmBloky, dmRoots:begin
-    Self.PM_Bitmap.Enabled    := false;
-    Self.PM_Sep_Vert.Enabled  := false;
-    Self.PM_Sep_Hor.Enabled   := false;
-    Self.PM_Bloky.Enabled     := true;
-    Self.PM_Roots.Enabled     := true;
-   end;
+    dmBloky, dmRoots:
+      begin
+        Self.PM_Bitmap.Enabled := false;
+        Self.PM_Sep_Vert.Enabled := false;
+        Self.PM_Sep_Hor.Enabled := false;
+        Self.PM_Bloky.Enabled := true;
+        Self.PM_Roots.Enabled := true;
+      end;
 
- end;//case
+  end; // case
 end;
 
-procedure TF_Hlavni.ActivateSymbol(index:Integer);
+procedure TF_Hlavni.ActivateSymbol(index: Integer);
 begin
- if (not Self.TB_BitmapTools.Visible) then
-   Exit;
+  if (not Self.TB_BitmapTools.Visible) then
+    Exit;
 
- if (Assigned(Self.pushedButton)) then
-   Self.pushedButton.Down := false;
+  if (Assigned(Self.pushedButton)) then
+    Self.pushedButton.Down := false;
 
- case (index) of
-   0: Self.ToolButton0.OnClick(Self.ToolButton0);
-   1: Self.ToolButton1.OnClick(Self.ToolButton1);
-   2: Self.ToolButton2.OnClick(Self.ToolButton2);
-   3: Self.ToolButton3.OnClick(Self.ToolButton3);
-  12: Self.ToolButton12.OnClick(Self.ToolButton12);
-  13: Self.ToolButton13.OnClick(Self.ToolButton13);
-  14: Self.ToolButton14.OnClick(Self.ToolButton14);
-  15: Self.ToolButton15.OnClick(Self.ToolButton15);
-  16: Self.ToolButton16.OnClick(Self.ToolButton16);
-  17: Self.ToolButton17.OnClick(Self.ToolButton17);
-  18: Self.ToolButton18.OnClick(Self.ToolButton18);
-  19: Self.ToolButton19.OnClick(Self.ToolButton19);
-  20: Self.ToolButton20.OnClick(Self.ToolButton20);
-  21: Self.ToolButton21.OnClick(Self.ToolButton21);
-  22: Self.ToolButton22.OnClick(Self.ToolButton22);
-  23: Self.ToolButton23.OnClick(Self.ToolButton23);
-  24: Self.ToolButton24.OnClick(Self.ToolButton24);
-  25: Self.ToolButton25.OnClick(Self.ToolButton25);
-  28: Self.ToolButton28.OnClick(Self.ToolButton28);
-  29: Self.ToolButton29.OnClick(Self.ToolButton29);
-  30: Self.ToolButton30.OnClick(Self.ToolButton30);
-  31: Self.ToolButton31.OnClick(Self.ToolButton31);
-  32: Self.ToolButton32.OnClick(Self.ToolButton32);
-  33: Self.ToolButton33.OnClick(Self.ToolButton33);
-  34: Self.ToolButton34.OnClick(Self.ToolButton34);
-  35: Self.ToolButton35.OnClick(Self.ToolButton35);
+  case (index) of
+    0:
+      Self.ToolButton0.OnClick(Self.ToolButton0);
+    1:
+      Self.ToolButton1.OnClick(Self.ToolButton1);
+    2:
+      Self.ToolButton2.OnClick(Self.ToolButton2);
+    3:
+      Self.ToolButton3.OnClick(Self.ToolButton3);
+    12:
+      Self.ToolButton12.OnClick(Self.ToolButton12);
+    13:
+      Self.ToolButton13.OnClick(Self.ToolButton13);
+    14:
+      Self.ToolButton14.OnClick(Self.ToolButton14);
+    15:
+      Self.ToolButton15.OnClick(Self.ToolButton15);
+    16:
+      Self.ToolButton16.OnClick(Self.ToolButton16);
+    17:
+      Self.ToolButton17.OnClick(Self.ToolButton17);
+    18:
+      Self.ToolButton18.OnClick(Self.ToolButton18);
+    19:
+      Self.ToolButton19.OnClick(Self.ToolButton19);
+    20:
+      Self.ToolButton20.OnClick(Self.ToolButton20);
+    21:
+      Self.ToolButton21.OnClick(Self.ToolButton21);
+    22:
+      Self.ToolButton22.OnClick(Self.ToolButton22);
+    23:
+      Self.ToolButton23.OnClick(Self.ToolButton23);
+    24:
+      Self.ToolButton24.OnClick(Self.ToolButton24);
+    25:
+      Self.ToolButton25.OnClick(Self.ToolButton25);
+    28:
+      Self.ToolButton28.OnClick(Self.ToolButton28);
+    29:
+      Self.ToolButton29.OnClick(Self.ToolButton29);
+    30:
+      Self.ToolButton30.OnClick(Self.ToolButton30);
+    31:
+      Self.ToolButton31.OnClick(Self.ToolButton31);
+    32:
+      Self.ToolButton32.OnClick(Self.ToolButton32);
+    33:
+      Self.ToolButton33.OnClick(Self.ToolButton33);
+    34:
+      Self.ToolButton34.OnClick(Self.ToolButton34);
+    35:
+      Self.ToolButton35.OnClick(Self.ToolButton35);
 
-  40: Self.TB_Text.OnClick(Self.TB_Text);
-  41: Self.TB_EndJC.OnClick(Self.TB_EndJC);
-  42: Self.TB_KCislo.OnClick(Self.TB_KCislo);
-  43: Self.TB_SoupravaPos.OnClick(Self.TB_SoupravaPos);
+    40:
+      Self.TB_Text.OnClick(Self.TB_Text);
+    41:
+      Self.TB_EndJC.OnClick(Self.TB_EndJC);
+    42:
+      Self.TB_KCislo.OnClick(Self.TB_KCislo);
+    43:
+      Self.TB_SoupravaPos.OnClick(Self.TB_SoupravaPos);
 
-  48: Self.ToolButton48.OnClick(Self.ToolButton48);
-  55: Self.ToolButton55.OnClick(Self.ToolButton55);
-  56: Self.ToolButton56.OnClick(Self.ToolButton56);
+    48:
+      Self.ToolButton48.OnClick(Self.ToolButton48);
+    55:
+      Self.ToolButton55.OnClick(Self.ToolButton55);
+    56:
+      Self.ToolButton56.OnClick(Self.ToolButton56);
 
-  49: Self.ToolButton49.OnClick(Self.ToolButton49);
-  50: Self.ToolButton50.OnClick(Self.ToolButton50);
- end;
+    49:
+      Self.ToolButton49.OnClick(Self.ToolButton49);
+    50:
+      Self.ToolButton50.OnClick(Self.ToolButton50);
+  end;
 end;
 
 procedure TF_Hlavni.AssignReliefEvents();
 begin
- Relief.OnError         := Self.ReliefErrorEvent;
- Relief.OnMove          := Self.ReliefMoveEvent;
- Relief.OnChangeText    := Self.ReliefChangeTextEvent;
- Relief.OnBlokEdit      := Self.BlokEditEvent;
+  Relief.OnError := Self.ReliefErrorEvent;
+  Relief.OnMove := Self.ReliefMoveEvent;
+  Relief.OnChangeText := Self.ReliefChangeTextEvent;
+  Relief.OnBlokEdit := Self.BlokEditEvent;
 
- Relief.OnMsg         := Self.MessageEvent;
- Relief.FormBlkClose  := Self.FormBlkCloseEvent;
+  Relief.OnMsg := Self.MessageEvent;
+  Relief.FormBlkClose := Self.FormBlkCloseEvent;
 end;
 
-procedure TF_Hlavni.FormBlkCloseEvent(Sender:TObject);
+procedure TF_Hlavni.FormBlkCloseEvent(Sender: TObject);
 begin
- F_BlockEdit.Close();
+  F_BlockEdit.Close();
 end;
 
-end.//unit
+end.// unit

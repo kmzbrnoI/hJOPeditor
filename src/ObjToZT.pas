@@ -7,27 +7,25 @@ interface
 uses ReliefObjects, ReliefZT;
 
 type
- TObjToZT=class
+  TObjToZT = class
   private const
 
   private
 
   public
-    function ObjToZT(ObjectData:TPanelObjects; ZT:TPanelZT):Byte;
- end;//TConvert
-
+    function ObjToZT(ObjectData: TPanelObjects; ZT: TPanelZT): Byte;
+  end; // TConvert
 
 implementation
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
-function TObjToZT.ObjToZT(ObjectData:TPanelObjects; ZT:TPanelZT):Byte;
+function TObjToZT.ObjToZT(ObjectData: TPanelObjects; ZT: TPanelZT): Byte;
 begin
 
-
- Result := 0;
+  Result := 0;
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
-end.//unit
+end.// unit

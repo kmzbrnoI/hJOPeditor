@@ -19,7 +19,7 @@ type
   private
     { Private declarations }
   public
-   procedure OpenForm();
+    procedure OpenForm();
   end;
 
 var
@@ -31,26 +31,26 @@ implementation
 
 procedure TF_ReliefProperties.OpenForm();
 begin
- Self.SE_Width.Value  := F_Hlavni.Relief.PanelWidth;
- Self.SE_Height.Value := F_Hlavni.Relief.PanelHeight;
+  Self.SE_Width.Value := F_Hlavni.Relief.PanelWidth;
+  Self.SE_Height.Value := F_Hlavni.Relief.PanelHeight;
 
- Self.ShowModal();
+  Self.ShowModal();
 end;
 
 procedure TF_ReliefProperties.B_ApplyClick(Sender: TObject);
 begin
- try
-   F_Hlavni.Relief.SetRozmery(SE_Width.Value, SE_Height.Value);
-   Self.Close();
- except
-   on E:Exception do
-     Application.MessageBox(PChar('Chyba: ' + E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
- end;
+  try
+    F_Hlavni.Relief.SetRozmery(SE_Width.Value, SE_Height.Value);
+    Self.Close();
+  except
+    on E: Exception do
+      Application.MessageBox(PChar('Chyba: ' + E.Message), 'Chyba', MB_OK OR MB_ICONWARNING);
+  end;
 end;
 
 procedure TF_ReliefProperties.B_StornoClick(Sender: TObject);
 begin
- Self.Close();
+  Self.Close();
 end;
 
-end.//unit
+end.// unit
