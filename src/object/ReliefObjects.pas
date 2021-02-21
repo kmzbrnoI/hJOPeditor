@@ -5,7 +5,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
-  StrUtils, Global, Menus, Forms, DXDraws, OblastRizeni, PGraphics,
+  StrUtils, Global, Menus, Forms, DXDraws, OblastRizeni, PGraphics, Types,
   Generics.Collections, symbolHelper, vetev, ObjBlok;
 
 const

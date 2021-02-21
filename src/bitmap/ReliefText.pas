@@ -4,7 +4,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
-  StrUtils, Global, Menus, Forms, PGraphics, Generics.Collections, symbolHelper;
+  StrUtils, Global, Menus, Forms, PGraphics, Generics.Collections, symbolHelper,
+  Types;
 
 const
  _MAX_POPISKY     = 256;

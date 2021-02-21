@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
-  StrUtils, ReliefText, VektorBasedObject, Global, symbolHelper;
+  StrUtils, ReliefText, VektorBasedObject, Global, symbolHelper, Types;
 
 const
   _MAX_MOVE = 64;

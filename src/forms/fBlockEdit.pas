@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, IniFiles, ReliefSettings, ReliefObjects, ExtCtrls, Global,
-  StrUtils, Spin, ObjBlok, Generics.Collections;
+  StrUtils, Spin, ObjBlok, Generics.Collections, Types;
 
 type
   TBlok=record

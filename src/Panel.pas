@@ -2,7 +2,7 @@
 
 interface
 
-uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
+uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes, Types,
      ReliefObjects, Forms, StdCtrls, ExtCtrls, ReliefBitmap, Menus, ReliefText,
      Global, BitmapToObj, OblastRizeni, StrUtils, DirectX, PGraphics,
      ObjBlok, symbolHelper, Generics.Collections;

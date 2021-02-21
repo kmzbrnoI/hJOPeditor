@@ -5,8 +5,9 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, Menus, ReliefObjects, Buttons, ToolWin, ComCtrls, ExtCtrls, Panel,
-  ImgList, DXDraws, StdCtrls, AppEvnts, StrUtils, ReliefBitmap, Global,
-  ReliefSettings, fBlockEdit, DXSprite, DIB, ObjBlok, ReliefText;
+  ImgList, DXDraws, StdCtrls, AppEvnts, StrUtils, ReliefBitmap, Global, Math,
+  ReliefSettings, fBlockEdit, DXSprite, DIB, ObjBlok, ReliefText, Types,
+  System.ImageList;
 
 type
   TF_Hlavni = class(TForm)
@@ -186,7 +187,7 @@ var
 implementation
 
 uses fNewRelief, fChangeRelief, fReliefSettings, fPopiskek, OblastRizeni,
-  fOREdit, fDataCheck, IBUtils, fImportLog;
+  fOREdit, fDataCheck, fImportLog;
 
 {$R *.dfm}
 
@@ -630,7 +631,7 @@ end;
 
 procedure TF_Hlavni.PM_AboutClick(Sender: TObject);
 begin
- Application.MessageBox(PChar('hJOPeditor'+#13#10+'v'+GetVersion(Application.ExeName)+#13#10+'Vytvořil Jan Horáček 2011–2019'),
+ Application.MessageBox(PChar('hJOPeditor'+#13#10+'v'+GetVersion(Application.ExeName)+#13#10+'Vytvořil Jan Horáček 2011–2021'),
                         'Info', MB_OK OR MB_ICONINFORMATION);
 end;
 

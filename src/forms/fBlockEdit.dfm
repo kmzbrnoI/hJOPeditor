@@ -79,7 +79,6 @@ object F_BlockEdit: TF_BlockEdit
       Width = 157
       Height = 21
       Style = csDropDownList
-      ItemHeight = 13
       TabOrder = 0
       OnChange = CB_VyhPlusChange
       Items.Strings = (
@@ -200,7 +199,6 @@ object F_BlockEdit: TF_BlockEdit
       Width = 145
       Height = 21
       Style = csDropDownList
-      ItemHeight = 13
       TabOrder = 0
       OnChange = CB_UvazkaSpr_VertDirChange
       Items.Strings = (
@@ -254,7 +252,6 @@ object F_BlockEdit: TF_BlockEdit
     Width = 185
     Height = 21
     Style = csDropDownList
-    ItemHeight = 0
     TabOrder = 1
     OnChange = CB_ORChange
   end

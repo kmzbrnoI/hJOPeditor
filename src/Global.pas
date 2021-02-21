@@ -5,7 +5,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
-  StrUtils;
+  StrUtils, Types;
 
 const
  //zde je definovan pocet barev
@@ -58,7 +58,7 @@ uses ownStrUtils;
 function GetVersion(const FileName: string): string;//cteni verze z nastaveni
 var
   size, len: longword;
-  handle: THandle;
+  handle: Cardinal;
   buffer: pchar;
   pinfo: ^VS_FIXEDFILEINFO;
   Major, Minor, Release: word;

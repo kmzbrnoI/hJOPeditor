@@ -6,7 +6,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
   StrUtils, ReliefText, VektorBasedObject, ReliefBitmapSymbols, Global, Forms,
-  OblastRizeni, PGraphics, symbolHelper, IBUtils, Generics.Collections;
+  OblastRizeni, PGraphics, symbolHelper, Generics.Collections, Types;
 
 const
  _IMPORT_MYJOP_SUFFIX = '.pnj';

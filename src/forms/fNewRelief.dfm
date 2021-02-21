@@ -515,7 +515,6 @@ object F_NewRelief: TF_NewRelief
       Width = 121
       Height = 21
       Style = csDropDownList
-      ItemHeight = 13
       TabOrder = 3
       Items.Strings = (
         'Zleva doprava'

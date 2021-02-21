@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
-  StrUtils, Global, Generics.Collections, symbolHelper;
+  StrUtils, Global, Generics.Collections, symbolHelper, Types;
 
 const
   _MAX_DATA = 256;

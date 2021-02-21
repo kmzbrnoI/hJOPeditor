@@ -2,7 +2,7 @@ unit BitmapToObj;
 
 interface
 
-uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes,
+uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes, Types,
      ReliefObjects, Forms, StdCtrls, ExtCtrls, ReliefBitmap, Menus, ReliefText,
      symbolHelper, Generics.Collections, vetev, Global;
 
