@@ -24,13 +24,11 @@ type
     OD_Open: TOpenDialog;
     SD_Save: TSaveDialog;
     IL_Menu: TImageList;
-    TB_Vyhybka: TToolBar;
+    TB_Turnout: TToolBar;
     ToolButton0: TToolButton;
     ToolButton1: TToolButton;
     ToolButton2: TToolButton;
     ToolButton3: TToolButton;
-    ToolButton21: TToolButton;
-    ToolButton20: TToolButton;
     ToolButton19: TToolButton;
     ToolButton18: TToolButton;
     ToolButton17: TToolButton;
@@ -39,14 +37,12 @@ type
     ToolButton14: TToolButton;
     ToolButton15: TToolButton;
     ToolButton16: TToolButton;
-    ToolButton22: TToolButton;
-    ToolButton23: TToolButton;
     ToolButton24: TToolButton;
     ToolButton25: TToolButton;
     ToolButton28: TToolButton;
     ToolButton29: TToolButton;
-    TB_Usek: TToolBar;
-    TB_SCom: TToolBar;
+    TB_Track_Detected: TToolBar;
+    TB_Signal: TToolBar;
     AE_Main: TApplicationEvents;
     MI_Draw: TMenuItem;
     PM_Bitmap: TMenuItem;
@@ -59,11 +55,11 @@ type
     CHB_Group: TCheckBox;
     ToolButton51: TToolButton;
     SB_Main: TStatusBar;
-    TB_Oddelovac: TToolBar;
+    TB_Separator: TToolBar;
     TB_Separator_Vert: TToolButton;
     MI_Relief: TMenuItem;
     PM_ChangeRozmery: TMenuItem;
-    TB_BitmapOstatni: TToolBar;
+    TB_Bitmap_Other: TToolBar;
     ToolButton30: TToolButton;
     ToolButton31: TToolButton;
     ToolButton32: TToolButton;
@@ -87,20 +83,17 @@ type
     MI_CheckData: TMenuItem;
     PM_Roots: TMenuItem;
     ToolButton35: TToolButton;
-    TB_Trat: TToolBar;
+    TB_Railway: TToolBar;
     TB_Uvazka: TToolButton;
     IL_Trat: TImageList;
     TB_UvazkaSpr: TToolButton;
     ToolButton48: TToolButton;
-    TB_Vykolejka: TToolBar;
+    TB_Derail: TToolBar;
     ToolButton49: TToolButton;
     ToolButton50: TToolButton;
     ToolButton55: TToolButton;
     TB_Separator_Horiz: TToolButton;
     PM_Sep_Hor: TMenuItem;
-    TB_Krizeni: TToolBar;
-    ToolButton4: TToolButton;
-    ToolButton5: TToolButton;
     TB_SoupravaPos: TToolButton;
     N6: TMenuItem;
     PM_Reload_Blocks: TMenuItem;
@@ -108,6 +101,21 @@ type
     OD_Import: TOpenDialog;
     MI_Import: TMenuItem;
     ToolButton56: TToolButton;
+    ToolButton6: TToolButton;
+    ToolButton7: TToolButton;
+    TB_Track_Undetected: TToolBar;
+    ToolButton36: TToolButton;
+    ToolButton37: TToolButton;
+    ToolButton38: TToolButton;
+    ToolButton39: TToolButton;
+    ToolButton40: TToolButton;
+    ToolButton41: TToolButton;
+    ToolButton4: TToolButton;
+    ToolButton5: TToolButton;
+    ToolButton8: TToolButton;
+    ToolButton9: TToolButton;
+    ToolButton10: TToolButton;
+    ToolButton11: TToolButton;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure PM_NewClick(Sender: TObject);
@@ -722,15 +730,15 @@ begin
 
   F_BlockEdit.Close();
 
-  Self.TB_Vyhybka.Visible := false;
-  Self.TB_Usek.Visible := false;
-  Self.TB_SCom.Visible := false;
+  Self.TB_Turnout.Visible := false;
+  Self.TB_Track_Undetected.Visible := false;
+  Self.TB_Track_Detected.Visible := false;
+  Self.TB_Signal.Visible := false;
   Self.TB_BitmapTools.Visible := false;
-  Self.TB_Oddelovac.Visible := false;
-  Self.TB_BitmapOstatni.Visible := false;
-  Self.TB_Trat.Visible := false;
-  Self.TB_Vykolejka.Visible := false;
-  Self.TB_Krizeni.Visible := false;
+  Self.TB_Separator.Visible := false;
+  Self.TB_Bitmap_Other.Visible := false;
+  Self.TB_Railway.Visible := false;
+  Self.TB_Derail.Visible := false;
   Self.CHB_Group.Enabled := false;
   Self.TB_Other.Visible := false;
   Self.MI_Relief.Visible := false;
@@ -757,17 +765,17 @@ begin
           end;
         end;
 
-        Self.TB_Vyhybka.Visible := true;
-        Self.TB_Usek.Visible := true;
-        Self.TB_SCom.Visible := true;
+        Self.TB_Turnout.Visible := true;
+        Self.TB_Track_Detected.Visible := true;
+        Self.TB_Track_Undetected.Visible := true;
+        Self.TB_Signal.Visible := true;
         Self.TB_BitmapTools.Visible := true;
-        Self.TB_BitmapOstatni.Visible := true;
-        Self.TB_Trat.Visible := true;
-        Self.TB_Krizeni.Visible := true;
+        Self.TB_Bitmap_Other.Visible := true;
+        Self.TB_Railway.Visible := true;
         Self.CHB_Group.Enabled := true;
         Self.TB_Other.Visible := true;
         Self.MI_Relief.Visible := true;
-        Self.TB_Vykolejka.Visible := true;
+        Self.TB_Derail.Visible := true;
       end; // case 0
 
     1, 2:
@@ -792,7 +800,7 @@ begin
           end;
         end;
 
-        Self.TB_Oddelovac.Visible := true;
+        Self.TB_Separator.Visible := true;
         Self.TB_BitmapTools.Visible := true;
         Self.MI_Relief.Visible := true;
       end;
@@ -1065,17 +1073,16 @@ begin
   Self.MI_CloseFile.Enabled := false;
   Self.MI_Data.Visible := false;
 
-  Self.TB_Vyhybka.Visible := false;
-  Self.TB_Usek.Visible := false;
-  Self.TB_SCom.Visible := false;
+  Self.TB_Turnout.Visible := false;
+  Self.TB_Track_Detected.Visible := false;
+  Self.TB_Track_Undetected.Visible := false;
+  Self.TB_Signal.Visible := false;
   Self.TB_BitmapTools.Visible := false;
-  Self.TB_Oddelovac.Visible := false;
-  Self.TB_BitmapOstatni.Visible := false;
+  Self.TB_Separator.Visible := false;
+  Self.TB_Bitmap_Other.Visible := false;
   Self.TB_Other.Visible := false;
-  Self.TB_Trat.Visible := false;
-  Self.TB_Usek.Visible := false;
-  Self.TB_Krizeni.Visible := false;
-  Self.TB_Vykolejka.Visible := false;
+  Self.TB_Railway.Visible := false;
+  Self.TB_Derail.Visible := false;
 
   if (Assigned(Self.pushedButton)) then
     Self.pushedButton.Down := false;
@@ -1179,14 +1186,14 @@ begin
       Self.ToolButton18.OnClick(Self.ToolButton18);
     19:
       Self.ToolButton19.OnClick(Self.ToolButton19);
-    20:
+{    20:
       Self.ToolButton20.OnClick(Self.ToolButton20);
     21:
       Self.ToolButton21.OnClick(Self.ToolButton21);
     22:
       Self.ToolButton22.OnClick(Self.ToolButton22);
     23:
-      Self.ToolButton23.OnClick(Self.ToolButton23);
+      Self.ToolButton23.OnClick(Self.ToolButton23); }
     24:
       Self.ToolButton24.OnClick(Self.ToolButton24);
     25:

@@ -113,8 +113,6 @@ end;
 procedure TPrejezd.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
   mode: TMode);
 var color: SymbolColor;
-  Pos: TPoint;
-  bp: TBlikPoint;
 begin
   if (selected) then
   begin
@@ -128,11 +126,11 @@ begin
     end;
   end;
 
-  for pos in Self.StaticPositions do
+  for var pos: TPoint in Self.StaticPositions do
     SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _Prejezd, color);
 
-  for bp in Self.BlikPositions do
-    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _Prejezd, color);
+  for var bp: TBlikPoint in Self.BlikPositions do
+    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, bp.Pos, _Prejezd, color);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

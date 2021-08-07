@@ -18,9 +18,10 @@ const
   _FILEVERSION_11 = $0101;
   _FILEVERSION_12 = $0102;
   _FILEVERSION_13 = $0103;
+  _FILEVERSION_20 = $0200;
 
-  _FileVersion = '1.3';
-  _FileVersion_accept: array [0 .. 2] of string = ('1.1', '1.2', '1.3');
+  _FileVersion = '2.0';
+  _FileVersion_accept: array [0 .. 3] of string = ('1.1', '1.2', '1.3', '2.0');
 
 type
 

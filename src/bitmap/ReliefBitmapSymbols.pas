@@ -8,8 +8,6 @@ uses
 
 const
   _MAX_MOVE = 64;
-  _Symbol_Uvazka_Spr = 45;
-  _Symbol_Uvazka = 43;
 
 type
 
@@ -178,56 +176,41 @@ begin
   Result := Self.Bitmap[Position.X, Position.Y];
 end;
 
-procedure TBitmapSymbols.Reset;
-var i, j: Integer;
+procedure TBitmapSymbols.Reset();
 begin
-  for i := 0 to _MAX_WIDTH - 1 do
-  begin
-    for j := 0 to _MAX_HEIGHT - 1 do
+  for var i: Integer := 0 to _MAX_WIDTH - 1 do
+    for var j: Integer := 0 to _MAX_HEIGHT - 1 do
       Self.Bitmap[i, j] := -1;
-  end; // for i
-
   Self.Escape(true);
 end;
 
-procedure TBitmapSymbols.Paint;
-var i, j: Integer;
+procedure TBitmapSymbols.Paint();
 begin
-  for i := 0 to Self.Panel.Width - 1 do
-    for j := 0 to Self.Panel.Height - 1 do
+  for var i: Integer := 0 to Self.Panel.Width - 1 do
+    for var j: Integer := 0 to Self.Panel.Height - 1 do
       Self.PaintSymbol(i, j, Self.Bitmap[i, j]);
 end;
 
 // nacteni surovych dat do struktur
 procedure TBitmapSymbols.SetLoadedData(LoadData: TBSData);
-var i, j: Integer;
 begin
   Self.Panel.Width := LoadData.Width;
   Self.Panel.Height := LoadData.Height;
 
-  for i := 0 to Self.Panel.Height - 1 do
-  begin
-    for j := 0 to Self.Panel.Width - 1 do
-    begin
-      Self.Bitmap[j, i] := LoadData.Data[(i * Self.Panel.Width) + j] - 1;
-    end; // for j
-  end; // for i
+  for var i: Integer := 0 to Self.Panel.Height - 1 do
+    for var j: Integer := 0 to Self.Panel.Width - 1 do
+      Self.Bitmap[j, i] := LoadData.Data[(i * Self.Panel.Width) + j]
 end;
 
 // ziskani surovych dat zapisovanych do souboru z dat programu
-function TBitmapSymbols.GetSaveData: TBSData;
-var i, j: Integer;
+function TBitmapSymbols.GetSaveData(): TBSData;
 begin
   Result.Width := Self.Panel.Width;
   Result.Height := Self.Panel.Height;
 
-  for i := 0 to Self.Panel.Height - 1 do
-  begin
-    for j := 0 to Self.Panel.Width - 1 do
-    begin
+  for var i: Integer := 0 to Self.Panel.Height - 1 do
+    for var j: Integer := 0 to Self.Panel.Width - 1 do
       Result.Data[(i * Self.Panel.Width) + j] := Self.Bitmap[j, i] + 1;
-    end; // for j
-  end; // for i
 end;
 
 procedure TBitmapSymbols.SetRozmery(Width, Height: Integer);
@@ -682,7 +665,7 @@ end;
 procedure TBitmapSymbols.PaintSymbol(IL: TImageList; X, Y: Integer; index: Integer; color: SymbolColor);
 begin
   // specialni pripady: symbol seznamu souprav uvazky
-  if (index = _Symbol_Uvazka_Spr) then
+  if (index = _Uvazka_Spr) then
   begin
     Self.DrawObject.Canvas.Pen.color := clYellow;
     Self.DrawObject.Canvas.Brush.color := clBlack;
@@ -692,11 +675,10 @@ begin
   end;
 
   // specialni pripad: k trati vykreslujeme druhy symbol do paru
-  if (index = _Symbol_Uvazka) then
-    Self.DrawObject.IL.Draw(Self.DrawObject.Canvas, (X + 1) * _Symbol_Sirka, Y * _Symbol_Vyska,
-      ((_Symbol_Uvazka + 1) * 10) + Integer(color));
+  if (index = _Uvazka_Start) then
+    SymbolDraw(IL, Self.DrawObject.Canvas, X+1, Y, _Uvazka_Start+1, color);
 
-  IL.Draw(Self.DrawObject.Canvas, X * _Symbol_Sirka, Y * _Symbol_Vyska, (index * 10) + Integer(color));
+  SymbolDraw(IL, Self.DrawObject.Canvas, X, Y, index, color);
 end;
 
 procedure TBitmapSymbols.PaintSymbol(X, Y: Integer; index: Integer);

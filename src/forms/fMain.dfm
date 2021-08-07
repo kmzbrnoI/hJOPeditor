@@ -3147,8 +3147,39 @@ object F_Hlavni: TF_Hlavni
     Color = clScrollBar
     ParentBackground = False
     TabOrder = 0
-    object TB_SCom: TToolBar
-      Left = 396
+    object TB_Separator: TToolBar
+      Left = 8
+      Top = 10
+      Width = 46
+      Height = 22
+      Align = alNone
+      Images = IL_Menu
+      TabOrder = 4
+      Transparent = False
+      Visible = False
+      object TB_Separator_Vert: TToolButton
+        Left = 0
+        Top = 0
+        Hint = 'Vertik'#225'ln'#237' odd'#283'lova'#269' '#250'sek'#367
+        Caption = 'TB_Separator_Vert'
+        ImageIndex = 43
+        ParentShowHint = False
+        ShowHint = True
+        OnClick = TB_Separator_VertClick
+      end
+      object TB_Separator_Horiz: TToolButton
+        Left = 23
+        Top = 0
+        Hint = 'Horizont'#225'ln'#237' odd'#283'lova'#269' '#250'sek'#367
+        Caption = 'TB_Separator_Horiz'
+        ImageIndex = 44
+        ParentShowHint = False
+        ShowHint = True
+        OnClick = TB_Separator_HorizClick
+      end
+    end
+    object TB_Signal: TToolBar
+      Left = 204
       Top = 10
       Width = 92
       Height = 22
@@ -3158,54 +3189,54 @@ object F_Hlavni: TF_Hlavni
       Transparent = False
       Visible = False
       object ToolButton24: TToolButton
-        Tag = 24
+        Tag = 46
         Left = 0
         Top = 0
-        Hint = 'J'#237'zdn'#237' n'#225'v'#283'stidlo'
+        Hint = 'Hlavn'#237' n'#225'v'#283'stidlo'
         Caption = 'ToolButton24'
-        ImageIndex = 16
+        ImageIndex = 30
         ParentShowHint = False
         ShowHint = True
         OnClick = ToolButton0Click
       end
       object ToolButton25: TToolButton
-        Tag = 25
+        Tag = 47
         Left = 23
         Top = 0
-        Hint = 'J'#237'zdn'#237' n'#225'v'#283'stidlo'
+        Hint = 'Hlavn'#237' n'#225'v'#283'stidlo'
         Caption = 'ToolButton25'
-        ImageIndex = 17
+        ImageIndex = 31
         ParentShowHint = False
         ShowHint = True
         OnClick = ToolButton0Click
       end
       object ToolButton28: TToolButton
-        Tag = 28
+        Tag = 50
         Left = 46
         Top = 0
         Hint = 'Se'#345'a'#271'ovac'#237' n'#225'v'#283'stidlo'
         Caption = 'ToolButton28'
-        ImageIndex = 18
+        ImageIndex = 32
         ParentShowHint = False
         ShowHint = True
         OnClick = ToolButton0Click
       end
       object ToolButton29: TToolButton
-        Tag = 29
+        Tag = 51
         Left = 69
         Top = 0
         Hint = 'Se'#345'a'#271'ovac'#237' n'#225'v'#283'stidlo'
         Caption = 'ToolButton29'
-        ImageIndex = 19
+        ImageIndex = 33
         ParentShowHint = False
         ShowHint = True
         OnClick = ToolButton0Click
       end
     end
-    object TB_Usek: TToolBar
-      Left = 110
-      Top = 10
-      Width = 276
+    object TB_Track_Detected: TToolBar
+      Left = 8
+      Top = 38
+      Width = 230
       Height = 22
       Align = alNone
       Images = IL_Menu
@@ -3213,7 +3244,7 @@ object F_Hlavni: TF_Hlavni
       Transparent = False
       Visible = False
       object ToolButton12: TToolButton
-        Tag = 12
+        Tag = 24
         Left = 0
         Top = 0
         Hint = 'Detekovan'#225' kolej'
@@ -3224,128 +3255,102 @@ object F_Hlavni: TF_Hlavni
         OnClick = ToolButton0Click
       end
       object ToolButton13: TToolButton
-        Tag = 13
+        Tag = 25
         Left = 23
         Top = 0
         Hint = 'Detekovan'#225' kolej'
         Caption = 'ToolButton13'
-        ImageIndex = 5
-        ParentShowHint = False
-        ShowHint = True
-        OnClick = ToolButton0Click
-      end
-      object ToolButton14: TToolButton
-        Tag = 14
-        Left = 46
-        Top = 0
-        Hint = 'Detekovan'#225' kolej'
-        Caption = 'ToolButton14'
-        ImageIndex = 6
-        ParentShowHint = False
-        ShowHint = True
-        OnClick = ToolButton0Click
-      end
-      object ToolButton15: TToolButton
-        Tag = 15
-        Left = 69
-        Top = 0
-        Hint = 'Detekovan'#225' kolej'
-        Caption = 'ToolButton15'
-        ImageIndex = 7
-        ParentShowHint = False
-        ShowHint = True
-        OnClick = ToolButton0Click
-      end
-      object ToolButton16: TToolButton
-        Tag = 16
-        Left = 92
-        Top = 0
-        Hint = 'Detekovan'#225' kolej'
-        Caption = 'ToolButton16'
-        ImageIndex = 8
-        ParentShowHint = False
-        ShowHint = True
-        OnClick = ToolButton0Click
-      end
-      object ToolButton17: TToolButton
-        Tag = 17
-        Left = 115
-        Top = 0
-        Hint = 'Detekovan'#225' kolej'
-        Caption = 'ToolButton17'
         ImageIndex = 9
         ParentShowHint = False
         ShowHint = True
         OnClick = ToolButton0Click
       end
-      object ToolButton18: TToolButton
-        Tag = 18
-        Left = 138
+      object ToolButton14: TToolButton
+        Tag = 26
+        Left = 46
         Top = 0
-        Hint = 'Nedetekovan'#225' kolej'
-        Caption = 'ToolButton18'
+        Hint = 'Detekovan'#225' kolej'
+        Caption = 'ToolButton14'
         ImageIndex = 10
         ParentShowHint = False
         ShowHint = True
         OnClick = ToolButton0Click
       end
-      object ToolButton19: TToolButton
-        Tag = 19
-        Left = 161
+      object ToolButton15: TToolButton
+        Tag = 27
+        Left = 69
         Top = 0
-        Hint = 'Nedetekovan'#225' kolej'
-        Caption = 'ToolButton19'
+        Hint = 'Detekovan'#225' kolej'
+        Caption = 'ToolButton15'
         ImageIndex = 11
         ParentShowHint = False
         ShowHint = True
         OnClick = ToolButton0Click
       end
-      object ToolButton20: TToolButton
-        Tag = 20
-        Left = 184
+      object ToolButton16: TToolButton
+        Tag = 28
+        Left = 92
         Top = 0
-        Hint = 'Nedetekovan'#225' kolej'
-        Caption = 'ToolButton20'
+        Hint = 'Detekovan'#225' kolej'
+        Caption = 'ToolButton16'
         ImageIndex = 12
         ParentShowHint = False
         ShowHint = True
         OnClick = ToolButton0Click
       end
-      object ToolButton21: TToolButton
-        Tag = 21
-        Left = 207
+      object ToolButton17: TToolButton
+        Tag = 29
+        Left = 115
         Top = 0
-        Hint = 'Nedetekovan'#225' kolej'
-        Caption = 'ToolButton21'
+        Hint = 'Detekovan'#225' kolej'
+        Caption = 'ToolButton17'
         ImageIndex = 13
         ParentShowHint = False
         ShowHint = True
         OnClick = ToolButton0Click
       end
-      object ToolButton22: TToolButton
-        Tag = 22
-        Left = 230
+      object ToolButton6: TToolButton
+        Tag = 30
+        Left = 138
         Top = 0
-        Hint = 'Nedetekovan'#225' kolej'
-        Caption = 'ToolButton22'
+        Hint = 'Detekovan'#225' kolej - k'#345'i'#382'ovatka'
+        Caption = 'ToolButton6'
         ImageIndex = 14
+        OnClick = ToolButton0Click
+      end
+      object ToolButton7: TToolButton
+        Tag = 31
+        Left = 161
+        Top = 0
+        Hint = 'Detekovan'#225' kolej - k'#345'i'#382'ovatka'
+        Caption = 'ToolButton7'
+        ImageIndex = 15
+        OnClick = ToolButton0Click
+      end
+      object ToolButton18: TToolButton
+        Tag = 32
+        Left = 184
+        Top = 0
+        Hint = 'Detekovan'#225' kolej - k'#345'i'#382'ovatka'
+        Caption = 'ToolButton18'
+        ImageIndex = 16
         ParentShowHint = False
         ShowHint = True
         OnClick = ToolButton0Click
       end
-      object ToolButton23: TToolButton
-        Tag = 23
-        Left = 253
+      object ToolButton19: TToolButton
+        Tag = 33
+        Left = 207
         Top = 0
-        Hint = 'Nedetekovan'#225' kolej'
-        Caption = 'ToolButton23'
-        ImageIndex = 15
+        Hint = 'Detekovan'#225' kolej - k'#345'i'#382'ovatka'
+        Caption = 'ToolButton19'
+        ImageIndex = 17
         ParentShowHint = False
         ShowHint = True
         OnClick = ToolButton0Click
       end
     end
-    object TB_Vyhybka: TToolBar
+    object TB_Turnout: TToolBar
       Left = 8
       Top = 10
       Width = 92
@@ -3402,9 +3407,9 @@ object F_Hlavni: TF_Hlavni
       end
     end
     object TB_BitmapTools: TToolBar
-      Left = 494
+      Left = 452
       Top = 10
-      Width = 250
+      Width = 248
       Height = 22
       Align = alNone
       ButtonWidth = 40
@@ -3424,7 +3429,7 @@ object F_Hlavni: TF_Hlavni
         Top = 0
         Width = 75
         Height = 22
-        Caption = 'Move'
+        Caption = 'Posun'
         TabOrder = 0
         OnClick = B_MoveClick
       end
@@ -3433,7 +3438,7 @@ object F_Hlavni: TF_Hlavni
         Top = 0
         Width = 75
         Height = 22
-        Caption = 'Delete'
+        Caption = 'Smazat'
         TabOrder = 1
         OnClick = B_DeleteClick
       end
@@ -3447,46 +3452,15 @@ object F_Hlavni: TF_Hlavni
       object CHB_Group: TCheckBox
         Left = 169
         Top = 0
-        Width = 51
+        Width = 64
         Height = 22
-        Caption = 'Group'
+        Caption = 'Skupina'
         TabOrder = 2
         OnClick = CHB_GroupClick
       end
     end
-    object TB_Oddelovac: TToolBar
-      Left = 8
-      Top = 10
-      Width = 46
-      Height = 22
-      Align = alNone
-      Images = IL_Menu
-      TabOrder = 4
-      Transparent = False
-      Visible = False
-      object TB_Separator_Vert: TToolButton
-        Left = 0
-        Top = 0
-        Hint = 'Vertik'#225'ln'#237' odd'#283'lova'#269' '#250'sek'#367
-        Caption = 'TB_Separator_Vert'
-        ImageIndex = 25
-        ParentShowHint = False
-        ShowHint = True
-        OnClick = TB_Separator_VertClick
-      end
-      object TB_Separator_Horiz: TToolButton
-        Left = 23
-        Top = 0
-        Hint = 'Horizont'#225'ln'#237' odd'#283'lova'#269' '#250'sek'#367
-        Caption = 'TB_Separator_Horiz'
-        ImageIndex = 34
-        ParentShowHint = False
-        ShowHint = True
-        OnClick = TB_Separator_HorizClick
-      end
-    end
-    object TB_BitmapOstatni: TToolBar
-      Left = 210
+    object TB_Bitmap_Other: TToolBar
+      Left = 480
       Top = 38
       Width = 207
       Height = 22
@@ -3496,105 +3470,106 @@ object F_Hlavni: TF_Hlavni
       Transparent = False
       Visible = False
       object ToolButton30: TToolButton
-        Tag = 30
+        Tag = 44
         Left = 0
         Top = 0
         Hint = 'Zar'#225#382'edlo'
         Caption = 'ToolButton17'
-        ImageIndex = 20
+        ImageIndex = 28
         ParentShowHint = False
         ShowHint = True
         OnClick = ToolButton0Click
       end
       object ToolButton31: TToolButton
-        Tag = 31
+        Tag = 45
         Left = 23
         Top = 0
         Hint = 'Zar'#225#382'edlo'
         Caption = 'ToolButton18'
-        ImageIndex = 21
-        ParentShowHint = False
-        ShowHint = True
-        OnClick = ToolButton0Click
-      end
-      object ToolButton32: TToolButton
-        Tag = 32
-        Left = 46
-        Top = 0
-        Hint = 'Per'#243'n'
-        Caption = 'ToolButton19'
-        ImageIndex = 22
-        ParentShowHint = False
-        ShowHint = True
-        OnClick = ToolButton0Click
-      end
-      object ToolButton33: TToolButton
-        Tag = 33
-        Left = 69
-        Top = 0
-        Hint = 'Per'#243'n'
-        Caption = 'ToolButton20'
-        ImageIndex = 23
-        ParentShowHint = False
-        ShowHint = True
-        OnClick = ToolButton0Click
-      end
-      object ToolButton34: TToolButton
-        Tag = 34
-        Left = 92
-        Top = 0
-        Hint = 'Per'#243'n'
-        Caption = 'ToolButton34'
-        ImageIndex = 24
-        ParentShowHint = False
-        ShowHint = True
-        OnClick = ToolButton0Click
-      end
-      object ToolButton35: TToolButton
-        Tag = 40
-        Left = 115
-        Top = 0
-        Hint = 'P'#345'ejezd'
-        Caption = 'ToolButton35'
         ImageIndex = 29
         ParentShowHint = False
         ShowHint = True
         OnClick = ToolButton0Click
       end
+      object ToolButton32: TToolButton
+        Tag = 59
+        Left = 46
+        Top = 0
+        Hint = 'Per'#243'n'
+        Caption = 'ToolButton19'
+        ImageIndex = 35
+        ParentShowHint = False
+        ShowHint = True
+        OnClick = ToolButton0Click
+      end
+      object ToolButton33: TToolButton
+        Tag = 60
+        Left = 69
+        Top = 0
+        Hint = 'Per'#243'n'
+        Caption = 'ToolButton20'
+        ImageIndex = 36
+        ParentShowHint = False
+        ShowHint = True
+        OnClick = ToolButton0Click
+      end
+      object ToolButton34: TToolButton
+        Tag = 61
+        Left = 92
+        Top = 0
+        Hint = 'Per'#243'n'
+        Caption = 'ToolButton34'
+        ImageIndex = 37
+        ParentShowHint = False
+        ShowHint = True
+        OnClick = ToolButton0Click
+      end
+      object ToolButton35: TToolButton
+        Tag = 52
+        Left = 115
+        Top = 0
+        Hint = 'P'#345'ejezd'
+        Caption = 'ToolButton35'
+        ImageIndex = 34
+        ParentShowHint = False
+        ShowHint = True
+        OnClick = ToolButton0Click
+      end
       object ToolButton48: TToolButton
-        Tag = 48
+        Tag = 56
         Left = 138
         Top = 0
         Hint = 'Z'#225'mek'
         Caption = 'ToolButton48'
-        ImageIndex = 30
+        ImageIndex = 41
         ParentShowHint = False
         ShowHint = True
         OnClick = ToolButton0Click
       end
       object ToolButton55: TToolButton
-        Tag = 55
+        Tag = 57
         Left = 161
         Top = 0
         Hint = 'Rozpojova'#269
         Caption = 'ToolButton55'
-        ImageIndex = 33
+        ImageIndex = 42
         ParentShowHint = False
         ShowHint = True
         OnClick = ToolButton0Click
       end
       object ToolButton56: TToolButton
-        Tag = 42
+        Tag = 68
         Left = 184
         Top = 0
+        Hint = 'Kole'#269'ko'
         Caption = 'ToolButton56'
         ImageIndex = 38
         OnClick = ToolButton0Click
       end
     end
     object TB_Other: TToolBar
-      Left = 60
-      Top = 38
+      Left = 302
+      Top = 10
       Width = 92
       Height = 22
       Align = alNone
@@ -3607,7 +3582,7 @@ object F_Hlavni: TF_Hlavni
         Top = 0
         Hint = 'Text'
         Caption = 'TB_Text'
-        ImageIndex = 26
+        ImageIndex = 40
         ParentShowHint = False
         ShowHint = True
         OnClick = TB_TextClick
@@ -3618,7 +3593,7 @@ object F_Hlavni: TF_Hlavni
         Top = 0
         Hint = 'Konec j'#237'zdn'#237' cesty'
         Caption = 'TB_EndJC'
-        ImageIndex = 27
+        ImageIndex = 45
         ParentShowHint = False
         ShowHint = True
         OnClick = TB_EndJCClick
@@ -3629,7 +3604,7 @@ object F_Hlavni: TF_Hlavni
         Top = 0
         Hint = 'Popisek koleje (n'#225'zev pop'#345'. '#269#237'slo vlaku)'
         Caption = 'TB_KCislo'
-        ImageIndex = 28
+        ImageIndex = 46
         ParentShowHint = False
         ShowHint = True
         OnClick = TB_KCisloClick
@@ -3638,17 +3613,17 @@ object F_Hlavni: TF_Hlavni
         Tag = 43
         Left = 69
         Top = 0
-        Hint = 'Pozice pro zobrazen'#237' soupravy'
+        Hint = 'Pozice pro zobrazen'#237' '#269#237'sla soupravy'
         Caption = 'TB_SoupravaPos'
-        ImageIndex = 37
+        ImageIndex = 47
         ParentShowHint = False
         ShowHint = True
         OnClick = TB_SoupravaPosClick
       end
     end
-    object TB_Trat: TToolBar
-      Left = 158
-      Top = 38
+    object TB_Railway: TToolBar
+      Left = 400
+      Top = 10
       Width = 46
       Height = 22
       Align = alNone
@@ -3657,7 +3632,7 @@ object F_Hlavni: TF_Hlavni
       Transparent = False
       Visible = False
       object TB_Uvazka: TToolButton
-        Tag = 43
+        Tag = 53
         Left = 0
         Top = 0
         Hint = #218'vazka'
@@ -3668,7 +3643,7 @@ object F_Hlavni: TF_Hlavni
         OnClick = ToolButton0Click
       end
       object TB_UvazkaSpr: TToolButton
-        Tag = 45
+        Tag = 55
         Left = 23
         Top = 0
         Hint = 'Soupravy v trati'
@@ -3677,10 +3652,10 @@ object F_Hlavni: TF_Hlavni
         OnClick = ToolButton0Click
       end
     end
-    object TB_Vykolejka: TToolBar
-      Left = 8
-      Top = 38
-      Width = 46
+    object TB_Derail: TToolBar
+      Left = 106
+      Top = 10
+      Width = 92
       Height = 22
       Align = alNone
       Images = IL_Menu
@@ -3688,56 +3663,156 @@ object F_Hlavni: TF_Hlavni
       Transparent = False
       Visible = False
       object ToolButton49: TToolButton
-        Tag = 49
+        Tag = 12
         Left = 0
         Top = 0
-        Hint = 'V'#253'kolejka'
+        Hint = 'V'#253'kolejka nahoru'
         Caption = 'ToolButton17'
-        ImageIndex = 31
+        ImageIndex = 5
         ParentShowHint = False
         ShowHint = True
         OnClick = ToolButton0Click
       end
       object ToolButton50: TToolButton
-        Tag = 50
+        Tag = 13
         Left = 23
         Top = 0
-        Hint = 'V'#253'kolejka'
+        Hint = 'V'#253'kolejka nahoru'
         Caption = 'ToolButton18'
-        ImageIndex = 32
+        ImageIndex = 6
         ParentShowHint = False
         ShowHint = True
         OnClick = ToolButton0Click
       end
+      object ToolButton10: TToolButton
+        Tag = 18
+        Left = 46
+        Top = 0
+        Hint = 'V'#253'kolejka dol'#367
+        Caption = 'ToolButton10'
+        ImageIndex = 7
+        OnClick = ToolButton0Click
+      end
+      object ToolButton11: TToolButton
+        Tag = 19
+        Left = 69
+        Top = 0
+        Hint = 'V'#253'kolejka dol'#367
+        Caption = 'ToolButton11'
+        ImageIndex = 8
+        OnClick = ToolButton0Click
+      end
     end
-    object TB_Krizeni: TToolBar
-      Left = 422
+    object TB_Track_Undetected: TToolBar
+      Left = 244
       Top = 38
-      Width = 46
+      Width = 230
       Height = 22
       Align = alNone
       Images = IL_Menu
       TabOrder = 9
       Transparent = False
       Visible = False
-      object ToolButton4: TToolButton
-        Tag = 58
+      object ToolButton36: TToolButton
+        Tag = 34
         Left = 0
         Top = 0
-        Hint = 'Dvojit'#225' kolejov'#225' spojka'
-        ImageIndex = 35
+        Hint = 'Nedetekovan'#225' kolej'
+        Caption = 'ToolButton18'
+        ImageIndex = 18
         ParentShowHint = False
         ShowHint = True
         OnClick = ToolButton0Click
       end
-      object ToolButton5: TToolButton
-        Tag = 59
+      object ToolButton37: TToolButton
+        Tag = 35
         Left = 23
         Top = 0
-        Hint = 'Dvojit'#225' kolejov'#225' spojka'
-        ImageIndex = 36
+        Hint = 'Nedetekovan'#225' kolej'
+        Caption = 'ToolButton19'
+        ImageIndex = 19
         ParentShowHint = False
         ShowHint = True
+        OnClick = ToolButton0Click
+      end
+      object ToolButton38: TToolButton
+        Tag = 36
+        Left = 46
+        Top = 0
+        Hint = 'Nedetekovan'#225' kolej'
+        Caption = 'ToolButton20'
+        ImageIndex = 20
+        ParentShowHint = False
+        ShowHint = True
+        OnClick = ToolButton0Click
+      end
+      object ToolButton39: TToolButton
+        Tag = 37
+        Left = 69
+        Top = 0
+        Hint = 'Nedetekovan'#225' kolej'
+        Caption = 'ToolButton21'
+        ImageIndex = 21
+        ParentShowHint = False
+        ShowHint = True
+        OnClick = ToolButton0Click
+      end
+      object ToolButton40: TToolButton
+        Tag = 38
+        Left = 92
+        Top = 0
+        Hint = 'Nedetekovan'#225' kolej'
+        Caption = 'ToolButton22'
+        ImageIndex = 22
+        ParentShowHint = False
+        ShowHint = True
+        OnClick = ToolButton0Click
+      end
+      object ToolButton41: TToolButton
+        Tag = 39
+        Left = 115
+        Top = 0
+        Hint = 'Nedetekovan'#225' kolej'
+        Caption = 'ToolButton23'
+        ImageIndex = 23
+        ParentShowHint = False
+        ShowHint = True
+        OnClick = ToolButton0Click
+      end
+      object ToolButton4: TToolButton
+        Tag = 40
+        Left = 138
+        Top = 0
+        Hint = 'Nedetekovan'#225' kolej - k'#345'i'#382'ovatka'
+        Caption = 'ToolButton4'
+        ImageIndex = 24
+        OnClick = ToolButton0Click
+      end
+      object ToolButton5: TToolButton
+        Tag = 41
+        Left = 161
+        Top = 0
+        Hint = 'Nedetekovan'#225' kolej - k'#345'i'#382'ovatka'
+        Caption = 'ToolButton5'
+        ImageIndex = 25
+        OnClick = ToolButton0Click
+      end
+      object ToolButton8: TToolButton
+        Tag = 42
+        Left = 184
+        Top = 0
+        Hint = 'Nedetekovan'#225' kolej - k'#345'i'#382'ovatka'
+        Caption = 'ToolButton8'
+        ImageIndex = 26
+        OnClick = ToolButton0Click
+      end
+      object ToolButton9: TToolButton
+        Tag = 43
+        Left = 207
+        Top = 0
+        Hint = 'Nedetekovan'#225' kolej - k'#345'i'#382'ovatka'
+        Caption = 'ToolButton9'
+        ImageIndex = 27
         OnClick = ToolButton0Click
       end
     end
@@ -3945,55 +4020,31 @@ object F_Hlavni: TF_Hlavni
     Left = 200
     Top = 504
     Bitmap = {
-      494C010127001C03040008000C00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
-      000000000000360000002800000020000000780000000100200000000000003C
+      494C010130003800040008000C00FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      0000000000003600000028000000200000009C0000000100200000000000004E
       0000000000000000000000000000000000000000000000000000000000000000
-      000000000000000000000000000000000000FF000000FF000000FF000000FF00
-      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      000000000000000000000000000000000000FF000000FF000000FF000000FF00
-      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      000000000000000000000000000000000000FF000000FF000000FF000000FF00
-      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      000000000000000000000000000000000000FF000000FF000000FF000000FF00
-      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      000000000000000000000000000000000000FF000000FF000000FF000000FF00
-      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      000000000000000000000000000000000000FF000000FF000000FF000000FF00
-      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      000000000000000000000000000000000000FF000000FF000000FF000000FF00
-      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      000000000000000000000000000000000000FF000000FF000000FF000000FF00
-      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      000000000000000000000000000000000000FF000000FF000000FF000000FF00
-      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      000000000000000000000000000000000000FF000000FF000000FF000000FF00
-      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      000000000000000000000000000000000000FF000000FF000000FF000000FF00
-      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      000000000000000000000000000000000000FF000000FF000000FF000000FF00
-      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -4013,133 +4064,301 @@ object F_Hlavni: TF_Hlavni
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000000000000000000000000000000241CED00241CED00241C
-      ED00241CED00241CED00241CED00000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      000000000000000000000000000000000000241CED00241CED00241CED00241C
-      ED00241CED00241CED00241CED00241CED000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000000000000000000000000000000241CED00241CED00241C
-      ED00241CED00241CED00241CED00000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000000000000000000000000F2FF0000F2FF0000F2FF0000F2
-      FF0000F2FF0000F2FF0000F2FF0000F2FF000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000000000000000000000000F2FF0000F2FF0000F2FF0000F2
-      FF0000F2FF0000F2FF0000F2FF0000F2FF000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000000000000000000000000F2FF0000F2FF0000F2FF0000F2
-      FF0000F2FF0000F2FF0000F2FF0000F2FF000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000000000000000000000000F2FF0000F2FF0000F2FF0000F2
-      FF0000F2FF0000F2FF0000F2FF0000F2FF000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000000000000000000000000F2FF0000F2FF0000F2FF0000F2
-      FF0000F2FF0000F2FF0000F2FF0000F2FF000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000000000000000000000000F2FF0000F2FF0000F2FF0000F2
-      FF0000F2FF0000F2FF0000F2FF0000F2FF000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000000000000000000000000F2FF0000F2FF0000F2FF0000F2
-      FF0000F2FF0000F2FF0000F2FF0000F2FF000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000000000000000000000000F2FF0000F2FF0000F2FF0000F2
-      FF0000F2FF0000F2FF0000F2FF0000F2FF000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000000000000000000000000F2FF0000F2FF0000F2FF0000F2
-      FF0000F2FF0000F2FF0000F2FF0000F2FF000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000000000000000000000000F2FF0000F2FF0000F2FF0000F2
-      FF0000F2FF0000F2FF0000F2FF0000F2FF000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000000000000000000000000F2FF0000F2FF0000F2FF0000F2
-      FF0000F2FF0000F2FF0000F2FF0000F2FF000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000000000000000000000000F2FF0000F2FF0000F2FF0000F2
-      FF0000F2FF0000F2FF0000F2FF0000F2FF000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000080000000800000008000000080
-      0000008000000080000000800000008000000000000000000000000000000000
+      00000080000000800000008000000080000000F2FF0000F2FF0000F2FF0000F2
+      FF0000F2FF0000F2FF0000F2FF0000F2FF00FF000000FF000000FF000000FF00
+      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
+      0000000000000000000000000000000000000080000000800000008000000080
+      00000080000000800000008000000080000000F2FF0000F2FF0000F2FF0000F2
+      FF0000F2FF0000F2FF0000F2FF0000F2FF00FF000000FF000000FF000000FF00
+      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
+      0000000000000000000000000000000000000080000000800000008000000080
+      00000080000000800000008000000080000000F2FF0000F2FF0000F2FF0000F2
+      FF0000F2FF0000F2FF0000F2FF0000F2FF00FF000000FF000000FF000000FF00
+      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
+      0000000000000000000000000000000000000080000000800000008000000080
+      00000080000000800000008000000080000000F2FF0000F2FF0000F2FF0000F2
+      FF0000F2FF0000F2FF0000F2FF0000F2FF00FF000000FF000000FF000000FF00
+      0000FF000000FF000000FF000000FF00000000000000241CED00241CED00241C
+      ED00241CED00241CED00241CED00000000000080000000800000008000000080
+      00000080000000800000008000000080000000F2FF0000F2FF0000F2FF0000F2
+      FF0000F2FF0000F2FF0000F2FF0000F2FF00FF000000FF000000FF000000FF00
+      0000FF000000FF000000FF000000FF000000241CED00241CED00241CED00241C
+      ED00241CED00241CED00241CED00241CED000080000000800000008000000080
+      00000080000000800000008000000080000000F2FF0000F2FF0000F2FF0000F2
+      FF0000F2FF0000F2FF0000F2FF0000F2FF00FF000000FF000000FF000000FF00
+      0000FF000000FF000000FF000000FF00000000000000241CED00241CED00241C
+      ED00241CED00241CED00241CED00000000000080000000800000008000000080
+      00000080000000800000008000000080000000F2FF0000F2FF0000F2FF0000F2
+      FF0000F2FF0000F2FF0000F2FF0000F2FF00FF000000FF000000FF000000FF00
+      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
+      0000000000000000000000000000000000000080000000800000008000000080
+      00000080000000800000008000000080000000F2FF0000F2FF0000F2FF0000F2
+      FF0000F2FF0000F2FF0000F2FF0000F2FF00FF000000FF000000FF000000FF00
+      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
+      0000000000000000000000000000000000000080000000800000008000000080
+      00000080000000800000008000000080000000F2FF0000F2FF0000F2FF0000F2
+      FF0000F2FF0000F2FF0000F2FF0000F2FF00FF000000FF000000FF000000FF00
+      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
+      0000000000000000000000000000000000000080000000800000008000000080
+      00000080000000800000008000000080000000F2FF0000F2FF0000F2FF0000F2
+      FF0000F2FF0000F2FF0000F2FF0000F2FF00FF000000FF000000FF000000FF00
+      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
+      0000000000000000000000000000000000000080000000800000008000000080
+      00000080000000800000008000000080000000F2FF0000F2FF0000F2FF0000F2
+      FF0000F2FF0000F2FF0000F2FF0000F2FF00FF000000FF000000FF000000FF00
+      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
+      0000000000000000000000000000000000000080000000800000008000000080
+      00000080000000800000008000000080000000F2FF0000F2FF0000F2FF0000F2
+      FF0000F2FF0000F2FF0000F2FF0000F2FF00FF000000FF000000FF000000FF00
+      0000FF000000FF000000FF000000FF0000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000000000000000000000000000000000000000000241C
       ED00000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000080000000800000008000000080
-      0000008000000080000000800000008000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000241CED00241C
       ED00241CED000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000080000000800000008000000080
-      0000008000000080000000800000008000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000241CED00241C
       ED00241CED000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000080000000800000008000000080
-      0000008000000080000000800000008000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000241CED00241C
       ED00241CED000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000080000000800000008000000080
-      0000008000000080000000800000008000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000241CED00241C
       ED00241CED000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000080000000800000008000000080
-      0000008000000080000000800000008000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000241CED00241C
       ED00241CED000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000080000000800000008000000080
-      0000008000000080000000800000008000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000241CED00241C
       ED00241CED000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000080000000800000008000000080
-      0000008000000080000000800000008000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000241CED00241C
       ED00241CED000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000080000000800000008000000080
-      0000008000000080000000800000008000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000241CED00241C
       ED00241CED000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000080000000800000008000000080
-      0000008000000080000000800000008000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000000000000000000000000000000000000000000241C
       ED00000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000080000000800000008000000080
-      0000008000000080000000800000008000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000080000000800000008000000080
-      0000008000000080000000800000008000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -4428,24 +4647,28 @@ object F_Hlavni: TF_Hlavni
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000000000000000000424D3E000000000000003E000000
-      2800000020000000780000000100010000000000E00100000000000000000000
-      000000000000000000000000FFFFFF00FF00FF00FF00FF00FF00FF00FF00C300
-      FF0081007E0081001C0081009C0081008900C300C900FF00E300FF00E300FF00
-      FF00FFE3FF81FFE3FFC3FFC9FFE7FF89FFFF819CC0FF001CC0FF817EC1FFFFFF
-      C3FFFFFFC7FFFFFFCFFFFFFFFFFFFFFF00ABFFFF00ABFFFF00BBFFFF00BB00FF
-      00AB81FF00AB990300ABBD0300AB998300BB81C300BBFFE300ABFFF300ABFFFF
-      AAFFFF0055EF9900AAC7990055C79900AAC7810055C78100FFC79900FFC79900
-      FFC79900FFC7C300FFEFE700FFFFFF00FFFFAAFFFFFF55FFFFFFAAFFE7E755FF
-      E7E7AAFFE00755FFE007AAAAE7E75555E7E7AAAAFFFF5555FFFFAAAAFFFF5555
-      FFFFFFFF1FF8FFFF0FF08FF107E0C7E303C0E3C70180F18F0180F18F03C0E3C7
-      07E0C7E30FF08FF11FF8FFFFFFFFFFFFFFFFFFFFF3FFCFFFF3FFCFFFF9FF9FFF
-      F9FF9FFFFFFFFFFFFFFFFFFFFF9FFFF9FF9FFFF9FFCFFFF3FFCFFFF3FFFFFFFF
-      E7FFFFFFCFFFFFFF9FFFFFE71FFFFFE73FFFFFE77FFEC1FFFFFEC1FFFFFCFFE7
-      FFF9FFE7FFF9FFE7FFF3FFFFFFE7FFFFFFE7E7FFFFE7F3FFFFE7F9FFFFE7F9FF
-      FFE7FCFF00E7FE7F00E7FF3FFFE7FF3FFFE7FF9FFFE7FF9FFFE7FFCFFFE7FFE7
-      FFE7FFE7FFCFFFF3FF9FFFF9FF9FFFF9FF3FFFFC00000000000000003FFFFCFF
-      9FFFF9FF9FFFF9FFCFFFF3FFE7FFE7FF00000000000000000000000000000000
-      000000000000}
+      28000000200000009C0000000100010000000000700200000000000000000000
+      000000000000000000000000FFFFFF0000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      FF000000FF000000FF000000FF000000810000000000000081000000FF000000
+      FF000000FF000000FF000000FF000000FFFF00FF99FF81EF99FFC3C79900E7C7
+      8181FFC78199FFC799BDFFC79999FFC79981FFC7C3FFFFC7E7FFFFEFFFFFFFFF
+      FFAAFF0FFF55FF9FFFAAFF9FFF55C39FFFAA8181FF558181AAFF819955FF8109
+      AAFFC3C155FFFFF0AAFFFFFC55FFFFFFFFFFABAAFFFFAB558FF1BBAAC7E3BB55
+      E3C7ABAAF18FAB55F18FABAAE3C7AB55C7E3BBAA8FF1BB55FFFFABAAFFFFAB55
+      FFFFFFFFFFFF1FF8FFFF0FF0E7E707E0E7E703C0E0070180E0070180E7E703C0
+      E7E707E0FFFF0FF0FFFF1FF8FFFFFFFFFFFFFFFFE3FFFFFFC9FF8FF189FF9FF9
+      9DFF9FF9BDFFBFFDFF9DBFFDFF9D9FF9FF899FF9FFC98FF1FFE3FFFFFFFFFFFF
+      FFFFFFFFF3FFCFFFF3FFCFFFF9FF9FFFF9FF9FFFFFFFFFFFFFFFFFFFFF9FFFF9
+      FF9FFFF9FFCFFFF3FFCFFFF3FFFFFFFFC7E3FFFFCFF3FFFF8FF1FFE79FF9FFE7
+      1FF8FFE73FFCC1FF3FFCC1FF1FF8FFE79FF9FFE78FF1FFE7CFF3FFFFC7E3FFFF
+      E7FFE3FFCFFFE3FF9FFFC9FF1FFF89FF3FFF9CFF7FFE1C7EFFFE7E1CFFFCFF9C
+      FFF9FF89FFF9FFC9FFF3FFE3FFE7FFE3FFE7E7FFCFE7F3FFC7E7F9FFC3E7F9FF
+      C1E7FCFFC0E7FE7FC0E7FF3FFFE7FF3FFFE7FF9FFFE7FF9FFFE7FFCFFFE7FFE7
+      FFFFFFFFFFFFFFF3FFFFFFE3FFFFFFC3FFFFFF830003C0030003C003FF83C1FF
+      FFC3C3FFFFE3C7FFFFF3CFFFFFFFFFFFFFE7FFE7FFCFFFF3FF9FFFF9FF9FFFF9
+      FF3FFFFC00000000000000003FFFFCFF9FFFF9FF9FFFF9FFCFFFF3FFE7FFE7FF
+      00000000000000000000000000000000000000000000}
   end
   object AE_Main: TApplicationEvents
     OnMessage = AE_MainMessage

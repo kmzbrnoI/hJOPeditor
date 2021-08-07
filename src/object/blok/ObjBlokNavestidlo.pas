@@ -19,6 +19,8 @@ type
 
 implementation
 
+uses ReliefObjects;
+
 /// /////////////////////////////////////////////////////////////////////////////
 
 constructor TNavestidlo.Create(index: Integer);
@@ -36,6 +38,8 @@ begin
   Self.Position.X := ini.ReadInteger(key, 'X', 0);
   Self.Position.Y := ini.ReadInteger(key, 'Y', 0);
   Self.SymbolID := ini.ReadInteger(key, 'S', 0);
+  if (version < _FILEVERSION_20) then
+    Self.SymbolID := TranscodeSymbolFromBpnlV3(Self.SymbolID);
 end;
 
 procedure TNavestidlo.Save(ini: TMemIniFile; key: string);

@@ -37,6 +37,8 @@ type
 
 implementation
 
+uses ReliefObjects;
+
 /// /////////////////////////////////////////////////////////////////////////////
 
 constructor TUsek.Create(index: Integer);
@@ -84,6 +86,8 @@ begin
       symbol.Position.X := StrToInt(copy(obj, j * 8 + 1, 3));
       symbol.Position.Y := StrToInt(copy(obj, j * 8 + 4, 3));
       symbol.SymbolID := StrToInt(copy(obj, j * 8 + 7, 2));
+      if (version < _FILEVERSION_20) then
+        symbol.SymbolID := TranscodeSymbolFromBpnlV3(symbol.SymbolID);
     except
       continue;
     end;
@@ -159,6 +163,8 @@ begin
       vetev.Symbols[k].Position.X := StrToIntDef(copy(obj, 9 * k + 1, 3), 0);
       vetev.Symbols[k].Position.Y := StrToIntDef(copy(obj, (9 * k + 4), 3), 0);
       vetev.Symbols[k].SymbolID := StrToIntDef(copy(obj, (9 * k + 7), 3), 0);
+      if (version < _FILEVERSION_20) then
+        vetev.Symbols[k].SymbolID := TranscodeSymbolFromBpnlV3(vetev.Symbols[k].SymbolID);
     end;
 
     Self.Vetve.Add(vetev);

@@ -360,7 +360,7 @@ begin
   if ((Self.Operations.FAddKrok = 1) or (Self.Operations.FMoveKrok = 2)) then
   begin
     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, KurzorPos.X * _Symbol_Sirka + posun.X,
-      KurzorPos.Y * _Symbol_Vyska + posun.Y, Self.DrawObject.SymbolIndex);
+      KurzorPos.Y * _Symbol_Vyska + posun.Y, SymbolIndex(Self.DrawObject.SymbolIndex, Self.DrawObject.symColor));
   end; // if (Self.Oddelovace.AddKrok = 1)
 end;
 

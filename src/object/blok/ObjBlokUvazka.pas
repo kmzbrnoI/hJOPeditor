@@ -66,7 +66,7 @@ begin
   end;
 
   SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _Uvazka_Start, color);
-  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _Uvazka_Start+1, color);
+  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos.X+1, Self.Pos.Y, _Uvazka_Start+1, color);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

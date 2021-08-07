@@ -119,11 +119,10 @@ procedure TPanelBitmap.FLoad(aFile: string; var ORs: string);
 var myFile: File;
   Buffer: array [0 .. 16383] of Byte;
   bytesBuf: TBytes;
-  i, len: Integer;
+  len: Integer;
   aCount: Integer;
   VBOData: TVBOData;
   BitmapData: TBSData;
-  version: Byte;
 begin
   Self.FStav := 2;
   Self.FSoubor := aFile;
@@ -147,8 +146,8 @@ begin
       raise EFileLoad.Create('Nesprávná identifika v hlavičce!');
 
     // kontrola verze
-    version := Buffer[2];
-    if ((version <> $21) and (version <> $30) and (version <> $31) and (version <> $32)) then
+    var version: Byte := Buffer[2];
+    if ((version <> $21) and (version <> $30) and (version <> $31) and (version <> $32) and (version <> $40)) then
       Application.MessageBox(PChar('Otevíráte soubor s verzí ' + IntToHex(version,
         2) + ', která není aplikací plně podporována!'), 'Varování', MB_OK OR MB_ICONWARNING);
 
@@ -167,6 +166,13 @@ begin
     BlockRead(myFile, BitmapData.Data, BitmapData.Width * BitmapData.Height, aCount);
     if (aCount < BitmapData.Width * BitmapData.Height) then
       raise EFileLoad.Create('Málo bitmapových dat!');
+
+    for var j: Integer := 0 to BitmapData.Width*BitmapData.Height-1 do
+      BitmapData.Data[j] := BitmapData.Data[j] - 1;
+
+    if (version < $40) then
+      for var j: Integer := 0 to BitmapData.Width*BitmapData.Height-1 do
+        BitmapData.Data[j] := TranscodeSymbolFromBpnlV3(BitmapData.Data[j]);
 
     Self.Symbols.SetLoadedData(BitmapData);
 
@@ -210,7 +216,7 @@ begin
     BlockRead(myFile, Buffer, (Buffer[0] * 2), aCount);
 
     VBOData.Count := aCount;
-    for i := 0 to aCount - 1 do
+    for var i: Integer := 0 to VBOData.Count - 1 do
       VBOData.Data[i] := Buffer[i];
 
     Self.SeparatorsVert.SetLoadedData(VBOData);
@@ -230,7 +236,7 @@ begin
       BlockRead(myFile, Buffer, (Buffer[0] * 2), aCount);
 
       VBOData.Count := aCount;
-      for i := 0 to aCount - 1 do
+      for var i: Integer := 0 to aCount - 1 do
         VBOData.Data[i] := Buffer[i];
 
       Self.SeparatorsHor.SetLoadedData(VBOData);
@@ -252,7 +258,7 @@ begin
     BlockRead(myFile, Buffer, (Buffer[0] * 2), aCount);
 
     VBOData.Count := aCount;
-    for i := 0 to aCount - 1 do
+    for var i: Integer := 0 to aCount - 1 do
       VBOData.Data[i] := Buffer[i];
 
     Self.KPopisky.SetLoadedData(VBOData);
@@ -270,7 +276,7 @@ begin
     BlockRead(myFile, Buffer, (Buffer[0] * 2), aCount);
 
     VBOData.Count := aCount;
-    for i := 0 to aCount - 1 do
+    for var i: Integer := 0 to aCount - 1 do
       VBOData.Data[i] := Buffer[i];
 
     Self.JCClick.SetLoadedData(VBOData);
@@ -290,7 +296,7 @@ begin
       BlockRead(myFile, Buffer, (Buffer[0] * 2), aCount);
 
       VBOData.Count := aCount;
-      for i := 0 to aCount - 1 do
+      for var i: Integer := 0 to aCount - 1 do
         VBOData.Data[i] := Buffer[i];
 
       Self.Soupravy.SetLoadedData(VBOData);
@@ -343,7 +349,7 @@ begin
     Buffer[0] := ord('b');
     Buffer[1] := ord('r');
     // verze
-    Buffer[2] := $32;
+    Buffer[2] := $40;
     // vyska a sirka
     BitmapData := Self.Symbols.GetSaveData;
 
@@ -477,7 +483,7 @@ begin
   Self.Symbols.FDeleteActivate := Self.DeleteActivateEvent;
   Self.Symbols.FOPAsk := Self.IsOperationEvent;
 
-  Self.SeparatorsVert := TVBO.Create(DrawCanvas, SymbolIL, _Separ_Vert_Index, scRed, stVert);
+  Self.SeparatorsVert := TVBO.Create(DrawCanvas, SymbolIL, _Separ_Vert, scRed, stVert);
   Self.SeparatorsVert.FOnShow := Self.ShowEvent;
   Self.SeparatorsVert.FIsSymbol := Self.IsSymbolSeparVertEvent;
   Self.SeparatorsVert.FNullOperations := Self.NullOperationsEvent;
@@ -485,7 +491,7 @@ begin
   Self.SeparatorsVert.FDeleteActivate := Self.DeleteActivateEvent;
   Self.SeparatorsVert.FOPAsk := Self.IsOperationEvent;
 
-  Self.SeparatorsHor := TVBO.Create(DrawCanvas, SymbolIL, _Separ_Hor_Index, scRed, stHor);
+  Self.SeparatorsHor := TVBO.Create(DrawCanvas, SymbolIL, _Separ_Hor, scRed, stHor);
   Self.SeparatorsHor.FOnShow := Self.ShowEvent;
   Self.SeparatorsHor.FIsSymbol := Self.IsSymbolSeparHorEvent;
   Self.SeparatorsHor.FNullOperations := Self.NullOperationsEvent;

@@ -23,6 +23,8 @@ type
 
 implementation
 
+uses ReliefObjects;
+
 /// /////////////////////////////////////////////////////////////////////////////
 
 constructor TPomocnyObj.Create(index: Integer);
@@ -48,6 +50,8 @@ begin
   inherited;
 
   Self.Symbol := ini.ReadInteger(key, 'S', 0);
+  if (version < _FILEVERSION_20) then
+    Self.Symbol := TranscodeSymbolFromBpnlV3(Self.Symbol);
 
   obj := ini.ReadString(key, 'P', '');
   Self.Positions.Clear();
