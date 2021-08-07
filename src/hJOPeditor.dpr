@@ -37,11 +37,12 @@ uses
   ObjBlokPrejezd in 'object\blok\ObjBlokPrejezd.pas',
   ObjBlokUvazkaSpr in 'object\blok\ObjBlokUvazkaSpr.pas',
   ObjBlokUvazka in 'object\blok\ObjBlokUvazka.pas',
-  ObjBlokZamek in 'object\blok\ObjBlokZamek.pas',
+  ObjBlokPst in 'object\blok\ObjBlokPst.pas',
   ObjBlokRozp in 'object\blok\ObjBlokRozp.pas',
   ObjBlokVykol in 'object\blok\ObjBlokVykol.pas',
   ownStrUtils in 'helpers\ownStrUtils.pas',
-  fImportLog in 'forms\fImportLog.pas' {F_ImportLog};
+  fImportLog in 'forms\fImportLog.pas' {F_ImportLog},
+  ObjBlokZamek in 'object\blok\ObjBlokZamek.pas';
 
 {$R *.res}
 

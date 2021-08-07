@@ -122,7 +122,8 @@ implementation
 
 uses ReliefBitmap, BitmapToObj, VetveComputer, ObjBlokUsek, ObjBlokVyhybka,
   ObjBlokPomocny, ObjBlokNavestidlo, ObjBlokText, ObjBlokPrejezd, ObjBlokUvazka,
-  ObjBlokUvazkaSpr, ObjBlokZamek, ObjBlokVykol, ObjBlokRozp, ownStrUtils;
+  ObjBlokUvazkaSpr, ObjBlokZamek, ObjBlokVykol, ObjBlokRozp, ownStrUtils,
+  ObjBlokPSt;
 
 // vytvoreni objektu
 constructor TPanelObjects.Create(SymbolIL, TextIL: TImageList; DrawCanvas: TCanvas; Width, Height: Integer;
@@ -273,6 +274,8 @@ begin
               Blok := ObjBlokVykol.TVykol.Create(i);
             rozp:
               Blok := ObjBlokRozp.TRozp.Create(i);
+            pst:
+              Blok := ObjBlokPst.TPSt.Create(i);
           else
             Blok := nil;
           end;
@@ -395,19 +398,17 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 function TPanelObjects.GetObject(Pos: TPoint): Integer;
-var i, j, tmp: Integer;
-  ObjBlok: TGraphBlok;
-  bpos: TPoint;
+var tmp: Integer;
 begin
   tmp := -1;
-  for i := 0 to Self.Bloky.count - 1 do
+  for var i := 0 to Self.Bloky.count - 1 do
   begin
-    ObjBlok := Self.Bloky[i];
+    var ObjBlok := Self.Bloky[i];
 
     case (ObjBlok.typ) of
       TBlkType.usek:
         begin
-          for j := 0 to (ObjBlok as TUsek).Symbols.count - 1 do
+          for var j := 0 to (ObjBlok as TUsek).Symbols.count - 1 do
             if ((Pos.X = (ObjBlok as TUsek).Symbols[j].Position.X) and
               (Pos.Y = (ObjBlok as TUsek).Symbols[j].Position.Y)) then
               tmp := i; // usek nema prioritu (napriklad nad rozpojovacem)
@@ -423,10 +424,10 @@ begin
 
       TBlkType.prejezd:
         begin
-          for bpos in (ObjBlok as TPrejezd).StaticPositions do
+          for var bpos in (ObjBlok as TPrejezd).StaticPositions do
             if (bpos.X = Pos.X) and (bpos.Y = Pos.Y) then
               Exit(i);
-          for j := 0 to (ObjBlok as TPrejezd).BlikPositions.count - 1 do
+          for var j := 0 to (ObjBlok as TPrejezd).BlikPositions.count - 1 do
             if ((ObjBlok as TPrejezd).BlikPositions[j].Pos.X = Pos.X) and
               ((ObjBlok as TPrejezd).BlikPositions[j].Pos.Y = Pos.Y) then
               Exit(i);
@@ -445,7 +446,7 @@ begin
           // klik na pomocny objekt nas nezajima
           if ((ObjBlok as TPomocnyObj).Symbol in ObjBlokPomocny.BLK_ASSIGN_SYMBOLS) then
           begin
-            for bpos in (ObjBlok as TPomocnyObj).Positions do
+            for var bpos in (ObjBlok as TPomocnyObj).Positions do
               if ((bpos.X = Pos.X) and (bpos.Y = Pos.Y)) then
                 Exit(i);
           end;
@@ -471,6 +472,10 @@ begin
 
       TBlkType.rozp:
         if (((ObjBlok as TRozp).Pos.Y = Pos.Y) and (Pos.X = (ObjBlok as TRozp).Pos.X)) then
+          Exit(i);
+
+      TBlkType.pst:
+        if ((Pos.X = (ObjBlok as TPSt).Pos.X) and (((ObjBlok as TPSt).Pos.Y = Pos.Y) or ((ObjBlok as TPSt).Pos.Y+1 = Pos.Y))) then
           Exit(i);
 
     end; // case
@@ -550,6 +555,8 @@ begin
           '), přiřazena úseku ' + IntToStr((Self.Selected as TVykol).obj));
       TBlkType.rozp:
         Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (rozpojovač ' + IntToStr(Self.Selected.index) + ')');
+      TBlkType.pst:
+        Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (PSt ' + IntToStr(Self.Selected.index) + ')');
     end; // case
   end; // if Assigned(FOnMsg)
 

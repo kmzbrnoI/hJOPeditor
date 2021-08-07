@@ -370,6 +370,11 @@ begin
         Self.Caption := 'Editace rozpojovače';
       end;
 
+    TBlkType.pst:
+      begin
+        Self.Caption := 'Editace pomocného stavědla';
+      end;
+
   end; // case Blok.typ
 
   if (Self.Showing) then
@@ -498,6 +503,8 @@ begin
       Result := 7;
     TBlkType.rozp:
       Result := 8;
+    TBlkType.pst:
+      Result := 14;
   else
     Result := -1;
   end;

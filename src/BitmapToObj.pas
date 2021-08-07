@@ -12,7 +12,7 @@ type
     Bitmap: TPanelBitmap;
     Objects: TPanelObjects;
 
-    Zahrnuto: array [0 .. _MAX_WIDTH, 0 .. _MAX_HEIGHT] of Boolean;
+    processed: array [0 .. _MAX_WIDTH, 0 .. _MAX_HEIGHT] of Boolean;
 
     procedure ResetData;
     procedure ZpracujObject(VychoziPos: TPoint; var index: Integer; var vyh_index: Integer; var vykol_index: Integer);
@@ -21,250 +21,286 @@ type
 
   public
     procedure BitmapToObjects(BitmapData: TPanelBitmap; ObjectData: TPanelObjects);
-  end; // TConvert
+  end;
 
 implementation
 
 uses ObjBlok, ObjBlokRozp, ObjBlokUsek, ObjBlokNavestidlo, ObjBlokText,
   ObjBlokUvazka, ObjBlokUvazkaSpr, ObjBlokZamek, ObjBlokPomocny, ObjBlokVyhybka,
-  ObjBlokVykol, ObjBlokPrejezd;
+  ObjBlokVykol, ObjBlokPrejezd, ObjBlokPst;
 
 // tato funkce se vola zvnejsku
 procedure TBitmapToObj.BitmapToObjects(BitmapData: TPanelBitmap; ObjectData: TPanelObjects);
-var i, j: Integer;
-  Symbol: ShortInt;
-  blk: TGraphBlok;
-  PopData: TPopisek;
-  pomocne: TDictionary<Integer, TGraphBlok>;
-  index, popisek_index, vyh_index, vykol_index: Integer;
 begin
   Self.Bitmap := BitmapData;
   Self.Objects := ObjectData;
 
-  Self.ResetData;
+  Self.ResetData();
 
   // nejdriv si najdeme vsechny rozpojovace a nahradime je beznymi rovnymi kolejemi
-  index := 0;
-  for i := 0 to Self.Bitmap.PanelWidth - 1 do
   begin
-    for j := 0 to Self.Bitmap.PanelHeight - 1 do
+    var index: Integer := 0;
+    for var x: Integer := 0 to Self.Bitmap.PanelWidth - 1 do
     begin
-      Symbol := Self.Bitmap.Symbols.GetSymbol(Point(i, j));
-      if (Symbol = _Rozp_Kolej) then
+      for var y: Integer := 0 to Self.Bitmap.PanelHeight - 1 do
       begin
-        blk := TRozp.Create(index);
-        (blk as TRozp).Pos := Point(i, j);
-        Self.Objects.Bloky.Add(blk);
+        var Symbol := Self.Bitmap.Symbols.GetSymbol(Point(x, y));
+        if (Symbol = _Rozp_Kolej) then
+        begin
+          var blk := TRozp.Create(index);
+          blk.Pos := Point(x, y);
+          Self.Objects.Bloky.Add(blk);
 
-        // na misto [i, j] dame rovnou kolej (bud detekovanou nebo nedetekovanou)
-        if (((i > 0) and (Self.Bitmap.Symbols.Bitmap[i - 1, j] >= _Usek_Nedetek_Start) and (Self.Bitmap.Symbols.Bitmap[i - 1,
-          j] <= _Usek_Nedetek_End)) or ((i < Self.Bitmap.PanelWidth - 1) and (Self.Bitmap.Symbols.Bitmap[i + 1,
-          j] >= _Usek_Nedetek_Start) and (Self.Bitmap.Symbols.Bitmap[i + 1, j] <= _Usek_Nedetek_End))) then
-          Self.Bitmap.Symbols.Bitmap[i, j] := _Usek_Nedetek_Start
-        else
-          Self.Bitmap.Symbols.Bitmap[i, j] := _Usek_Detek_Start;
+          // na misto [i, j] dame rovnou kolej (bud detekovanou nebo nedetekovanou)
+          if (((x > 0) and (Self.Bitmap.Symbols.Bitmap[x - 1, y] >= _Usek_Nedetek_Start) and (Self.Bitmap.Symbols.Bitmap[x - 1,
+            y] <= _Usek_Nedetek_End)) or ((x < Self.Bitmap.PanelWidth - 1) and (Self.Bitmap.Symbols.Bitmap[x + 1,
+            y] >= _Usek_Nedetek_Start) and (Self.Bitmap.Symbols.Bitmap[x + 1, y] <= _Usek_Nedetek_End))) then
+            Self.Bitmap.Symbols.Bitmap[x, y] := _Usek_Nedetek_Start
+          else
+            Self.Bitmap.Symbols.Bitmap[x, y] := _Usek_Detek_Start;
 
-        Inc(Index);
-      end; // if
-    end; // for j
-  end; // for i
+          Inc(Index);
+        end; // if
+      end;
+    end;
+  end;
 
   // projedeme cely dvourozmerny bitmapovy obrazek a spojime useky do bloku
-  index := 0;
-  vyh_index := 0;
-  vykol_index := 0;
-  for i := 0 to Self.Bitmap.PanelWidth - 1 do
   begin
-    for j := 0 to Self.Bitmap.PanelHeight - 1 do
+    var index: Integer := 0;
+    var vyh_index: Integer := 0;
+    var vykol_index: Integer := 0;
+    for var x: Integer := 0 to Self.Bitmap.PanelWidth - 1 do
     begin
-      Symbol := Self.Bitmap.Symbols.GetSymbol(Point(i, j));
-      if (Symbol <> -1) then
+      for var y: Integer := 0 to Self.Bitmap.PanelHeight - 1 do
       begin
-        if ((not Self.Zahrnuto[i, j]) and (((Symbol >= _Usek_Detek_Start) and (Symbol <= _Usek_Detek_End)) or
-          ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End)) or (Symbol = _Zarazedlo_r) or (Symbol = _Zarazedlo_l))) then
-          Self.ZpracujObject(Point(i, j), index, vyh_index, vykol_index);
-      end; // if (Self.BitmapData.Symbols.GetSymbol(Point(i,j)) <> -1)
-    end; // for j
-  end; // for i
+        var Symbol := Self.Bitmap.Symbols.GetSymbol(Point(x, y));
+        if (Symbol <> -1) then
+        begin
+          if ((not Self.processed[x, y]) and (((Symbol >= _Usek_Detek_Start) and (Symbol <= _Usek_Detek_End)) or
+            ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End)) or (Symbol = _Zarazedlo_r) or (Symbol = _Zarazedlo_l))) then
+            Self.ZpracujObject(Point(x, y), index, vyh_index, vykol_index);
+        end; // if (Self.BitmapData.Symbols.GetSymbol(Point(i,j)) <> -1)
+      end;
+    end;
+  end;
 
-  // pridavani KPopisek, JCClick a souprav
-  for i := 0 to Self.Objects.Bloky.Count - 1 do
+  // KPopisek, JCClick, soupravy
+  for var x: Integer := 0 to Self.Objects.Bloky.Count - 1 do
   begin
-    if (Self.Objects.Bloky[i].typ <> TBlkType.usek) then
+    if (Self.Objects.Bloky[x].typ <> TBlkType.usek) then
       continue;
-    for j := 0 to (Self.Objects.Bloky[i] as TUsek).Symbols.Count - 1 do
+    for var y: Integer := 0 to (Self.Objects.Bloky[x] as TUsek).Symbols.Count - 1 do
     begin
-      if (Self.Bitmap.KPopisky.GetObject((Self.Objects.Bloky[i] as TUsek).Symbols[j].Position) <> -1) then
-        (Self.Objects.Bloky[i] as TUsek).KPopisek.Add((Self.Objects.Bloky[i] as TUsek).Symbols[j].Position);
+      if (Self.Bitmap.KPopisky.GetObject((Self.Objects.Bloky[x] as TUsek).Symbols[y].Position) <> -1) then
+        (Self.Objects.Bloky[x] as TUsek).KPopisek.Add((Self.Objects.Bloky[x] as TUsek).Symbols[y].Position);
 
-      if (Self.Bitmap.JCClick.GetObject((Self.Objects.Bloky[i] as TUsek).Symbols[j].Position) <> -1) then
-        (Self.Objects.Bloky[i] as TUsek).JCClick.Add((Self.Objects.Bloky[i] as TUsek).Symbols[j].Position);
+      if (Self.Bitmap.JCClick.GetObject((Self.Objects.Bloky[x] as TUsek).Symbols[y].Position) <> -1) then
+        (Self.Objects.Bloky[x] as TUsek).JCClick.Add((Self.Objects.Bloky[x] as TUsek).Symbols[y].Position);
 
-      if (Self.Bitmap.Soupravy.GetObject((Self.Objects.Bloky[i] as TUsek).Symbols[j].Position) <> -1) then
-        (Self.Objects.Bloky[i] as TUsek).Soupravy.Add((Self.Objects.Bloky[i] as TUsek).Symbols[j].Position);
-    end; // for j
-  end; // for i
+      if (Self.Bitmap.Soupravy.GetObject((Self.Objects.Bloky[x] as TUsek).Symbols[y].Position) <> -1) then
+        (Self.Objects.Bloky[x] as TUsek).Soupravy.Add((Self.Objects.Bloky[x] as TUsek).Symbols[y].Position);
+    end;
+  end;
 
-  // prevedeni navestidel
-  index := 0;
-  for i := 0 to Self.Bitmap.PanelWidth - 1 do
+  // navestidla
   begin
-    for j := 0 to Self.Bitmap.PanelHeight - 1 do
+    var index: Integer := 0;
+    for var x: Integer := 0 to Self.Bitmap.PanelWidth - 1 do
     begin
-      Symbol := Self.Bitmap.Symbols.GetSymbol(Point(i, j));
-      if ((Symbol >= _Navestidlo_Start) and (Symbol <= _Navestidlo_End)) then
+      for var y: Integer := 0 to Self.Bitmap.PanelHeight - 1 do
       begin
-        blk := TNavestidlo.Create(index);
-        (blk as TNavestidlo).Position := Point(i, j);
-        (blk as TNavestidlo).SymbolID := Symbol - _Navestidlo_Start;
-        Self.Objects.Bloky.Add(blk);
-        Self.Zahrnuto[i, j] := true;
-        Inc(Index);
-      end; // ((Symbol >= _SCom_Start) and (Symbol <= _SCom_End))
-    end; // for j
-  end; // for i
-
-  // prevadeni textu
-  index := 0;
-  popisek_index := 0;
-  for i := 0 to Self.Bitmap.Text.Count - 1 do
-  begin
-    PopData := Self.Bitmap.Text.GetPopisekData(i);
-
-    if (PopData.BlokPopisek) then
-      blk := TText.Create(popisek_index)
-    else
-      blk := TText.Create(index);
-    (blk as TText).Text := PopData.Text;
-    (blk as TText).Position := PopData.Position;
-    (blk as TText).Color := PopData.Color;
-
-    if (PopData.BlokPopisek) then
-    begin
-      blk.typ := TBlkType.blok_popisek;
-      blk.Blok := -2;
-      Inc(popisek_index);
-    end
-    else
-      Inc(index);
-
-    Self.Objects.Bloky.Add(blk);
-  end; // for i
-
-  // prevedeni prejezdu
-  index := 0;
-  for i := 0 to Self.Bitmap.PanelWidth - 1 do
-  begin
-    for j := 0 to Self.Bitmap.PanelHeight - 1 do
-    begin
-      Symbol := Self.Bitmap.Symbols.GetSymbol(Point(i, j));
-      if (not Self.Zahrnuto[i, j]) then
-        if (Symbol = _Prejezd) then
+        var Symbol := Self.Bitmap.Symbols.GetSymbol(Point(x, y));
+        if ((Symbol >= _Navestidlo_Start) and (Symbol <= _Navestidlo_End)) then
         begin
-          Self.AddPrj(Point(i, j), index);
-          Self.Zahrnuto[i, j] := true;
-          Inc(index);
-        end;
-    end; // for j
-  end; // for i
-
-  // prevedeni uvazek
-  index := 0;
-  for i := 0 to Self.Bitmap.PanelWidth - 1 do
-  begin
-    for j := 0 to Self.Bitmap.PanelHeight - 1 do
-    begin
-      Symbol := Self.Bitmap.Symbols.GetSymbol(Point(i, j));
-      if (not Self.Zahrnuto[i, j]) then
-        if (Symbol = _Uvazka_Start) then
-        begin
-          blk := TUvazka.Create(index);
-          (blk as TUvazka).Pos := Point(i, j);
+          var blk := TNavestidlo.Create(index);
+          blk.Position := Point(x, y);
+          blk.SymbolID := Symbol - _Navestidlo_Start;
           Self.Objects.Bloky.Add(blk);
-          Self.Zahrnuto[i, j] := true;
-          Inc(index);
-        end;
-    end; // for j
-  end; // for i
+          Self.processed[x, y] := true;
+          Inc(Index);
+        end; // ((Symbol >= _SCom_Start) and (Symbol <= _SCom_End))
+      end;
+    end;
+  end;
 
-  // prevedeni uvazek spr
-  index := 0;
-  for i := 0 to Self.Bitmap.PanelWidth - 1 do
+  // text
   begin
-    for j := 0 to Self.Bitmap.PanelHeight - 1 do
+    var index: Integer := 0;
+    var popisek_index: Integer := 0;
+    for var x: Integer := 0 to Self.Bitmap.Text.Count - 1 do
     begin
-      Symbol := Self.Bitmap.Symbols.GetSymbol(Point(i, j));
-      if (not Self.Zahrnuto[i, j]) then
-        if (Symbol = _Uvazka_Spr) then
-        begin
-          blk := TUvazkaSpr.Create(index);
-          (blk as TUvazkaSpr).Pos := Point(i, j);
-          (blk as TUvazkaSpr).spr_cnt := 1;
-          Self.Objects.Bloky.Add(blk);
-          Self.Zahrnuto[i, j] := true;
-          Inc(index);
-        end;
-    end; // for j
-  end; // for i
+      var PopData := Self.Bitmap.Text.GetPopisekData(x);
 
-  // prevedeni zamku
-  index := 0;
-  for i := 0 to Self.Bitmap.PanelWidth - 1 do
+      var blk: TText;
+      if (PopData.BlokPopisek) then
+        blk := TText.Create(popisek_index)
+      else
+        blk := TText.Create(index);
+      blk.Text := PopData.Text;
+      blk.Position := PopData.Position;
+      blk.Color := PopData.Color;
+
+      if (PopData.BlokPopisek) then
+      begin
+        blk.typ := TBlkType.blok_popisek;
+        blk.Blok := -2;
+        Inc(popisek_index);
+      end
+      else
+        Inc(index);
+
+      Self.Objects.Bloky.Add(blk);
+    end;
+  end;
+
+  // prejezdy
   begin
-    for j := 0 to Self.Bitmap.PanelHeight - 1 do
+    var index: Integer := 0;
+    for var x: Integer := 0 to Self.Bitmap.PanelWidth - 1 do
     begin
-      Symbol := Self.Bitmap.Symbols.GetSymbol(Point(i, j));
-      if (not Self.Zahrnuto[i, j]) then
-        if (Symbol = _Zamek) then
-        begin
-          blk := TZamek.Create(index);
-          (blk as TZamek).Pos := Point(i, j);
-          Self.Objects.Bloky.Add(blk);
-          Self.Zahrnuto[i, j] := true;
-          Inc(index);
-        end;
-    end; // for j
-  end; // for i
+      for var y: Integer := 0 to Self.Bitmap.PanelHeight - 1 do
+      begin
+        var Symbol := Self.Bitmap.Symbols.GetSymbol(Point(x, y));
+        if (not Self.processed[x, y]) then
+          if (Symbol = _Prejezd) then
+          begin
+            Self.AddPrj(Point(x, y), index);
+            Self.processed[x, y] := true;
+            Inc(index);
+          end;
+      end;
+    end;
+  end;
+
+  // uvazky
+  begin
+    var index: Integer := 0;
+    for var x: Integer := 0 to Self.Bitmap.PanelWidth - 1 do
+    begin
+      for var y: Integer := 0 to Self.Bitmap.PanelHeight - 1 do
+      begin
+        var Symbol := Self.Bitmap.Symbols.GetSymbol(Point(x, y));
+        if (not Self.processed[x, y]) then
+          if (Symbol = _Uvazka_Start) then
+          begin
+            var blk := TUvazka.Create(index);
+            blk.Pos := Point(x, y);
+            Self.Objects.Bloky.Add(blk);
+            Self.processed[x, y] := true;
+            Inc(index);
+          end;
+      end;
+    end;
+  end;
+
+  // uvazky soupravy
+  begin
+    var index: Integer := 0;
+    for var x: Integer := 0 to Self.Bitmap.PanelWidth - 1 do
+    begin
+      for var y: Integer := 0 to Self.Bitmap.PanelHeight - 1 do
+      begin
+        var Symbol := Self.Bitmap.Symbols.GetSymbol(Point(x, y));
+        if (not Self.processed[x, y]) then
+          if (Symbol = _Uvazka_Spr) then
+          begin
+            var blk := TUvazkaSpr.Create(index);
+            blk.Pos := Point(x, y);
+            blk.spr_cnt := 1;
+            Self.Objects.Bloky.Add(blk);
+            Self.processed[x, y] := true;
+            Inc(index);
+          end;
+      end;
+    end;
+  end;
+
+  // zamky
+  begin
+    var index: Integer := 0;
+    for var x: Integer := 0 to Self.Bitmap.PanelWidth - 1 do
+    begin
+      for var y: Integer := 0 to Self.Bitmap.PanelHeight - 1 do
+      begin
+        var Symbol := Self.Bitmap.Symbols.GetSymbol(Point(x, y));
+        if (not Self.processed[x, y]) then
+          if (Symbol = _Zamek) then
+          begin
+            var blk := TZamek.Create(index);
+            blk.Pos := Point(x, y);
+            Self.Objects.Bloky.Add(blk);
+            Self.processed[x, y] := true;
+            Inc(index);
+          end;
+      end;
+    end;
+  end;
+
+  // Pomocna stavedla
+  begin
+    var index: Integer := 0;
+    for var x: Integer := 0 to Self.Bitmap.PanelWidth - 1 do
+    begin
+      for var y: Integer := 0 to Self.Bitmap.PanelHeight - 1 do
+      begin
+        var Symbol := Self.Bitmap.Symbols.GetSymbol(Point(x, y));
+        if (not Self.processed[x, y]) then
+          if (Symbol = _Pst_Top) then
+          begin
+            var blk := TPst.Create(index);
+            blk.Pos := Point(x, y);
+            Self.Objects.Bloky.Add(blk);
+            Self.processed[x, y] := true;
+            Inc(index);
+          end;
+      end;
+    end;
+  end;
 
   // vsechny ostatni symboly = pomocne symboly
   // vsehcny symboly jednoho typu davame do jednoho bloku
   // to, ze jsou vedle sebe, nebo na opacne strane reliefu, nas nezajima
 
-  // tady je namapovan index symbolu na bloky
-  pomocne := TDictionary<Integer, TGraphBlok>.Create();
-
-  index := 0;
-  for i := 0 to Self.Bitmap.PanelWidth - 1 do
   begin
-    for j := 0 to Self.Bitmap.PanelHeight - 1 do
-    begin
-      if (Self.Zahrnuto[i, j]) then
-        continue;
+    var index: Integer := 0;
+    var indexMap: TDictionary<Integer, TGraphBlok> := TDictionary<Integer, TGraphBlok>.Create(); // tady je namapovan index symbolu na bloky
 
-      Symbol := Self.Bitmap.Symbols.GetSymbol(Point(i, j));
-      if (Symbol = -1) then
-        continue;
-
-      if ((pomocne.TryGetValue(Symbol, blk)) and (not(Symbol in ObjBlokPomocny.BLK_ASSIGN_SYMBOLS))) then
+    try
+      for var x: Integer := 0 to Self.Bitmap.PanelWidth - 1 do
       begin
-        // pridat do existujiciho bloku
-        (blk as TPomocnyObj).Positions.Add(Point(i, j));
-      end else begin
-        // vytvorit novy blok
-        blk := TPomocnyObj.Create(index);
-        (blk as TPomocnyObj).Symbol := Symbol;
-        (blk as TPomocnyObj).Positions.Add(Point(i, j));
+        for var y: Integer := 0 to Self.Bitmap.PanelHeight - 1 do
+        begin
+          if (Self.processed[x, y]) then
+            continue;
 
-        pomocne.AddOrSetValue(Symbol, blk);
-        Self.Objects.Bloky.Add(blk);
-        Inc(index);
+          var Symbol := Self.Bitmap.Symbols.GetSymbol(Point(x, y));
+          if (Symbol = -1) then
+            continue;
+
+          var blk: TGraphBlok;
+          if ((indexMap.TryGetValue(Symbol, blk)) and (not(Symbol in ObjBlokPomocny.BLK_ASSIGN_SYMBOLS))) then
+          begin
+            // pridat do existujiciho bloku
+            (blk as TPomocnyObj).Positions.Add(Point(x, y));
+          end else begin
+            // vytvorit novy blok
+            blk := TPomocnyObj.Create(index);
+            (blk as TPomocnyObj).Symbol := Symbol;
+            (blk as TPomocnyObj).Positions.Add(Point(x, y));
+
+            indexMap.AddOrSetValue(Symbol, blk);
+            Self.Objects.Bloky.Add(blk);
+            Inc(index);
+          end;
+
+          Self.processed[x, y] := true;
+        end;
       end;
-
-      Self.Zahrnuto[i, j] := true;
-    end; // for j
-  end; // for i
-
-  pomocne.Free();
+    finally
+      indexMap.Free();
+    end;
+  end;
 
   Self.Objects.ComputePrjPanelUsek();
 end;
@@ -276,7 +312,7 @@ begin
   for i := 0 to _MAX_WIDTH - 1 do
   begin
     for j := 0 to _MAX_HEIGHT - 1 do
-      Self.Zahrnuto[i, j] := false;
+      Self.processed[i, j] := false;
   end; // for i
 end;
 
@@ -315,7 +351,7 @@ begin
 
   try
     s.Push(VychoziPos);
-    Self.Zahrnuto[VychoziPos.X, VychoziPos.Y] := true;
+    Self.processed[VychoziPos.X, VychoziPos.Y] := true;
 
     while (s.Count <> 0) do
     begin
@@ -355,7 +391,7 @@ begin
           var TempPos: TPoint := Point(cur.X + dir.X, cur.Y + dir.Y);
           var tempSym: Integer := Self.Bitmap.Symbols.GetSymbol(TempPos);
 
-          if (Self.Zahrnuto[TempPos.X, TempPos.Y]) then
+          if (Self.processed[TempPos.X, TempPos.Y]) then
             continue;
 
           // vedlejsi symbol je vykolejka
@@ -369,7 +405,7 @@ begin
             vykol.vetev := -1;
             Self.Objects.Bloky.Add(vykol);
 
-            Zahrnuto[TempPos.X, TempPos.Y] := true;
+            processed[TempPos.X, TempPos.Y] := true;
             s.Push(TempPos);
           end;
 
@@ -401,11 +437,11 @@ begin
                 sym.SymbolID := tempSym;
                 sym.Position := TempPos;
                 usek.Symbols.Add(sym);
-                Zahrnuto[TempPos.X, TempPos.Y] := true;
+                processed[TempPos.X, TempPos.Y] := true;
                 s.Push(TempPos);
               end;
             end;
-          end; // if ((not Self.Zahrnuto[TempPos[j].X,TempPos[j].Y])...
+          end; // if ((not Self.processed[TempPos[j].X,TempPos[j].Y])...
 
           // vedlejsi symbol je vyhybka
           if ((tempSym >= _Vyhybka_Start) and (tempSym <= _Vyhybka_End)) then
@@ -425,7 +461,7 @@ begin
                 vyhybka.obj := index - 1;
                 Self.Objects.Bloky.Add(vyhybka);
 
-                Zahrnuto[TempPos.X, TempPos.Y] := true;
+                processed[TempPos.X, TempPos.Y] := true;
                 s.Push(TempPos);
               end; // if TempPos.x + _Vyh_Navaznost[...
             end; // for k
@@ -457,8 +493,8 @@ begin
   // edges are always static
   (blk as TPrejezd).StaticPositions.Add(Point(Pos.X, Pos.Y));
   (blk as TPrejezd).StaticPositions.Add(Point(Pos.X, Pos.Y + height - 1));
-  Self.Zahrnuto[Pos.X, Pos.Y] := true;
-  Self.Zahrnuto[Pos.X, Pos.Y + height - 1] := true;
+  Self.processed[Pos.X, Pos.Y] := true;
+  Self.processed[Pos.X, Pos.Y + height - 1] := true;
 
   if (height = 3) then
   begin
@@ -466,7 +502,7 @@ begin
     blik_point.Pos := Point(Pos.X, Pos.Y + 1);
     blik_point.PanelUsek := -1;
     (blk as TPrejezd).BlikPositions.Add(blik_point);
-    Self.Zahrnuto[Pos.X, Pos.Y + 1] := true;
+    Self.processed[Pos.X, Pos.Y + 1] := true;
   end else begin
     for Y := 1 to height - 2 do
     begin
@@ -480,7 +516,7 @@ begin
       end
       else
         (blk as TPrejezd).StaticPositions.Add(Point(Pos.X, Pos.Y + Y));
-      Self.Zahrnuto[Pos.X, Pos.Y + Y] := true;
+      Self.processed[Pos.X, Pos.Y + Y] := true;
     end;
   end;
 
