@@ -168,10 +168,7 @@ end;
 function TBitmapSymbols.GetSymbol(Position: TPoint): ShortInt;
 begin
   if ((Position.X < 0) or (Position.Y < 0) or (Position.X > _MAX_WIDTH) or (Position.Y > _MAX_HEIGHT)) then
-  begin
-    Result := -2;
-    Exit;
-  end;
+    Exit(-2);
 
   Result := Self.Bitmap[Position.X, Position.Y];
 end;
@@ -228,7 +225,6 @@ begin
 end;
 
 procedure TBitmapSymbols.Adding(Position: TPoint);
-var i, j: Integer;
 begin
   // overovani skupiny - 2. cast podminky pridana, kdyby nekdo po 1. kroku vypl IsGroup
   if ((Self.Operations.Group.IsGroup) or ((Self.Operations.Group.Start.X <> -1) and
@@ -254,39 +250,36 @@ begin
             raise EInvalidPosition.Create('Výběr musí být zleva doprava a shora dolů!');
 
           // kontrola obsazenosti
-          for i := Self.Operations.Group.Start.X to Position.X do
+          for var x: Integer := Self.Operations.Group.Start.X to Position.X do
           begin
-            for j := Self.Operations.Group.Start.Y to Position.Y do
+            for var y: Integer := Self.Operations.Group.Start.Y to Position.Y do
             begin
-              if Assigned(FIsSymbol) then
+              if (Assigned(FIsSymbol)) then
               begin
-                if (FIsSymbol(Point(i, j))) then
+                if (FIsSymbol(Point(x, y))) then
                   raise ENonemptyField.Create('Na pozici je již symbol!');
               end else begin
-                if (Self.GetSymbol(Point(i, j)) <> -1) then
+                if (Self.GetSymbol(Point(x, y)) <> -1) then
                   raise ENonemptyField.Create('Na pozici je již symbol!');
-              end; // else Assigned(FIsOperation)
-            end; // for j
-          end; // for i
+              end;
+            end;
+          end;
 
           if (Assigned(FNullOperations)) then
             FNullOperations;
 
           // dosazeni vlastnich objektu
-          for i := Self.Operations.Group.Start.X to Position.X do
-          begin
-            for j := Self.Operations.Group.Start.Y to Position.Y do
+          for var i: Integer := Self.Operations.Group.Start.X to Position.X do
+            for var j := Self.Operations.Group.Start.Y to Position.Y do
               Self.AddToStructure(Point(i, j), Self.Operations.Add.Symbol);
-          end; // for i
 
-          Self.Operations.Group.Start.X := -1;
-          Self.Operations.Group.Start.Y := -1;
+          Self.Operations.Group.Start := Point(-1, -1);
 
           // znovu pripraveni dosazeni objektu
           Self.Operations.Add.Krok := 0;
-          if Assigned(FOnShow) then
+          if (Assigned(FOnShow)) then
           begin
-            FOnShow;
+            FOnShow();
             Sleep(50);
           end;
           Self.Add(Self.Operations.Add.Symbol);
@@ -361,8 +354,8 @@ begin
                 Self.GetSymbol(Point(i, j));
               if (Self.Bitmap[i, j] <> -1) then
                 Self.DeleteFromStructure(Point(i, j));
-            end; // for j
-          end; // for i
+            end;
+          end;
 
           Self.Operations.Move.Krok := 3;
         end; // case 2
@@ -674,9 +667,11 @@ begin
       Y * _Symbol_Vyska + _Symbol_Vyska - 1);
   end;
 
-  // specialni pripad: k trati vykreslujeme druhy symbol do paru
+  // specialni pripad: k trati a k Pst vykreslujeme druhy symbol do paru
   if (index = _Uvazka_Start) then
     SymbolDraw(IL, Self.DrawObject.Canvas, X+1, Y, _Uvazka_Start+1, color);
+  if (index = _Pst_Top) then
+    SymbolDraw(IL, Self.DrawObject.Canvas, X, Y+1, _Pst_Bot, color);
 
   SymbolDraw(IL, Self.DrawObject.Canvas, X, Y, index, color);
 end;

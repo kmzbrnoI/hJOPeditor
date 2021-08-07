@@ -3462,7 +3462,7 @@ object F_Hlavni: TF_Hlavni
     object TB_Bitmap_Other: TToolBar
       Left = 480
       Top = 38
-      Width = 207
+      Width = 230
       Height = 22
       Align = alNone
       Images = IL_Menu
@@ -3564,6 +3564,14 @@ object F_Hlavni: TF_Hlavni
         Hint = 'Kole'#269'ko'
         Caption = 'ToolButton56'
         ImageIndex = 38
+        OnClick = ToolButton0Click
+      end
+      object ToolButton20: TToolButton
+        Tag = 62
+        Left = 207
+        Top = 0
+        Caption = 'ToolButton20'
+        ImageIndex = 39
         OnClick = ToolButton0Click
       end
     end
