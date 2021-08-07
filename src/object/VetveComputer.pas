@@ -8,12 +8,6 @@ interface
 
 uses symbolHelper, Types, Generics.Collections, ReliefObjects, vetev, SysUtils;
 
-const
-  // vedjesi symboly vyhybek ulozeny ve formatu: rovna_x,rovna_y,odbocka_x,odbocka_y,zpet_x,zpet_y ...
-  _Vyh_Navaznost: array [0 .. 23] of ShortInt = (1, 0, 0, -1, -1, 0, 1, 0, 0, 1, -1, 0, -1, 0, 0, -1, 1, 0, -1, 0,
-    0, 1, 1, 0);
-  // _Vyh_Navaznost : array [0..15] of ShortInt = (1,0,0,-1, 1,0,0,1, -1,0,0,-1, -1,0,0,1);
-
 type
   TVetevReturner = record
     symbols: TList<TReliefSym>;
@@ -42,19 +36,18 @@ uses ObjBlok, ObjBlokUsek, ObjBlokVyhybka, ObjBlokVykol;
   Projde vsechy useky a pro kazdy spusti prislusou funkci, ktera spocita vetve.
 }
 procedure ComputeVetve(po: TPanelObjects);
-var i, row, col, j: Integer;
-  data: TVetveData; // = Array of Array of Integer; toto pole je pro algoritmus nize zdrojem vsech dat
+var data: TVetveData; // = Array of Array of Integer; toto pole je pro algoritmus nize zdrojem vsech dat
   // jedna s o dvourozmerne pole reprezentujici cely panel, na kazdem poli je cislo bitmapoveho
   // metoda pro zpracovani jednoho bloku dostane na vstup vzdy toto pole s tim, ze jsou v nem jen body, ktere patri prislusnemu bloku
   // vsude jinde je (-1)
 begin
   // inicializace pole data
   SetLength(data, po.PanelWidth, po.PanelHeight);
-  for col := 0 to po.PanelWidth - 1 do
-    for row := 0 to po.PanelHeight - 1 do
+  for var col := 0 to po.PanelWidth - 1 do
+    for var row := 0 to po.PanelHeight - 1 do
       data[col, row] := -1;
 
-  for i := 0 to po.Bloky.Count - 1 do
+  for var i := 0 to po.Bloky.Count - 1 do
   begin
     if (po.Bloky[i].typ <> TBlkType.usek) then
       continue;
@@ -67,12 +60,12 @@ begin
       continue;
 
     // inicializujeme pole symboly bloku
-    for j := 0 to (po.Bloky[i] as TUsek).symbols.Count - 1 do
+    for var j := 0 to (po.Bloky[i] as TUsek).symbols.Count - 1 do
       data[(po.Bloky[i] as TUsek).symbols[j].Position.X, (po.Bloky[i] as TUsek).symbols[j].Position.Y] :=
         (po.Bloky[i] as TUsek).symbols[j].SymbolID;
 
     // do tohoto pole take musime ulozit vyhybky a vykolejky
-    for j := 0 to po.Bloky.Count - 1 do
+    for var j := 0 to po.Bloky.Count - 1 do
     begin
       if ((po.Bloky[j].typ = TBlkType.vyhybka) and ((po.Bloky[j] as TVyhybka).obj = po.Bloky[i].index)) then
         data[(po.Bloky[j] as TVyhybka).Position.X, (po.Bloky[j] as TVyhybka).Position.Y] :=
@@ -82,9 +75,10 @@ begin
           _Vykol_Start;
     end;
 
-    if (data[TUsek(po.Bloky[i]).Root.X, TUsek(po.Bloky[i]).Root.Y] = _DKS_Detek_Top) then
+    var symbol := data[TUsek(po.Bloky[i]).Root.X, TUsek(po.Bloky[i]).Root.Y];
+    if ((symbol = _DKS_Detek_Top) or (symbol = _DKS_Nedetek_Top)) then
       (po.Bloky[i] as TUsek).DKStype := dksTop
-    else if (data[TUsek(po.Bloky[i]).Root.X, TUsek(po.Bloky[i]).Root.Y] = _DKS_Detek_Bot) then
+    else if ((symbol = _DKS_Detek_Bot) or (symbol = _DKS_Nedetek_Bot)) then
       (po.Bloky[i] as TUsek).DKStype := dksBottom
     else
       (po.Bloky[i] as TUsek).DKStype := dksNone;
@@ -103,17 +97,17 @@ begin
       ComputeNormalBlokVetve(po, data, (po.Bloky[i] as TUsek).Root, (po.Bloky[i] as TUsek).Vetve);
 
     // nastavime pole data opet na -1 (algortimus by to mel udelat sam, ale pro jistotu)
-    for j := 0 to (po.Bloky[i] as TUsek).symbols.Count - 1 do
+    for var j := 0 to (po.Bloky[i] as TUsek).symbols.Count - 1 do
       data[(po.Bloky[i] as TUsek).symbols[j].Position.X, (po.Bloky[i] as TUsek).symbols[j].Position.Y] := -1;
 
     // odstranit vyhybky
-    for j := 0 to po.Bloky.Count - 1 do
+    for var j := 0 to po.Bloky.Count - 1 do
     begin
       if ((po.Bloky[i].typ <> TBlkType.vyhybka) or ((po.Bloky[i] as TVyhybka).obj <> i)) then
         continue;
       data[(po.Bloky[i] as TVyhybka).Position.X, (po.Bloky[i] as TVyhybka).Position.Y] := -1;
     end;
-  end; // for i
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -134,11 +128,7 @@ end;
 procedure ComputeNormalBlokVetve(po: TPanelObjects; var data: TVetveData; start: TPoint; Vetve: TList<TVetev>;
   future_offset: Integer);
 var queue: TQueue<TPoint>;
-  first, temp, new: TPoint;
-  i, j, up: Integer;
-  vetev: TVetev;
   symbols: TList<TReliefSym>;
-  symbol: TReliefSym;
   node: ^TVetevEnd;
   startOnVyh: Boolean;
 begin
@@ -154,10 +144,10 @@ begin
       // expanduji jeden vrchol: pozor:  musim expandovat doleva i doprava
 
       // resetuji vetev:
-      vetev := DefaultVetev();
+      var vetev := DefaultVetev();
 
       // vezmu aktualni vrchol z fronty
-      first := queue.Dequeue();
+      var first := queue.Dequeue();
 
       // dodelat kontrolu toho, jestli nahodou nejsem na vyhybce
 
@@ -165,23 +155,24 @@ begin
       symbols.Clear();
 
       // expanduji oba smery z prvniho symbolu, dalsi symboly maji vzdy jen jeden smer k expanzi
-      for j := 0 to 1 do
+      for var j := 0 to 1 do
       begin
-        new := first;
+        var new := first;
         // projizdim usek jednim smerem pro jedno 'j'
-        while (((data[new.X, new.Y] >= _Usek_Detek_Start) and (data[new.X, new.Y] <= _Usek_Detek_End)) or
+        while (((data[new.X, new.Y] >= _Usek_Detek_Start) and (data[new.X, new.Y] <= _Usek_Nedetek_End)) or
           ((data[new.X, new.Y] >= _Vykol_Start) and (data[new.X, new.Y] <= _Vykol_End))) do
         begin
           // pridam symbol do seznamu symbolu
           if ((((new.X <> first.X) or (new.Y <> first.Y)) or (j = 1)) and ((data[new.X, new.Y] < _Vykol_Start) or
             (data[new.X, new.Y] > _Vykol_End))) then
           begin
+            var symbol: TReliefSym;
             symbol.Position := new;
             symbol.SymbolID := data[new.X, new.Y];
             symbols.Add(symbol);
           end;
 
-          temp := new;
+          var temp := new;
 
           // vypocitam prvni vedlejsi pole
           if ((data[new.X, new.Y] >= _Vykol_Start) and (data[new.X, new.Y] <= _Vykol_End)) then
@@ -208,6 +199,7 @@ begin
 
           if ((data[temp.X, temp.Y] = _Zarazedlo_l) or (data[temp.X, temp.Y] = _Zarazedlo_r)) then
           begin
+            var symbol: TReliefSym;
             symbol.Position := temp;
             symbol.SymbolID := data[temp.X, temp.Y];
             symbols.Add(symbol);
@@ -241,6 +233,7 @@ begin
           // projdu 2 smery, do kterych muze vyhybka (je jasne, ze barvici cesta
           // musela prijit z te strany, kde se koleje spojuji)/
           // Pokud se zacinalo na vyhybce, projde se i 3. smer.
+          var up: Integer;
           if (startOnVyh) then
           begin
             startOnVyh := false;
@@ -249,10 +242,11 @@ begin
           else
             up := 1;
 
-          for i := 0 to up do
+          for var i := 0 to up do
           begin
-            temp.X := new.X + _Vyh_Navaznost[((data[new.X, new.Y] - _Vyhybka_Start) * 6) + (i * 2)];
-            temp.Y := new.Y + _Vyh_Navaznost[((data[new.X, new.Y] - _Vyhybka_Start) * 6) + (i * 2) + 1];
+            var temp: TPoint;
+            temp.X := new.X + _TURNOUT_CONNECTIONS[data[new.X, new.Y] - _Vyhybka_Start].dir(TNavDir(i * 2)).X;
+            temp.Y := new.Y + _TURNOUT_CONNECTIONS[data[new.X, new.Y] - _Vyhybka_Start].dir(TNavDir(i * 2)).Y;
 
             if (data[temp.X, temp.Y] > -1) then
             begin
@@ -276,7 +270,7 @@ begin
 
       // prochazeni vetve je kompletni vcetne pripadnych koncovych vyhybek -> priradim do vetve symboly a vytvorim vetev
       SetLength(vetev.symbols, symbols.Count);
-      for i := 0 to symbols.Count - 1 do
+      for var i := 0 to symbols.Count - 1 do
         vetev.symbols[i] := symbols[i];
       Vetve.Add(vetev);
     end; // while
@@ -293,11 +287,9 @@ end;
   Predpoklada se, ze root je nastaven na kriz DKS.
 }
 procedure ComputeDKSBlokVetve(po: TPanelObjects; var data: TVetveData; start: TPoint; Vetve: TList<TVetev>);
-var vetev: TVetev;
+var
   r: TVetevReturner;
-  i: Integer;
   vlPos, vrPos, Pos: TPoint;
-  symbol, addI: Integer;
   tempVetve: TList<TVetev>;
 begin
   r.symbols := TList<TReliefSym>.Create();
@@ -311,9 +303,9 @@ begin
     if (r.next.X < 0) then
       Exit();
 
-    vetev := DefaultVetev();
+    var vetev := DefaultVetev();
     SetLength(vetev.symbols, r.symbols.Count);
-    for i := 0 to r.symbols.Count - 1 do
+    for var i := 0 to r.symbols.Count - 1 do
       vetev.symbols[i] := r.symbols[i];
 
     if ((data[r.next.X, r.next.Y] >= _Vyhybka_Start) and (data[r.next.X, r.next.Y] <= _Vyhybka_End)) then
@@ -335,7 +327,7 @@ begin
 
     vetev := DefaultVetev();
     SetLength(vetev.symbols, r.symbols.Count);
-    for i := 0 to r.symbols.Count - 1 do
+    for var i := 0 to r.symbols.Count - 1 do
       vetev.symbols[i] := r.symbols[i];
 
     if ((data[r.next.X, r.next.Y] >= _Vyhybka_Start) and (data[r.next.X, r.next.Y] <= _Vyhybka_End)) then
@@ -356,7 +348,7 @@ begin
     // 3) hledame spojovaci usek obou vyhybek
     // musime expandovat v obbou smerech
     r.symbols.Clear();
-    symbol := data[vlPos.X + 1, vlPos.Y];
+    var symbol := data[vlPos.X + 1, vlPos.Y];
     GetUsekTillVyhybka(data, Point(vlPos.X + 1, vlPos.Y), ndPositive, r);
 
     data[vlPos.X + 1, vlPos.Y] := symbol;
@@ -367,7 +359,7 @@ begin
 
     vetev := DefaultVetev();
     SetLength(vetev.symbols, r.symbols.Count);
-    for i := 0 to r.symbols.Count - 1 do
+    for var i := 0 to r.symbols.Count - 1 do
       vetev.symbols[i] := r.symbols[i];
     Vetve.Add(vetev);
 
@@ -399,7 +391,7 @@ begin
       Pos := SecondCrossPos(data, start);
       data[Pos.X, Pos.Y] := -1;
 
-      addI := Vetve.Count;
+      var addI := Vetve.Count;
       ComputeNormalBlokVetve(po, data, Point(Pos.X - 1, Pos.Y), Vetve);
       if (addI <> Vetve.Count) then
       begin
@@ -434,21 +426,23 @@ end;
   Je uzitecna predevsim pro potreby DKS.
 }
 procedure GetUsekTillVyhybka(var data: TVetveData; start: TPoint; initDir: TNavDir; var res: TVetevReturner);
-var temp, new: TPoint;
-  symbol: TReliefSym;
+var new: TPoint;
   first: Boolean;
 begin
   new := start;
   first := true;
   res.next := Point(-1, -1);
 
-  while ((data[new.X, new.Y] >= _Usek_Detek_Start) and (data[new.X, new.Y] <= _Usek_Detek_End)) do
+  while (((data[new.X, new.Y] >= _Usek_Detek_Start) and (data[new.X, new.Y] < _DKS_Detek_Top)) or
+         ((data[new.X, new.Y] >= _Usek_Nedetek_Start) and (data[new.X, new.Y] < _DKS_Nedetek_Top))) do
   begin
     // pridam symbol do seznamu symbolu
+    var symbol: TReliefSym;
     symbol.Position := new;
     symbol.SymbolID := data[new.X, new.Y];
     res.symbols.Add(symbol);
 
+    var temp: TPoint;
     if (first) then
     begin
       // podivame se na vedlejsi pole ve spravnem smeru
@@ -481,12 +475,16 @@ end;
 
 function IsSecondCross(var data: TVetveData; start: TPoint): Boolean;
 begin
-  Result := false;
-
   if ((data[start.X, start.Y] = _DKS_Detek_Top) and (data[start.X, start.Y + 1] = _DKS_Detek_Bot)) then
-    Result := true;
-  if ((data[start.X, start.Y] = _DKS_Detek_Top) and (data[start.X, start.Y - 1] = _DKS_Detek_Bot)) then
-    Result := true;
+    Exit(true);
+  if ((data[start.X, start.Y] = _DKS_Detek_Bot) and (data[start.X, start.Y - 1] = _DKS_Detek_Top)) then
+    Exit(true);
+  if ((data[start.X, start.Y] = _DKS_Nedetek_Top) and (data[start.X, start.Y + 1] = _DKS_Nedetek_Bot)) then
+    Exit(true);
+  if ((data[start.X, start.Y] = _DKS_Nedetek_Bot) and (data[start.X, start.Y - 1] = _DKS_Nedetek_Top)) then
+    Exit(true);
+
+  Result := false;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -495,7 +493,11 @@ function SecondCrossPos(var data: TVetveData; start: TPoint): TPoint;
 begin
   if ((data[start.X, start.Y] = _DKS_Detek_Top) and (data[start.X, start.Y + 1] = _DKS_Detek_Bot)) then
     Result := Point(start.X, start.Y + 1)
-  else if ((data[start.X, start.Y] = _DKS_Detek_Top) and (data[start.X, start.Y - 1] = _DKS_Detek_Bot)) then
+  else if ((data[start.X, start.Y] = _DKS_Detek_Bot) and (data[start.X, start.Y - 1] = _DKS_Detek_Top)) then
+    Result := Point(start.X, start.Y - 1)
+  else if ((data[start.X, start.Y] = _DKS_Nedetek_Top) and (data[start.X, start.Y + 1] = _DKS_Nedetek_Bot)) then
+    Result := Point(start.X, start.Y + 1)
+  else if ((data[start.X, start.Y] = _DKS_Nedetek_Bot) and (data[start.X, start.Y - 1] = _DKS_Nedetek_Top)) then
     Result := Point(start.X, start.Y - 1)
   else
     raise Exception.Create('No second cross!');
@@ -504,12 +506,10 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure OffsetVetve(Vetve: TList<TVetev>; offset: Integer);
-var vetev: TVetev;
-  i: Integer;
 begin
-  for i := 0 to Vetve.Count - 1 do
+  for var i := 0 to Vetve.Count - 1 do
   begin
-    vetev := Vetve[i];
+    var vetev := Vetve[i];
 
     if (vetev.node1.ref_plus > -1) then
       vetev.node1.ref_plus := vetev.node1.ref_plus + offset;

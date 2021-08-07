@@ -146,7 +146,8 @@ end;
 
 function GetUsekNavaznost(symbol: Integer; dir: TNavDir): TPoint;
 begin
-  if (((symbol < _DKS_Detek_Top) or (symbol > _DKS_Detek_Bot)) and (dir = ndThird)) then
+  if ((dir = ndThird) and ((symbol < _DKS_Detek_Top) or (symbol > _DKS_Detek_L)) and
+      ((symbol < _DKS_Nedetek_Top) or (symbol > _DKS_Nedetek_L))) then
     raise Exception.Create('Unsupported direction!');
 
   if ((symbol >= _Usek_Detek_Start) and (symbol <= _Usek_Detek_End)) then

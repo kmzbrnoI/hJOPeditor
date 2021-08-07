@@ -77,7 +77,7 @@ begin
         var Symbol := Self.Bitmap.Symbols.GetSymbol(Point(x, y));
         if (Symbol <> -1) then
         begin
-          if ((not Self.processed[x, y]) and (((Symbol >= _Usek_Detek_Start) and (Symbol <= _Usek_Detek_End)) or
+          if ((not Self.processed[x, y]) and (((Symbol >= _Usek_Detek_Start) and (Symbol <= _Usek_Nedetek_End)) or
             ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End)) or (Symbol = _Zarazedlo_r) or (Symbol = _Zarazedlo_l))) then
             Self.ZpracujObject(Point(x, y), index, vyh_index, vykol_index);
         end; // if (Self.BitmapData.Symbols.GetSymbol(Point(i,j)) <> -1)
@@ -358,7 +358,7 @@ begin
       var cur: TPoint := s.Pop();
       Symbol := Self.Bitmap.Symbols.GetSymbol(cur);
 
-      if (((Symbol >= _Usek_Detek_Start) and (Symbol <= _Usek_Detek_End)) or
+      if (((Symbol >= _Usek_Detek_Start) and (Symbol <= _Usek_Nedetek_End)) or
         ((Symbol >= _Vykol_Start) and (Symbol <= _Vykol_End)) or
         ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End)) or (Symbol = _Zarazedlo_r) or (Symbol = _Zarazedlo_l))
       then
@@ -374,7 +374,8 @@ begin
           if ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End)) then
           begin
             dir := _TURNOUT_CONNECTIONS[Symbol-_Vyhybka_Start].dir(TNavDir(j));
-          end else if ((Symbol >= _DKS_Detek_Top) and (Symbol <= _DKS_Detek_Bot)) then
+          end else if (((Symbol >= _DKS_Detek_Top) and (Symbol <= _DKS_Detek_L)) or
+                       ((Symbol >= _DKS_Nedetek_Top) and (Symbol <= _DKS_Nedetek_L))) then
           begin
             dir := GetUsekNavaznost(Self.Bitmap.Symbols.GetSymbol(cur), TNavDir(j));
           end else begin // usek
@@ -410,7 +411,7 @@ begin
           end;
 
           // vedlejsi symbol je usek, krizeni nebo zarazedlo
-          if (((tempSym >= _Usek_Detek_Start) and (tempSym <= _Usek_Detek_End)) or (tempSym = _Zarazedlo_r) or
+          if (((tempSym >= _Usek_Detek_Start) and (tempSym <= _Usek_Nedetek_End)) or (tempSym = _Zarazedlo_r) or
             (tempSym = _Zarazedlo_l)) then
           begin
             // ted vime, ze na NavaznostPos je usek
@@ -418,7 +419,7 @@ begin
             if (((TempPos.X + GetUsekNavaznost(tempSym, ndPositive).X = cur.X) and
               (TempPos.Y + GetUsekNavaznost(tempSym, ndPositive).Y = cur.Y)) or
               ((TempPos.X + GetUsekNavaznost(tempSym, ndNegative).X = cur.X) and (TempPos.Y + GetUsekNavaznost(tempSym,
-              ndNegative).Y = cur.Y)) or ((tempSym >= _DKS_Detek_Top) and (tempSym <= _DKS_Detek_Bot) and
+              ndNegative).Y = cur.Y)) or ((((tempSym >= _DKS_Detek_L) and (tempSym <= _DKS_Detek_Bot)) or ((tempSym >= _DKS_Nedetek_Top) and (tempSym <= _DKS_Nedetek_L))) and
               ((TempPos.X + GetUsekNavaznost(tempSym, ndThird).X = cur.X) and (TempPos.Y + GetUsekNavaznost(tempSym,
               ndThird).Y = cur.Y)))) then
             begin
@@ -507,7 +508,7 @@ begin
     for Y := 1 to height - 2 do
     begin
       lefts := Self.Bitmap.Symbols.GetSymbol(Point(Pos.X - 1, Pos.Y + Y));
-      if ((lefts >= _Usek_Detek_Start) and (lefts <= _Usek_Detek_End) and (lefts <> 15) and (lefts <> 16) and (lefts <> 21) and
+      if ((lefts >= _Usek_Detek_Start) and (lefts <= _Usek_Nedetek_End) and (lefts <> 15) and (lefts <> 16) and (lefts <> 21) and
         (lefts <> 22)) then
       begin
         blik_point.Pos := Point(Pos.X, Pos.Y + Y);
