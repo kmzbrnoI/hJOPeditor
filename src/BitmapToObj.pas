@@ -81,8 +81,7 @@ begin
       if (Symbol <> -1) then
       begin
         if ((not Self.Zahrnuto[i, j]) and (((Symbol >= _Usek_Detek_Start) and (Symbol <= _Usek_Detek_End)) or
-          ((Symbol >= _DKS_Detek_Top) and (Symbol <= _DKS_Detek_Bot)) or ((Symbol >= _Vyhybka_Start) and
-          (Symbol <= _Vyhybka_End)) or (Symbol = _Zarazedlo_r) or (Symbol = _Zarazedlo_l))) then
+          ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End)) or (Symbol = _Zarazedlo_r) or (Symbol = _Zarazedlo_l))) then
           Self.ZpracujObject(Point(i, j), index, vyh_index, vykol_index);
       end; // if (Self.BitmapData.Symbols.GetSymbol(Point(i,j)) <> -1)
     end; // for j
@@ -288,16 +287,7 @@ end;
 procedure TBitmapToObj.ZpracujObject(VychoziPos: TPoint; var index: Integer; var vyh_index: Integer;
   var vykol_index: Integer);
 var usek: TUsek;
-  sym: TReliefSym;
-  j, k: Integer;
-  Symbol, Symbol2: Integer;
-  TempPos: TPoint;
-  vyhybka: TVyhybka;
-  vykol: TVykol;
-  vertSep, horSep: SmallInt;
-  dir: TPoint;
-  s: TStack<TPoint>;
-  cur: TPoint;
+  Symbol: Integer;
 begin
   // vytvoreni objektu a vlozeni do nej 1. symbolu
   usek := TUsek.Create(index);
@@ -307,20 +297,21 @@ begin
   Symbol := Self.Bitmap.Symbols.GetSymbol(VychoziPos);
   if ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End)) then
   begin
-    vyhybka := TVyhybka.Create(vyh_index);
+    var vyhybka: TVyhybka := TVyhybka.Create(vyh_index);
     Inc(vyh_index);
     vyhybka.Position := VychoziPos;
     vyhybka.SymbolID := Symbol;
     vyhybka.obj := index - 1;
     Self.Objects.Bloky.Add(vyhybka);
   end else begin
+    var sym: TReliefSym;
     sym.SymbolID := Symbol;
     sym.Position := VychoziPos;
     usek.Symbols.Add(sym);
   end;
 
   Self.Objects.Bloky.Add(usek);
-  s := TStack<TPoint>.Create();
+  var s: TStack<TPoint> := TStack<TPoint>.Create();
 
   try
     s.Push(VychoziPos);
@@ -328,7 +319,7 @@ begin
 
     while (s.Count <> 0) do
     begin
-      cur := s.Pop();
+      var cur: TPoint := s.Pop();
       Symbol := Self.Bitmap.Symbols.GetSymbol(cur);
 
       if (((Symbol >= _Usek_Detek_Start) and (Symbol <= _Usek_Detek_End)) or
@@ -337,16 +328,16 @@ begin
       then
       begin
         // cyklus kvuli smerum navaznosti (vyhybka ma az 3 smery navaznosti)
-        for j := 0 to 2 do
+        for var j: Integer := 0 to 2 do
         begin
           // vykolejka je pro nase potreby rovna kolej
           if ((Symbol >= _Vykol_Start) and (Symbol <= _Vykol_End)) then
             Self.Bitmap.Symbols.Bitmap[cur.X, cur.Y] := _Usek_Detek_Start;
 
+          var dir: TPoint;
           if ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End)) then
           begin
-            dir.X := _Vyh_Navaznost[((Symbol - _Vyhybka_Start) * 6) + (j * 2)];
-            dir.Y := _Vyh_Navaznost[((Symbol - _Vyhybka_Start) * 6) + (j * 2) + 1];
+            dir := _TURNOUT_CONNECTIONS[Symbol-_Vyhybka_Start].dir(TNavDir(j));
           end else if ((Symbol >= _DKS_Detek_Top) and (Symbol <= _DKS_Detek_Bot)) then
           begin
             dir := GetUsekNavaznost(Self.Bitmap.Symbols.GetSymbol(cur), TNavDir(j));
@@ -361,18 +352,18 @@ begin
           if (Self.IsSeparator(cur, dir)) then
             continue;
 
-          TempPos := Point(cur.X + dir.X, cur.Y + dir.Y);
-          Symbol2 := Self.Bitmap.Symbols.GetSymbol(TempPos);
+          var TempPos: TPoint := Point(cur.X + dir.X, cur.Y + dir.Y);
+          var tempSym: Integer := Self.Bitmap.Symbols.GetSymbol(TempPos);
 
           if (Self.Zahrnuto[TempPos.X, TempPos.Y]) then
             continue;
 
           // vedlejsi symbol je vykolejka
-          if ((Symbol2 >= _Vykol_Start) and (Symbol2 <= _Vykol_End)) then
+          if ((tempSym >= _Vykol_Start) and (tempSym <= _Vykol_End)) then
           begin
-            vykol := TVykol.Create(vykol_index);
+            var vykol: TVykol := TVykol.Create(vykol_index);
             Inc(vykol_index);
-            vykol.Symbol := Symbol2 - _Vykol_Start;
+            vykol.Symbol := tempSym - _Vykol_Start;
             vykol.Pos := TempPos;
             vykol.obj := index - 1;
             vykol.vetev := -1;
@@ -383,16 +374,16 @@ begin
           end;
 
           // vedlejsi symbol je usek, krizeni nebo zarazedlo
-          if (((Symbol2 >= _Usek_Detek_Start) and (Symbol2 <= _Usek_Detek_End)) or (Symbol2 = _Zarazedlo_r) or
-            (Symbol2 = _Zarazedlo_l)) then
+          if (((tempSym >= _Usek_Detek_Start) and (tempSym <= _Usek_Detek_End)) or (tempSym = _Zarazedlo_r) or
+            (tempSym = _Zarazedlo_l)) then
           begin
             // ted vime, ze na NavaznostPos je usek
 
-            if (((TempPos.X + GetUsekNavaznost(Symbol2, ndPositive).X = cur.X) and
-              (TempPos.Y + GetUsekNavaznost(Symbol2, ndPositive).Y = cur.Y)) or
-              ((TempPos.X + GetUsekNavaznost(Symbol2, ndNegative).X = cur.X) and (TempPos.Y + GetUsekNavaznost(Symbol2,
-              ndNegative).Y = cur.Y)) or ((Symbol2 >= _DKS_Detek_Top) and (Symbol2 <= _DKS_Detek_Bot) and
-              ((TempPos.X + GetUsekNavaznost(Symbol2, ndThird).X = cur.X) and (TempPos.Y + GetUsekNavaznost(Symbol2,
+            if (((TempPos.X + GetUsekNavaznost(tempSym, ndPositive).X = cur.X) and
+              (TempPos.Y + GetUsekNavaznost(tempSym, ndPositive).Y = cur.Y)) or
+              ((TempPos.X + GetUsekNavaznost(tempSym, ndNegative).X = cur.X) and (TempPos.Y + GetUsekNavaznost(tempSym,
+              ndNegative).Y = cur.Y)) or ((tempSym >= _DKS_Detek_Top) and (tempSym <= _DKS_Detek_Bot) and
+              ((TempPos.X + GetUsekNavaznost(tempSym, ndThird).X = cur.X) and (TempPos.Y + GetUsekNavaznost(tempSym,
               ndThird).Y = cur.Y)))) then
             begin
               // ted vime, ze i navaznost z TempPos vede na cur.Pos - muzeme pridat Symbol2 do bloku
@@ -400,13 +391,14 @@ begin
               // pri pohybu vlevo a nahoru je zapotrebi overovat separator uz tady, protoze jenom tady vime, ze se pohybujeme doleva nebo nahoru
               // pohyb doprava a dolu resi podminka vyse
 
-              vertSep := Self.Bitmap.SeparatorsVert.GetObject(TempPos);
-              horSep := Self.Bitmap.SeparatorsHor.GetObject(TempPos);
+              var vertSep: Integer := Self.Bitmap.SeparatorsVert.GetObject(TempPos);
+              var horSep: Integer := Self.Bitmap.SeparatorsHor.GetObject(TempPos);
 
               if (((vertSep = -1) and (horSep = -1)) or ((horSep = -1) and ((TempPos.X > cur.X) or (TempPos.Y <> cur.Y))
                 ) or ((vertSep = -1) and ((TempPos.Y > cur.Y) or (TempPos.X <> cur.X)))) then
               begin
-                sym.SymbolID := Symbol2;
+                var sym: TReliefSym;
+                sym.SymbolID := tempSym;
                 sym.Position := TempPos;
                 usek.Symbols.Add(sym);
                 Zahrnuto[TempPos.X, TempPos.Y] := true;
@@ -416,20 +408,20 @@ begin
           end; // if ((not Self.Zahrnuto[TempPos[j].X,TempPos[j].Y])...
 
           // vedlejsi symbol je vyhybka
-          if ((Symbol2 >= _Vyhybka_Start) and (Symbol2 <= _Vyhybka_End)) then
+          if ((tempSym >= _Vyhybka_Start) and (tempSym <= _Vyhybka_End)) then
           begin
             // ted vime, ze na NavaznostPos je vyhybka
-            for k := 0 to 2 do
+            for var k: Integer := 0 to 2 do
             begin
-              if ((TempPos.X + _Vyh_Navaznost[(Symbol2 - _Vyhybka_Start) * 6 + (k * 2)] = cur.X) and
-                (TempPos.Y + _Vyh_Navaznost[((Symbol2 - _Vyhybka_Start) * 6) + (k * 2) + 1] = cur.Y)) then
+              if ((TempPos.X + _TURNOUT_CONNECTIONS[tempSym-_Vyhybka_Start].dir(TNavDir(k)).X = cur.X) and
+                (TempPos.Y + _TURNOUT_CONNECTIONS[tempSym-_Vyhybka_Start].dir(TNavDir(k)).Y = cur.Y)) then
               begin
                 // ted vime, ze i navaznost z TempPos vede na cur.Pos - muzeme pridat Symbol2 do bloku
                 // pridavame vyhybku
-                vyhybka := TVyhybka.Create(vyh_index);
+                var vyhybka: TVyhybka := TVyhybka.Create(vyh_index);
                 Inc(vyh_index);
                 vyhybka.Position := TempPos;
-                vyhybka.SymbolID := Symbol2;
+                vyhybka.SymbolID := tempSym;
                 vyhybka.obj := index - 1;
                 Self.Objects.Bloky.Add(vyhybka);
 

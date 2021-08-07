@@ -6,7 +6,35 @@ unit symbolHelper;
 
 interface
 
-uses Types, SysUtils, Graphics, Vcl.Controls;
+uses Types, SysUtils, Graphics, Vcl.Controls, Classes;
+
+type
+  TNavDir = (ndPositive = 0, ndNegative = 1, ndThird = 2);
+
+  TReliefSym = record
+    Position: TPoint;
+    SymbolID: Integer;
+  end;
+
+  SymbolColor = (
+    scPurple = 0,
+    scGray = 1,
+    scRed = 2,
+    scLime = 3,
+    scWhite = 4,
+    scAqua = 5,
+    scBlue = 6,
+    scYellow = 7,
+    scFuchsia = 8,
+    scBlack = 9
+  );
+
+  TSymbolConnection = record
+    a: TPoint;
+    b: TPoint;
+    c: TPoint;
+     function dir(dir: TNavDir): TPoint;
+  end;
 
 const
   _Symbol_Sirka = 8;
@@ -25,11 +53,26 @@ const
     clBlack
   );
 
-  _Usek_Navaznost: array [0 .. 47] of ShortInt = (-1, 0, 1, 0, 0, -1, 0, 1, 0, 1, 1, 0, -1, 0, 0, -1, -1, 0, 0, 1, 0,
-    -1, 1, 0, -1, 0, 1, 0, 0, -1, 0, 1, 0, 1, 1, 0, -1, 0, 0, -1, -1, 0, 0, 1, 0, -1, 1, 0);
-  _Krizeni_Navaznost: array [0 .. 11] of ShortInt = (-1, 0, 1, 0, 0, 1, -1, 0, 1, 0, 0, -1);
-  _Vyh_Navaznost: array [0 .. 23] of ShortInt = (-1, 0, 0, -1, 1, 0, -1, 0, 0, 1, 1, 0, -1, 0, 0, -1, 1, 0, -1, 0,
-    0, 1, 1, 0);
+  // same for detected & undetected
+  _TRACK_CONNECTIONS: array [0..9] of TSymbolConnection = (
+    (a: (X: -1; Y: 0); b: (X: 1; Y: 0); c: (X: 0; Y: 0)),
+    (a: (X: 0; Y: -1); b: (X: 0; Y: 1); c: (X: 0; Y: 0)),
+    (a: (X: 0; Y: 1); b: (X: 1; Y: 0); c: (X: 0; Y: 0)),
+    (a: (X: -1; Y: 0); b: (X: 0; Y: -1); c: (X: 0; Y: 0)),
+    (a: (X: -1; Y: 0); b: (X: 0; Y: 1); c: (X: 0; Y: 0)),
+    (a: (X: 0; Y: -1); b: (X: 1; Y: 0); c: (X: 0; Y: 0)),
+    (a: (X: -1; Y: 0); b: (X: 1; Y: 0); c: (X: 0; Y: 1)), // dks start
+    (a: (X: -1; Y: 0); b: (X: 1; Y: 0); c: (X: 0; Y: -1)),
+    (a: (X: 0; Y: -1); b: (X: 0; Y: 1); c: (X: -1; Y: 0)),
+    (a: (X: 0; Y: -1); b: (X: 0; Y: 1); c: (X: 1; Y: 0)) // last dks
+  );
+
+  _TURNOUT_CONNECTIONS: array [0..3] of TSymbolConnection = (
+    (a: (X: -1; Y: 0); b: (X: 0; Y: -1); c: (X: 1; Y: 0)),
+    (a: (X: -1; Y: 0); b: (X: 0; Y: 1); c: (X: 1; Y: 0)),
+    (a: (X: -1; Y: 0); b: (X: 0; Y: -1); c: (X: 1; Y: 0)),
+    (a: (X: -1; Y: 0); b: (X: 0; Y: 1); c: (X: 1; Y: 0))
+  );
 
   _Vyhybka_Start = 0;
   _Vyhybka_End = 3;
@@ -78,28 +121,6 @@ const
   _Full = 65;
   _Kolecko = 68;
 
-
-type
-  TNavDir = (ndPositive = 0, ndNegative = 1, ndThird = 2);
-
-  TReliefSym = record
-    Position: TPoint;
-    SymbolID: Integer;
-  end;
-
-  SymbolColor = (
-    scPurple = 0,
-    scGray = 1,
-    scRed = 2,
-    scLime = 3,
-    scWhite = 4,
-    scAqua = 5,
-    scBlue = 6,
-    scYellow = 7,
-    scFuchsia = 8,
-    scBlack = 9
-  );
-
 function LoadIL(ResourceName: string; PartWidth, PartHeight: Byte; MaskColor: TColor = clPurple): TImageList;
 
 function GetUsekNavaznost(symbol: Integer; dir: TNavDir): TPoint;
@@ -114,17 +135,24 @@ implementation
 
 /// /////////////////////////////////////////////////////////////////////////////
 
+function TSymbolConnection.dir(dir: TNavDir): TPoint;
+begin
+  case (dir) of
+    TNavDir.ndPositive: Result := a;
+    TNavDir.ndNegative: Result := b;
+    TNavDir.ndThird: Result := c;
+  end;
+end;
+
 function GetUsekNavaznost(symbol: Integer; dir: TNavDir): TPoint;
 begin
   if (((symbol < _DKS_Detek_Top) or (symbol > _DKS_Detek_Bot)) and (dir = ndThird)) then
     raise Exception.Create('Unsupported direction!');
 
   if ((symbol >= _Usek_Detek_Start) and (symbol <= _Usek_Detek_End)) then
-    Result := Point(_Usek_Navaznost[(symbol - _Usek_Detek_Start) * 4 + (2 * Integer(dir))],
-      _Usek_Navaznost[(symbol - _Usek_Detek_Start) * 4 + (2 * Integer(dir)) + 1])
-  else if ((symbol >= _Usek_Detek_Start) and (symbol <= _Usek_Detek_End)) then
-    Result := Point(_Krizeni_Navaznost[(symbol - _Usek_Detek_Start) * 6 + (2 * Integer(dir))],
-      _Krizeni_Navaznost[(symbol - _Usek_Detek_Start) * 6 + (2 * Integer(dir)) + 1])
+    Result := _TRACK_CONNECTIONS[symbol-_Usek_Detek_Start].dir(dir)
+  else if ((symbol >= _Usek_Nedetek_Start) and (symbol <= _Usek_Nedetek_End)) then
+    Result := _TRACK_CONNECTIONS[symbol-_Usek_Nedetek_Start].dir(dir)
   else if ((symbol = _Zarazedlo_r) and (dir = ndNegative)) then
     Result := Point(1, 0)
   else if ((symbol = _Zarazedlo_l) and (dir = ndPositive)) then
