@@ -6,11 +6,11 @@ uses ObjBlok, Types, IniFiles, Global, symbolHelper, Graphics, PGraphics;
 
 type
 
-  TVykol = class(TGraphBlok)
+  TDerail = class(TGraphBlok)
     Pos: TPoint;
     symbol: Integer;
     obj: Integer; // index useku, na kterem je vykolejka
-    vetev: Integer; // cislo vetve, ve kterem je vykolejka
+    branch: Integer; // cislo vetve, ve kterem je vykolejka
 
     constructor Create(index: Integer);
     procedure Load(ini: TMemIniFile; key: string; version: Word); override;
@@ -23,15 +23,15 @@ implementation
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TVykol.Create(index: Integer);
+constructor TDerail.Create(index: Integer);
 begin
   inherited;
-  Self.typ := TBlkType.vykol;
+  Self.typ := TBlkType.derail;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TVykol.Load(ini: TMemIniFile; key: string; version: Word);
+procedure TDerail.Load(ini: TMemIniFile; key: string; version: Word);
 begin
   inherited;
 
@@ -39,10 +39,10 @@ begin
   Self.Pos.Y := ini.ReadInteger(key, 'Y', 0);
   Self.symbol := ini.ReadInteger(key, 'T', 0);
   Self.obj := ini.ReadInteger(key, 'O', 0);
-  Self.vetev := ini.ReadInteger(key, 'V', -1);
+  Self.branch := ini.ReadInteger(key, 'V', -1);
 end;
 
-procedure TVykol.Save(ini: TMemIniFile; key: string);
+procedure TDerail.Save(ini: TMemIniFile; key: string);
 begin
   inherited;
 
@@ -50,12 +50,12 @@ begin
   ini.WriteInteger(key, 'Y', Self.Pos.Y);
   ini.WriteInteger(key, 'T', Self.symbol);
   ini.WriteInteger(key, 'O', Self.obj);
-  ini.WriteInteger(key, 'V', Self.vetev);
+  ini.WriteInteger(key, 'V', Self.branch);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TVykol.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
+procedure TDerail.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
   mode: TMode);
 var color: SymbolColor;
 begin
@@ -63,7 +63,7 @@ begin
   begin
     color := colors.selected;
   end else begin
-    case (Self.blok) of
+    case (Self.block) of
       -1: color := colors.Alert;
       -2: color := colors.IntUnassigned;
     else

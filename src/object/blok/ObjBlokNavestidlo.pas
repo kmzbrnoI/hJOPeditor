@@ -6,7 +6,7 @@ uses ObjBlok, Types, IniFiles, Global, SymbolHelper, PGraphics;
 
 type
 
-  TNavestidlo = class(TGraphBlok)
+  TSignal = class(TGraphBlok)
     Position: TPoint;
     SymbolID: Integer;
 
@@ -23,15 +23,15 @@ uses ReliefObjects;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TNavestidlo.Create(index: Integer);
+constructor TSignal.Create(index: Integer);
 begin
   inherited;
-  Self.typ := TBlkType.navestidlo;
+  Self.typ := TBlkType.signal;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TNavestidlo.Load(ini: TMemIniFile; key: string; version: Word);
+procedure TSignal.Load(ini: TMemIniFile; key: string; version: Word);
 begin
   inherited;
 
@@ -42,7 +42,7 @@ begin
     Self.SymbolID := TranscodeSymbolFromBpnlV3(Self.SymbolID);
 end;
 
-procedure TNavestidlo.Save(ini: TMemIniFile; key: string);
+procedure TSignal.Save(ini: TMemIniFile; key: string);
 begin
   inherited;
 
@@ -53,14 +53,14 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TNavestidlo.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors;
+procedure TSignal.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors;
   selected: boolean; mode: TMode);
 begin
   if (selected) then
   begin
     SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _S_SIGNAL_B + Self.SymbolID, colors.Selected);
   end else begin
-    case (Self.Blok) of
+    case (Self.block) of
       -1: SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _S_SIGNAL_B + Self.SymbolID, colors.Alert);
       -2: SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _S_SIGNAL_B + Self.SymbolID, colors.IntUnassigned);
     else

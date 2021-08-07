@@ -6,7 +6,7 @@ uses ObjBlok, IniFiles, Types, Global, PGraphics, Graphics, symbolHelper;
 
 type
 
-  TZamek = class(TGraphBlok)
+  TLock = class(TGraphBlok)
     Pos: TPoint;
 
     constructor Create(index: Integer);
@@ -20,15 +20,15 @@ implementation
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TZamek.Create(index: Integer);
+constructor TLock.Create(index: Integer);
 begin
   inherited;
-  Self.typ := TBlkType.zamek;
+  Self.typ := TBlkType.lock;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TZamek.Load(ini: TMemIniFile; key: string; version: Word);
+procedure TLock.Load(ini: TMemIniFile; key: string; version: Word);
 begin
   inherited;
 
@@ -36,7 +36,7 @@ begin
   Self.Pos.Y := ini.ReadInteger(key, 'Y', 0);
 end;
 
-procedure TZamek.Save(ini: TMemIniFile; key: string);
+procedure TLock.Save(ini: TMemIniFile; key: string);
 begin
   inherited;
 
@@ -46,7 +46,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TZamek.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
+procedure TLock.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
   mode: TMode);
 var color: SymbolColor;
 begin
@@ -54,7 +54,7 @@ begin
   begin
     color := colors.selected;
   end else begin
-    case (Self.blok) of
+    case (Self.block) of
       -1: color := colors.Alert;
       -2: color := colors.IntUnassigned;
     else

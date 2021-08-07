@@ -47,7 +47,7 @@ begin
         var Symbol := Self.Bitmap.Symbols.GetSymbol(Point(x, y));
         if (Symbol = _S_DISC_TRACK) then
         begin
-          var blk := TRozp.Create(index);
+          var blk := TDisconnector.Create(index);
           blk.Pos := Point(x, y);
           Self.Objects.Bloky.Add(blk);
 
@@ -88,18 +88,18 @@ begin
   // KPopisek, JCClick, soupravy
   for var x: Integer := 0 to Self.Objects.Bloky.Count - 1 do
   begin
-    if (Self.Objects.Bloky[x].typ <> TBlkType.usek) then
+    if (Self.Objects.Bloky[x].typ <> TBlkType.track) then
       continue;
-    for var y: Integer := 0 to (Self.Objects.Bloky[x] as TUsek).Symbols.Count - 1 do
+    for var y: Integer := 0 to (Self.Objects.Bloky[x] as TTrack).Symbols.Count - 1 do
     begin
-      if (Self.Bitmap.KPopisky.GetObject((Self.Objects.Bloky[x] as TUsek).Symbols[y].Position) <> -1) then
-        (Self.Objects.Bloky[x] as TUsek).KPopisek.Add((Self.Objects.Bloky[x] as TUsek).Symbols[y].Position);
+      if (Self.Bitmap.KPopisky.GetObject((Self.Objects.Bloky[x] as TTrack).Symbols[y].Position) <> -1) then
+        (Self.Objects.Bloky[x] as TTrack).labels.Add((Self.Objects.Bloky[x] as TTrack).Symbols[y].Position);
 
-      if (Self.Bitmap.JCClick.GetObject((Self.Objects.Bloky[x] as TUsek).Symbols[y].Position) <> -1) then
-        (Self.Objects.Bloky[x] as TUsek).JCClick.Add((Self.Objects.Bloky[x] as TUsek).Symbols[y].Position);
+      if (Self.Bitmap.JCClick.GetObject((Self.Objects.Bloky[x] as TTrack).Symbols[y].Position) <> -1) then
+        (Self.Objects.Bloky[x] as TTrack).JCClick.Add((Self.Objects.Bloky[x] as TTrack).Symbols[y].Position);
 
-      if (Self.Bitmap.Soupravy.GetObject((Self.Objects.Bloky[x] as TUsek).Symbols[y].Position) <> -1) then
-        (Self.Objects.Bloky[x] as TUsek).Soupravy.Add((Self.Objects.Bloky[x] as TUsek).Symbols[y].Position);
+      if (Self.Bitmap.Soupravy.GetObject((Self.Objects.Bloky[x] as TTrack).Symbols[y].Position) <> -1) then
+        (Self.Objects.Bloky[x] as TTrack).trains.Add((Self.Objects.Bloky[x] as TTrack).Symbols[y].Position);
     end;
   end;
 
@@ -113,7 +113,7 @@ begin
         var Symbol := Self.Bitmap.Symbols.GetSymbol(Point(x, y));
         if ((Symbol >= _S_SIGNAL_B) and (Symbol <= _S_SIGNAL_E)) then
         begin
-          var blk := TNavestidlo.Create(index);
+          var blk := TSignal.Create(index);
           blk.Position := Point(x, y);
           blk.SymbolID := Symbol - _S_SIGNAL_B;
           Self.Objects.Bloky.Add(blk);
@@ -143,8 +143,8 @@ begin
 
       if (PopData.BlokPopisek) then
       begin
-        blk.typ := TBlkType.blok_popisek;
-        blk.Blok := -2;
+        blk.typ := TBlkType.description;
+        blk.block := -2;
         Inc(popisek_index);
       end
       else
@@ -184,7 +184,7 @@ begin
         if (not Self.processed[x, y]) then
           if (Symbol = _S_LINKER_B) then
           begin
-            var blk := TUvazka.Create(index);
+            var blk := TLinker.Create(index);
             blk.Pos := Point(x, y);
             Self.Objects.Bloky.Add(blk);
             Self.processed[x, y] := true;
@@ -205,7 +205,7 @@ begin
         if (not Self.processed[x, y]) then
           if (Symbol = _S_LINKER_TRAIN) then
           begin
-            var blk := TUvazkaSpr.Create(index);
+            var blk := TLinkerTrain.Create(index);
             blk.Pos := Point(x, y);
             blk.spr_cnt := 1;
             Self.Objects.Bloky.Add(blk);
@@ -227,7 +227,7 @@ begin
         if (not Self.processed[x, y]) then
           if (Symbol = _S_LOCK) then
           begin
-            var blk := TZamek.Create(index);
+            var blk := TLock.Create(index);
             blk.Pos := Point(x, y);
             Self.Objects.Bloky.Add(blk);
             Self.processed[x, y] := true;
@@ -282,12 +282,12 @@ begin
           if ((indexMap.TryGetValue(Symbol, blk)) and (not(Symbol in ObjBlokPomocny.BLK_ASSIGN_SYMBOLS))) then
           begin
             // pridat do existujiciho bloku
-            (blk as TPomocnyObj).Positions.Add(Point(x, y));
+            (blk as TObjOther).Positions.Add(Point(x, y));
           end else begin
             // vytvorit novy blok
-            blk := TPomocnyObj.Create(index);
-            (blk as TPomocnyObj).Symbol := Symbol;
-            (blk as TPomocnyObj).Positions.Add(Point(x, y));
+            blk := TObjOther.Create(index);
+            (blk as TObjOther).Symbol := Symbol;
+            (blk as TObjOther).Positions.Add(Point(x, y));
 
             indexMap.AddOrSetValue(Symbol, blk);
             Self.Objects.Bloky.Add(blk);
@@ -322,18 +322,18 @@ end;
 // Metoda vyuziva techniku prohledavani do hloubky.
 procedure TBitmapToObj.ZpracujObject(VychoziPos: TPoint; var index: Integer; var vyh_index: Integer;
   var vykol_index: Integer);
-var usek: TUsek;
+var usek: TTrack;
   Symbol: Integer;
 begin
   // vytvoreni objektu a vlozeni do nej 1. symbolu
-  usek := TUsek.Create(index);
+  usek := TTrack.Create(index);
   Inc(index);
   usek.Root := Point(-1, -1);
 
   Symbol := Self.Bitmap.Symbols.GetSymbol(VychoziPos);
   if ((Symbol >= _S_TURNOUT_B) and (Symbol <= _S_TURNOUT_E)) then
   begin
-    var vyhybka: TVyhybka := TVyhybka.Create(vyh_index);
+    var vyhybka: TTurnout := TTurnout.Create(vyh_index);
     Inc(vyh_index);
     vyhybka.Position := VychoziPos;
     vyhybka.SymbolID := Symbol;
@@ -377,11 +377,11 @@ begin
           end else if (((Symbol >= _S_DKS_DET_TOP) and (Symbol <= _S_DKS_DET_L)) or
                        ((Symbol >= _S_DKS_NODET_TOP) and (Symbol <= _S_DKS_NODET_L))) then
           begin
-            dir := GetUsekNavaznost(Self.Bitmap.Symbols.GetSymbol(cur), TNavDir(j));
+            dir := GetTrackContinue(Self.Bitmap.Symbols.GetSymbol(cur), TNavDir(j));
           end else begin // usek
             if (j = 2) then
               break; // usek ma jen 2 smery navaznosti
-            dir := GetUsekNavaznost(Self.Bitmap.Symbols.GetSymbol(cur), TNavDir(j));
+            dir := GetTrackContinue(Self.Bitmap.Symbols.GetSymbol(cur), TNavDir(j));
           end;
 
           // TempPos = pozice teoreticky navaznych objektu
@@ -398,13 +398,13 @@ begin
           // vedlejsi symbol je vykolejka
           if ((tempSym >= _S_DERAIL_B) and (tempSym <= _S_DERAIL_E)) then
           begin
-            var vykol: TVykol := TVykol.Create(vykol_index);
+            var derail: TDerail := TDerail.Create(vykol_index);
             Inc(vykol_index);
-            vykol.Symbol := tempSym - _S_DERAIL_B;
-            vykol.Pos := TempPos;
-            vykol.obj := index - 1;
-            vykol.vetev := -1;
-            Self.Objects.Bloky.Add(vykol);
+            derail.Symbol := tempSym - _S_DERAIL_B;
+            derail.Pos := TempPos;
+            derail.obj := index - 1;
+            derail.branch := -1;
+            Self.Objects.Bloky.Add(derail);
 
             processed[TempPos.X, TempPos.Y] := true;
             s.Push(TempPos);
@@ -416,11 +416,11 @@ begin
           begin
             // ted vime, ze na NavaznostPos je usek
 
-            if (((TempPos.X + GetUsekNavaznost(tempSym, ndPositive).X = cur.X) and
-              (TempPos.Y + GetUsekNavaznost(tempSym, ndPositive).Y = cur.Y)) or
-              ((TempPos.X + GetUsekNavaznost(tempSym, ndNegative).X = cur.X) and (TempPos.Y + GetUsekNavaznost(tempSym,
+            if (((TempPos.X + GetTrackContinue(tempSym, ndPositive).X = cur.X) and
+              (TempPos.Y + GetTrackContinue(tempSym, ndPositive).Y = cur.Y)) or
+              ((TempPos.X + GetTrackContinue(tempSym, ndNegative).X = cur.X) and (TempPos.Y + GetTrackContinue(tempSym,
               ndNegative).Y = cur.Y)) or ((((tempSym >= _S_DKS_DET_L) and (tempSym <= _S_DKS_DET_BOT)) or ((tempSym >= _S_DKS_NODET_TOP) and (tempSym <= _S_DKS_NODET_L))) and
-              ((TempPos.X + GetUsekNavaznost(tempSym, ndThird).X = cur.X) and (TempPos.Y + GetUsekNavaznost(tempSym,
+              ((TempPos.X + GetTrackContinue(tempSym, ndThird).X = cur.X) and (TempPos.Y + GetTrackContinue(tempSym,
               ndThird).Y = cur.Y)))) then
             begin
               // ted vime, ze i navaznost z TempPos vede na cur.Pos - muzeme pridat Symbol2 do bloku
@@ -455,7 +455,7 @@ begin
               begin
                 // ted vime, ze i navaznost z TempPos vede na cur.Pos - muzeme pridat Symbol2 do bloku
                 // pridavame vyhybku
-                var vyhybka: TVyhybka := TVyhybka.Create(vyh_index);
+                var vyhybka: TTurnout := TTurnout.Create(vyh_index);
                 Inc(vyh_index);
                 vyhybka.Position := TempPos;
                 vyhybka.SymbolID := tempSym;
@@ -485,15 +485,15 @@ var blk: TGraphBlok;
   Y: Integer;
   lefts: Integer;
 begin
-  blk := TPrejezd.Create(index);
+  blk := TCrossing.Create(index);
 
   height := 0;
   while (Self.Bitmap.Symbols.GetSymbol(Point(Pos.X, Pos.Y + height)) = _S_CROSSING) do
     Inc(height);
 
   // edges are always static
-  (blk as TPrejezd).StaticPositions.Add(Point(Pos.X, Pos.Y));
-  (blk as TPrejezd).StaticPositions.Add(Point(Pos.X, Pos.Y + height - 1));
+  (blk as TCrossing).StaticPositions.Add(Point(Pos.X, Pos.Y));
+  (blk as TCrossing).StaticPositions.Add(Point(Pos.X, Pos.Y + height - 1));
   Self.processed[Pos.X, Pos.Y] := true;
   Self.processed[Pos.X, Pos.Y + height - 1] := true;
 
@@ -502,7 +502,7 @@ begin
     // special case
     blik_point.Pos := Point(Pos.X, Pos.Y + 1);
     blik_point.PanelUsek := -1;
-    (blk as TPrejezd).BlikPositions.Add(blik_point);
+    (blk as TCrossing).BlikPositions.Add(blik_point);
     Self.processed[Pos.X, Pos.Y + 1] := true;
   end else begin
     for Y := 1 to height - 2 do
@@ -513,10 +513,10 @@ begin
       begin
         blik_point.Pos := Point(Pos.X, Pos.Y + Y);
         blik_point.PanelUsek := -1;
-        (blk as TPrejezd).BlikPositions.Add(blik_point)
+        (blk as TCrossing).BlikPositions.Add(blik_point)
       end
       else
-        (blk as TPrejezd).StaticPositions.Add(Point(Pos.X, Pos.Y + Y));
+        (blk as TCrossing).StaticPositions.Add(Point(Pos.X, Pos.Y + Y));
       Self.processed[Pos.X, Pos.Y + Y] := true;
     end;
   end;

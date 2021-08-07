@@ -17,7 +17,7 @@ type
   end;
 
   // vetev useku
-  TVetev = record // vetev useku
+  TTrackBranch = record // vetev useku
 
     node1: TVetevEnd; // reference na 1. vyhybku, ktera ukoncuje tuto vetev
     node2: TVetevEnd; // reference na 2. vyhybku, ktera ukoncuje tuto vetev
@@ -29,11 +29,11 @@ type
     // pokud je v useku vykolejka, jednoduse sem ulozime symbol vykolejky
   end;
 
-function DefaultVetev(): TVetev;
+function DefaultVetev(): TTrackBranch;
 
 implementation
 
-function DefaultVetev(): TVetev;
+function DefaultVetev(): TTrackBranch;
 begin
   Result.node1.vyh := -1;
   Result.node1.ref_plus := -1;

@@ -12,7 +12,7 @@ type
     PanelUsek: Integer; // jaky usek panelu (v ciselne radu useku) ma tato cast prejezdu
   end;
 
-  TPrejezd = class(TGraphBlok)
+  TCrossing = class(TGraphBlok)
     StaticPositions: TList<TPoint>;
     BlikPositions: TList<TBlikPoint>;
 
@@ -30,15 +30,15 @@ uses ReliefObjects;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TPrejezd.Create(index: Integer);
+constructor TCrossing.Create(index: Integer);
 begin
   inherited;
-  Self.typ := TBlkType.prejezd;
+  Self.typ := TBlkType.crossing;
   Self.BlikPositions := TList<TBlikPoint>.Create();
   Self.StaticPositions := TList<TPoint>.Create();
 end;
 
-destructor TPrejezd.Destroy;
+destructor TCrossing.Destroy;
 begin
   Self.StaticPositions.Free();
   Self.BlikPositions.Free();
@@ -47,7 +47,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPrejezd.Load(ini: TMemIniFile; key: string; version: Word);
+procedure TCrossing.Load(ini: TMemIniFile; key: string; version: Word);
 var obj: string;
   Pos: TPoint;
   j: Integer;
@@ -90,7 +90,7 @@ begin
   end;
 end;
 
-procedure TPrejezd.Save(ini: TMemIniFile; key: string);
+procedure TCrossing.Save(ini: TMemIniFile; key: string);
 var obj: string;
   bp: TBlikPoint;
   point: TPoint;
@@ -110,7 +110,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPrejezd.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
+procedure TCrossing.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
   mode: TMode);
 var color: SymbolColor;
 begin
@@ -118,7 +118,7 @@ begin
   begin
     color := colors.selected;
   end else begin
-    case (Self.blok) of
+    case (Self.block) of
       -1: color := colors.Alert;
       -2: color := colors.IntUnassigned;
     else

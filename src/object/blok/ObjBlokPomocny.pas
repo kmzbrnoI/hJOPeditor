@@ -9,7 +9,7 @@ const BLK_ASSIGN_SYMBOLS = [_S_CIRCLE];
 
 type
 
-  TPomocnyObj = class(TGraphBlok)
+  TObjOther = class(TGraphBlok)
     Positions: TList<TPoint>;
     Symbol: Integer;
 
@@ -27,14 +27,14 @@ uses ReliefObjects;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TPomocnyObj.Create(index: Integer);
+constructor TObjOther.Create(index: Integer);
 begin
   inherited;
-  Self.typ := TBlkType.pomocny_obj;
+  Self.typ := TBlkType.other;
   Self.Positions := TList<TPoint>.Create();
 end;
 
-destructor TPomocnyObj.Destroy;
+destructor TObjOther.Destroy;
 begin
   Self.Positions.Free();
   inherited;
@@ -42,7 +42,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPomocnyObj.Load(ini: TMemIniFile; key: string; version: Word);
+procedure TObjOther.Load(ini: TMemIniFile; key: string; version: Word);
 var obj: string;
   pos: TPoint;
   j: Integer;
@@ -63,7 +63,7 @@ begin
   end;
 end;
 
-procedure TPomocnyObj.Save(ini: TMemIniFile; key: string);
+procedure TObjOther.Save(ini: TMemIniFile; key: string);
 var obj: string;
   point: TPoint;
 begin
@@ -79,7 +79,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPomocnyObj.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors;
+procedure TObjOther.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors;
   selected: boolean; mode: TMode);
 var pos: TPoint;
     color: SymbolColor;
@@ -90,7 +90,7 @@ begin
     begin
       color := colors.Selected;
     end else begin
-      case (Self.blok) of
+      case (Self.block) of
         - 1:
           color := colors.Alert;
         -2:

@@ -7,15 +7,15 @@ uses IniFiles, Global, PGraphics;
 type
 
   TBlkType = (
-    usek, navestidlo, pomocny_obj, text, blok_popisek, vyhybka, prejezd, uvazka,
-    uvazka_spr, zamek, vykol, rozp, pst
+    track, signal, other, text, description, turnout, crossing, linker,
+    linker_train, lock, derail, disconnector, pst
   );
 
   TGraphBlok = class
     typ: TBlkType;
 
-    Blok: Integer;
-    OblRizeni: Integer;
+    block: Integer;
+    area: Integer;
     index: Integer; // index bloku daneho typu v poli vsech bloku (tzn. kazdy typ ma svou indexaci - pocinaje 0)
 
     constructor Create(index: Integer);
@@ -33,22 +33,22 @@ constructor TGraphBlok.Create(index: Integer);
 begin
   inherited Create();
   Self.index := index;
-  Self.Blok := -1;
-  Self.OblRizeni := 0;
+  Self.block := -1;
+  Self.area := 0;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TGraphBlok.Load(ini: TMemIniFile; key: string; version: Word);
 begin
-  Self.Blok := ini.ReadInteger(key, 'B', -1);
-  Self.OblRizeni := ini.ReadInteger(key, 'OR', -1);
+  Self.block := ini.ReadInteger(key, 'B', -1);
+  Self.area := ini.ReadInteger(key, 'OR', -1);
 end;
 
 procedure TGraphBlok.Save(ini: TMemIniFile; key: string);
 begin
-  ini.WriteInteger(key, 'B', Self.Blok);
-  ini.WriteInteger(key, 'OR', Self.OblRizeni);
+  ini.WriteInteger(key, 'B', Self.block);
+  ini.WriteInteger(key, 'OR', Self.area);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -56,29 +56,29 @@ end;
 class function TGraphBlok.TypeToFileStr(typ: TBlkType): string;
 begin
   case (typ) of
-    TBlkType.usek:
+    TBlkType.track:
       Result := 'U';
-    TBlkType.navestidlo:
+    TBlkType.signal:
       Result := 'N';
-    TBlkType.vyhybka:
+    TBlkType.turnout:
       Result := 'V';
-    TBlkType.prejezd:
+    TBlkType.crossing:
       Result := 'PRJ';
     TBlkType.text:
       Result := 'T';
-    TBlkType.pomocny_obj:
+    TBlkType.other:
       Result := 'P';
-    TBlkType.uvazka:
+    TBlkType.linker:
       Result := 'Uv';
-    TBlkType.uvazka_spr:
+    TBlkType.linker_train:
       Result := 'UvS';
-    TBlkType.zamek:
+    TBlkType.lock:
       Result := 'Z';
-    TBlkType.vykol:
+    TBlkType.derail:
       Result := 'Vyk';
-    TBlkType.rozp:
+    TBlkType.disconnector:
       Result := 'R';
-    TBlkType.blok_popisek:
+    TBlkType.description:
       Result := 'TP';
     TBlkType.pst:
       Result := 'PSt';

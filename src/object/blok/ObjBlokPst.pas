@@ -54,7 +54,7 @@ begin
   begin
     color := colors.selected;
   end else begin
-    case (Self.blok) of
+    case (Self.block) of
       -1: color := colors.Alert;
       -2: color := colors.IntUnassigned;
     else

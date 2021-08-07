@@ -153,25 +153,25 @@ end;
 
 procedure TF_BlockEdit.CB_ORChange(Sender: TObject);
 begin
-  Self.OpenBlok.OblRizeni := (Sender as TComboBox).ItemIndex;
+  Self.OpenBlok.area := (Sender as TComboBox).ItemIndex;
   Self.SaveData();
 end;
 
 procedure TF_BlockEdit.CB_UvazkaSpr_VertDirChange(Sender: TObject);
 begin
-  if (Self.OpenBlok.typ = TBlkType.uvazka_spr) then
+  if (Self.OpenBlok.typ = TBlkType.linker_train) then
   begin
-    (Self.OpenBlok as TUvazkaSpr).spr_cnt := Self.SE_UvazkaSpr_Cnt.Value;
-    (Self.OpenBlok as TUvazkaSpr).vertical_dir := TUvazkaSprVertDir(Self.CB_UvazkaSpr_VertDir.ItemIndex);
+    (Self.OpenBlok as TLinkerTrain).spr_cnt := Self.SE_UvazkaSpr_Cnt.Value;
+    (Self.OpenBlok as TLinkerTrain).vertical_dir := TUvazkaSprVertDir(Self.CB_UvazkaSpr_VertDir.ItemIndex);
     Self.SaveData();
   end;
 end;
 
 procedure TF_BlockEdit.CB_VyhPlusChange(Sender: TObject);
 begin
-  if (Self.OpenBlok.typ = TBlkType.vyhybka) then
+  if (Self.OpenBlok.typ = TBlkType.turnout) then
   begin
-    (Self.OpenBlok as TVyhybka).PolohaPlus := (Sender as TComboBox).ItemIndex;
+    (Self.OpenBlok as TTurnout).PolohaPlus := (Sender as TComboBox).ItemIndex;
     Self.SaveData();
   end;
 end;
@@ -181,7 +181,7 @@ begin
   Self.UpdateLB(Self.E_Blk.text);
   Self.LB_BlocksClick(Self.LB_Blocks);
 
-  if ((Self.E_Blk.text <> '') and (Self.LB_Blocks.ItemIndex <= 0) and (Self.OpenBlok.Blok = -1)) then
+  if ((Self.E_Blk.text <> '') and (Self.LB_Blocks.ItemIndex <= 0) and (Self.OpenBlok.block = -1)) then
     Self.LB_Blocks.ItemIndex := 2; // vybrat prvni filtrovany blok
 end;
 
@@ -232,9 +232,9 @@ end;
 
 procedure TF_BlockEdit.E_KPopisekChange(Sender: TObject);
 begin
-  if (Self.OpenBlok.typ = TBlkType.usek) then
+  if (Self.OpenBlok.typ = TBlkType.track) then
   begin
-    (Self.OpenBlok as TUsek).KpopisekStr := (Sender as TEdit).text;
+    (Self.OpenBlok as TTrack).caption := (Sender as TEdit).text;
     Self.SaveData();
   end;
 end;
@@ -295,13 +295,13 @@ procedure TF_BlockEdit.OpenForm(Blok: TGraphBlok);
 begin
   Self.OpenFormGlobal();
   Self.OpenBlok := Blok;
-  Self.CB_OR.ItemIndex := Blok.OblRizeni;
+  Self.CB_OR.ItemIndex := Blok.area;
 
   case (Blok.typ) of
-    TBlkType.usek:
+    TBlkType.track:
       begin
         Self.GB_Usek.Visible := true;
-        if ((Blok as TUsek).KPopisek.Count > 0) then
+        if ((Blok as TTrack).labels.Count > 0) then
         begin
           Self.Label2.Visible := true;
           Self.E_KPopisek.Visible := true;
@@ -309,24 +309,24 @@ begin
           Self.Label2.Visible := false;
           Self.E_KPopisek.Visible := false;
         end; // else KPopisek.Count > 0
-        Self.E_KPopisek.text := (Blok as TUsek).KpopisekStr;
+        Self.E_KPopisek.text := (Blok as TTrack).caption;
         Self.Caption := 'Editace úseku';
       end;
 
-    TBlkType.navestidlo:
+    TBlkType.signal:
       begin
         Self.Caption := 'Editace návěstidla';
       end;
 
-    TBlkType.vyhybka:
+    TBlkType.turnout:
       begin
         Self.GB_Vyhybka.Visible := true;
-        Self.CB_VyhPlus.ItemIndex := (Blok as TVyhybka).PolohaPlus;
-        Self.CB_OR.ItemIndex := (Blok as TVyhybka).OblRizeni;
+        Self.CB_VyhPlus.ItemIndex := (Blok as TTurnout).PolohaPlus;
+        Self.CB_OR.ItemIndex := (Blok as TTurnout).area;
         Self.Caption := 'Editace výhybky';
       end;
 
-    TBlkType.prejezd:
+    TBlkType.crossing:
       begin
         Self.Caption := 'Editace přejezdu';
       end;
@@ -336,10 +336,10 @@ begin
         Self.Caption := 'Editace popisku';
       end;
 
-    TBlkType.uvazka:
+    TBlkType.linker:
       begin
         Self.GB_Uvazka.Visible := true;
-        case ((Blok as TUvazka).defalt_dir) of
+        case ((Blok as TLinker).defalt_dir) of
           0:
             Self.RB_UvazkaSmer1.Checked := true;
           1:
@@ -348,24 +348,24 @@ begin
         Self.Caption := 'Editace úvazky';
       end;
 
-    TBlkType.uvazka_spr:
+    TBlkType.linker_train:
       begin
         Self.GB_UvazkaSpr.Visible := true;
-        Self.CB_UvazkaSpr_VertDir.ItemIndex := integer((Blok as TUvazkaSpr).vertical_dir);
-        Self.SE_UvazkaSpr_Cnt.Value := (Blok as TUvazkaSpr).spr_cnt;
+        Self.CB_UvazkaSpr_VertDir.ItemIndex := integer((Blok as TLinkerTrain).vertical_dir);
+        Self.SE_UvazkaSpr_Cnt.Value := (Blok as TLinkerTrain).spr_cnt;
       end;
 
-    TBlkType.zamek:
+    TBlkType.lock:
       begin
         Self.Caption := 'Editace zámku';
       end;
 
-    TBlkType.vykol:
+    TBlkType.derail:
       begin
         Self.Caption := 'Editace výkolejky';
       end;
 
-    TBlkType.rozp:
+    TBlkType.disconnector:
       begin
         Self.Caption := 'Editace rozpojovače';
       end;
@@ -398,7 +398,7 @@ begin
 
   if (Self.OpenBlok <> nil) then
   begin
-    Self.OpenBlok.Blok := id;
+    Self.OpenBlok.block := id;
     Self.SaveData();
   end;
 end;
@@ -443,9 +443,9 @@ begin
   Self.LB_BlocksIndexes[0] := -1;
   Self.LB_BlocksIndexes[1] := -2;
 
-  if (Self.OpenBlok.Blok = -2) then
+  if (Self.OpenBlok.block = -2) then
     index := 1
-  else if (Self.OpenBlok.Blok = -1) then
+  else if (Self.OpenBlok.block = -1) then
     index := 0
   else
     index := -1;
@@ -459,7 +459,7 @@ begin
     begin
       Self.LB_BlocksIndexes[Self.LB_Blocks.Items.Count] := i;
       Self.LB_Blocks.Items.Add(Self.Bloky.Bloky[i].Nazev);
-      if (Self.Bloky.Bloky[i].id = Self.OpenBlok.Blok) then
+      if (Self.Bloky.Bloky[i].id = Self.OpenBlok.block) then
         index := Self.LB_Blocks.Items.Count - 1;
     end;
   end; // for i
@@ -479,9 +479,9 @@ end;
 
 procedure TF_BlockEdit.RB_UvazkaSmer2Click(Sender: TObject);
 begin
-  if (Self.OpenBlok.typ = TBlkType.uvazka) then
+  if (Self.OpenBlok.typ = TBlkType.linker) then
   begin
-    (Self.OpenBlok as TUvazka).defalt_dir := (Sender as TRadioButton).Tag;
+    (Self.OpenBlok as TLinker).defalt_dir := (Sender as TRadioButton).Tag;
     Self.SaveData();
   end;
 end;
@@ -489,19 +489,19 @@ end;
 function TF_BlockEdit.GetTechBlokType(panel_type: TBlkType): integer;
 begin
   case (panel_type) of
-    TBlkType.vyhybka, TBlkType.vykol:
+    TBlkType.turnout, TBlkType.derail:
       Result := 0;
-    TBlkType.usek:
+    TBlkType.track:
       Result := 1;
-    TBlkType.navestidlo:
+    TBlkType.signal:
       Result := 3;
-    TBlkType.prejezd:
+    TBlkType.crossing:
       Result := 4;
-    TBlkType.uvazka, TBlkType.uvazka_spr:
+    TBlkType.linker, TBlkType.linker_train:
       Result := 6;
-    TBlkType.zamek:
+    TBlkType.lock:
       Result := 7;
-    TBlkType.rozp:
+    TBlkType.disconnector:
       Result := 8;
     TBlkType.pst:
       Result := 14;

@@ -6,7 +6,7 @@ uses ObjBlok, IniFiles, Types, Global, Graphics, symbolHelper, PGraphics;
 
 type
 
-  TRozp = class(TGraphBlok)
+  TDisconnector = class(TGraphBlok)
     Pos: TPoint;
 
     constructor Create(index: Integer);
@@ -20,15 +20,15 @@ implementation
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TRozp.Create(index: Integer);
+constructor TDisconnector.Create(index: Integer);
 begin
   inherited;
-  Self.typ := TBlkType.rozp;
+  Self.typ := TBlkType.disconnector;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TRozp.Load(ini: TMemIniFile; key: string; version: Word);
+procedure TDisconnector.Load(ini: TMemIniFile; key: string; version: Word);
 begin
   inherited;
 
@@ -36,7 +36,7 @@ begin
   Self.Pos.Y := ini.ReadInteger(key, 'Y', 0);
 end;
 
-procedure TRozp.Save(ini: TMemIniFile; key: string);
+procedure TDisconnector.Save(ini: TMemIniFile; key: string);
 begin
   inherited;
 
@@ -46,7 +46,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TRozp.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
+procedure TDisconnector.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
   mode: TMode);
 var color: SymbolColor;
 begin
@@ -54,7 +54,7 @@ begin
   begin
     color := colors.selected;
   end else begin
-    case (Self.blok) of
+    case (Self.block) of
       -1: color := colors.Alert;
       -2: color := colors.IntUnassigned;
     else

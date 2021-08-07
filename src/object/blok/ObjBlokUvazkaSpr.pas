@@ -8,7 +8,7 @@ type
 
   TUvazkaSprVertDir = (top = 0, bottom = 1);
 
-  TUvazkaSpr = class(TGraphBlok)
+  TLinkerTrain = class(TGraphBlok)
     Pos: TPoint;
     vertical_dir: TUvazkaSprVertDir;
     spr_cnt: Integer;
@@ -24,15 +24,15 @@ implementation
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TUvazkaSpr.Create(index: Integer);
+constructor TLinkerTrain.Create(index: Integer);
 begin
   inherited;
-  Self.typ := TBlkType.uvazka_spr;
+  Self.typ := TBlkType.linker_train;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TUvazkaSpr.Load(ini: TMemIniFile; key: string; version: Word);
+procedure TLinkerTrain.Load(ini: TMemIniFile; key: string; version: Word);
 begin
   inherited;
 
@@ -42,7 +42,7 @@ begin
   Self.spr_cnt := ini.ReadInteger(key, 'C', 1);
 end;
 
-procedure TUvazkaSpr.Save(ini: TMemIniFile; key: string);
+procedure TLinkerTrain.Save(ini: TMemIniFile; key: string);
 begin
   inherited;
 
@@ -54,7 +54,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TUvazkaSpr.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors;
+procedure TLinkerTrain.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors;
   selected: boolean; mode: TMode);
 var color: SymbolColor;
 begin
@@ -63,7 +63,7 @@ begin
     DrawObject.Canvas.Pen.color := clRed;
     color := colors.Selected;
   end else begin
-    case (Self.blok) of
+    case (Self.block) of
       -1:
         begin
           color := colors.Alert;

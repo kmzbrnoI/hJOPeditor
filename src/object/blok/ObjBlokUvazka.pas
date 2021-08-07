@@ -6,7 +6,7 @@ uses ObjBlok, IniFiles, Types, Global, PGraphics, Graphics, symbolHelper;
 
 type
 
-  TUvazka = class(TGraphBlok)
+  TLinker = class(TGraphBlok)
     Pos: TPoint;
     defalt_dir: Integer;
 
@@ -21,15 +21,15 @@ implementation
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TUvazka.Create(index: Integer);
+constructor TLinker.Create(index: Integer);
 begin
   inherited;
-  Self.typ := TBlkType.uvazka;
+  Self.typ := TBlkType.linker;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TUvazka.Load(ini: TMemIniFile; key: string; version: Word);
+procedure TLinker.Load(ini: TMemIniFile; key: string; version: Word);
 begin
   inherited;
 
@@ -38,7 +38,7 @@ begin
   Self.defalt_dir := ini.ReadInteger(key, 'D', 0);
 end;
 
-procedure TUvazka.Save(ini: TMemIniFile; key: string);
+procedure TLinker.Save(ini: TMemIniFile; key: string);
 begin
   inherited;
 
@@ -49,7 +49,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TUvazka.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
+procedure TLinker.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
   mode: TMode);
 var color: SymbolColor;
 begin
@@ -57,7 +57,7 @@ begin
   begin
     color := colors.Selected;
   end else begin
-    case (Self.blok) of
+    case (Self.block) of
       -1: color := colors.Alert;
       -2: color := colors.IntUnassigned;
     else

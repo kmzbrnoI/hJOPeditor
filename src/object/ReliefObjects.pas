@@ -247,33 +247,33 @@ begin
       begin
         try
           case (blkTyp) of
-            usek:
-              Blok := ObjBlokUsek.TUsek.Create(i);
-            navestidlo:
-              Blok := ObjBlokNavestidlo.TNavestidlo.Create(i);
-            vyhybka:
-              Blok := ObjBlokVyhybka.TVyhybka.Create(i);
-            prejezd:
-              Blok := ObjBlokPrejezd.TPrejezd.Create(i);
+            track:
+              Blok := ObjBlokUsek.TTrack.Create(i);
+            signal:
+              Blok := ObjBlokNavestidlo.TSignal.Create(i);
+            turnout:
+              Blok := ObjBlokVyhybka.TTurnout.Create(i);
+            crossing:
+              Blok := ObjBlokPrejezd.TCrossing.Create(i);
             text:
               Blok := ObjBlokText.TText.Create(i);
-            blok_popisek:
+            description:
               begin
                 Blok := ObjBlokText.TText.Create(i);
-                Blok.typ := TBlkType.blok_popisek; // override type
+                Blok.typ := TBlkType.description; // override type
               end;
-            pomocny_obj:
-              Blok := ObjBlokPomocny.TPomocnyObj.Create(i);
-            uvazka:
-              Blok := ObjBlokUvazka.TUvazka.Create(i);
-            uvazka_spr:
-              Blok := ObjBlokUvazkaSpr.TUvazkaSpr.Create(i);
-            zamek:
-              Blok := ObjBlokZamek.TZamek.Create(i);
-            vykol:
-              Blok := ObjBlokVykol.TVykol.Create(i);
-            rozp:
-              Blok := ObjBlokRozp.TRozp.Create(i);
+            other:
+              Blok := ObjBlokPomocny.TObjOther.Create(i);
+            linker:
+              Blok := ObjBlokUvazka.TLinker.Create(i);
+            linker_train:
+              Blok := ObjBlokUvazkaSpr.TLinkerTrain.Create(i);
+            lock:
+              Blok := ObjBlokZamek.TLock.Create(i);
+            derail:
+              Blok := ObjBlokVykol.TDerail.Create(i);
+            disconnector:
+              Blok := ObjBlokRozp.TDisconnector.Create(i);
             pst:
               Blok := ObjBlokPst.TPSt.Create(i);
           else
@@ -306,7 +306,7 @@ begin
   Self.FStav := 2;
 
   Self.ComputeVyhybkaFlag();
-  ComputeVetve(Self);
+  ComputeBranches(Self);
 
   DeleteFile(aFile);
 
@@ -368,7 +368,7 @@ var Blok: TGraphBlok;
 begin
   Self.DrawObject.Canvas.Pen.mode := pmMerge; // pruhlednost
   for Blok in Self.Bloky do
-    if ((Self.ShowBlokPopisky) or (Blok.typ <> TBlkType.blok_popisek)) then
+    if ((Self.ShowBlokPopisky) or (Blok.typ <> TBlkType.description)) then
       Blok.Paint(Self.DrawObject, Self.Graphics, Self.Colors, Self.Selected = Blok, Self.mode);
 end;
 
@@ -406,34 +406,34 @@ begin
     var ObjBlok := Self.Bloky[i];
 
     case (ObjBlok.typ) of
-      TBlkType.usek:
+      TBlkType.track:
         begin
-          for var j := 0 to (ObjBlok as TUsek).Symbols.count - 1 do
-            if ((Pos.X = (ObjBlok as TUsek).Symbols[j].Position.X) and
-              (Pos.Y = (ObjBlok as TUsek).Symbols[j].Position.Y)) then
+          for var j := 0 to (ObjBlok as TTrack).Symbols.count - 1 do
+            if ((Pos.X = (ObjBlok as TTrack).Symbols[j].Position.X) and
+              (Pos.Y = (ObjBlok as TTrack).Symbols[j].Position.Y)) then
               tmp := i; // usek nema prioritu (napriklad nad rozpojovacem)
         end;
 
-      TBlkType.navestidlo:
-        if ((Pos.X = (ObjBlok as TNavestidlo).Position.X) and (Pos.Y = (ObjBlok as TNavestidlo).Position.Y)) then
+      TBlkType.signal:
+        if ((Pos.X = (ObjBlok as TSignal).Position.X) and (Pos.Y = (ObjBlok as TSignal).Position.Y)) then
           Exit(i);
 
-      TBlkType.vyhybka:
-        if ((Pos.X = (ObjBlok as TVyhybka).Position.X) and (Pos.Y = (ObjBlok as TVyhybka).Position.Y)) then
+      TBlkType.turnout:
+        if ((Pos.X = (ObjBlok as TTurnout).Position.X) and (Pos.Y = (ObjBlok as TTurnout).Position.Y)) then
           Exit(i);
 
-      TBlkType.prejezd:
+      TBlkType.crossing:
         begin
-          for var bpos in (ObjBlok as TPrejezd).StaticPositions do
+          for var bpos in (ObjBlok as TCrossing).StaticPositions do
             if (bpos.X = Pos.X) and (bpos.Y = Pos.Y) then
               Exit(i);
-          for var j := 0 to (ObjBlok as TPrejezd).BlikPositions.count - 1 do
-            if ((ObjBlok as TPrejezd).BlikPositions[j].Pos.X = Pos.X) and
-              ((ObjBlok as TPrejezd).BlikPositions[j].Pos.Y = Pos.Y) then
+          for var j := 0 to (ObjBlok as TCrossing).BlikPositions.count - 1 do
+            if ((ObjBlok as TCrossing).BlikPositions[j].Pos.X = Pos.X) and
+              ((ObjBlok as TCrossing).BlikPositions[j].Pos.Y = Pos.Y) then
               Exit(i);
         end;
 
-      TBlkType.text, TBlkType.blok_popisek:
+      TBlkType.text, TBlkType.description:
         begin
           if ((Pos.Y = (ObjBlok as TText).Position.Y) and (Pos.X >= (ObjBlok as TText).Position.X) and
             (Pos.X < (ObjBlok as TText).Position.X + Length((ObjBlok as TText).text)) and
@@ -441,37 +441,37 @@ begin
             Exit(i);
         end;
 
-      TBlkType.pomocny_obj:
+      TBlkType.other:
         begin
           // klik na pomocny objekt nas nezajima
-          if ((ObjBlok as TPomocnyObj).Symbol in ObjBlokPomocny.BLK_ASSIGN_SYMBOLS) then
+          if ((ObjBlok as TObjOther).Symbol in ObjBlokPomocny.BLK_ASSIGN_SYMBOLS) then
           begin
-            for var bpos in (ObjBlok as TPomocnyObj).Positions do
+            for var bpos in (ObjBlok as TObjOther).Positions do
               if ((bpos.X = Pos.X) and (bpos.Y = Pos.Y)) then
                 Exit(i);
           end;
 
         end;
 
-      TBlkType.uvazka:
-        if (((ObjBlok as TUvazka).Pos.Y = Pos.Y) and (Pos.X >= (ObjBlok as TUvazka).Pos.X) and
-          (Pos.X <= (ObjBlok as TUvazka).Pos.X + 1)) then
+      TBlkType.linker:
+        if (((ObjBlok as TLinker).Pos.Y = Pos.Y) and (Pos.X >= (ObjBlok as TLinker).Pos.X) and
+          (Pos.X <= (ObjBlok as TLinker).Pos.X + 1)) then
           Exit(i);
 
-      TBlkType.uvazka_spr:
-        if (((ObjBlok as TUvazkaSpr).Pos.Y = Pos.Y) and (Pos.X = (ObjBlok as TUvazkaSpr).Pos.X)) then
+      TBlkType.linker_train:
+        if (((ObjBlok as TLinkerTrain).Pos.Y = Pos.Y) and (Pos.X = (ObjBlok as TLinkerTrain).Pos.X)) then
           Exit(i);
 
-      TBlkType.zamek:
-        if (((ObjBlok as TZamek).Pos.Y = Pos.Y) and (Pos.X = (ObjBlok as TZamek).Pos.X)) then
+      TBlkType.lock:
+        if (((ObjBlok as TLock).Pos.Y = Pos.Y) and (Pos.X = (ObjBlok as TLock).Pos.X)) then
           Exit(i);
 
-      TBlkType.vykol:
-        if (((ObjBlok as TVykol).Pos.Y = Pos.Y) and (Pos.X = (ObjBlok as TVykol).Pos.X)) then
+      TBlkType.derail:
+        if (((ObjBlok as TDerail).Pos.Y = Pos.Y) and (Pos.X = (ObjBlok as TDerail).Pos.X)) then
           Exit(i);
 
-      TBlkType.rozp:
-        if (((ObjBlok as TRozp).Pos.Y = Pos.Y) and (Pos.X = (ObjBlok as TRozp).Pos.X)) then
+      TBlkType.disconnector:
+        if (((ObjBlok as TDisconnector).Pos.Y = Pos.Y) and (Pos.X = (ObjBlok as TDisconnector).Pos.X)) then
           Exit(i);
 
       TBlkType.pst:
@@ -491,12 +491,12 @@ begin
   if (Self.FMode = dmRoots) then
   begin
     var tmp := Self.GetObject(Position);
-    if ((tmp = -1) or (Self.Bloky[tmp].typ <> TBlkType.usek)) then
+    if ((tmp = -1) or (Self.Bloky[tmp].typ <> TBlkType.track)) then
     begin
       Self.Selected := nil;
       Exit;
     end;
-    if ((Self.Bloky[tmp] as TUsek).IsVyhybka) then
+    if ((Self.Bloky[tmp] as TTrack).IsTurnout) then
       Self.Selected := Self.Bloky[tmp];
   end;
 end;
@@ -528,31 +528,31 @@ begin
   if (Assigned(Self.FOnMsg)) then
   begin
     case (Self.Selected.typ) of
-      TBlkType.usek:
+      TBlkType.track:
         Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (úsek ' + IntToStr(Self.Selected.index) + ')');
-      TBlkType.navestidlo:
+      TBlkType.signal:
         Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (návěstidlo ' + IntToStr(Self.Selected.index) + ')');
-      TBlkType.vyhybka:
+      TBlkType.turnout:
         Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (výhybka ' + IntToStr(Self.Selected.index) + '), přiřazen úseku '
-          + IntToStr((Self.Selected as TVyhybka).obj));
-      TBlkType.prejezd:
+          + IntToStr((Self.Selected as TTurnout).obj));
+      TBlkType.crossing:
         Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (přejezd ' + IntToStr(Self.Selected.index) + ')');
       TBlkType.text:
         Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (popisek ' + IntToStr(Self.Selected.index) + ')');
-      TBlkType.blok_popisek:
+      TBlkType.description:
         Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (popisek bloku ' + IntToStr(Self.Selected.index) + ')');
-      TBlkType.pomocny_obj:
+      TBlkType.other:
         Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (pomocný objekt ' + IntToStr(Self.Selected.index) + ')');
-      TBlkType.uvazka:
+      TBlkType.linker:
         Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (úvazka ' + IntToStr(Self.Selected.index) + ')');
-      TBlkType.uvazka_spr:
+      TBlkType.linker_train:
         Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (úvazka spr. ' + IntToStr(Self.Selected.index) + ')');
-      TBlkType.zamek:
+      TBlkType.lock:
         Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (zámek ' + IntToStr(Self.Selected.index) + ')');
-      TBlkType.vykol:
+      TBlkType.derail:
         Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (výkolejka ' + IntToStr(Self.Selected.index) +
-          '), přiřazena úseku ' + IntToStr((Self.Selected as TVykol).obj));
-      TBlkType.rozp:
+          '), přiřazena úseku ' + IntToStr((Self.Selected as TDerail).obj));
+      TBlkType.disconnector:
         Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (rozpojovač ' + IntToStr(Self.Selected.index) + ')');
       TBlkType.pst:
         Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (PSt ' + IntToStr(Self.Selected.index) + ')');
@@ -562,7 +562,7 @@ begin
   // prave tlacitko mysi
   if (Button = mbRight) then
   begin
-    if (Self.Selected.typ <> TBlkType.pomocny_obj) then
+    if (Self.Selected.typ <> TBlkType.other) then
     begin
       Self.PopUpPos := Position;
       Self.PM_Properties.Popup(Mouse.CursorPos.X, Mouse.CursorPos.Y);
@@ -573,7 +573,7 @@ begin
 
   // leve tlacitko mysi
   if (Button = mbLeft) then
-    if ((Self.Selected.typ <> TBlkType.pomocny_obj) or ((Self.Selected as TPomocnyObj).Symbol
+    if ((Self.Selected.typ <> TBlkType.other) or ((Self.Selected as TObjOther).Symbol
       in ObjBlokPomocny.BLK_ASSIGN_SYMBOLS)) then
       Self.PMPropertiesClick(Self);
 end;
@@ -587,12 +587,12 @@ begin
   var blk := Self.GetObject(Position);
   if (blk < 0) then
     Self.Selected := nil
-  else if (Self.Bloky[blk].typ = TBlkType.usek) then
+  else if (Self.Bloky[blk].typ = TBlkType.track) then
     Self.Selected := Self.Bloky[blk]
-  else if (Self.Bloky[blk].typ = TBlkType.vyhybka) then
+  else if (Self.Bloky[blk].typ = TBlkType.turnout) then
   begin
     for var i := 0 to Self.Bloky.count - 1 do
-      if ((Self.Bloky[i].typ = TBlkType.usek) and (Self.Bloky[i].index = (Self.Bloky[blk] as TVyhybka).obj)) then
+      if ((Self.Bloky[i].typ = TBlkType.track) and (Self.Bloky[i].index = (Self.Bloky[blk] as TTurnout).obj)) then
       begin
         Self.Selected := Self.Bloky[i];
         break;
@@ -603,9 +603,9 @@ begin
 
   if (Assigned(Self.FOnMsg)) then
     Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (úsek)');
-  if ((not Assigned(Self.Selected)) or (not(Self.Selected as TUsek).IsVyhybka)) then
+  if ((not Assigned(Self.Selected)) or (not(Self.Selected as TTrack).IsTurnout)) then
     Exit;
-  (Self.Selected as TUsek).Root := Position;
+  (Self.Selected as TTrack).Root := Position;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -643,7 +643,7 @@ function TPanelObjects.SetOR(OblR: Integer): Byte;
 begin
   if (Self.Selected = nil) then
     Exit(1);
-  Self.Selected.OblRizeni := OblR;
+  Self.Selected.area := OblR;
   Result := 0;
 end;
 
@@ -665,13 +665,13 @@ begin
 
   for var i := 0 to Self.Bloky.count - 1 do
   begin
-    if ((Self.Bloky[i].Blok = -1) and (Self.Bloky[i].typ <> TBlkType.pomocny_obj) and
+    if ((Self.Bloky[i].block = -1) and (Self.Bloky[i].typ <> TBlkType.other) and
       ((Self.Bloky[i].typ <> TBlkType.text) or (Length((Self.Bloky[i] as TText).text) = 1))) then
     begin
       Result.Add('ERR: blok ' + IntToStr(i) + ': není návaznost na technologický blok');
       error_cnt := error_cnt + 1;
     end;
-    if ((Self.Bloky[i].OblRizeni < 0) and ((Self.Bloky[i].typ <> TBlkType.pomocny_obj)
+    if ((Self.Bloky[i].area < 0) and ((Self.Bloky[i].typ <> TBlkType.other)
       xor ((Self.Bloky[i].typ = TBlkType.text) and (Length((Self.Bloky[i] as TText).text) > 1)))) then
     begin
       Result.Add('ERR: blok ' + IntToStr(i) + ': není návaznost na oblast řízení');
@@ -679,24 +679,24 @@ begin
     end;
 
     case (Self.Bloky[i].typ) of
-      TBlkType.usek:
+      TBlkType.track:
         begin
-          if (((Self.Bloky[i] as TUsek).KPopisek.count > 0) and ((Self.Bloky[i] as TUsek).KpopisekStr = '')) then
+          if (((Self.Bloky[i] as TTrack).labels.count > 0) and ((Self.Bloky[i] as TTrack).caption = '')) then
           begin
             Result.Add('ERR: blok ' + IntToStr(i) + ' (úsek): kolej není pojmenována');
             error_cnt := error_cnt + 1;
           end;
 
-          if (((Self.Bloky[i] as TUsek).IsVyhybka) and ((Self.Bloky[i] as TUsek).Root.X < 0)) then
+          if (((Self.Bloky[i] as TTrack).IsTurnout) and ((Self.Bloky[i] as TTrack).Root.X < 0)) then
           begin
             Result.Add('ERR: blok ' + IntToStr(i) + ' (úsek) : obsahuje výhybky a přesto nemá kořen');
             error_cnt := error_cnt + 1;
           end;
 
-          for var j := 0 to (Self.Bloky[i] as TUsek).Vetve.count - 1 do
+          for var j := 0 to (Self.Bloky[i] as TTrack).branches.count - 1 do
           begin
-            var vetev := (Self.Bloky[i] as TUsek).Vetve[j];
-            if (((Self.Bloky[i] as TUsek).DKStype <> TDKSType.dksNone) and (j < 3)) then
+            var vetev := (Self.Bloky[i] as TTrack).branches[j];
+            if (((Self.Bloky[i] as TTrack).DKStype <> TDKSType.dksNone) and (j < 3)) then
               continue;
             if (((vetev.node1.vyh >= 0) and ((vetev.node1.ref_plus = -1) or (vetev.node1.ref_minus = -1))) or
               ((vetev.node2.vyh >= 0) and ((vetev.node2.ref_plus = -1) or (vetev.node2.ref_minus = -1)))) then
@@ -707,9 +707,9 @@ begin
 
       /// ///////////////////////////////
 
-      TBlkType.vyhybka:
+      TBlkType.turnout:
         begin
-          if ((Self.Bloky[i] as TVyhybka).obj < 0) then
+          if ((Self.Bloky[i] as TTurnout).obj < 0) then
           begin
             Result.Add('ERR: blok ' + IntToStr(i) + ' (výhybka) : není návaznost na úsek');
             error_cnt := error_cnt + 1;
@@ -741,18 +741,18 @@ procedure TPanelObjects.ComputeVyhybkaFlag();
 begin
   // reset flagu
   for var i := 0 to Self.Bloky.count - 1 do
-    if (Self.Bloky[i].typ = TBlkType.usek) then
-      (Self.Bloky[i] as TUsek).IsVyhybka := false;
+    if (Self.Bloky[i].typ = TBlkType.track) then
+      (Self.Bloky[i] as TTrack).IsTurnout := false;
 
   // zjistime, jestli na danych blocich jsou vyhybky
   for var i := 0 to Self.Bloky.count - 1 do
-    if (Self.Bloky[i].typ = TBlkType.vyhybka) then
+    if (Self.Bloky[i].typ = TBlkType.turnout) then
     begin
       // .obj referuje na index v seznamu useku -> musime vypocitat index v poli vsech bloku
       for var j := 0 to Self.Bloky.count - 1 do
-        if ((Self.Bloky[j].typ = TBlkType.usek) and (Self.Bloky[j].index = (Self.Bloky[i] as TVyhybka).obj)) then
+        if ((Self.Bloky[j].typ = TBlkType.track) and (Self.Bloky[j].index = (Self.Bloky[i] as TTurnout).obj)) then
         begin
-          (Self.Bloky[j] as TUsek).IsVyhybka := true;
+          (Self.Bloky[j] as TTrack).IsTurnout := true;
           break;
         end;
     end;
@@ -782,16 +782,16 @@ procedure TPanelObjects.ComputePrjPanelUsek();
 begin
   for var i := 0 to Self.Bloky.count - 1 do
   begin
-    if (Self.Bloky[i].typ <> TBlkType.prejezd) then
+    if (Self.Bloky[i].typ <> TBlkType.crossing) then
       continue;
 
-    for var j := 0 to (Self.Bloky[i] as TPrejezd).BlikPositions.count - 1 do
+    for var j := 0 to (Self.Bloky[i] as TCrossing).BlikPositions.count - 1 do
     begin
-      var usek := Self.GetObject(Point((Self.Bloky[i] as TPrejezd).BlikPositions[j].Pos.X - 1,
-        (Self.Bloky[i] as TPrejezd).BlikPositions[j].Pos.Y));
-      var blik_point := (Self.Bloky[i] as TPrejezd).BlikPositions[j];
+      var usek := Self.GetObject(Point((Self.Bloky[i] as TCrossing).BlikPositions[j].Pos.X - 1,
+        (Self.Bloky[i] as TCrossing).BlikPositions[j].Pos.Y));
+      var blik_point := (Self.Bloky[i] as TCrossing).BlikPositions[j];
       blik_point.PanelUsek := usek;
-      (Self.Bloky[i] as TPrejezd).BlikPositions[j] := blik_point;
+      (Self.Bloky[i] as TCrossing).BlikPositions[j] := blik_point;
     end; // for j
   end; // for i
 end;

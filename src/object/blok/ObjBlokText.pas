@@ -34,10 +34,10 @@ procedure TText.Load(ini: TMemIniFile; key: string; version: Word);
 begin
   inherited;
 
-  if (Self.typ = TBlkType.blok_popisek) then
+  if (Self.typ = TBlkType.description) then
   begin
-    Self.Blok := -2;
-    Self.OblRizeni := 0;
+    Self.block := -2;
+    Self.area := 0;
   end;
 
   Self.Text := ini.ReadString(key, 'T', 'text');
@@ -48,7 +48,7 @@ end;
 
 procedure TText.Save(ini: TMemIniFile; key: string);
 begin
-  if ((Length(Self.Text) = 1) and (Self.typ <> TBlkType.blok_popisek)) then
+  if ((Length(Self.Text) = 1) and (Self.typ <> TBlkType.description)) then
     inherited;
 
   ini.WriteString(key, 'T', Self.Text);
@@ -69,7 +69,7 @@ begin
     begin
       Color := colors.selected;
     end else begin
-      case (Self.Blok) of
+      case (Self.block) of
         - 1:
           Color := colors.Alert;
         -2:
@@ -82,7 +82,7 @@ begin
     Color := Self.Color;
   end;
 
-  if (Self.typ = TBlkType.blok_popisek) then
+  if (Self.typ = TBlkType.description) then
     panelGraphics.TextOutputI(Self.Position, Self.Text, Self.Color, clBlack, true)
   else
     panelGraphics.TextOutputI(Self.Position, Self.Text, Color, clBlack);

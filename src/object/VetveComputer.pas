@@ -9,21 +9,21 @@ interface
 uses symbolHelper, Types, Generics.Collections, ReliefObjects, vetev, SysUtils;
 
 type
-  TVetevReturner = record
+  TBranchReturner = record
     symbols: TList<TReliefSym>;
     next: TPoint;
   end;
 
-  TVetveData = array of array of Integer;
+  TBranchData = array of array of Integer;
 
-procedure ComputeVetve(po: TPanelObjects);
-procedure ComputeNormalBlokVetve(po: TPanelObjects; var data: TVetveData; start: TPoint; Vetve: TList<TVetev>;
+procedure ComputeBranches(po: TPanelObjects);
+procedure ComputeNormalBlockBranches(po: TPanelObjects; var data: TBranchData; start: TPoint; branches: TList<TTrackBranch>;
   future_offset: Integer = 0);
-procedure GetUsekTillVyhybka(var data: TVetveData; start: TPoint; initDir: TNavDir; var res: TVetevReturner);
-procedure ComputeDKSBlokVetve(po: TPanelObjects; var data: TVetveData; start: TPoint; Vetve: TList<TVetev>);
-function IsSecondCross(var data: TVetveData; start: TPoint): Boolean;
-function SecondCrossPos(var data: TVetveData; start: TPoint): TPoint;
-procedure OffsetVetve(Vetve: TList<TVetev>; offset: Integer);
+procedure GetTrackTillCrossing(var data: TBranchData; start: TPoint; initDir: TNavDir; var res: TBranchReturner);
+procedure ComputeDKSBlockBranches(po: TPanelObjects; var data: TBranchData; start: TPoint; branches: TList<TTrackBranch>);
+function IsSecondCross(var data: TBranchData; start: TPoint): Boolean;
+function SecondCrossPos(var data: TBranchData; start: TPoint): TPoint;
+procedure OffsetBranches(branches: TList<TTrackBranch>; offset: Integer);
 
 implementation
 
@@ -35,8 +35,8 @@ uses ObjBlok, ObjBlokUsek, ObjBlokVyhybka, ObjBlokVykol;
   Pocitani vetvi vsech useku.
   Projde vsechy useky a pro kazdy spusti prislusou funkci, ktera spocita vetve.
 }
-procedure ComputeVetve(po: TPanelObjects);
-var data: TVetveData; // = Array of Array of Integer; toto pole je pro algoritmus nize zdrojem vsech dat
+procedure ComputeBranches(po: TPanelObjects);
+var data: TBranchData; // = Array of Array of Integer; toto pole je pro algoritmus nize zdrojem vsech dat
   // jedna s o dvourozmerne pole reprezentujici cely panel, na kazdem poli je cislo bitmapoveho
   // metoda pro zpracovani jednoho bloku dostane na vstup vzdy toto pole s tim, ze jsou v nem jen body, ktere patri prislusnemu bloku
   // vsude jinde je (-1)
@@ -49,63 +49,63 @@ begin
 
   for var i := 0 to po.Bloky.Count - 1 do
   begin
-    if (po.Bloky[i].typ <> TBlkType.usek) then
+    if (po.Bloky[i].typ <> TBlkType.track) then
       continue;
 
-    (po.Bloky[i] as TUsek).Vetve.Clear();
-    if (not(po.Bloky[i] as TUsek).IsVyhybka) then
+    (po.Bloky[i] as TTrack).branches.Clear();
+    if (not(po.Bloky[i] as TTrack).IsTurnout) then
       continue;
 
-    if ((po.Bloky[i] as TUsek).Root.X < 0) then
+    if ((po.Bloky[i] as TTrack).Root.X < 0) then
       continue;
 
     // inicializujeme pole symboly bloku
-    for var j := 0 to (po.Bloky[i] as TUsek).symbols.Count - 1 do
-      data[(po.Bloky[i] as TUsek).symbols[j].Position.X, (po.Bloky[i] as TUsek).symbols[j].Position.Y] :=
-        (po.Bloky[i] as TUsek).symbols[j].SymbolID;
+    for var j := 0 to (po.Bloky[i] as TTrack).symbols.Count - 1 do
+      data[(po.Bloky[i] as TTrack).symbols[j].Position.X, (po.Bloky[i] as TTrack).symbols[j].Position.Y] :=
+        (po.Bloky[i] as TTrack).symbols[j].SymbolID;
 
     // do tohoto pole take musime ulozit vyhybky a vykolejky
     for var j := 0 to po.Bloky.Count - 1 do
     begin
-      if ((po.Bloky[j].typ = TBlkType.vyhybka) and ((po.Bloky[j] as TVyhybka).obj = po.Bloky[i].index)) then
-        data[(po.Bloky[j] as TVyhybka).Position.X, (po.Bloky[j] as TVyhybka).Position.Y] :=
-          (po.Bloky[j] as TVyhybka).SymbolID;
-      if ((po.Bloky[j].typ = TBlkType.vykol) and ((po.Bloky[j] as TVykol).obj = po.Bloky[i].index)) then
-        data[(po.Bloky[j] as TVykol).Pos.X, (po.Bloky[j] as TVykol).Pos.Y] := (po.Bloky[j] as TVykol).symbol +
+      if ((po.Bloky[j].typ = TBlkType.turnout) and ((po.Bloky[j] as TTurnout).obj = po.Bloky[i].index)) then
+        data[(po.Bloky[j] as TTurnout).Position.X, (po.Bloky[j] as TTurnout).Position.Y] :=
+          (po.Bloky[j] as TTurnout).SymbolID;
+      if ((po.Bloky[j].typ = TBlkType.derail) and ((po.Bloky[j] as TDerail).obj = po.Bloky[i].index)) then
+        data[(po.Bloky[j] as TDerail).Pos.X, (po.Bloky[j] as TDerail).Pos.Y] := (po.Bloky[j] as TDerail).symbol +
           _S_DERAIL_B;
     end;
 
-    var symbol := data[TUsek(po.Bloky[i]).Root.X, TUsek(po.Bloky[i]).Root.Y];
+    var symbol := data[TTrack(po.Bloky[i]).Root.X, TTrack(po.Bloky[i]).Root.Y];
     if ((symbol = _S_DKS_DET_TOP) or (symbol = _S_DKS_NODET_TOP)) then
-      (po.Bloky[i] as TUsek).DKStype := dksTop
+      (po.Bloky[i] as TTrack).DKStype := dksTop
     else if ((symbol = _S_DKS_DET_BOT) or (symbol = _S_DKS_NODET_BOT)) then
-      (po.Bloky[i] as TUsek).DKStype := dksBottom
+      (po.Bloky[i] as TTrack).DKStype := dksBottom
     else
-      (po.Bloky[i] as TUsek).DKStype := dksNone;
+      (po.Bloky[i] as TTrack).DKStype := dksNone;
 
     // provedeme algoritmus
-    if ((po.Bloky[i] as TUsek).DKStype <> dksNone) then
+    if ((po.Bloky[i] as TTrack).DKStype <> dksNone) then
     begin
-      ComputeDKSBlokVetve(po, data, (po.Bloky[i] as TUsek).Root, (po.Bloky[i] as TUsek).Vetve);
-      if (TUsek(po.Bloky[i]).Vetve.Count < 3) then
+      ComputeDKSBlockBranches(po, data, (po.Bloky[i] as TTrack).Root, (po.Bloky[i] as TTrack).branches);
+      if (TTrack(po.Bloky[i]).branches.Count < 3) then
       begin
-        (po.Bloky[i] as TUsek).DKStype := dksNone;
-        ComputeNormalBlokVetve(po, data, (po.Bloky[i] as TUsek).Root, (po.Bloky[i] as TUsek).Vetve);
+        (po.Bloky[i] as TTrack).DKStype := dksNone;
+        ComputeNormalBlockBranches(po, data, (po.Bloky[i] as TTrack).Root, (po.Bloky[i] as TTrack).branches);
       end;
     end
     else
-      ComputeNormalBlokVetve(po, data, (po.Bloky[i] as TUsek).Root, (po.Bloky[i] as TUsek).Vetve);
+      ComputeNormalBlockBranches(po, data, (po.Bloky[i] as TTrack).Root, (po.Bloky[i] as TTrack).branches);
 
     // nastavime pole data opet na -1 (algortimus by to mel udelat sam, ale pro jistotu)
-    for var j := 0 to (po.Bloky[i] as TUsek).symbols.Count - 1 do
-      data[(po.Bloky[i] as TUsek).symbols[j].Position.X, (po.Bloky[i] as TUsek).symbols[j].Position.Y] := -1;
+    for var j := 0 to (po.Bloky[i] as TTrack).symbols.Count - 1 do
+      data[(po.Bloky[i] as TTrack).symbols[j].Position.X, (po.Bloky[i] as TTrack).symbols[j].Position.Y] := -1;
 
     // odstranit vyhybky
     for var j := 0 to po.Bloky.Count - 1 do
     begin
-      if ((po.Bloky[i].typ <> TBlkType.vyhybka) or ((po.Bloky[i] as TVyhybka).obj <> i)) then
+      if ((po.Bloky[i].typ <> TBlkType.turnout) or ((po.Bloky[i] as TTurnout).obj <> i)) then
         continue;
-      data[(po.Bloky[i] as TVyhybka).Position.X, (po.Bloky[i] as TVyhybka).Position.Y] := -1;
+      data[(po.Bloky[i] as TTurnout).Position.X, (po.Bloky[i] as TTurnout).Position.Y] := -1;
     end;
   end;
 end;
@@ -125,7 +125,7 @@ end;
   Pozor: deti pridavame jen v pripade, ze existuji (muze se taky stat, ze za
   vyhybkou nic neni)!
 }
-procedure ComputeNormalBlokVetve(po: TPanelObjects; var data: TVetveData; start: TPoint; Vetve: TList<TVetev>;
+procedure ComputeNormalBlockBranches(po: TPanelObjects; var data: TBranchData; start: TPoint; branches: TList<TTrackBranch>;
   future_offset: Integer);
 var queue: TQueue<TPoint>;
   symbols: TList<TReliefSym>;
@@ -144,7 +144,7 @@ begin
       // expanduji jeden vrchol: pozor:  musim expandovat doleva i doprava
 
       // resetuji vetev:
-      var vetev := DefaultVetev();
+      var branch := DefaultVetev();
 
       // vezmu aktualni vrchol z fronty
       var first := queue.Dequeue();
@@ -177,13 +177,13 @@ begin
           // vypocitam prvni vedlejsi pole
           if ((data[new.X, new.Y] >= _S_DERAIL_B) and (data[new.X, new.Y] <= _S_DERAIL_E)) then
           begin
-            (po.Bloky[po.GetObject(new)] as TVykol).vetev := Vetve.Count + future_offset;
+            (po.Bloky[po.GetObject(new)] as TDerail).branch := branches.Count + future_offset;
             data[new.X, new.Y] := _S_TRACK_DET_B;
           end;
 
           // podivame se na prvni ze dvou vedlejsich policek
-          temp.X := new.X + GetUsekNavaznost(data[new.X, new.Y], ndPositive).X;
-          temp.Y := new.Y + GetUsekNavaznost(data[new.X, new.Y], ndPositive).Y;
+          temp.X := new.X + GetTrackContinue(data[new.X, new.Y], ndPositive).X;
+          temp.Y := new.Y + GetTrackContinue(data[new.X, new.Y], ndPositive).Y;
 
           // je na vedlejsim poli symbol?
           if (data[temp.X, temp.Y] > -1) and ((temp.X <> first.X) or (temp.Y <> first.Y)) then
@@ -193,8 +193,8 @@ begin
             // ne, na vedlejsim poli neni symbol -> toto policko jsme asi uz prosli, nebo tam proste nic neni
             // zkusime druhe vedlejsi policko
 
-            temp.X := new.X + GetUsekNavaznost(data[new.X, new.Y], ndNegative).X;
-            temp.Y := new.Y + GetUsekNavaznost(data[new.X, new.Y], ndNegative).Y;
+            temp.X := new.X + GetTrackContinue(data[new.X, new.Y], ndNegative).X;
+            temp.Y := new.Y + GetTrackContinue(data[new.X, new.Y], ndNegative).Y;
           end;
 
           if ((data[temp.X, temp.Y] = _S_BUMPER_L) or (data[temp.X, temp.Y] = _S_BUMPER_R)) then
@@ -216,13 +216,13 @@ begin
         if (data[new.X, new.Y] >= _S_TURNOUT_B) and (data[new.X, new.Y] <= _S_TURNOUT_E) then
         begin
           // na aktualnim poli je vyhybka -> nova vetev
-          if (vetev.node1.vyh > -1) then
+          if (branch.node1.vyh > -1) then
           begin
             // 1. vyhybka uz existuje -> vytvorim 2. vyhybku
-            node := @vetev.node2;
+            node := @branch.node2;
           end else begin
             // 1. vyhybka neexstuje -> vytvorim 1. vyhybku
-            node := @vetev.node1;
+            node := @branch.node1;
           end;
 
           // zjistim index vyhybky a pridam dalsi vetve, pokud za vyhybkou existuji useky
@@ -256,23 +256,23 @@ begin
 
               case (i) of
                 0:
-                  node^.ref_plus := Vetve.Count + queue.Count;
+                  node^.ref_plus := branches.Count + queue.Count;
                 1:
-                  node^.ref_minus := Vetve.Count + queue.Count;
+                  node^.ref_minus := branches.Count + queue.Count;
                 2:
                   first := temp;
               end; // case
             end;
           end; // for 2_smery_do_kterych_muze_expandovat_vyhybka
           data[new.X, new.Y] := -1; // vyhybku jsem zpracoval
-        end; // if vetev_skoncila_vyhybkou
+        end; // if branch_skoncila_vyhybkou
       end; // for j
 
-      // prochazeni vetve je kompletni vcetne pripadnych koncovych vyhybek -> priradim do vetve symboly a vytvorim vetev
-      SetLength(vetev.symbols, symbols.Count);
+      // prochazeni vetve je kompletni vcetne pripadnych koncovych vyhybek -> priradim do vetve symboly a vytvorim branch
+      SetLength(branch.symbols, symbols.Count);
       for var i := 0 to symbols.Count - 1 do
-        vetev.symbols[i] := symbols[i];
-      Vetve.Add(vetev);
+        branch.symbols[i] := symbols[i];
+      branches.Add(branch);
     end; // while
   finally
     symbols.Free();
@@ -286,62 +286,62 @@ end;
   Vyrabi vetve poloviny DKS.
   Predpoklada se, ze root je nastaven na kriz DKS.
 }
-procedure ComputeDKSBlokVetve(po: TPanelObjects; var data: TVetveData; start: TPoint; Vetve: TList<TVetev>);
+procedure ComputeDKSBlockBranches(po: TPanelObjects; var data: TBranchData; start: TPoint; branches: TList<TTrackBranch>);
 var
-  r: TVetevReturner;
+  r: TBranchReturner;
   vlPos, vrPos, Pos: TPoint;
-  tempVetve: TList<TVetev>;
+  tempBranches: TList<TTrackBranch>;
 begin
   r.symbols := TList<TReliefSym>.Create();
-  tempVetve := TList<TVetev>.Create();
+  tempBranches := TList<TTrackBranch>.Create();
   vlPos := Point(-1, -1);
   vrPos := Point(-1, -1);
 
   try
     // 1) nejprve hledame usek k nejblizsi leve vyhybce
-    GetUsekTillVyhybka(data, Point(start.X - 1, start.Y), ndPositive, r);
+    GetTrackTillCrossing(data, Point(start.X - 1, start.Y), ndPositive, r);
     if (r.next.X < 0) then
       Exit();
 
-    var vetev := DefaultVetev();
-    SetLength(vetev.symbols, r.symbols.Count);
+    var branch := DefaultVetev();
+    SetLength(branch.symbols, r.symbols.Count);
     for var i := 0 to r.symbols.Count - 1 do
-      vetev.symbols[i] := r.symbols[i];
+      branch.symbols[i] := r.symbols[i];
 
     if ((data[r.next.X, r.next.Y] >= _S_TURNOUT_B) and (data[r.next.X, r.next.Y] <= _S_TURNOUT_E)) then
     begin
-      vetev.node1.vyh := po.Bloky[po.GetObject(r.next)].index;
+      branch.node1.vyh := po.Bloky[po.GetObject(r.next)].index;
       vlPos := r.next;
     end;
 
-    Vetve.Add(vetev);
+    branches.Add(branch);
 
     // 2) hledame usek k nejblizsi prave vyhybce
     r.symbols.Clear();
-    GetUsekTillVyhybka(data, Point(start.X + 1, start.Y), ndNegative, r);
+    GetTrackTillCrossing(data, Point(start.X + 1, start.Y), ndNegative, r);
     if (r.next.X < 0) then
     begin
-      Vetve.Clear();
+      branches.Clear();
       Exit();
     end;
 
-    vetev := DefaultVetev();
-    SetLength(vetev.symbols, r.symbols.Count);
+    branch := DefaultVetev();
+    SetLength(branch.symbols, r.symbols.Count);
     for var i := 0 to r.symbols.Count - 1 do
-      vetev.symbols[i] := r.symbols[i];
+      branch.symbols[i] := r.symbols[i];
 
     if ((data[r.next.X, r.next.Y] >= _S_TURNOUT_B) and (data[r.next.X, r.next.Y] <= _S_TURNOUT_E)) then
     begin
-      vetev.node1.vyh := po.Bloky[po.GetObject(r.next)].index;
+      branch.node1.vyh := po.Bloky[po.GetObject(r.next)].index;
       vrPos := r.next;
     end;
 
-    Vetve.Add(vetev);
+    branches.Add(branch);
 
     // dal nema smysl pokracovat, pokud nejsou obe vyhybky nalezeny
     if ((vlPos.X < 0) or (vrPos.X < 0)) then
     begin
-      Vetve.Clear(); // neni DKS -> vykresli se vse pomoci symbolu
+      branches.Clear(); // neni DKS -> vykresli se vse pomoci symbolu
       Exit();
     end;
 
@@ -349,41 +349,41 @@ begin
     // musime expandovat v obbou smerech
     r.symbols.Clear();
     var symbol := data[vlPos.X + 1, vlPos.Y];
-    GetUsekTillVyhybka(data, Point(vlPos.X + 1, vlPos.Y), ndPositive, r);
+    GetTrackTillCrossing(data, Point(vlPos.X + 1, vlPos.Y), ndPositive, r);
 
     data[vlPos.X + 1, vlPos.Y] := symbol;
-    GetUsekTillVyhybka(data, Point(vlPos.X + 1, vlPos.Y), ndNegative, r);
+    GetTrackTillCrossing(data, Point(vlPos.X + 1, vlPos.Y), ndNegative, r);
 
     // symbol na pozici [vlPos.X+1, vlPos.Y] dvakrat -> vymazat
     r.symbols.Delete(0);
 
-    vetev := DefaultVetev();
-    SetLength(vetev.symbols, r.symbols.Count);
+    branch := DefaultVetev();
+    SetLength(branch.symbols, r.symbols.Count);
     for var i := 0 to r.symbols.Count - 1 do
-      vetev.symbols[i] := r.symbols[i];
-    Vetve.Add(vetev);
+      branch.symbols[i] := r.symbols[i];
+    branches.Add(branch);
 
     // 4) odstranit vyhybky
     data[vlPos.X, vlPos.Y] := -1;
     data[vrPos.X, vrPos.Y] := -1;
 
-    // 4) hledame navazujici levou vetev
-    tempVetve.Clear();
-    ComputeNormalBlokVetve(po, data, Point(vlPos.X - 1, vlPos.Y), tempVetve, 4);
-    OffsetVetve(tempVetve, 4);
+    // 4) hledame navazujici levou branch
+    tempBranches.Clear();
+    ComputeNormalBlockBranches(po, data, Point(vlPos.X - 1, vlPos.Y), tempBranches, 4);
+    OffsetBranches(tempBranches, 4);
 
-    Vetve.Add(tempVetve[0]);
-    Vetve.Add(tempVetve[0]); // docasne i prava vetev
-    tempVetve.Delete(0);
-    Vetve.AddRange(tempVetve);
+    branches.Add(tempBranches[0]);
+    branches.Add(tempBranches[0]); // docasne i prava branch
+    tempBranches.Delete(0);
+    branches.AddRange(tempBranches);
 
-    // 5) hledame navazujici pravou vetev
-    tempVetve.Clear();
-    ComputeNormalBlokVetve(po, data, Point(vrPos.X + 1, vrPos.Y), tempVetve, Vetve.Count - 1);
-    OffsetVetve(tempVetve, Vetve.Count - 1);
-    Vetve[4] := tempVetve[0];
-    tempVetve.Delete(0);
-    Vetve.AddRange(tempVetve);
+    // 5) hledame navazujici pravou branch
+    tempBranches.Clear();
+    ComputeNormalBlockBranches(po, data, Point(vrPos.X + 1, vrPos.Y), tempBranches, branches.Count - 1);
+    OffsetBranches(tempBranches, branches.Count - 1);
+    branches[4] := tempBranches[0];
+    tempBranches.Delete(0);
+    branches.AddRange(tempBranches);
 
     // 6) kontrolujeme krizeni "obe casti DKS v jednom bloku"
     if (IsSecondCross(data, start)) then
@@ -391,28 +391,28 @@ begin
       Pos := SecondCrossPos(data, start);
       data[Pos.X, Pos.Y] := -1;
 
-      var addI := Vetve.Count;
-      ComputeNormalBlokVetve(po, data, Point(Pos.X - 1, Pos.Y), Vetve);
-      if (addI <> Vetve.Count) then
+      var addI := branches.Count;
+      ComputeNormalBlockBranches(po, data, Point(Pos.X - 1, Pos.Y), branches);
+      if (addI <> branches.Count) then
       begin
-        vetev := Vetve[1];
-        vetev.node1.ref_minus := addI;
-        Vetve[1] := vetev;
+        branch := branches[1];
+        branch.node1.ref_minus := addI;
+        branches[1] := branch;
       end;
 
-      addI := Vetve.Count;
-      ComputeNormalBlokVetve(po, data, Point(Pos.X + 1, Pos.Y), Vetve);
-      if (addI <> Vetve.Count) then
+      addI := branches.Count;
+      ComputeNormalBlockBranches(po, data, Point(Pos.X + 1, Pos.Y), branches);
+      if (addI <> branches.Count) then
       begin
-        vetev := Vetve[0];
-        vetev.node1.ref_minus := addI;
-        Vetve[0] := vetev;
+        branch := branches[0];
+        branch.node1.ref_minus := addI;
+        branches[0] := branch;
       end;
     end;
 
   finally
     r.symbols.Free();
-    tempVetve.Free();
+    tempBranches.Free();
   end;
 end;
 
@@ -425,7 +425,7 @@ end;
   Pozor: tato funkce neni pouzitelna obecne (nepocita treba s vykolejkami).
   Je uzitecna predevsim pro potreby DKS.
 }
-procedure GetUsekTillVyhybka(var data: TVetveData; start: TPoint; initDir: TNavDir; var res: TVetevReturner);
+procedure GetTrackTillCrossing(var data: TBranchData; start: TPoint; initDir: TNavDir; var res: TBranchReturner);
 var new: TPoint;
   first: Boolean;
 begin
@@ -446,19 +446,19 @@ begin
     if (first) then
     begin
       // podivame se na vedlejsi pole ve spravnem smeru
-      temp.X := new.X + GetUsekNavaznost(data[new.X, new.Y], initDir).X;
-      temp.Y := new.Y + GetUsekNavaznost(data[new.X, new.Y], initDir).Y;
+      temp.X := new.X + GetTrackContinue(data[new.X, new.Y], initDir).X;
+      temp.Y := new.Y + GetTrackContinue(data[new.X, new.Y], initDir).Y;
     end else begin
       // podivame se na vedlejsi pole
-      temp.X := new.X + GetUsekNavaznost(data[new.X, new.Y], ndPositive).X;
-      temp.Y := new.Y + GetUsekNavaznost(data[new.X, new.Y], ndPositive).Y;
+      temp.X := new.X + GetTrackContinue(data[new.X, new.Y], ndPositive).X;
+      temp.Y := new.Y + GetTrackContinue(data[new.X, new.Y], ndPositive).Y;
 
       // je na vedlejsim poli symbol?
       if (data[temp.X, temp.Y] = -1) then
       begin
         // ne, na vedlejsim poli neni symbol -> zkusime poliko v druhem smeru
-        temp.X := new.X + GetUsekNavaznost(data[new.X, new.Y], ndNegative).X;
-        temp.Y := new.Y + GetUsekNavaznost(data[new.X, new.Y], ndNegative).Y;
+        temp.X := new.X + GetTrackContinue(data[new.X, new.Y], ndNegative).X;
+        temp.Y := new.Y + GetTrackContinue(data[new.X, new.Y], ndNegative).Y;
       end;
     end;
 
@@ -473,7 +473,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function IsSecondCross(var data: TVetveData; start: TPoint): Boolean;
+function IsSecondCross(var data: TBranchData; start: TPoint): Boolean;
 begin
   if ((data[start.X, start.Y] = _S_DKS_DET_TOP) and (data[start.X, start.Y + 1] = _S_DKS_DET_BOT)) then
     Exit(true);
@@ -489,7 +489,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function SecondCrossPos(var data: TVetveData; start: TPoint): TPoint;
+function SecondCrossPos(var data: TBranchData; start: TPoint): TPoint;
 begin
   if ((data[start.X, start.Y] = _S_DKS_DET_TOP) and (data[start.X, start.Y + 1] = _S_DKS_DET_BOT)) then
     Result := Point(start.X, start.Y + 1)
@@ -505,23 +505,23 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure OffsetVetve(Vetve: TList<TVetev>; offset: Integer);
+procedure OffsetBranches(branches: TList<TTrackBranch>; offset: Integer);
 begin
-  for var i := 0 to Vetve.Count - 1 do
+  for var i := 0 to branches.Count - 1 do
   begin
-    var vetev := Vetve[i];
+    var branch := branches[i];
 
-    if (vetev.node1.ref_plus > -1) then
-      vetev.node1.ref_plus := vetev.node1.ref_plus + offset;
-    if (vetev.node1.ref_minus > -1) then
-      vetev.node1.ref_minus := vetev.node1.ref_minus + offset;
+    if (branch.node1.ref_plus > -1) then
+      branch.node1.ref_plus := branch.node1.ref_plus + offset;
+    if (branch.node1.ref_minus > -1) then
+      branch.node1.ref_minus := branch.node1.ref_minus + offset;
 
-    if (vetev.node2.ref_plus > -1) then
-      vetev.node2.ref_plus := vetev.node2.ref_plus + offset;
-    if (vetev.node2.ref_minus > -1) then
-      vetev.node2.ref_minus := vetev.node2.ref_minus + offset;
+    if (branch.node2.ref_plus > -1) then
+      branch.node2.ref_plus := branch.node2.ref_plus + offset;
+    if (branch.node2.ref_minus > -1) then
+      branch.node2.ref_minus := branch.node2.ref_minus + offset;
 
-    Vetve[i] := vetev;
+    branches[i] := branch;
   end;
 end;
 

@@ -9,17 +9,17 @@ type
 
   TDKSType = (dksNone = 0, dksTop = 1, dksBottom = 2);
 
-  TUsek = class(TGraphBlok)
+  TTrack = class(TGraphBlok)
     Root: TPoint;
-    IsVyhybka: boolean; // pomocny flag pro vykreslovani v modu korenu
+    IsTurnout: boolean; // pomocny flag pro vykreslovani v modu korenu
     Symbols: TList<TReliefSym>; // pokud je v useku vykolejka, je zde ulozena jako klasicky symbol
     JCClick: TList<TPoint>;
-    KPopisek: TList<TPoint>;
-    Soupravy: TList<TPoint>;
-    KpopisekStr: string;
+    labels: TList<TPoint>;
+    trains: TList<TPoint>;
+    caption: string;
     DKStype: TDKSType;
 
-    Vetve: TList<TVetev>; // vetve useku
+    branches: TList<TTrackBranch>; // vetve useku
     // vetev 0 je vzdy koren
     // zde je ulozen binarni strom v pseudo-forme
     // na 0. indexu je koren, kazdy vrchol pak obsahuje referenci na jeho deti
@@ -41,36 +41,36 @@ uses ReliefObjects;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TUsek.Create(index: Integer);
+constructor TTrack.Create(index: Integer);
 begin
   inherited;
-  Self.typ := TBlkType.usek;
+  Self.typ := TBlkType.track;
   Self.Symbols := TList<TReliefSym>.Create();
   Self.JCClick := TList<TPoint>.Create();
-  Self.KPopisek := TList<TPoint>.Create();
-  Self.Soupravy := TList<TPoint>.Create();
-  Self.Vetve := TList<TVetev>.Create();
+  Self.labels := TList<TPoint>.Create();
+  Self.trains := TList<TPoint>.Create();
+  Self.branches := TList<TTrackBranch>.Create();
 end;
 
-destructor TUsek.Destroy();
+destructor TTrack.Destroy();
 begin
   Self.Symbols.Free();
   Self.JCClick.Free();
-  Self.KPopisek.Free();
-  Self.Soupravy.Free();
-  Self.Vetve.Free();
+  Self.labels.Free();
+  Self.trains.Free();
+  Self.branches.Free();
   inherited;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TUsek.Load(ini: TMemIniFile; key: string; version: Word);
+procedure TTrack.Load(ini: TMemIniFile; key: string; version: Word);
 var obj: string;
   j, k: Integer;
   symbol: TReliefSym;
   pos: TPoint;
   vetevCount: Integer;
-  vetev: TVetev;
+  vetev: TTrackBranch;
 begin
   inherited;
 
@@ -110,7 +110,7 @@ begin
 
   // KPopisek
   obj := ini.ReadString(key, 'P', '');
-  Self.KPopisek.Clear();
+  Self.labels.Clear();
   for j := 0 to (Length(obj) div 6) - 1 do
   begin
     try
@@ -119,12 +119,12 @@ begin
     except
       continue;
     end;
-    Self.KPopisek.Add(pos);
+    Self.labels.Add(pos);
   end; // for j
 
   // soupravy
   obj := ini.ReadString(key, 'Spr', '');
-  Self.Soupravy.Clear();
+  Self.trains.Clear();
   for j := 0 to (Length(obj) div 6) - 1 do
   begin
     try
@@ -133,12 +133,12 @@ begin
     except
       continue;
     end;
-    Self.Soupravy.Add(pos);
+    Self.trains.Add(pos);
   end; // for j
 
   // Nazev
-  Self.KpopisekStr := ini.ReadString(key, 'N', '');
-  Self.Vetve.Clear();
+  Self.caption := ini.ReadString(key, 'N', '');
+  Self.branches.Clear();
 
   // vetve
   vetevCount := ini.ReadInteger(key, 'VC', 0);
@@ -167,21 +167,21 @@ begin
         vetev.Symbols[k].SymbolID := TranscodeSymbolFromBpnlV3(vetev.Symbols[k].SymbolID);
     end;
 
-    Self.Vetve.Add(vetev);
+    Self.branches.Add(vetev);
   end; // for j
 end;
 
-procedure TUsek.Save(ini: TMemIniFile; key: string);
+procedure TTrack.Save(ini: TMemIniFile; key: string);
 var obj: string;
   sym: TReliefSym;
   point: TPoint;
-  vetev: TVetev;
+  vetev: TTrackBranch;
   i: Integer;
 begin
   inherited;
 
   // root
-  if (Self.IsVyhybka) then
+  if (Self.IsTurnout) then
     ini.WriteString(key, 'R', GetPos(Self.Root));
 
   if (Self.DKStype <> dksNone) then
@@ -203,29 +203,29 @@ begin
 
   // KPopisek
   obj := '';
-  for point in Self.KPopisek do
+  for point in Self.labels do
     obj := obj + Format('%.3d%.3d', [point.X, point.Y]);
   if (obj <> '') then
     ini.WriteString(key, 'P', obj);
 
   // soupravy
   obj := '';
-  for point in Self.Soupravy do
+  for point in Self.trains do
     obj := obj + Format('%.3d%.3d', [point.X, point.Y]);
   if (obj <> '') then
     ini.WriteString(key, 'Spr', obj);
 
   // Nazev
-  if (Self.KpopisekStr <> '') then
-    ini.WriteString(key, 'N', Self.KpopisekStr);
+  if (Self.caption <> '') then
+    ini.WriteString(key, 'N', Self.caption);
 
   // vetve
-  if (Self.Vetve.Count > 0) then
-    ini.WriteInteger(key, 'VC', Self.Vetve.Count);
+  if (Self.branches.Count > 0) then
+    ini.WriteInteger(key, 'VC', Self.branches.Count);
 
-  for i := 0 to Self.Vetve.Count - 1 do
+  for i := 0 to Self.branches.Count - 1 do
   begin
-    vetev := Self.Vetve[i];
+    vetev := Self.branches[i];
     if (vetev.node1.vyh < 0) then
       obj := Format('%.2d', [vetev.node1.vyh])
     else
@@ -268,7 +268,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TUsek.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
+procedure TTrack.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
   mode: TMode);
 var pos: TPoint;
   sym: TReliefSym;
@@ -279,10 +279,10 @@ begin
     for pos in Self.JCClick do
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_FULL, scYellow);
 
-    for pos in Self.KPopisek do
+    for pos in Self.labels do
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_KC, scLime);
 
-    for pos in Self.Soupravy do
+    for pos in Self.trains do
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_FULL, scBlue);
 
     for sym in Self.Symbols do
@@ -293,22 +293,22 @@ begin
     for pos in Self.JCClick do
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_KC, scLime);
 
-    for pos in Self.KPopisek do
+    for pos in Self.labels do
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_FULL, scYellow);
 
-    for pos in Self.Soupravy do
+    for pos in Self.trains do
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_FULL, scBlue);
 
     if (mode = TMode.dmBloky) then
     begin
-      case (Self.Blok) of
+      case (Self.block) of
         -1: color := colors.Alert;
         -2: color := colors.IntUnassigned;
       else
         color := colors.Normal;
       end;
     end else begin
-      if ((Self.IsVyhybka) and (Self.Root.X = -1)) then
+      if ((Self.IsTurnout) and (Self.Root.X = -1)) then
         color := colors.Alert
       else
         color := colors.Normal;

@@ -6,7 +6,7 @@ uses ObjBlok, Types, IniFiles, Global, symbolHelper, PGraphics;
 
 type
 
-  TVyhybka = class(TGraphBlok)
+  TTurnout = class(TGraphBlok)
     PolohaPlus: Byte;
     Position: TPoint;
     SymbolID: Integer;
@@ -23,15 +23,15 @@ implementation
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-constructor TVyhybka.Create(index: Integer);
+constructor TTurnout.Create(index: Integer);
 begin
   inherited;
-  Self.typ := TBlkType.vyhybka;
+  Self.typ := TBlkType.turnout;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TVyhybka.Load(ini: TMemIniFile; key: string; version: Word);
+procedure TTurnout.Load(ini: TMemIniFile; key: string; version: Word);
 begin
   inherited;
 
@@ -42,7 +42,7 @@ begin
   Self.obj := ini.ReadInteger(key, 'O', -1);
 end;
 
-procedure TVyhybka.Save(ini: TMemIniFile; key: string);
+procedure TTurnout.Save(ini: TMemIniFile; key: string);
 begin
   inherited;
 
@@ -55,14 +55,14 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TVyhybka.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
+procedure TTurnout.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
   mode: TMode);
 begin
   if (selected) then
   begin
     SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, Self.SymbolID, colors.Selected);
   end else begin
-    case (Self.Blok) of
+    case (Self.block) of
       -1: SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, Self.SymbolID, colors.Alert);
       -2: SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, Self.SymbolID, colors.IntUnassigned);
     else

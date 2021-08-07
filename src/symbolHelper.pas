@@ -121,7 +121,7 @@ const
 
 function LoadIL(ResourceName: string; PartWidth, PartHeight: Byte; MaskColor: TColor = clPurple): TImageList;
 
-function GetUsekNavaznost(symbol: Integer; dir: TNavDir): TPoint;
+function GetTrackContinue(symbol: Integer; dir: TNavDir): TPoint;
 function SymbolDrawColor(symbol: Integer): SymbolColor;
 function ColorToSymbolColor(color: TColor): SymbolColor;
 function SymbolIndex(symbol: Integer; color: SymbolColor): Integer;
@@ -142,7 +142,7 @@ begin
   end;
 end;
 
-function GetUsekNavaznost(symbol: Integer; dir: TNavDir): TPoint;
+function GetTrackContinue(symbol: Integer; dir: TNavDir): TPoint;
 begin
   if ((dir = ndThird) and ((symbol < _S_DKS_DET_TOP) or (symbol > _S_DKS_DET_L)) and
       ((symbol < _S_DKS_NODET_TOP) or (symbol > _S_DKS_NODET_L))) then
