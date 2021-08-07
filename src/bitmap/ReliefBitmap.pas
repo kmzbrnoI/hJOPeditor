@@ -477,7 +477,7 @@ begin
   Self.Symbols.FDeleteActivate := Self.DeleteActivateEvent;
   Self.Symbols.FOPAsk := Self.IsOperationEvent;
 
-  Self.SeparatorsVert := TVBO.Create(DrawCanvas, SymbolIL, _Separ_Vert_Index, stVert);
+  Self.SeparatorsVert := TVBO.Create(DrawCanvas, SymbolIL, _Separ_Vert_Index, scRed, stVert);
   Self.SeparatorsVert.FOnShow := Self.ShowEvent;
   Self.SeparatorsVert.FIsSymbol := Self.IsSymbolSeparVertEvent;
   Self.SeparatorsVert.FNullOperations := Self.NullOperationsEvent;
@@ -485,7 +485,7 @@ begin
   Self.SeparatorsVert.FDeleteActivate := Self.DeleteActivateEvent;
   Self.SeparatorsVert.FOPAsk := Self.IsOperationEvent;
 
-  Self.SeparatorsHor := TVBO.Create(DrawCanvas, SymbolIL, _Separ_Hor_Index, stHor);
+  Self.SeparatorsHor := TVBO.Create(DrawCanvas, SymbolIL, _Separ_Hor_Index, scRed, stHor);
   Self.SeparatorsHor.FOnShow := Self.ShowEvent;
   Self.SeparatorsHor.FIsSymbol := Self.IsSymbolSeparHorEvent;
   Self.SeparatorsHor.FNullOperations := Self.NullOperationsEvent;
@@ -493,7 +493,7 @@ begin
   Self.SeparatorsHor.FDeleteActivate := Self.DeleteActivateEvent;
   Self.SeparatorsHor.FOPAsk := Self.IsOperationEvent;
 
-  Self.KPopisky := TVBO.Create(DrawCanvas, SymbolIL, _KPopisek_Index);
+  Self.KPopisky := TVBO.Create(DrawCanvas, SymbolIL, _Full, scYellow);
   Self.KPopisky.FOnShow := Self.ShowEvent;
   Self.KPopisky.FIsSymbol := Self.IsSymbolKPopiskyJCClickSoupravyEvent;
   Self.KPopisky.FNullOperations := Self.NullOperationsEvent;
@@ -501,7 +501,7 @@ begin
   Self.KPopisky.FDeleteActivate := Self.DeleteActivateEvent;
   Self.KPopisky.FOPAsk := Self.IsOperationEvent;
 
-  Self.JCClick := TVBO.Create(DrawCanvas, SymbolIL, _JCPopisek_Index);
+  Self.JCClick := TVBO.Create(DrawCanvas, SymbolIL, _KC, scLime);
   Self.JCClick.FOnShow := Self.ShowEvent;
   Self.JCClick.FIsSymbol := Self.IsSymbolKPopiskyJCClickSoupravyEvent;
   Self.JCClick.FNullOperations := Self.NullOperationsEvent;
@@ -509,7 +509,7 @@ begin
   Self.JCClick.FDeleteActivate := Self.DeleteActivateEvent;
   Self.JCClick.FOPAsk := Self.IsOperationEvent;
 
-  Self.Soupravy := TVBO.Create(DrawCanvas, SymbolIL, _Soupravy_Index);
+  Self.Soupravy := TVBO.Create(DrawCanvas, SymbolIL, _Full, scBlue);
   Self.Soupravy.FOnShow := Self.ShowEvent;
   Self.Soupravy.FIsSymbol := Self.IsSymbolKPopiskyJCClickSoupravyEvent;
   Self.Soupravy.FNullOperations := Self.NullOperationsEvent;
@@ -911,20 +911,20 @@ begin
         popy := StrToInt(splitted[9]) + OFFSET_Y;
 
         if (splitted[3] = '1') then
-          Self.Symbols.Bitmap[X][Y] := _Usek_Start + StrToInt(splitted[12])
+          Self.Symbols.Bitmap[X][Y] := _Usek_Detek_Start + StrToInt(splitted[12])
         else if (splitted[3] = '2') then
-          Self.Symbols.Bitmap[X][Y] := _Usek_Start + 6 + StrToInt(splitted[12])
+          Self.Symbols.Bitmap[X][Y] := _Usek_Detek_Start + 6 + StrToInt(splitted[12])
         else if (splitted[3] = '3') then
           Self.Symbols.Bitmap[X][Y] := _Zarazedlo_r + StrToInt(splitted[12])
         else if (splitted[3] = '4') then
-          Self.Symbols.Bitmap[X][Y] := _SCom_Start + StrToInt(splitted[12])
+          Self.Symbols.Bitmap[X][Y] := _Navestidlo_Start + StrToInt(splitted[12])
         else if (splitted[3] = '5') then
-          Self.Symbols.Bitmap[X][Y] := _SCom_Start + 4 + StrToInt(splitted[12])
+          Self.Symbols.Bitmap[X][Y] := _Navestidlo_Start + 4 + StrToInt(splitted[12])
         else if (splitted[3] = '6') then
         begin
           Self.Symbols.Bitmap[X][Y] := _Vyhybka_Start + StrToInt(splitted[12]);
           try
-            Self.Text.AddToStructure(Point(popx, popy), splitted[7], 4, true);
+            Self.Text.AddToStructure(Point(popx, popy), splitted[7], scWhite, true);
           except
             Result := Result + 'WARN: nepodařilo se přidat popisek bloku ' + splitted[7] + #13#10;
           end;
@@ -937,7 +937,7 @@ begin
           else
             Self.Symbols.Bitmap[X][Y] := _Vykol_Start + 1;
           try
-            Self.Text.AddToStructure(Point(popx, popy), splitted[7], 4, true);
+            Self.Text.AddToStructure(Point(popx, popy), splitted[7], scWhite, true);
           except
             Result := Result + 'WARN: nepodařilo se přidat popisek bloku ' + splitted[7] + #13#10;
           end;
@@ -949,7 +949,7 @@ begin
         end else if (splitted[3] = '20') then
           Self.Symbols.Bitmap[X][Y] := _Uvazka_Start
         else if (splitted[3] = '12') then
-          Self.Symbols.Bitmap[X][Y] := _Rozp_Start
+          Self.Symbols.Bitmap[X][Y] := _Rozp_Kolej
         else if (splitted[3] = '21') then
           Self.Symbols.Bitmap[X][Y] := _Uvazka_Spr
         else if (splitted[3] = '30') then
@@ -975,7 +975,7 @@ begin
           end;
 
           try
-            Self.Text.AddToStructure(Point(popx, popy), OblR.Name, 4, false);
+            Self.Text.AddToStructure(Point(popx, popy), OblR.Name, scWhite, false);
           except
             Result := Result + 'WARN: nepodařilo se přidat název OŘ ' + OblR.Name + #13#10;
           end;
@@ -984,11 +984,11 @@ begin
         begin
           Height := StrToInt(splitted[15]);
           for i := 0 to Height - 1 do
-            Self.Symbols.Bitmap[X][Y + i] := _Prj
+            Self.Symbols.Bitmap[X][Y + i] := _Prejezd
         end else if (splitted[3] = '80') then
         begin
           try
-            Self.Text.AddToStructure(Point(X, Y), splitted[7], 1, false);
+            Self.Text.AddToStructure(Point(X, Y), splitted[7], scGray, false);
           except
             Result := Result + 'WARN: nepodařilo se přidat popisek bloku ' + splitted[7] + #13#10;
           end;
@@ -1024,7 +1024,7 @@ begin
             popy := StrToInt(gsplitted[13]) + OFFSET_Y;
           end;
           try
-            Self.Text.AddToStructure(Point(popx, popy), gsplitted[8], 1, true);
+            Self.Text.AddToStructure(Point(popx, popy), gsplitted[8], scGray, true);
           except
             Result := Result + 'WARN: nepodařilo se přidat popisek bloku ' + gsplitted[8] + #13#10;
           end;

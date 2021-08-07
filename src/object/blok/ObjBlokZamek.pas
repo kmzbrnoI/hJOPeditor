@@ -48,25 +48,22 @@ end;
 
 procedure TZamek.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
   mode: TMode);
-var color: TColor;
+var color: SymbolColor;
 begin
   if (selected) then
   begin
     color := colors.selected;
   end else begin
     case (Self.blok) of
-      - 1:
-        color := colors.Alert;
-      -2:
-        color := colors.IntUnassigned;
+      -1: color := colors.Alert;
+      -2: color := colors.IntUnassigned;
     else
       color := colors.Normal;
     end;
-  end; // else (Self.Selected > 255)
+  end;
 
   DrawObject.Canvas.Brush.color := clBlack;
-  DrawObject.SymbolIL.Draw(DrawObject.Canvas, Self.Pos.X * _Symbol_Sirka, Self.Pos.Y * _Symbol_Vyska,
-    (_Zamek * 10) + color);
+  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _Zamek, color);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

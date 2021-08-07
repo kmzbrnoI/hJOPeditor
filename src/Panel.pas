@@ -47,7 +47,6 @@ type
     _OR_Size: array [0 .. 5] of Byte = (5, 3, 14, 1, 16, 1);
 
     _Separator_BitmapIndex = 352;
-    _Symbols_DefColor = clBlack;
 
     // pripony bitmapoveho a vektoroveho formatu souboru
     _Suf_bmp = '.bpnl';
@@ -99,10 +98,7 @@ type
 
     procedure Initialize(Rozmery: TPoint; Mode: TMode);
 
-    procedure LoadIL(var IL: TImageList; ResourceName: string; PartWidth, PartHeight: Byte;
-      MaskColor: TColor = clPurple);
     procedure PaintMrizka(MrizkaColor: TColor);
-
     function PaintKurzor(CursorData: TCursorDraw): Byte;
 
     procedure PaintOR();
@@ -162,7 +158,7 @@ type
     procedure SetRozmery(aWidth, aHeight: Byte);
 
     procedure AddSymbol(SymbolID: Integer);
-    procedure AddText(Text: string; Color: Integer; popisekBlok: Boolean);
+    procedure AddText(Text: string; Color: SymbolColor; popisekBlok: Boolean);
     procedure AddJCClick();
     procedure AddSeparatorVert();
     procedure AddSeparatorHor();
@@ -252,9 +248,9 @@ begin
   Self.ORClick.MovingOR := -1;
   Self.FMove := false;
 
-  Self.LoadIL(Self.IL_Symbols, _Resource_Symbols, 8, 12);
-  Self.LoadIL(Self.IL_Text, _Resource_Text, 8, 12);
-  Self.LoadIL(Self.IL_DK, _Resource_DK, 8 * _OR_Size[0], 12 * _OR_Size[1]);
+  Self.IL_Symbols := LoadIL(_Resource_Symbols, 8, 12);
+  Self.IL_Text := LoadIL(_Resource_Text, 8, 12);
+  Self.IL_DK := LoadIL(_Resource_DK, 8 * _OR_Size[0], 12 * _OR_Size[1]);
 
   Self.Graphics := TPanelGraphics.Create(Self.DrawObject, Self.IL_Text);
 
@@ -352,44 +348,6 @@ begin
 
   inherited Destroy;
 end; // destructor
-
-procedure TRelief.LoadIL(var IL: TImageList; ResourceName: string; PartWidth, PartHeight: Byte;
-  MaskColor: TColor = clPurple);
-var AllImages, ColouredImages: TBitmap;
-  i, j, k, symbol: Byte;
-begin
-  IL := TImageList.Create(nil);
-
-  AllImages := TBitmap.Create;
-  AllImages.LoadFromResourceName(HInstance, ResourceName);
-  ColouredImages := TBitmap.Create;
-
-  IL.SetSize(PartWidth, PartHeight);
-  ColouredImages.SetSize(PartWidth * _Symbol_ColorsCount, PartHeight);
-
-  for symbol := 0 to (AllImages.Width div PartWidth) - 1 do
-  begin
-    for i := 0 to _Symbol_ColorsCount - 1 do
-    begin
-      ColouredImages.Canvas.CopyRect(Rect(i * PartWidth, 0, (i * PartWidth) + PartWidth, PartHeight), AllImages.Canvas,
-        Rect(symbol * PartWidth, 0, (symbol * PartWidth) + PartWidth, PartHeight));
-
-      for j := 0 to PartWidth - 1 do
-      begin
-        for k := 0 to PartHeight - 1 do
-        begin
-          if (ColouredImages.Canvas.Pixels[j + (i * PartWidth), k] = _Symbols_DefColor) then
-            ColouredImages.Canvas.Pixels[j + (i * PartWidth), k] := _Symbol_Colors[i];
-        end; // for k
-      end; // for j
-    end; // for i
-
-    IL.AddMasked(ColouredImages, MaskColor);
-  end; // for symbol
-
-  ColouredImages.Free;
-  AllImages.Free;
-end;
 
 // hlavni zobrazeni celeho reliefu
 procedure TRelief.show(CursorPos: TPoint);
@@ -800,7 +758,7 @@ begin
     Self.PanelBitmap.Symbols.Add(SymbolID);
 end;
 
-procedure TRelief.AddText(Text: string; Color: Integer; popisekBlok: Boolean);
+procedure TRelief.AddText(Text: string; Color: SymbolColor; popisekBlok: Boolean);
 begin
   if (Assigned(Self.PanelBitmap)) then
     Self.PanelBitmap.Text.Add(Text, Color, popisekBlok);
@@ -890,9 +848,9 @@ begin
     Self.IL_DK.Draw(Self.DrawObject.Surface.Canvas, oblr.Poss.DK.X * _Symbol_Sirka, oblr.Poss.DK.Y * _Symbol_Vyska,
       (oblr.Poss.DKOr * 10) + 1);
 
-    Self.Graphics.TextOutputI(oblr.Poss.Queue, '00 VZ PV EZ 00', 1, clBlack);
-    Self.Graphics.TextOutputI(oblr.Poss.Time, 'MER CASU', 1, clBlack);
-    Self.Graphics.TextOutputC(Point(oblr.Poss.Time.X + 8, oblr.Poss.Time.Y), '        ', clBlack, clWhite);
+    Self.Graphics.TextOutputI(oblr.Poss.Queue, '00 VZ PV EZ 00', scGray, clBlack);
+    Self.Graphics.TextOutputI(oblr.Poss.Time, 'MER CASU', scGray, clBlack);
+    Self.Graphics.TextOutputI(Point(oblr.Poss.Time.X + 8, oblr.Poss.Time.Y), '        ', scBlack, clWhite);
   end; // for i
 end;
 

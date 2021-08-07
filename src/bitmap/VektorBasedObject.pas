@@ -33,6 +33,7 @@ type
       Canvas: TCanvas;
       SymbolIL: TImageList;
       SymbolIndex: Integer;
+      symColor: SymbolColor;
     end;
 
     Operations: record
@@ -58,7 +59,8 @@ type
     FDeleteActivate: TNEvent;
     FOPAsk: TOpAskEvent;
 
-    constructor Create(DrawCanvas: TCanvas; SymbolIL: TImageList; SymbolIndex: Integer; Separ: TSeparType = stNone);
+    constructor Create(DrawCanvas: TCanvas; SymbolIL: TImageList; SymbolIndex: Integer;
+                       SymColor: SymbolColor; Separ: TSeparType = stNone);
     destructor Destroy(); override;
 
     procedure Add(Position: TPoint); overload;
@@ -97,7 +99,7 @@ type
 
 implementation
 
-constructor TVBO.Create(DrawCanvas: TCanvas; SymbolIL: TImageList; SymbolIndex: Integer; Separ: TSeparType);
+constructor TVBO.Create(DrawCanvas: TCanvas; SymbolIL: TImageList; SymbolIndex: Integer; symColor: SymbolColor; Separ: TSeparType);
 begin
   inherited Create();
 
@@ -105,6 +107,7 @@ begin
   Self.DrawObject.Canvas := DrawCanvas;
   Self.DrawObject.SymbolIL := SymbolIL;
   Self.DrawObject.SymbolIndex := SymbolIndex;
+  Self.DrawObject.symColor := symColor;
   Self.Separ := Separ;
 
   Self.Reset();
@@ -203,7 +206,7 @@ begin
 
   for i := 0 to Self.Data.Count - 1 do
     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Data[i].X * _Symbol_Sirka) + posun.X,
-      (Self.Data[i].Y * _Symbol_Vyska) + posun.Y, Self.DrawObject.SymbolIndex);
+      (Self.Data[i].Y * _Symbol_Vyska) + posun.Y, SymbolIndex(Self.DrawObject.SymbolIndex, Self.DrawObject.symColor));
 end;
 
 procedure TVBO.Adding(Position: TPoint);

@@ -82,9 +82,9 @@ begin
           _Vykol_Start;
     end;
 
-    if (data[TUsek(po.Bloky[i]).Root.X, TUsek(po.Bloky[i]).Root.Y] = _DKS_Top) then
+    if (data[TUsek(po.Bloky[i]).Root.X, TUsek(po.Bloky[i]).Root.Y] = _DKS_Detek_Top) then
       (po.Bloky[i] as TUsek).DKStype := dksTop
-    else if (data[TUsek(po.Bloky[i]).Root.X, TUsek(po.Bloky[i]).Root.Y] = _DKS_Bot) then
+    else if (data[TUsek(po.Bloky[i]).Root.X, TUsek(po.Bloky[i]).Root.Y] = _DKS_Detek_Bot) then
       (po.Bloky[i] as TUsek).DKStype := dksBottom
     else
       (po.Bloky[i] as TUsek).DKStype := dksNone;
@@ -169,9 +169,8 @@ begin
       begin
         new := first;
         // projizdim usek jednim smerem pro jedno 'j'
-        while (((data[new.X, new.Y] >= _Usek_Start) and (data[new.X, new.Y] <= _Usek_End)) or
-          ((data[new.X, new.Y] >= _Vykol_Start) and (data[new.X, new.Y] <= _Vykol_End)) or
-          ((data[new.X, new.Y] >= _Krizeni_Start) and (data[new.X, new.Y] <= _Krizeni_End))) do
+        while (((data[new.X, new.Y] >= _Usek_Detek_Start) and (data[new.X, new.Y] <= _Usek_Detek_End)) or
+          ((data[new.X, new.Y] >= _Vykol_Start) and (data[new.X, new.Y] <= _Vykol_End))) do
         begin
           // pridam symbol do seznamu symbolu
           if ((((new.X <> first.X) or (new.Y <> first.Y)) or (j = 1)) and ((data[new.X, new.Y] < _Vykol_Start) or
@@ -188,7 +187,7 @@ begin
           if ((data[new.X, new.Y] >= _Vykol_Start) and (data[new.X, new.Y] <= _Vykol_End)) then
           begin
             (po.Bloky[po.GetObject(new)] as TVykol).vetev := Vetve.Count + future_offset;
-            data[new.X, new.Y] := _Usek_Start;
+            data[new.X, new.Y] := _Usek_Detek_Start;
           end;
 
           // podivame se na prvni ze dvou vedlejsich policek
@@ -443,7 +442,7 @@ begin
   first := true;
   res.next := Point(-1, -1);
 
-  while ((data[new.X, new.Y] >= _Usek_Start) and (data[new.X, new.Y] <= _Usek_End)) do
+  while ((data[new.X, new.Y] >= _Usek_Detek_Start) and (data[new.X, new.Y] <= _Usek_Detek_End)) do
   begin
     // pridam symbol do seznamu symbolu
     symbol.Position := new;
@@ -484,9 +483,9 @@ function IsSecondCross(var data: TVetveData; start: TPoint): Boolean;
 begin
   Result := false;
 
-  if ((data[start.X, start.Y] = _Krizeni_Start) and (data[start.X, start.Y + 1] = _Krizeni_End)) then
+  if ((data[start.X, start.Y] = _DKS_Detek_Top) and (data[start.X, start.Y + 1] = _DKS_Detek_Bot)) then
     Result := true;
-  if ((data[start.X, start.Y] = _Krizeni_End) and (data[start.X, start.Y - 1] = _Krizeni_Start)) then
+  if ((data[start.X, start.Y] = _DKS_Detek_Top) and (data[start.X, start.Y - 1] = _DKS_Detek_Bot)) then
     Result := true;
 end;
 
@@ -494,9 +493,9 @@ end;
 
 function SecondCrossPos(var data: TVetveData; start: TPoint): TPoint;
 begin
-  if ((data[start.X, start.Y] = _Krizeni_Start) and (data[start.X, start.Y + 1] = _Krizeni_End)) then
+  if ((data[start.X, start.Y] = _DKS_Detek_Top) and (data[start.X, start.Y + 1] = _DKS_Detek_Bot)) then
     Result := Point(start.X, start.Y + 1)
-  else if ((data[start.X, start.Y] = _Krizeni_End) and (data[start.X, start.Y - 1] = _Krizeni_Start)) then
+  else if ((data[start.X, start.Y] = _DKS_Detek_Top) and (data[start.X, start.Y - 1] = _DKS_Detek_Bot)) then
     Result := Point(start.X, start.Y - 1)
   else
     raise Exception.Create('No second cross!');

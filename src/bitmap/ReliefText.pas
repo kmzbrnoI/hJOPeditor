@@ -26,7 +26,7 @@ type
   TPopisek = record
     Position: TPoint;
     Text: string;
-    Color: ShortInt;
+    Color: SymbolColor;
     BlokPopisek: boolean;
   end;
 
@@ -52,7 +52,7 @@ type
 
       TextProperties: record
         Text: string;
-        Color: Integer;
+        Color: SymbolColor;
         BlokPopisek: boolean;
       end;
     end; // Operations
@@ -79,7 +79,7 @@ type
     constructor Create(DrawCanvas: TCanvas; TextIL: TImageList; Parent: TForm; Graphics: TPanelGraphics);
     destructor Destroy; override;
 
-    procedure AddToStructure(aPos: TPoint; aText: string; aColor: ShortInt; aBlokDesc: boolean);
+    procedure AddToStructure(aPos: TPoint; aText: string; aColor: SymbolColor; aBlokDesc: boolean);
     procedure DeleteFromStructure(aPos: TPoint);
 
     function GetPopisekData(Index: Integer): TPopisek;
@@ -94,7 +94,7 @@ type
     function GetPopisek(aPos: TPoint): SmallInt;
     function IsObsazeno(Pos1, Pos2: TPoint): boolean;
 
-    procedure Add(aText: string; aColor: ShortInt; popisekBlok: boolean);
+    procedure Add(aText: string; aColor: SymbolColor; popisekBlok: boolean);
     procedure Move();
     procedure Delete();
 
@@ -148,7 +148,7 @@ begin
 end;
 
 // pridani popisku
-procedure TText.AddToStructure(aPos: TPoint; aText: string; aColor: ShortInt; aBlokDesc: boolean);
+procedure TText.AddToStructure(aPos: TPoint; aText: string; aColor: SymbolColor; aBlokDesc: boolean);
 var p: TPopisek;
 begin
   if ((aPos.X < 0) or (aPos.Y < 0) or (aPos.X > (_MAX_WIDTH - 1)) or (aPos.Y > (_MAX_HEIGHT - 1))) then
@@ -209,7 +209,7 @@ begin
   begin
     p.Position.X := LoadData[(i * _Block_Length)];
     p.Position.Y := LoadData[(i * _Block_Length) + 1];
-    p.Color := LoadData[(i * _Block_Length) + 2];
+    p.Color := SymbolColor(LoadData[(i * _Block_Length) + 2]);
     p.Text := '';
     p.BlokPopisek := false;
 
@@ -240,7 +240,7 @@ begin
   begin
     p.Position.X := LoadData[pos];
     p.Position.Y := LoadData[pos + 1];
-    p.Color := LoadData[pos + 2];
+    p.Color := SymbolColor(LoadData[pos + 2]);
     len := LoadData[pos + 3];
     p.BlokPopisek := (LoadData[pos + 4] = _POPISEK_MAGIC_CODE);
     if (p.BlokPopisek) then
@@ -278,7 +278,7 @@ begin
 
     Result[currentLen] := p.Position.X;
     Result[currentLen + 1] := p.Position.Y;
-    Result[currentLen + 2] := p.Color;
+    Result[currentLen + 2] := Byte(p.Color);
 
     if (p.BlokPopisek) then
     begin
@@ -312,11 +312,9 @@ begin
   Self.Operations.FDeleteKrok := 0;
 end;
 
-// vykresleni textu
 procedure TText.Paint(showPopisky: boolean);
 var popisek: TPopisek;
 begin
-  // vykresleni textu
   for popisek in Self.Data do
     if (showPopisky) or (not popisek.BlokPopisek) then
       Self.Graphics.TextOutputI(popisek.Position, popisek.Text, popisek.Color, clBlack, popisek.BlokPopisek);
@@ -326,7 +324,7 @@ function TText.GetPopisekData(Index: Integer): TPopisek;
 begin
   if (Index >= _MAX_POPISKY) then
   begin
-    Result.Color := -1;
+    Result.Color := scPurple;
     Exit;
   end;
 
@@ -407,7 +405,7 @@ begin
           Self.Operations.TextProperties.BlokPopisek);
 
         Self.Operations.TextProperties.Text := '';
-        Self.Operations.TextProperties.Color := 0;
+        Self.Operations.TextProperties.Color := scPurple;
         Self.Operations.FMoveKrok := 0;
 
         // znovu pripraveni pohybu objektu
@@ -456,7 +454,7 @@ begin
         Exit(true);
 end;
 
-procedure TText.Add(aText: string; aColor: ShortInt; popisekBlok: boolean);
+procedure TText.Add(aText: string; aColor: SymbolColor; popisekBlok: boolean);
 begin
   if (Length(aText) > _MAX_TEXT_LENGTH) then
     raise ETooLongText.Create('Text je příliš dlouhý!');

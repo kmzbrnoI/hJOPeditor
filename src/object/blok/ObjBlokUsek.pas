@@ -266,42 +266,38 @@ procedure TUsek.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; co
   mode: TMode);
 var pos: TPoint;
   sym: TReliefSym;
-  color: TColor;
+  color: SymbolColor;
 begin
   if (selected) then
   begin
     for pos in Self.JCClick do
-      DrawObject.SymbolIL.Draw(DrawObject.Canvas, pos.X * _Symbol_Sirka, pos.Y * _Symbol_Vyska, _KPopisek_Index);
+      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _Full, scYellow);
 
     for pos in Self.KPopisek do
-      DrawObject.SymbolIL.Draw(DrawObject.Canvas, pos.X * _Symbol_Sirka, pos.Y * _Symbol_Vyska, _JCPopisek_Index);
+      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _KC, scLime);
 
     for pos in Self.Soupravy do
-      DrawObject.SymbolIL.Draw(DrawObject.Canvas, pos.X * _Symbol_Sirka, pos.Y * _Symbol_Vyska, _Soupravy_Index - 5);
+      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _Full, scBlue);
 
     for sym in Self.Symbols do
-      DrawObject.SymbolIL.Draw(DrawObject.Canvas, sym.Position.X * _Symbol_Sirka, sym.Position.Y * _Symbol_Vyska,
-        (sym.SymbolID * 10) + colors.selected);
+      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, sym.Position, sym.SymbolID, colors.Selected);
 
-    DrawObject.SymbolIL.Draw(DrawObject.Canvas, Self.Root.X * _Symbol_Sirka, Self.Root.Y * _Symbol_Vyska,
-      (_Root_Index * 10) + colors.selected);
+    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Root, _Kolecko, colors.Selected);
   end else begin
     for pos in Self.JCClick do
-      DrawObject.SymbolIL.Draw(DrawObject.Canvas, pos.X * _Symbol_Sirka, pos.Y * _Symbol_Vyska, _JCPopisek_Index);
+      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _KC, scLime);
 
     for pos in Self.KPopisek do
-      DrawObject.SymbolIL.Draw(DrawObject.Canvas, pos.X * _Symbol_Sirka, pos.Y * _Symbol_Vyska, _KPopisek_Index);
+      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _Full, scYellow);
 
     for pos in Self.Soupravy do
-      DrawObject.SymbolIL.Draw(DrawObject.Canvas, pos.X * _Symbol_Sirka, pos.Y * _Symbol_Vyska, _Soupravy_Index);
+      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _Full, scBlue);
 
     if (mode = TMode.dmBloky) then
     begin
       case (Self.Blok) of
-        - 1:
-          color := colors.Alert;
-        -2:
-          color := colors.IntUnassigned;
+        -1: color := colors.Alert;
+        -2: color := colors.IntUnassigned;
       else
         color := colors.Normal;
       end;
@@ -313,10 +309,9 @@ begin
     end;
 
     for sym in Self.Symbols do
-      DrawObject.SymbolIL.Draw(DrawObject.Canvas, sym.Position.X * _Symbol_Sirka, sym.Position.Y * _Symbol_Vyska,
-        (sym.SymbolID * 10) + color);
-    DrawObject.SymbolIL.Draw(DrawObject.Canvas, Self.Root.X * _Symbol_Sirka, Self.Root.Y * _Symbol_Vyska,
-      (_Root_Index * 10) + _Root_Color);
+      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, sym.Position, sym.SymbolID, color);
+
+    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Root, _Kolecko, scAqua);
   end; // else Selected = i
 end;
 

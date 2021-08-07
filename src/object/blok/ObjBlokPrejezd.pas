@@ -112,7 +112,7 @@ end;
 
 procedure TPrejezd.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
   mode: TMode);
-var color: TColor;
+var color: SymbolColor;
   Pos: TPoint;
   bp: TBlikPoint;
 begin
@@ -121,20 +121,18 @@ begin
     color := colors.selected;
   end else begin
     case (Self.blok) of
-      - 1:
-        color := colors.Alert;
-      -2:
-        color := colors.IntUnassigned;
+      -1: color := colors.Alert;
+      -2: color := colors.IntUnassigned;
     else
       color := colors.Normal;
     end;
-  end; // else (Self.Selected > 255)
+  end;
 
-  for Pos in Self.StaticPositions do
-    DrawObject.SymbolIL.Draw(DrawObject.Canvas, Pos.X * _Symbol_Sirka, Pos.Y * _Symbol_Vyska, _Prj_Index + color);
+  for pos in Self.StaticPositions do
+    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _Prejezd, color);
 
   for bp in Self.BlikPositions do
-    DrawObject.SymbolIL.Draw(DrawObject.Canvas, bp.Pos.X * _Symbol_Sirka, bp.Pos.Y * _Symbol_Vyska, _Prj_Index + color);
+    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _Prejezd, color);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

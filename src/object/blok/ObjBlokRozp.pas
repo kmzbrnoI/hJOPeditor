@@ -48,24 +48,21 @@ end;
 
 procedure TRozp.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
   mode: TMode);
-var color: TColor;
+var color: SymbolColor;
 begin
   if (selected) then
   begin
     color := colors.selected;
   end else begin
     case (Self.blok) of
-      - 1:
-        color := colors.Alert;
-      -2:
-        color := colors.IntUnassigned;
+      -1: color := colors.Alert;
+      -2: color := colors.IntUnassigned;
     else
       color := colors.Normal;
     end;
   end; // else (Self.Selected > 255)
 
-  DrawObject.SymbolIL.Draw(DrawObject.Canvas, Self.Pos.X * _Symbol_Sirka, Self.Pos.Y * _Symbol_Vyska,
-    ((_Rozp_Start + 1) * 10) + color);
+  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _Rozp_NoKolej, color);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

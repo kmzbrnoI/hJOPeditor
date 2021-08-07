@@ -22,12 +22,8 @@ type
 
     constructor Create(DrawObject: TDXDraw; IL_Text: TImageList);
 
-    procedure TextOutputC(Pos: TPoint; Text: string; Popredi, Pozadi: TColor; underline: boolean = false;
+    procedure TextOutputI(Pos: TPoint; Text: string; Popredi: SymbolColor; Pozadi: TColor; underline: boolean = false;
       transparent: boolean = false);
-    procedure TextOutputI(Pos: TPoint; Text: string; Popredi: ShortInt; Pozadi: TColor; underline: boolean = false;
-      transparent: boolean = false);
-
-    function GetColorIndex(Color: TColor): integer;
   end;
 
 implementation
@@ -43,13 +39,7 @@ end; // ctor
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPanelGraphics.TextOutputC(Pos: TPoint; Text: string; Popredi, Pozadi: TColor; underline: boolean = false;
-  transparent: boolean = false);
-begin
-  Self.TextOutputI(Pos, Text, Self.GetColorIndex(Popredi), Pozadi, underline, transparent);
-end;
-
-procedure TPanelGraphics.TextOutputI(Pos: TPoint; Text: string; Popredi: ShortInt; Pozadi: TColor;
+procedure TPanelGraphics.TextOutputI(Pos: TPoint; Text: string; Popredi: SymbolColor; Pozadi: TColor;
   underline: boolean = false; transparent: boolean = false);
 var j: integer;
   TextIndex: integer;
@@ -140,34 +130,17 @@ begin
     end;
 
     Self.IL_Text.Draw(Self.DrawObject.Surface.Canvas, Pos.X * _Symbol_Sirka + (j * _Symbol_Sirka),
-      Pos.Y * _Symbol_Vyska, (TextIndex * 10) + Popredi)
+      Pos.Y * _Symbol_Vyska, (TextIndex * 10) + Integer(Popredi))
   end; // for j
 
   if (underline) then
   begin
-    Self.DrawObject.Surface.Canvas.Pen.Color := _Symbol_Colors[Popredi];
+    Self.DrawObject.Surface.Canvas.Pen.Color := _Symbol_Colors[Integer(Popredi)];
     Self.DrawObject.Surface.Canvas.Rectangle(Pos.X * _Symbol_Sirka, (Pos.Y + 1) * _Symbol_Vyska - 1,
       (Pos.X + Length(Text)) * _Symbol_Sirka, (Pos.Y + 1) * _Symbol_Vyska);
   end;
 end;
 
-/// /////////////////////////////////////////////////////////////////////////////
-
-// TColor -> color index
-function TPanelGraphics.GetColorIndex(Color: TColor): integer;
-var i: integer;
-begin
-  Result := 0;
-  for i := 0 to _Symbol_ColorsCount - 1 do
-  begin
-    if (_Symbol_Colors[i] = Color) then
-    begin
-      Result := i;
-      Break;
-    end;
-  end; // for i
-end;
-
-/// /////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 end.// unit

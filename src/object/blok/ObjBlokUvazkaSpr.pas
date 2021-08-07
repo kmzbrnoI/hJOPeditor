@@ -56,15 +56,15 @@ end;
 
 procedure TUvazkaSpr.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors;
   selected: boolean; mode: TMode);
-var color: TColor;
+var color: SymbolColor;
 begin
   if (selected) then
   begin
     DrawObject.Canvas.Pen.color := clRed;
-    color := colors.selected;
+    color := colors.Selected;
   end else begin
     case (Self.blok) of
-      - 1:
+      -1:
         begin
           color := colors.Alert;
           DrawObject.Canvas.Pen.color := clAqua;
@@ -75,7 +75,7 @@ begin
           DrawObject.Canvas.Pen.color := clWhite;
         end
     else
-      color := 7;
+      color := scYellow;
       DrawObject.Canvas.Pen.color := clYellow;
     end;
   end;
@@ -94,10 +94,9 @@ begin
         DrawObject.Canvas.Rectangle(Self.Pos.X * _Symbol_Sirka, Self.Pos.Y * _Symbol_Vyska,
           (Self.Pos.X + _Uvazka_Spr_Sirka) * _Symbol_Sirka - 1, (Self.Pos.Y + Self.spr_cnt) * _Symbol_Vyska - 1);
       end;
-  end; // case
+  end;
 
-  DrawObject.SymbolIL.Draw(DrawObject.Canvas, Self.Pos.X * _Symbol_Sirka, Self.Pos.Y * _Symbol_Vyska,
-    (_Uvazka_Spr_Index * 10) + color);
+  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _Uvazka_Spr, color);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

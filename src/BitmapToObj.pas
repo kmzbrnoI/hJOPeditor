@@ -50,19 +50,19 @@ begin
     for j := 0 to Self.Bitmap.PanelHeight - 1 do
     begin
       Symbol := Self.Bitmap.Symbols.GetSymbol(Point(i, j));
-      if (Symbol = _Rozp_Start) then
+      if (Symbol = _Rozp_Kolej) then
       begin
         blk := TRozp.Create(index);
         (blk as TRozp).Pos := Point(i, j);
         Self.Objects.Bloky.Add(blk);
 
         // na misto [i, j] dame rovnou kolej (bud detekovanou nebo nedetekovanou)
-        if (((i > 0) and (Self.Bitmap.Symbols.Bitmap[i - 1, j] >= _Nedetek_Start) and (Self.Bitmap.Symbols.Bitmap[i - 1,
-          j] <= _Nedetek_End)) or ((i < Self.Bitmap.PanelWidth - 1) and (Self.Bitmap.Symbols.Bitmap[i + 1,
-          j] >= _Nedetek_Start) and (Self.Bitmap.Symbols.Bitmap[i + 1, j] <= _Nedetek_End))) then
-          Self.Bitmap.Symbols.Bitmap[i, j] := _Nedetek_Start
+        if (((i > 0) and (Self.Bitmap.Symbols.Bitmap[i - 1, j] >= _Usek_Nedetek_Start) and (Self.Bitmap.Symbols.Bitmap[i - 1,
+          j] <= _Usek_Nedetek_End)) or ((i < Self.Bitmap.PanelWidth - 1) and (Self.Bitmap.Symbols.Bitmap[i + 1,
+          j] >= _Usek_Nedetek_Start) and (Self.Bitmap.Symbols.Bitmap[i + 1, j] <= _Usek_Nedetek_End))) then
+          Self.Bitmap.Symbols.Bitmap[i, j] := _Usek_Nedetek_Start
         else
-          Self.Bitmap.Symbols.Bitmap[i, j] := _Usek_Start;
+          Self.Bitmap.Symbols.Bitmap[i, j] := _Usek_Detek_Start;
 
         Inc(Index);
       end; // if
@@ -80,8 +80,8 @@ begin
       Symbol := Self.Bitmap.Symbols.GetSymbol(Point(i, j));
       if (Symbol <> -1) then
       begin
-        if ((not Self.Zahrnuto[i, j]) and (((Symbol >= _Usek_Start) and (Symbol <= _Usek_End)) or
-          ((Symbol >= _Krizeni_Start) and (Symbol <= _Krizeni_End)) or ((Symbol >= _Vyhybka_Start) and
+        if ((not Self.Zahrnuto[i, j]) and (((Symbol >= _Usek_Detek_Start) and (Symbol <= _Usek_Detek_End)) or
+          ((Symbol >= _DKS_Detek_Top) and (Symbol <= _DKS_Detek_Bot)) or ((Symbol >= _Vyhybka_Start) and
           (Symbol <= _Vyhybka_End)) or (Symbol = _Zarazedlo_r) or (Symbol = _Zarazedlo_l))) then
           Self.ZpracujObject(Point(i, j), index, vyh_index, vykol_index);
       end; // if (Self.BitmapData.Symbols.GetSymbol(Point(i,j)) <> -1)
@@ -113,11 +113,11 @@ begin
     for j := 0 to Self.Bitmap.PanelHeight - 1 do
     begin
       Symbol := Self.Bitmap.Symbols.GetSymbol(Point(i, j));
-      if ((Symbol >= _SCom_Start) and (Symbol <= _SCom_End)) then
+      if ((Symbol >= _Navestidlo_Start) and (Symbol <= _Navestidlo_End)) then
       begin
         blk := TNavestidlo.Create(index);
         (blk as TNavestidlo).Position := Point(i, j);
-        (blk as TNavestidlo).SymbolID := Symbol - _SCom_Start;
+        (blk as TNavestidlo).SymbolID := Symbol - _Navestidlo_Start;
         Self.Objects.Bloky.Add(blk);
         Self.Zahrnuto[i, j] := true;
         Inc(Index);
@@ -160,7 +160,7 @@ begin
     begin
       Symbol := Self.Bitmap.Symbols.GetSymbol(Point(i, j));
       if (not Self.Zahrnuto[i, j]) then
-        if (Symbol = _Prj) then
+        if (Symbol = _Prejezd) then
         begin
           Self.AddPrj(Point(i, j), index);
           Self.Zahrnuto[i, j] := true;
@@ -177,7 +177,7 @@ begin
     begin
       Symbol := Self.Bitmap.Symbols.GetSymbol(Point(i, j));
       if (not Self.Zahrnuto[i, j]) then
-        if (Symbol = _Uvazka) then
+        if (Symbol = _Uvazka_Start) then
         begin
           blk := TUvazka.Create(index);
           (blk as TUvazka).Pos := Point(i, j);
@@ -331,8 +331,7 @@ begin
       cur := s.Pop();
       Symbol := Self.Bitmap.Symbols.GetSymbol(cur);
 
-      if (((Symbol >= _Usek_Start) and (Symbol <= _Usek_End)) or
-        ((Symbol >= _Krizeni_Start) and (Symbol <= _Krizeni_End)) or
+      if (((Symbol >= _Usek_Detek_Start) and (Symbol <= _Usek_Detek_End)) or
         ((Symbol >= _Vykol_Start) and (Symbol <= _Vykol_End)) or
         ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End)) or (Symbol = _Zarazedlo_r) or (Symbol = _Zarazedlo_l))
       then
@@ -342,13 +341,13 @@ begin
         begin
           // vykolejka je pro nase potreby rovna kolej
           if ((Symbol >= _Vykol_Start) and (Symbol <= _Vykol_End)) then
-            Self.Bitmap.Symbols.Bitmap[cur.X, cur.Y] := _Usek_Start;
+            Self.Bitmap.Symbols.Bitmap[cur.X, cur.Y] := _Usek_Detek_Start;
 
           if ((Symbol >= _Vyhybka_Start) and (Symbol <= _Vyhybka_End)) then
           begin
             dir.X := _Vyh_Navaznost[((Symbol - _Vyhybka_Start) * 6) + (j * 2)];
             dir.Y := _Vyh_Navaznost[((Symbol - _Vyhybka_Start) * 6) + (j * 2) + 1];
-          end else if ((Symbol >= _Krizeni_Start) and (Symbol <= _Krizeni_End)) then
+          end else if ((Symbol >= _DKS_Detek_Top) and (Symbol <= _DKS_Detek_Bot)) then
           begin
             dir := GetUsekNavaznost(Self.Bitmap.Symbols.GetSymbol(cur), TNavDir(j));
           end else begin // usek
@@ -384,8 +383,7 @@ begin
           end;
 
           // vedlejsi symbol je usek, krizeni nebo zarazedlo
-          if (((Symbol2 >= _Usek_Start) and (Symbol2 <= _Usek_End)) or
-            ((Symbol2 >= _Krizeni_Start) and (Symbol2 <= _Krizeni_End)) or (Symbol2 = _Zarazedlo_r) or
+          if (((Symbol2 >= _Usek_Detek_Start) and (Symbol2 <= _Usek_Detek_End)) or (Symbol2 = _Zarazedlo_r) or
             (Symbol2 = _Zarazedlo_l)) then
           begin
             // ted vime, ze na NavaznostPos je usek
@@ -393,7 +391,7 @@ begin
             if (((TempPos.X + GetUsekNavaznost(Symbol2, ndPositive).X = cur.X) and
               (TempPos.Y + GetUsekNavaznost(Symbol2, ndPositive).Y = cur.Y)) or
               ((TempPos.X + GetUsekNavaznost(Symbol2, ndNegative).X = cur.X) and (TempPos.Y + GetUsekNavaznost(Symbol2,
-              ndNegative).Y = cur.Y)) or ((Symbol2 >= _Krizeni_Start) and (Symbol2 <= _Krizeni_End) and
+              ndNegative).Y = cur.Y)) or ((Symbol2 >= _DKS_Detek_Top) and (Symbol2 <= _DKS_Detek_Bot) and
               ((TempPos.X + GetUsekNavaznost(Symbol2, ndThird).X = cur.X) and (TempPos.Y + GetUsekNavaznost(Symbol2,
               ndThird).Y = cur.Y)))) then
             begin
@@ -461,7 +459,7 @@ begin
   blk := TPrejezd.Create(index);
 
   height := 0;
-  while (Self.Bitmap.Symbols.GetSymbol(Point(Pos.X, Pos.Y + height)) = _Prj) do
+  while (Self.Bitmap.Symbols.GetSymbol(Point(Pos.X, Pos.Y + height)) = _Prejezd) do
     Inc(height);
 
   // edges are always static
@@ -481,7 +479,7 @@ begin
     for Y := 1 to height - 2 do
     begin
       lefts := Self.Bitmap.Symbols.GetSymbol(Point(Pos.X - 1, Pos.Y + Y));
-      if ((lefts >= _Usek_Start) and (lefts <= _Usek_End) and (lefts <> 15) and (lefts <> 16) and (lefts <> 21) and
+      if ((lefts >= _Usek_Detek_Start) and (lefts <= _Usek_Detek_End) and (lefts <> 15) and (lefts <> 16) and (lefts <> 21) and
         (lefts <> 22)) then
       begin
         blik_point.Pos := Point(Pos.X, Pos.Y + Y);

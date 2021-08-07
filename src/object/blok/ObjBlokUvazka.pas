@@ -51,26 +51,22 @@ end;
 
 procedure TUvazka.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
   mode: TMode);
-var color: TColor;
+var color: SymbolColor;
 begin
   if (selected) then
   begin
-    color := colors.selected;
+    color := colors.Selected;
   end else begin
     case (Self.blok) of
-      - 1:
-        color := colors.Alert;
-      -2:
-        color := colors.IntUnassigned;
+      -1: color := colors.Alert;
+      -2: color := colors.IntUnassigned;
     else
       color := colors.Normal;
     end;
   end;
 
-  DrawObject.SymbolIL.Draw(DrawObject.Canvas, Self.Pos.X * _Symbol_Sirka, Self.Pos.Y * _Symbol_Vyska,
-    (_Uvazka_Start * 10) + color);
-  DrawObject.SymbolIL.Draw(DrawObject.Canvas, (Self.Pos.X + 1) * _Symbol_Sirka, Self.Pos.Y * _Symbol_Vyska,
-    ((_Uvazka_Start + 1) * 10) + color);
+  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _Uvazka_Start, color);
+  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _Uvazka_Start+1, color);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

@@ -7,7 +7,7 @@ uses
   Dialogs, Menus, ReliefObjects, Buttons, ToolWin, ComCtrls, ExtCtrls, Panel,
   ImgList, DXDraws, StdCtrls, AppEvnts, StrUtils, ReliefBitmap, Global, Math,
   ReliefSettings, fBlockEdit, DXSprite, DIB, ObjBlok, ReliefText, Types,
-  System.ImageList;
+  System.ImageList, symbolHelper;
 
 type
   TF_Hlavni = class(TForm)
@@ -962,7 +962,7 @@ begin
   F_Popisek.NewPopisek();
 
   if (F_Popisek.PopisekColor <> -1) then
-    Relief.AddText(F_Popisek.PopisekText, F_Popisek.PopisekColor, F_Popisek.PopisekBlok);
+    Relief.AddText(F_Popisek.PopisekText, SymbolColor(F_Popisek.PopisekColor), F_Popisek.PopisekBlok);
 end;
 
 procedure TF_Hlavni.TB_EndJCClick(Sender: TObject);
@@ -1108,7 +1108,7 @@ begin
   if (F_Popisek.PopisekColor = -1) then
     Exit;
   popisek.Text := F_Popisek.PopisekText;
-  popisek.Color := F_Popisek.PopisekColor;
+  popisek.Color := SymbolColor(F_Popisek.PopisekColor);
   popisek.BlokPopisek := F_Popisek.PopisekBlok;
 end;
 

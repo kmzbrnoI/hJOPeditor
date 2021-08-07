@@ -5,15 +5,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
-  StrUtils, Types;
+  StrUtils, Types, symbolHelper;
 
 const
-  // zde je definovan pocet barev
-  _Symbol_ColorsCount = 10;
-  // zde jsou definovany jednotluve barvy
-  _Symbol_Colors: array [0 .. (_Symbol_ColorsCount - 1)] of TColor = ($FF00FF, $A0A0A0, $0000FF, $00FF00, $FFFFFF,
-    $FFFF00, $FF0000, $00FFFF, $800080, $000000);
-
   _Uvazka_Spr_Sirka = 9;
   _MAX_BLK = 1023;
 
@@ -42,7 +36,7 @@ type
   end;
 
   TObjColors = record
-    Selected, Normal, Alert, IntUnassigned: Byte;
+    Selected, Normal, Alert, IntUnassigned: SymbolColor;
   end;
 
 function GetVersion(const FileName: string): string; // cteni verze z nastaveni

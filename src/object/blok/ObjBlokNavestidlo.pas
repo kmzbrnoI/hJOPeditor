@@ -54,19 +54,13 @@ procedure TNavestidlo.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphi
 begin
   if (selected) then
   begin
-    DrawObject.SymbolIL.Draw(DrawObject.Canvas, Self.Position.X * _Symbol_Sirka, Self.Position.Y * _Symbol_Vyska,
-      ((_SCom_Start + Self.SymbolID) * 10) + colors.selected);
+    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _Navestidlo_Start + Self.SymbolID, colors.Selected);
   end else begin
     case (Self.Blok) of
-      - 1:
-        DrawObject.SymbolIL.Draw(DrawObject.Canvas, Self.Position.X * _Symbol_Sirka, Self.Position.Y * _Symbol_Vyska,
-          ((_SCom_Start + Self.SymbolID) * 10) + colors.Alert);
-      -2:
-        DrawObject.SymbolIL.Draw(DrawObject.Canvas, Self.Position.X * _Symbol_Sirka, Self.Position.Y * _Symbol_Vyska,
-          ((_SCom_Start + Self.SymbolID) * 10) + colors.IntUnassigned);
+      -1: SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _Navestidlo_Start + Self.SymbolID, colors.Alert);
+      -2: SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _Navestidlo_Start + Self.SymbolID, colors.IntUnassigned);
     else
-      DrawObject.SymbolIL.Draw(DrawObject.Canvas, Self.Position.X * _Symbol_Sirka, Self.Position.Y * _Symbol_Vyska,
-        ((_SCom_Start + Self.SymbolID) * 10) + colors.Normal);
+      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _Navestidlo_Start + Self.SymbolID, colors.Normal);
     end;
   end;
 end;

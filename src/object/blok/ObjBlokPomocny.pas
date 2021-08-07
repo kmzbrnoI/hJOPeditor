@@ -78,13 +78,13 @@ end;
 procedure TPomocnyObj.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors;
   selected: boolean; mode: TMode);
 var pos: TPoint;
-  color: Integer;
+    color: SymbolColor;
 begin
   if (Self.Symbol in BLK_ASSIGN_SYMBOLS) then
   begin
     if (selected) then
     begin
-      color := colors.selected;
+      color := colors.Selected;
     end else begin
       case (Self.blok) of
         - 1:
@@ -96,12 +96,11 @@ begin
       end;
     end;
   end else begin
-    color := _Bitmap_DrawColors[Self.Symbol];
+    color := SymbolDrawColor(Self.Symbol);
   end;
 
   for pos in Self.Positions do
-    DrawObject.SymbolIL.Draw(DrawObject.Canvas, pos.X * _Symbol_Sirka, pos.Y * _Symbol_Vyska,
-      (Self.Symbol * 10) + color);
+    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, Self.Symbol, color);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

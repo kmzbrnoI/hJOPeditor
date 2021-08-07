@@ -56,7 +56,8 @@ type
       end;
     end; // Operations
 
-    procedure PaintSymbol(IL: TImageList; X, Y: Integer; index: Integer; color: Integer);
+    procedure PaintSymbol(X, Y: Integer; index: Integer); overload;
+    procedure PaintSymbol(IL: TImageList; X, Y: Integer; index: Integer; color: SymbolColor); overload;
 
     procedure AddToStructure(aPos: TPoint; SymbolID: Integer);
     procedure DeleteFromStructure(aPos: TPoint);
@@ -194,7 +195,7 @@ var i, j: Integer;
 begin
   for i := 0 to Self.Panel.Width - 1 do
     for j := 0 to Self.Panel.Height - 1 do
-      Self.PaintSymbol(Self.DrawObject.IL, i, j, Self.Bitmap[i, j], _Bitmap_DrawColors[Self.Bitmap[i, j]]);
+      Self.PaintSymbol(i, j, Self.Bitmap[i, j]);
 end;
 
 // nacteni surovych dat do struktur
@@ -592,8 +593,7 @@ begin
     if ((Self.Operations.Group.Start.X = -1) and (Self.Operations.Group.Start.Y = -1)) then
     begin
       // presun 1 objektu
-      Self.PaintSymbol(Self.DrawObject.IL, KurzorPos.X, KurzorPos.Y, Self.Operations.Move.Symbols[0, 0],
-        _Bitmap_DrawColors[Self.Operations.Move.Symbols[0, 0]]);
+      Self.PaintSymbol(KurzorPos.X, KurzorPos.Y, Self.Operations.Move.Symbols[0, 0]);
     end else begin
       // presun skupiny
       if (Self.Operations.Move.Krok > 2) then
@@ -605,8 +605,7 @@ begin
             aPos.X := i + KurzorPos.X - Self.Operations.Move.aWidth + 1;
             aPos.Y := j + KurzorPos.Y - Self.Operations.Move.aHeight + 1;
             if (Self.GetSymbol(aPos) = -1) then
-              Self.PaintSymbol(Self.DrawObject.IL, aPos.X, aPos.Y, Self.Operations.Move.Symbols[i, j],
-                _Bitmap_DrawColors[Self.Operations.Move.Symbols[i, j]]);
+              Self.PaintSymbol(aPos.X, aPos.Y, Self.Operations.Move.Symbols[i, j]);
           end; // for j
         end; // for i
       end; // if (Self.Move.Krok > 2)
@@ -619,19 +618,13 @@ begin
     if ((Self.Operations.Group.Start.X = -1) and (Self.Operations.Group.Start.Y = -1)) then
     begin
       // presun 1 objektu
-      Self.PaintSymbol(Self.DrawObject.IL, KurzorPos.X, KurzorPos.Y, Self.Operations.Add.Symbol,
-        _Bitmap_DrawColors[Self.Operations.Add.Symbol]);
+      Self.PaintSymbol(KurzorPos.X, KurzorPos.Y, Self.Operations.Add.Symbol);
     end else begin
       // presun skupiny
       for i := Self.Operations.Group.Start.X to KurzorPos.X do
-      begin
         for j := Self.Operations.Group.Start.Y to KurzorPos.Y do
-        begin
           if (Self.GetSymbol(Point(i, j)) = -1) then
-            Self.PaintSymbol(Self.DrawObject.IL, i, j, Self.Operations.Add.Symbol,
-              _Bitmap_DrawColors[Self.Operations.Add.Symbol]);
-        end; // for j
-      end; // for i
+            Self.PaintSymbol(i, j, Self.Operations.Add.Symbol);
     end; // else ((Self.Group.Start.X = -1) and (Self.Group.Start.Y = -1))
   end; // if Self.Add > -1
 end;
@@ -686,7 +679,7 @@ end;
 
 // tato funkce ve skutenocnosti jen vykresluje veci z ImageListu
 // zaroven ale resi specialni pripady velikosti, jako jsou naprikald uvazky, ci seznam souprav u uvazky
-procedure TBitmapSymbols.PaintSymbol(IL: TImageList; X, Y: Integer; index: Integer; color: Integer);
+procedure TBitmapSymbols.PaintSymbol(IL: TImageList; X, Y: Integer; index: Integer; color: SymbolColor);
 begin
   // specialni pripady: symbol seznamu souprav uvazky
   if (index = _Symbol_Uvazka_Spr) then
@@ -701,9 +694,14 @@ begin
   // specialni pripad: k trati vykreslujeme druhy symbol do paru
   if (index = _Symbol_Uvazka) then
     Self.DrawObject.IL.Draw(Self.DrawObject.Canvas, (X + 1) * _Symbol_Sirka, Y * _Symbol_Vyska,
-      ((_Symbol_Uvazka + 1) * 10) + color);
+      ((_Symbol_Uvazka + 1) * 10) + Integer(color));
 
-  IL.Draw(Self.DrawObject.Canvas, X * _Symbol_Sirka, Y * _Symbol_Vyska, (index * 10) + color);
+  IL.Draw(Self.DrawObject.Canvas, X * _Symbol_Sirka, Y * _Symbol_Vyska, (index * 10) + Integer(color));
+end;
+
+procedure TBitmapSymbols.PaintSymbol(X, Y: Integer; index: Integer);
+begin
+  Self.PaintSymbol(Self.DrawObject.IL, X, Y, index, SymbolDrawColor(index));
 end;
 
 procedure TBitmapSymbols.CheckOpInProgressAndExcept();

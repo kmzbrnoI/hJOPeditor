@@ -9,10 +9,10 @@ uses
   Generics.Collections, symbolHelper, vetev, ObjBlok;
 
 const
-  _Def_Color_Selected = 2;
-  _Def_Color_Normal = 1;
-  _Def_Color_Alert = 5;
-  _Def_Color_IntUnassigned = 4;
+  _Def_Color_Selected: SymbolColor = scRed;
+  _Def_Color_Normal: SymbolColor = scGray;
+  _Def_Color_Alert: SymbolColor = scAqua;
+  _Def_Color_IntUnassigned: SymbolColor = scWhite;
 
   _FILEVERSION_10 = $0100;
   _FILEVERSION_11 = $0101;
@@ -98,10 +98,10 @@ type
     property FileStav: ShortInt read FStav;
     property mode: TMode read FMode write SetMode;
 
-    property ColorSelected: Byte read Colors.Selected write Colors.Selected;
-    property ColorNormal: Byte read Colors.Normal write Colors.Normal;
-    property ColorAlert: Byte read Colors.Alert write Colors.Alert;
-    property ColorIntUnassigned: Byte read Colors.IntUnassigned write Colors.IntUnassigned;
+    property ColorSelected: SymbolColor read Colors.Selected write Colors.Selected;
+    property ColorNormal: SymbolColor read Colors.Normal write Colors.Normal;
+    property ColorAlert: SymbolColor read Colors.Alert write Colors.Alert;
+    property ColorIntUnassigned: SymbolColor read Colors.IntUnassigned write Colors.IntUnassigned;
     property selected_obj: TGraphBlok read Selected;
 
     property OnBlokEdit: TBlokAskEvent read FOnBlokEdit write FOnBlokEdit;
@@ -388,8 +388,7 @@ begin
 
   // vykreslit koren pod kurzorem
   if (Self.FMode = dmRoots) then
-    Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, CursorPos.X * _Symbol_Sirka, CursorPos.Y * _Symbol_Vyska,
-      (_Root_Index * 10) + _Root_Color);
+    SymbolDraw(Self.DrawObject.SymbolIL, Self.DrawObject.Canvas, CursorPos, _Kolecko, scAqua);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

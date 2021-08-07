@@ -60,19 +60,13 @@ procedure TVyhybka.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics;
 begin
   if (selected) then
   begin
-    DrawObject.SymbolIL.Draw(DrawObject.Canvas, Self.Position.X * _Symbol_Sirka, Self.Position.Y * _Symbol_Vyska,
-      ((Self.SymbolID) * 10) + colors.selected);
+    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, Self.SymbolID, colors.Selected);
   end else begin
     case (Self.Blok) of
-      - 1:
-        DrawObject.SymbolIL.Draw(DrawObject.Canvas, Self.Position.X * _Symbol_Sirka, Self.Position.Y * _Symbol_Vyska,
-          ((Self.SymbolID) * 10) + colors.Alert);
-      -2:
-        DrawObject.SymbolIL.Draw(DrawObject.Canvas, Self.Position.X * _Symbol_Sirka, Self.Position.Y * _Symbol_Vyska,
-          ((Self.SymbolID) * 10) + colors.IntUnassigned);
+      -1: SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, Self.SymbolID, colors.Alert);
+      -2: SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, Self.SymbolID, colors.IntUnassigned);
     else
-      DrawObject.SymbolIL.Draw(DrawObject.Canvas, Self.Position.X * _Symbol_Sirka, Self.Position.Y * _Symbol_Vyska,
-        ((Self.SymbolID) * 10) + colors.Normal);
+      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, Self.SymbolID, colors.Normal);
     end;
   end;
 end;

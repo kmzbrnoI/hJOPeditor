@@ -40,7 +40,7 @@ type
     // private
   public
     PopisekText: string;
-    PopisekColor: ShortInt;
+    PopisekColor: Integer;
     PopisekBlok: Boolean;
 
     procedure NewPopisek;
@@ -51,6 +51,8 @@ var
   F_Popisek: TF_Popisek;
 
 implementation
+
+uses symbolHelper;
 
 {$R *.dfm}
 
@@ -118,28 +120,20 @@ end;
 procedure TF_Popisek.OpenPopisek(aText: string; popisek: TPopisek);
 begin
   Self.PopisekText := popisek.Text;
-  Self.PopisekColor := popisek.Color;
+  Self.PopisekColor := Integer(popisek.Color);
   Self.PopisekBlok := popisek.BlokPopisek;
 
   Self.E_Text.Text := popisek.Text;
   case (popisek.Color) of
-    0:
-      Self.RB_Col0.Checked := true;
-    1:
-      Self.RB_Col1.Checked := true;
-    2:
-      Self.RB_Col2.Checked := true;
-    3:
-      Self.RB_Col3.Checked := true;
-    4:
-      Self.RB_Col4.Checked := true;
-    5:
-      Self.RB_Col5.Checked := true;
-    6:
-      Self.RB_Col6.Checked := true;
-    7:
-      Self.RB_Col7.Checked := true;
-  end; // case
+    scPurple: Self.RB_Col0.Checked := true;
+    scGray: Self.RB_Col1.Checked := true;
+    scRed: Self.RB_Col2.Checked := true;
+    scLime: Self.RB_Col3.Checked := true;
+    scWhite: Self.RB_Col4.Checked := true;
+    scAqua: Self.RB_Col5.Checked := true;
+    scBlue: Self.RB_Col6.Checked := true;
+    scYellow: Self.RB_Col7.Checked := true;
+  end;
   Self.CHB_Blok_Popisek.Checked := popisek.BlokPopisek;
 
   Self.Caption := 'Editovat popisek';

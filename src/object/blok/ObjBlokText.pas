@@ -2,14 +2,14 @@ unit ObjBlokText;
 
 interface
 
-uses ObjBlok, IniFiles, Types, Global, PGraphics, Graphics;
+uses ObjBlok, IniFiles, Types, Global, PGraphics, Graphics, symbolHelper;
 
 type
 
   TText = class(TGraphBlok)
     Text: string;
     Position: TPoint;
-    Color: Integer;
+    Color: SymbolColor;
 
     constructor Create(index: Integer);
     procedure Load(ini: TMemIniFile; key: string; version: Word); override;
@@ -43,7 +43,7 @@ begin
   Self.Text := ini.ReadString(key, 'T', 'text');
   Self.Position.X := ini.ReadInteger(key, 'X', 0);
   Self.Position.Y := ini.ReadInteger(key, 'Y', 0);
-  Self.Color := ini.ReadInteger(key, 'C', 0);
+  Self.Color := SymbolColor(ini.ReadInteger(key, 'C', 0));
 end;
 
 procedure TText.Save(ini: TMemIniFile; key: string);
@@ -54,13 +54,14 @@ begin
   ini.WriteString(key, 'T', Self.Text);
   ini.WriteInteger(key, 'X', Self.Position.X);
   ini.WriteInteger(key, 'Y', Self.Position.Y);
-  ini.WriteInteger(key, 'C', Self.Color);
+  ini.WriteInteger(key, 'C', Integer(Self.Color));
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TText.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
   mode: TMode);
+var color: SymbolColor;
 begin
   if ((Length(Self.Text) = 1) and (Self.typ = TBlkType.Text)) then
   begin
