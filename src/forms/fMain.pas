@@ -158,8 +158,6 @@ type
     _Caption = 'hJOPeditor';
     _Config_File = 'Config.ini';
 
-    procedure ActivateSymbol(index: Integer);
-
   public
     DXD_main: TDXDraw;
     Relief: TRelief;
@@ -335,7 +333,6 @@ begin
 end;
 
 procedure TF_Hlavni.FormKeyPress(Sender: TObject; var Key: Char);
-var index: Integer;
 begin
   case (Key) of
     'g':
@@ -367,118 +364,6 @@ begin
         if (Self.Relief.Mode = dmBitmap) then
           Self.B_MoveClick(Self);
       end;
-
-    'r':
-      begin
-        // rotate symbol
-        if (not Assigned(Self.pushedButton)) then
-          Exit;
-        index := Self.pushedButton.Tag; // index of the symbol
-
-        case (index) of
-          0 .. 3:
-            begin
-              // vyhybky
-              index := index + 1;
-              if (index > 3) then
-                index := 0;
-              Self.ActivateSymbol(index);
-            end;
-
-          12 .. 17:
-            begin
-              // detekovany usek
-              index := index + 1;
-              if (index > 17) then
-                index := 12;
-              Self.ActivateSymbol(index);
-            end;
-
-          18 .. 23:
-            begin
-              // nedetekovany usek
-              index := index + 1;
-              if (index > 23) then
-                index := 18;
-              Self.ActivateSymbol(index);
-            end;
-
-          // jizdni navestidla
-          24:
-            Self.ActivateSymbol(25);
-          25:
-            Self.ActivateSymbol(24);
-
-          // manipulacni navestidla
-          28:
-            Self.ActivateSymbol(29);
-          29:
-            Self.ActivateSymbol(28);
-
-          // zarazedla
-          30:
-            Self.ActivateSymbol(31);
-          31:
-            Self.ActivateSymbol(30);
-
-          32 .. 34:
-            begin
-              // peron
-              index := index + 1;
-              if (index > 34) then
-                index := 32;
-              Self.ActivateSymbol(index);
-            end;
-
-          // vykolejka
-          49:
-            Self.ActivateSymbol(50);
-          50:
-            Self.ActivateSymbol(49);
-
-        end;
-      end;
-
-    's':
-      begin
-        // change symbol
-        if (not Assigned(Self.Relief)) then
-          Exit;
-        if (Self.Relief.Mode <> dmBitmap) then
-          Exit;
-
-        if (Assigned(Self.pushedButton)) then
-          index := Self.pushedButton.Tag
-        else
-          index := -1;
-
-        case (index) of
-          0 .. 3:
-            Self.ActivateSymbol(12);
-          12 .. 17:
-            Self.ActivateSymbol(18);
-          18 .. 23:
-            Self.ActivateSymbol(24);
-          24 .. 25:
-            Self.ActivateSymbol(28);
-          28 .. 29:
-            Self.ActivateSymbol(49);
-          30 .. 31:
-            Self.ActivateSymbol(32);
-          32 .. 34:
-            Self.ActivateSymbol(35);
-          40:
-            Self.ActivateSymbol(48);
-          48:
-            Self.ActivateSymbol(55);
-          49 .. 50:
-            Self.ActivateSymbol(30);
-          35:
-            Self.ActivateSymbol(30);
-        else
-          Self.ActivateSymbol(0);
-        end;
-      end; // 's'
 
     't':
       begin
@@ -1151,91 +1036,6 @@ begin
       end;
 
   end; // case
-end;
-
-procedure TF_Hlavni.ActivateSymbol(index: Integer);
-begin
-  if (not Self.TB_BitmapTools.Visible) then
-    Exit;
-
-  if (Assigned(Self.pushedButton)) then
-    Self.pushedButton.Down := false;
-
-  case (index) of
-    0:
-      Self.ToolButton0.OnClick(Self.ToolButton0);
-    1:
-      Self.ToolButton1.OnClick(Self.ToolButton1);
-    2:
-      Self.ToolButton2.OnClick(Self.ToolButton2);
-    3:
-      Self.ToolButton3.OnClick(Self.ToolButton3);
-    12:
-      Self.ToolButton12.OnClick(Self.ToolButton12);
-    13:
-      Self.ToolButton13.OnClick(Self.ToolButton13);
-    14:
-      Self.ToolButton14.OnClick(Self.ToolButton14);
-    15:
-      Self.ToolButton15.OnClick(Self.ToolButton15);
-    16:
-      Self.ToolButton16.OnClick(Self.ToolButton16);
-    17:
-      Self.ToolButton17.OnClick(Self.ToolButton17);
-    18:
-      Self.ToolButton18.OnClick(Self.ToolButton18);
-    19:
-      Self.ToolButton19.OnClick(Self.ToolButton19);
-{    20:
-      Self.ToolButton20.OnClick(Self.ToolButton20);
-    21:
-      Self.ToolButton21.OnClick(Self.ToolButton21);
-    22:
-      Self.ToolButton22.OnClick(Self.ToolButton22);
-    23:
-      Self.ToolButton23.OnClick(Self.ToolButton23); }
-    24:
-      Self.ToolButton24.OnClick(Self.ToolButton24);
-    25:
-      Self.ToolButton25.OnClick(Self.ToolButton25);
-    28:
-      Self.ToolButton28.OnClick(Self.ToolButton28);
-    29:
-      Self.ToolButton29.OnClick(Self.ToolButton29);
-    30:
-      Self.ToolButton30.OnClick(Self.ToolButton30);
-    31:
-      Self.ToolButton31.OnClick(Self.ToolButton31);
-    32:
-      Self.ToolButton32.OnClick(Self.ToolButton32);
-    33:
-      Self.ToolButton33.OnClick(Self.ToolButton33);
-    34:
-      Self.ToolButton34.OnClick(Self.ToolButton34);
-    35:
-      Self.ToolButton35.OnClick(Self.ToolButton35);
-
-    40:
-      Self.TB_Text.OnClick(Self.TB_Text);
-    41:
-      Self.TB_EndJC.OnClick(Self.TB_EndJC);
-    42:
-      Self.TB_KCislo.OnClick(Self.TB_KCislo);
-    43:
-      Self.TB_SoupravaPos.OnClick(Self.TB_SoupravaPos);
-
-    48:
-      Self.ToolButton48.OnClick(Self.ToolButton48);
-    55:
-      Self.ToolButton55.OnClick(Self.ToolButton55);
-    56:
-      Self.ToolButton56.OnClick(Self.ToolButton56);
-
-    49:
-      Self.ToolButton49.OnClick(Self.ToolButton49);
-    50:
-      Self.ToolButton50.OnClick(Self.ToolButton50);
-  end;
 end;
 
 procedure TF_Hlavni.AssignReliefEvents();
