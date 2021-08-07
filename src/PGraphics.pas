@@ -22,7 +22,7 @@ type
 
     constructor Create(DrawObject: TDXDraw; IL_Text: TImageList);
 
-    procedure TextOutputI(Pos: TPoint; Text: string; Popredi: SymbolColor; Pozadi: TColor; underline: boolean = false;
+    procedure TextOutputI(Pos: TPoint; Text: string; fg: SymbolColor; bg: TColor; underline: boolean = false;
       transparent: boolean = false);
   end;
 
@@ -39,15 +39,15 @@ end; // ctor
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPanelGraphics.TextOutputI(Pos: TPoint; Text: string; Popredi: SymbolColor; Pozadi: TColor;
+procedure TPanelGraphics.TextOutputI(Pos: TPoint; Text: string; fg: SymbolColor; bg: TColor;
   underline: boolean = false; transparent: boolean = false);
 begin
   // transparent is faster
 
   if (not transparent) then
   begin
-    Self.DrawObject.Surface.Canvas.Pen.Color := Pozadi;
-    Self.DrawObject.Surface.Canvas.Brush.Color := Pozadi;
+    Self.DrawObject.Surface.Canvas.Pen.Color := bg;
+    Self.DrawObject.Surface.Canvas.Brush.Color := bg;
     Self.DrawObject.Surface.Canvas.Rectangle(Pos.X * _Symbol_Sirka, Pos.Y * _Symbol_Vyska,
       (Pos.X + Length(Text)) * _Symbol_Sirka, (Pos.Y + 1) * _Symbol_Vyska);
   end;
@@ -129,12 +129,12 @@ begin
     end;
 
     Self.IL_Text.Draw(Self.DrawObject.Surface.Canvas, Pos.X * _Symbol_Sirka + (j * _Symbol_Sirka),
-      Pos.Y * _Symbol_Vyska, (TextIndex * 10) + Integer(Popredi))
+      Pos.Y * _Symbol_Vyska, (TextIndex * 10) + Integer(fg))
   end; // for j
 
   if (underline) then
   begin
-    Self.DrawObject.Surface.Canvas.Pen.Color := _Symbol_Colors[Integer(Popredi)];
+    Self.DrawObject.Surface.Canvas.Pen.Color := _Symbol_Colors[Integer(fg)];
     Self.DrawObject.Surface.Canvas.Rectangle(Pos.X * _Symbol_Sirka, (Pos.Y + 1) * _Symbol_Vyska - 1,
       (Pos.X + Length(Text)) * _Symbol_Sirka, (Pos.Y + 1) * _Symbol_Vyska);
   end;

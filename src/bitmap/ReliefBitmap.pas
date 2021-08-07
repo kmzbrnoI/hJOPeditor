@@ -45,7 +45,8 @@ type
     procedure CheckOperations;
 
     procedure ShowEvent;
-    function IsSymbolSymbolTextEvent(Pos: TPoint): Boolean;
+    function IsSymbolSymbolEvent(Pos: TPoint): Boolean;
+    function IsSymbolTextEvent(Pos: TPoint): Boolean;
     function IsSymbolSeparVertEvent(Pos: TPoint): Boolean;
     function IsSymbolSeparHorEvent(Pos: TPoint): Boolean;
     function IsSymbolKPopiskyJCClickSoupravyEvent(Pos: TPoint): Boolean;
@@ -477,7 +478,7 @@ begin
 
   Self.Symbols := TBitmapSymbols.Create(SymbolIL, DrawCanvas, Width, Height);
   Self.Symbols.FOnShow := Self.ShowEvent;
-  Self.Symbols.FIsSymbol := Self.IsSymbolSymbolTextEvent;
+  Self.Symbols.FIsSymbol := Self.IsSymbolSymbolEvent;
   Self.Symbols.FNullOperations := Self.NullOperationsEvent;
   Self.Symbols.FMoveActivate := Self.MoveActivateEvent;
   Self.Symbols.FDeleteActivate := Self.DeleteActivateEvent;
@@ -525,7 +526,7 @@ begin
 
   Self.Text := TText.Create(DrawCanvas, TextIL, Parent, Graphics);
   Self.Text.FOnShow := Self.ShowEvent;
-  Self.Text.FIsSymbol := Self.IsSymbolSymbolTextEvent;
+  Self.Text.FIsSymbol := Self.IsSymbolTextEvent;
   Self.Text.FNullOperations := Self.NullOperationsEvent;
   Self.Text.FMoveActivate := Self.MoveActivateEvent;
   Self.Text.FDeleteActivate := Self.DeleteActivateEvent;
@@ -567,11 +568,11 @@ begin
   case (Self.Mode) of
     dmBitmap:
       begin
+        Self.Text.MouseUp(Position, Button);
         Self.KPopisky.MouseUp(Position, Button);
         Self.JCClick.MouseUp(Position, Button);
         Self.Soupravy.MouseUp(Position, Button);
         Self.Symbols.MouseUp(Position, Button);
-        Self.Text.MouseUp(Position, Button);
       end;
 
     dmSepHor:
@@ -595,11 +596,24 @@ begin
     FOnShow;
 end;
 
-function TPanelBitmap.IsSymbolSymbolTextEvent(Pos: TPoint): Boolean;
+function TPanelBitmap.IsSymbolSymbolEvent(Pos: TPoint): Boolean;
 begin
   Result := false;
 
   if (Self.Symbols.GetSymbol(Pos) <> -1) then
+    Exit(true);
+  // Symbol (platform) could be placed over text
+  if (Assigned(Self.FORAskEvent)) then
+    Exit(Self.FORAskEvent(Pos));
+end;
+
+function TPanelBitmap.IsSymbolTextEvent(Pos: TPoint): Boolean;
+begin
+  Result := false;
+
+  // Text could be placed over platform
+  var symbol := Self.Symbols.GetSymbol(Pos);
+  if ((symbol <> -1) and ((symbol < _Peron_Start) or (symbol > _Peron_End))) then
     Exit(true);
   if (Self.Text.GetPopisek(Pos) <> -1) then
     Exit(true);
@@ -619,7 +633,7 @@ end;
 
 function TPanelBitmap.IsSymbolKPopiskyJCClickSoupravyEvent(Pos: TPoint): Boolean;
 begin
-  Result :=  (Self.KPopisky.GetObject(Pos) <> -1) or (Self.JCClick.GetObject(Pos) <> -1) or (Self.Soupravy.GetObject(Pos) <> -1);
+  Result := (Self.KPopisky.GetObject(Pos) <> -1) or (Self.JCClick.GetObject(Pos) <> -1) or (Self.Soupravy.GetObject(Pos) <> -1);
 end;
 
 procedure TPanelBitmap.NullOperationsEvent();

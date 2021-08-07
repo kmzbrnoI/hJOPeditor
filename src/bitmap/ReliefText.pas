@@ -314,7 +314,7 @@ var popisek: TPopisek;
 begin
   for popisek in Self.Data do
     if (showPopisky) or (not popisek.BlokPopisek) then
-      Self.Graphics.TextOutputI(popisek.Position, popisek.Text, popisek.Color, clBlack, popisek.BlokPopisek);
+      Self.Graphics.TextOutputI(popisek.Position, popisek.Text, popisek.Color, clBlack, popisek.BlokPopisek, true);
 end;
 
 function TText.GetPopisekData(Index: Integer): TPopisek;
