@@ -62,7 +62,7 @@ begin
     end;
   end; // else (Self.Selected > 255)
 
-  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _Rozp_NoKolej, color);
+  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _S_DISC_ALONE, color);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

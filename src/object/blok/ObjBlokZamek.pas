@@ -63,7 +63,7 @@ begin
   end;
 
   DrawObject.Canvas.Brush.color := clBlack;
-  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _Zamek, color);
+  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _S_LOCK, color);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

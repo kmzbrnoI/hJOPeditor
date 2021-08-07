@@ -72,13 +72,13 @@ begin
           (po.Bloky[j] as TVyhybka).SymbolID;
       if ((po.Bloky[j].typ = TBlkType.vykol) and ((po.Bloky[j] as TVykol).obj = po.Bloky[i].index)) then
         data[(po.Bloky[j] as TVykol).Pos.X, (po.Bloky[j] as TVykol).Pos.Y] := (po.Bloky[j] as TVykol).symbol +
-          _Vykol_Start;
+          _S_DERAIL_B;
     end;
 
     var symbol := data[TUsek(po.Bloky[i]).Root.X, TUsek(po.Bloky[i]).Root.Y];
-    if ((symbol = _DKS_Detek_Top) or (symbol = _DKS_Nedetek_Top)) then
+    if ((symbol = _S_DKS_DET_TOP) or (symbol = _S_DKS_NODET_TOP)) then
       (po.Bloky[i] as TUsek).DKStype := dksTop
-    else if ((symbol = _DKS_Detek_Bot) or (symbol = _DKS_Nedetek_Bot)) then
+    else if ((symbol = _S_DKS_DET_BOT) or (symbol = _S_DKS_NODET_BOT)) then
       (po.Bloky[i] as TUsek).DKStype := dksBottom
     else
       (po.Bloky[i] as TUsek).DKStype := dksNone;
@@ -135,7 +135,7 @@ begin
   queue := TQueue<TPoint>.Create();
   queue.Enqueue(start);
 
-  startOnVyh := ((data[start.X, start.Y] >= _Vyhybka_Start) and (data[start.X, start.Y] <= _Vyhybka_End));
+  startOnVyh := ((data[start.X, start.Y] >= _S_TURNOUT_B) and (data[start.X, start.Y] <= _S_TURNOUT_E));
   symbols := TList<TReliefSym>.Create();
 
   try
@@ -159,12 +159,12 @@ begin
       begin
         var new := first;
         // projizdim usek jednim smerem pro jedno 'j'
-        while (((data[new.X, new.Y] >= _Usek_Detek_Start) and (data[new.X, new.Y] <= _Usek_Nedetek_End)) or
-          ((data[new.X, new.Y] >= _Vykol_Start) and (data[new.X, new.Y] <= _Vykol_End))) do
+        while (((data[new.X, new.Y] >= _S_TRACK_DET_B) and (data[new.X, new.Y] <= _S_TRACK_NODET_E)) or
+          ((data[new.X, new.Y] >= _S_DERAIL_B) and (data[new.X, new.Y] <= _S_DERAIL_E))) do
         begin
           // pridam symbol do seznamu symbolu
-          if ((((new.X <> first.X) or (new.Y <> first.Y)) or (j = 1)) and ((data[new.X, new.Y] < _Vykol_Start) or
-            (data[new.X, new.Y] > _Vykol_End))) then
+          if ((((new.X <> first.X) or (new.Y <> first.Y)) or (j = 1)) and ((data[new.X, new.Y] < _S_DERAIL_B) or
+            (data[new.X, new.Y] > _S_DERAIL_E))) then
           begin
             var symbol: TReliefSym;
             symbol.Position := new;
@@ -175,10 +175,10 @@ begin
           var temp := new;
 
           // vypocitam prvni vedlejsi pole
-          if ((data[new.X, new.Y] >= _Vykol_Start) and (data[new.X, new.Y] <= _Vykol_End)) then
+          if ((data[new.X, new.Y] >= _S_DERAIL_B) and (data[new.X, new.Y] <= _S_DERAIL_E)) then
           begin
             (po.Bloky[po.GetObject(new)] as TVykol).vetev := Vetve.Count + future_offset;
-            data[new.X, new.Y] := _Usek_Detek_Start;
+            data[new.X, new.Y] := _S_TRACK_DET_B;
           end;
 
           // podivame se na prvni ze dvou vedlejsich policek
@@ -197,7 +197,7 @@ begin
             temp.Y := new.Y + GetUsekNavaznost(data[new.X, new.Y], ndNegative).Y;
           end;
 
-          if ((data[temp.X, temp.Y] = _Zarazedlo_l) or (data[temp.X, temp.Y] = _Zarazedlo_r)) then
+          if ((data[temp.X, temp.Y] = _S_BUMPER_L) or (data[temp.X, temp.Y] = _S_BUMPER_R)) then
           begin
             var symbol: TReliefSym;
             symbol.Position := temp;
@@ -213,7 +213,7 @@ begin
         end; // while
 
         // skoncilo prochazeni jednoho smeru aktualni vetve
-        if (data[new.X, new.Y] >= _Vyhybka_Start) and (data[new.X, new.Y] <= _Vyhybka_End) then
+        if (data[new.X, new.Y] >= _S_TURNOUT_B) and (data[new.X, new.Y] <= _S_TURNOUT_E) then
         begin
           // na aktualnim poli je vyhybka -> nova vetev
           if (vetev.node1.vyh > -1) then
@@ -245,8 +245,8 @@ begin
           for var i := 0 to up do
           begin
             var temp: TPoint;
-            temp.X := new.X + _TURNOUT_CONNECTIONS[data[new.X, new.Y] - _Vyhybka_Start].dir(TNavDir(i * 2)).X;
-            temp.Y := new.Y + _TURNOUT_CONNECTIONS[data[new.X, new.Y] - _Vyhybka_Start].dir(TNavDir(i * 2)).Y;
+            temp.X := new.X + _TURNOUT_CONNECTIONS[data[new.X, new.Y] - _S_TURNOUT_B].dir(TNavDir(i * 2)).X;
+            temp.Y := new.Y + _TURNOUT_CONNECTIONS[data[new.X, new.Y] - _S_TURNOUT_B].dir(TNavDir(i * 2)).Y;
 
             if (data[temp.X, temp.Y] > -1) then
             begin
@@ -308,7 +308,7 @@ begin
     for var i := 0 to r.symbols.Count - 1 do
       vetev.symbols[i] := r.symbols[i];
 
-    if ((data[r.next.X, r.next.Y] >= _Vyhybka_Start) and (data[r.next.X, r.next.Y] <= _Vyhybka_End)) then
+    if ((data[r.next.X, r.next.Y] >= _S_TURNOUT_B) and (data[r.next.X, r.next.Y] <= _S_TURNOUT_E)) then
     begin
       vetev.node1.vyh := po.Bloky[po.GetObject(r.next)].index;
       vlPos := r.next;
@@ -330,7 +330,7 @@ begin
     for var i := 0 to r.symbols.Count - 1 do
       vetev.symbols[i] := r.symbols[i];
 
-    if ((data[r.next.X, r.next.Y] >= _Vyhybka_Start) and (data[r.next.X, r.next.Y] <= _Vyhybka_End)) then
+    if ((data[r.next.X, r.next.Y] >= _S_TURNOUT_B) and (data[r.next.X, r.next.Y] <= _S_TURNOUT_E)) then
     begin
       vetev.node1.vyh := po.Bloky[po.GetObject(r.next)].index;
       vrPos := r.next;
@@ -433,8 +433,8 @@ begin
   first := true;
   res.next := Point(-1, -1);
 
-  while (((data[new.X, new.Y] >= _Usek_Detek_Start) and (data[new.X, new.Y] < _DKS_Detek_Top)) or
-         ((data[new.X, new.Y] >= _Usek_Nedetek_Start) and (data[new.X, new.Y] < _DKS_Nedetek_Top))) do
+  while (((data[new.X, new.Y] >= _S_TRACK_DET_B) and (data[new.X, new.Y] < _S_DKS_DET_TOP)) or
+         ((data[new.X, new.Y] >= _S_TRACK_NODET_B) and (data[new.X, new.Y] < _S_DKS_NODET_TOP))) do
   begin
     // pridam symbol do seznamu symbolu
     var symbol: TReliefSym;
@@ -475,13 +475,13 @@ end;
 
 function IsSecondCross(var data: TVetveData; start: TPoint): Boolean;
 begin
-  if ((data[start.X, start.Y] = _DKS_Detek_Top) and (data[start.X, start.Y + 1] = _DKS_Detek_Bot)) then
+  if ((data[start.X, start.Y] = _S_DKS_DET_TOP) and (data[start.X, start.Y + 1] = _S_DKS_DET_BOT)) then
     Exit(true);
-  if ((data[start.X, start.Y] = _DKS_Detek_Bot) and (data[start.X, start.Y - 1] = _DKS_Detek_Top)) then
+  if ((data[start.X, start.Y] = _S_DKS_DET_BOT) and (data[start.X, start.Y - 1] = _S_DKS_DET_TOP)) then
     Exit(true);
-  if ((data[start.X, start.Y] = _DKS_Nedetek_Top) and (data[start.X, start.Y + 1] = _DKS_Nedetek_Bot)) then
+  if ((data[start.X, start.Y] = _S_DKS_NODET_TOP) and (data[start.X, start.Y + 1] = _S_DKS_NODET_BOT)) then
     Exit(true);
-  if ((data[start.X, start.Y] = _DKS_Nedetek_Bot) and (data[start.X, start.Y - 1] = _DKS_Nedetek_Top)) then
+  if ((data[start.X, start.Y] = _S_DKS_NODET_BOT) and (data[start.X, start.Y - 1] = _S_DKS_NODET_TOP)) then
     Exit(true);
 
   Result := false;
@@ -491,13 +491,13 @@ end;
 
 function SecondCrossPos(var data: TVetveData; start: TPoint): TPoint;
 begin
-  if ((data[start.X, start.Y] = _DKS_Detek_Top) and (data[start.X, start.Y + 1] = _DKS_Detek_Bot)) then
+  if ((data[start.X, start.Y] = _S_DKS_DET_TOP) and (data[start.X, start.Y + 1] = _S_DKS_DET_BOT)) then
     Result := Point(start.X, start.Y + 1)
-  else if ((data[start.X, start.Y] = _DKS_Detek_Bot) and (data[start.X, start.Y - 1] = _DKS_Detek_Top)) then
+  else if ((data[start.X, start.Y] = _S_DKS_DET_BOT) and (data[start.X, start.Y - 1] = _S_DKS_DET_TOP)) then
     Result := Point(start.X, start.Y - 1)
-  else if ((data[start.X, start.Y] = _DKS_Nedetek_Top) and (data[start.X, start.Y + 1] = _DKS_Nedetek_Bot)) then
+  else if ((data[start.X, start.Y] = _S_DKS_NODET_TOP) and (data[start.X, start.Y + 1] = _S_DKS_NODET_BOT)) then
     Result := Point(start.X, start.Y + 1)
-  else if ((data[start.X, start.Y] = _DKS_Nedetek_Bot) and (data[start.X, start.Y - 1] = _DKS_Nedetek_Top)) then
+  else if ((data[start.X, start.Y] = _S_DKS_NODET_BOT) and (data[start.X, start.Y - 1] = _S_DKS_NODET_TOP)) then
     Result := Point(start.X, start.Y - 1)
   else
     raise Exception.Create('No second cross!');

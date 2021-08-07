@@ -63,8 +63,8 @@ begin
   end;
 
   DrawObject.Canvas.Brush.color := clBlack;
-  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _Pst_Top, color);
-  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos.X, Self.Pos.Y+1, _Pst_Bot, color);
+  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _S_PST_TOP, color);
+  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos.X, Self.Pos.Y+1, _S_PST_BOT, color);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

@@ -127,10 +127,10 @@ begin
   end;
 
   for var pos: TPoint in Self.StaticPositions do
-    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _Prejezd, color);
+    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_CROSSING, color);
 
   for var bp: TBlikPoint in Self.BlikPositions do
-    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, bp.Pos, _Prejezd, color);
+    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, bp.Pos, _S_CROSSING, color);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

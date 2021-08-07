@@ -5,7 +5,7 @@ interface
 uses ObjBlok, IniFiles, Generics.Collections, Types, SysUtils, Global, PGraphics,
   symbolHelper;
 
-const BLK_ASSIGN_SYMBOLS = [_Kolecko];
+const BLK_ASSIGN_SYMBOLS = [_S_CIRCLE];
 
 type
 

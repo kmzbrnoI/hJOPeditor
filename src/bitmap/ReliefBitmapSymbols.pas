@@ -654,7 +654,7 @@ end;
 procedure TBitmapSymbols.PaintSymbol(IL: TImageList; X, Y: Integer; index: Integer; color: SymbolColor);
 begin
   // specialni pripady: symbol seznamu souprav uvazky
-  if (index = _Uvazka_Spr) then
+  if (index = _S_LINKER_TRAIN) then
   begin
     Self.DrawObject.Canvas.Pen.color := clYellow;
     Self.DrawObject.Canvas.Brush.color := clBlack;
@@ -664,10 +664,10 @@ begin
   end;
 
   // specialni pripad: k trati a k Pst vykreslujeme druhy symbol do paru
-  if (index = _Uvazka_Start) then
-    SymbolDraw(IL, Self.DrawObject.Canvas, X+1, Y, _Uvazka_Start+1, color);
-  if (index = _Pst_Top) then
-    SymbolDraw(IL, Self.DrawObject.Canvas, X, Y+1, _Pst_Bot, color);
+  if (index = _S_LINKER_B) then
+    SymbolDraw(IL, Self.DrawObject.Canvas, X+1, Y, _S_LINKER_B+1, color);
+  if (index = _S_PST_TOP) then
+    SymbolDraw(IL, Self.DrawObject.Canvas, X, Y+1, _S_PST_BOT, color);
 
   SymbolDraw(IL, Self.DrawObject.Canvas, X, Y, index, color);
 end;

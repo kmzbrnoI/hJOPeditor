@@ -74,52 +74,50 @@ const
     (a: (X: -1; Y: 0); b: (X: 0; Y: 1); c: (X: 1; Y: 0))
   );
 
-  _Vyhybka_Start = 0;
-  _Vyhybka_End = 3;
+  _S_TURNOUT_B = 0;
+  _S_TURNOUT_E = 3;
 
-  _Vykol_Start = 12;
-  _Vykol_Top_Start = 12;
-  _Vykol_Bot_Start = 18;
-  _Vykol_End = 23;
+  _S_DERAIL_B = 12;
+  _S_DERAIL_E = 23;
 
-  _Usek_Detek_Start = 24;
-  _DKS_Detek_Top = 30;
-  _DKS_Detek_Bot = 31;
-  _DKS_Detek_R = 32;
-  _DKS_Detek_L = 33;
-  _Usek_Detek_End = 33;
+  _S_TRACK_DET_B = 24;
+  _S_DKS_DET_TOP = 30;
+  _S_DKS_DET_BOT = 31;
+  _S_DKS_DET_R = 32;
+  _S_DKS_DET_L = 33;
+  _S_TRACK_DET_E = 33;
 
-  _Usek_Nedetek_Start = 34;
-  _DKS_Nedetek_Top = 40;
-  _DKS_Nedetek_Bot = 41;
-  _DKS_Nedetek_R = 42;
-  _DKS_Nedetek_L = 43;
-  _Usek_Nedetek_End = 43;
+  _S_TRACK_NODET_B = 34;
+  _S_DKS_NODET_TOP = 40;
+  _S_DKS_NODET_BOT = 41;
+  _S_DKS_NODET_R = 42;
+  _S_DKS_NODET_L = 43;
+  _S_TRACK_NODET_E = 43;
 
-  _Zarazedlo_r = 44;
-  _Zarazedlo_l = 45;
+  _S_BUMPER_R = 44;
+  _S_BUMPER_L = 45;
 
-  _Navestidlo_Start = 46;
-  _Navestidlo_End = 51;
+  _S_SIGNAL_B = 46;
+  _S_SIGNAL_E = 51;
 
-  _Prejezd = 52;
-  _Uvazka_Start = 53;
-  _Uvazka_Spr = 55;
-  _Zamek = 56;
-  _Rozp_Kolej = 57;
-  _Rozp_NoKolej = 58;
-  _Peron_Start = 59;
-  _Peron_End = 61;
+  _S_CROSSING = 52;
+  _S_LINKER_B = 53;
+  _S_LINKER_TRAIN = 55;
+  _S_LOCK = 56;
+  _S_DISC_TRACK = 57;
+  _S_DISC_ALONE = 58;
+  _S_PLATFORM_B = 59;
+  _S_PLATFORM_E = 61;
 
-  _Pst_Top = 62;
-  _Pst_Bot = 63;
+  _S_PST_TOP = 62;
+  _S_PST_BOT = 63;
 
-  _Separ_Vert = 71;
-  _Separ_Hor = 72;
+  _S_SEPAR_VERT = 71;
+  _S_SEPAR_HOR = 72;
 
-  _KC = 64;
-  _Full = 65;
-  _Kolecko = 68;
+  _S_KC = 64;
+  _S_FULL = 65;
+  _S_CIRCLE = 68;
 
 function LoadIL(ResourceName: string; PartWidth, PartHeight: Byte; MaskColor: TColor = clPurple): TImageList;
 
@@ -146,17 +144,17 @@ end;
 
 function GetUsekNavaznost(symbol: Integer; dir: TNavDir): TPoint;
 begin
-  if ((dir = ndThird) and ((symbol < _DKS_Detek_Top) or (symbol > _DKS_Detek_L)) and
-      ((symbol < _DKS_Nedetek_Top) or (symbol > _DKS_Nedetek_L))) then
+  if ((dir = ndThird) and ((symbol < _S_DKS_DET_TOP) or (symbol > _S_DKS_DET_L)) and
+      ((symbol < _S_DKS_NODET_TOP) or (symbol > _S_DKS_NODET_L))) then
     raise Exception.Create('Unsupported direction!');
 
-  if ((symbol >= _Usek_Detek_Start) and (symbol <= _Usek_Detek_End)) then
-    Result := _TRACK_CONNECTIONS[symbol-_Usek_Detek_Start].dir(dir)
-  else if ((symbol >= _Usek_Nedetek_Start) and (symbol <= _Usek_Nedetek_End)) then
-    Result := _TRACK_CONNECTIONS[symbol-_Usek_Nedetek_Start].dir(dir)
-  else if ((symbol = _Zarazedlo_r) and (dir = ndNegative)) then
+  if ((symbol >= _S_TRACK_DET_B) and (symbol <= _S_TRACK_DET_E)) then
+    Result := _TRACK_CONNECTIONS[symbol-_S_TRACK_DET_B].dir(dir)
+  else if ((symbol >= _S_TRACK_NODET_B) and (symbol <= _S_TRACK_NODET_E)) then
+    Result := _TRACK_CONNECTIONS[symbol-_S_TRACK_NODET_B].dir(dir)
+  else if ((symbol = _S_BUMPER_R) and (dir = ndNegative)) then
     Result := Point(1, 0)
-  else if ((symbol = _Zarazedlo_l) and (dir = ndPositive)) then
+  else if ((symbol = _S_BUMPER_L) and (dir = ndPositive)) then
     Result := Point(-1, 0)
   else
     Result := Point(0, 0);
@@ -164,9 +162,9 @@ end;
 
 function SymbolDrawColor(symbol: Integer): SymbolColor;
 begin
-  if ((symbol >= _Peron_Start) and (symbol <= _Peron_End)) then
+  if ((symbol >= _S_PLATFORM_B) and (symbol <= _S_PLATFORM_E)) then
     Result := scBlue
-  else if (symbol = _Uvazka_Spr) then
+  else if (symbol = _S_LINKER_TRAIN) then
     Result := scYellow
   else
     Result := scGray;
@@ -248,29 +246,29 @@ end;
 function TranscodeSymbolFromBpnlV3(symbol: Integer): Integer;
 begin
  if ((symbol >= 12) and (symbol <= 17)) then
-   Result := symbol-12 + _Usek_Detek_Start
+   Result := symbol-12 + _S_TRACK_DET_B
  else if ((symbol >= 18) and (symbol <= 23)) then
-   Result := symbol-18 + _Usek_Nedetek_Start
+   Result := symbol-18 + _S_TRACK_NODET_B
  else if ((symbol >= 24) and (symbol <= 29)) then
-   Result := symbol-24 + _Navestidlo_Start
+   Result := symbol-24 + _S_SIGNAL_B
  else if (symbol = 30) then
-   Result := _Zarazedlo_r
+   Result := _S_BUMPER_R
  else if (symbol = 31) then
-   Result := _Zarazedlo_l
+   Result := _S_BUMPER_L
  else if ((symbol >= 32) and (symbol <= 34)) then
-   Result := symbol-32 + _Peron_Start
+   Result := symbol-32 + _S_PLATFORM_B
  else if (symbol = 40) then
-   Result := _Prejezd
+   Result := _S_CROSSING
  else if (symbol = 42) then
-   Result := _Kolecko
+   Result := _S_CIRCLE
  else if ((symbol >= 43) and (symbol <= 45)) then
-   Result := symbol-43 + _Uvazka_Start
+   Result := symbol-43 + _S_LINKER_B
  else if ((symbol >= 49) and (symbol <= 54)) then
-   Result := symbol-49 + _Vykol_Start
+   Result := symbol-49 + _S_DERAIL_B
  else if ((symbol >= 55) and (symbol <= 56)) then
-   Result := symbol-55 + _Rozp_Kolej
+   Result := symbol-55 + _S_DISC_TRACK
  else if ((symbol >= 58) and (symbol <= 59)) then
-   Result := symbol-58 + _DKS_Detek_Top
+   Result := symbol-58 + _S_DKS_DET_TOP
  else
    Result := symbol;
 end;

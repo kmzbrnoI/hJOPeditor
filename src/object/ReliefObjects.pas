@@ -392,7 +392,7 @@ begin
 
   // vykreslit koren pod kurzorem
   if (Self.FMode = dmRoots) then
-    SymbolDraw(Self.DrawObject.SymbolIL, Self.DrawObject.Canvas, CursorPos, _Kolecko, scAqua);
+    SymbolDraw(Self.DrawObject.SymbolIL, Self.DrawObject.Canvas, CursorPos, _S_CIRCLE, scAqua);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

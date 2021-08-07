@@ -58,13 +58,13 @@ procedure TNavestidlo.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphi
 begin
   if (selected) then
   begin
-    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _Navestidlo_Start + Self.SymbolID, colors.Selected);
+    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _S_SIGNAL_B + Self.SymbolID, colors.Selected);
   end else begin
     case (Self.Blok) of
-      -1: SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _Navestidlo_Start + Self.SymbolID, colors.Alert);
-      -2: SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _Navestidlo_Start + Self.SymbolID, colors.IntUnassigned);
+      -1: SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _S_SIGNAL_B + Self.SymbolID, colors.Alert);
+      -2: SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _S_SIGNAL_B + Self.SymbolID, colors.IntUnassigned);
     else
-      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _Navestidlo_Start + Self.SymbolID, colors.Normal);
+      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _S_SIGNAL_B + Self.SymbolID, colors.Normal);
     end;
   end;
 end;

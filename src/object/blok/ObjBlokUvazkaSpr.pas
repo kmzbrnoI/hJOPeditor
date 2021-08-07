@@ -96,7 +96,7 @@ begin
       end;
   end;
 
-  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _Uvazka_Spr, color);
+  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _S_LINKER_TRAIN, color);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

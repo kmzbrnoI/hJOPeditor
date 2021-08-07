@@ -72,7 +72,7 @@ begin
   end;
 
   DrawObject.Canvas.Brush.color := clBlack;
-  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _Vykol_Start + Self.symbol, color);
+  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _S_DERAIL_B + Self.symbol, color);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

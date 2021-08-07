@@ -484,7 +484,7 @@ begin
   Self.Symbols.FDeleteActivate := Self.DeleteActivateEvent;
   Self.Symbols.FOPAsk := Self.IsOperationEvent;
 
-  Self.SeparatorsVert := TVBO.Create(DrawCanvas, SymbolIL, _Separ_Vert, scRed, stVert);
+  Self.SeparatorsVert := TVBO.Create(DrawCanvas, SymbolIL, _S_SEPAR_VERT, scRed, stVert);
   Self.SeparatorsVert.FOnShow := Self.ShowEvent;
   Self.SeparatorsVert.FIsSymbol := Self.IsSymbolSeparVertEvent;
   Self.SeparatorsVert.FNullOperations := Self.NullOperationsEvent;
@@ -492,7 +492,7 @@ begin
   Self.SeparatorsVert.FDeleteActivate := Self.DeleteActivateEvent;
   Self.SeparatorsVert.FOPAsk := Self.IsOperationEvent;
 
-  Self.SeparatorsHor := TVBO.Create(DrawCanvas, SymbolIL, _Separ_Hor, scRed, stHor);
+  Self.SeparatorsHor := TVBO.Create(DrawCanvas, SymbolIL, _S_SEPAR_HOR, scRed, stHor);
   Self.SeparatorsHor.FOnShow := Self.ShowEvent;
   Self.SeparatorsHor.FIsSymbol := Self.IsSymbolSeparHorEvent;
   Self.SeparatorsHor.FNullOperations := Self.NullOperationsEvent;
@@ -500,7 +500,7 @@ begin
   Self.SeparatorsHor.FDeleteActivate := Self.DeleteActivateEvent;
   Self.SeparatorsHor.FOPAsk := Self.IsOperationEvent;
 
-  Self.KPopisky := TVBO.Create(DrawCanvas, SymbolIL, _Full, scYellow);
+  Self.KPopisky := TVBO.Create(DrawCanvas, SymbolIL, _S_FULL, scYellow);
   Self.KPopisky.FOnShow := Self.ShowEvent;
   Self.KPopisky.FIsSymbol := Self.IsSymbolKPopiskyJCClickSoupravyEvent;
   Self.KPopisky.FNullOperations := Self.NullOperationsEvent;
@@ -508,7 +508,7 @@ begin
   Self.KPopisky.FDeleteActivate := Self.DeleteActivateEvent;
   Self.KPopisky.FOPAsk := Self.IsOperationEvent;
 
-  Self.JCClick := TVBO.Create(DrawCanvas, SymbolIL, _KC, scLime);
+  Self.JCClick := TVBO.Create(DrawCanvas, SymbolIL, _S_KC, scLime);
   Self.JCClick.FOnShow := Self.ShowEvent;
   Self.JCClick.FIsSymbol := Self.IsSymbolKPopiskyJCClickSoupravyEvent;
   Self.JCClick.FNullOperations := Self.NullOperationsEvent;
@@ -516,7 +516,7 @@ begin
   Self.JCClick.FDeleteActivate := Self.DeleteActivateEvent;
   Self.JCClick.FOPAsk := Self.IsOperationEvent;
 
-  Self.Soupravy := TVBO.Create(DrawCanvas, SymbolIL, _Full, scBlue);
+  Self.Soupravy := TVBO.Create(DrawCanvas, SymbolIL, _S_FULL, scBlue);
   Self.Soupravy.FOnShow := Self.ShowEvent;
   Self.Soupravy.FIsSymbol := Self.IsSymbolKPopiskyJCClickSoupravyEvent;
   Self.Soupravy.FNullOperations := Self.NullOperationsEvent;
@@ -613,7 +613,7 @@ begin
 
   // Text could be placed over platform
   var symbol := Self.Symbols.GetSymbol(Pos);
-  if ((symbol <> -1) and ((symbol < _Peron_Start) or (symbol > _Peron_End))) then
+  if ((symbol <> -1) and ((symbol < _S_PLATFORM_B) or (symbol > _S_PLATFORM_E))) then
     Exit(true);
   if (Self.Text.GetPopisek(Pos) <> -1) then
     Exit(true);
@@ -917,31 +917,31 @@ begin
         var popy := StrToInt(splitted[9]) + OFFSET_Y;
 
         if (splitted[3] = '1') then
-          Self.Symbols.Bitmap[X][Y] := _Usek_Detek_Start + StrToInt(splitted[12])
+          Self.Symbols.Bitmap[X][Y] := _S_TRACK_DET_B + StrToInt(splitted[12])
         else if (splitted[3] = '2') then
-          Self.Symbols.Bitmap[X][Y] := _Usek_Detek_Start + 6 + StrToInt(splitted[12])
+          Self.Symbols.Bitmap[X][Y] := _S_TRACK_DET_B + 6 + StrToInt(splitted[12])
         else if (splitted[3] = '3') then
-          Self.Symbols.Bitmap[X][Y] := _Zarazedlo_r + StrToInt(splitted[12])
+          Self.Symbols.Bitmap[X][Y] := _S_BUMPER_R + StrToInt(splitted[12])
         else if (splitted[3] = '4') then
-          Self.Symbols.Bitmap[X][Y] := _Navestidlo_Start + StrToInt(splitted[12])
+          Self.Symbols.Bitmap[X][Y] := _S_SIGNAL_B + StrToInt(splitted[12])
         else if (splitted[3] = '5') then
-          Self.Symbols.Bitmap[X][Y] := _Navestidlo_Start + 4 + StrToInt(splitted[12])
+          Self.Symbols.Bitmap[X][Y] := _S_SIGNAL_B + 4 + StrToInt(splitted[12])
         else if (splitted[3] = '6') then
         begin
-          Self.Symbols.Bitmap[X][Y] := _Vyhybka_Start + StrToInt(splitted[12]);
+          Self.Symbols.Bitmap[X][Y] := _S_TURNOUT_B + StrToInt(splitted[12]);
           try
             Self.Text.AddToStructure(Point(popx, popy), splitted[7], scWhite, true);
           except
             Result := Result + 'WARN: nepodařilo se přidat popisek bloku ' + splitted[7] + #13#10;
           end;
         end else if (splitted[3] = '10') then
-          Self.Symbols.Bitmap[X][Y] := _Zamek
+          Self.Symbols.Bitmap[X][Y] := _S_LOCK
         else if (splitted[3] = '7') then
         begin
           if (splitted[12] = '0') then
-            Self.Symbols.Bitmap[X][Y] := _Vykol_Start
+            Self.Symbols.Bitmap[X][Y] := _S_DERAIL_B
           else
-            Self.Symbols.Bitmap[X][Y] := _Vykol_Start + 1;
+            Self.Symbols.Bitmap[X][Y] := _S_DERAIL_B + 1;
           try
             Self.Text.AddToStructure(Point(popx, popy), splitted[7], scWhite, true);
           except
@@ -951,13 +951,13 @@ begin
         begin
           var Width := StrToInt(splitted[15]);
           for var i := 0 to Width - 1 do
-            Self.Symbols.Bitmap[X + i][Y] := _Peron_Start + StrToInt(splitted[12])
+            Self.Symbols.Bitmap[X + i][Y] := _S_PLATFORM_B + StrToInt(splitted[12])
         end else if (splitted[3] = '20') then
-          Self.Symbols.Bitmap[X][Y] := _Uvazka_Start
+          Self.Symbols.Bitmap[X][Y] := _S_LINKER_B
         else if (splitted[3] = '12') then
-          Self.Symbols.Bitmap[X][Y] := _Rozp_Kolej
+          Self.Symbols.Bitmap[X][Y] := _S_DISC_TRACK
         else if (splitted[3] = '21') then
-          Self.Symbols.Bitmap[X][Y] := _Uvazka_Spr
+          Self.Symbols.Bitmap[X][Y] := _S_LINKER_TRAIN
         else if (splitted[3] = '30') then
         begin
           var gref := StrToInt(splitted[17]);
@@ -991,7 +991,7 @@ begin
         begin
           var Height := StrToInt(splitted[15]);
           for var i := 0 to Height - 1 do
-            Self.Symbols.Bitmap[X][Y + i] := _Prejezd
+            Self.Symbols.Bitmap[X][Y + i] := _S_CROSSING
         end else if (splitted[3] = '80') then
         begin
           try

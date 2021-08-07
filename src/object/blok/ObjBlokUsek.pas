@@ -277,27 +277,27 @@ begin
   if (selected) then
   begin
     for pos in Self.JCClick do
-      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _Full, scYellow);
+      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_FULL, scYellow);
 
     for pos in Self.KPopisek do
-      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _KC, scLime);
+      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_KC, scLime);
 
     for pos in Self.Soupravy do
-      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _Full, scBlue);
+      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_FULL, scBlue);
 
     for sym in Self.Symbols do
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, sym.Position, sym.SymbolID, colors.Selected);
 
-    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Root, _Kolecko, colors.Selected);
+    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Root, _S_CIRCLE, colors.Selected);
   end else begin
     for pos in Self.JCClick do
-      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _KC, scLime);
+      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_KC, scLime);
 
     for pos in Self.KPopisek do
-      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _Full, scYellow);
+      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_FULL, scYellow);
 
     for pos in Self.Soupravy do
-      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _Full, scBlue);
+      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_FULL, scBlue);
 
     if (mode = TMode.dmBloky) then
     begin
@@ -317,7 +317,7 @@ begin
     for sym in Self.Symbols do
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, sym.Position, sym.SymbolID, color);
 
-    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Root, _Kolecko, scAqua);
+    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Root, _S_CIRCLE, scAqua);
   end; // else Selected = i
 end;
 
