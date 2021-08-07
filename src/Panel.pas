@@ -826,12 +826,10 @@ end;
 // zatim jen baracky
 // bereme ohled na posun
 procedure TRelief.PaintOR();
-var oblr: TOR;
-  i: Integer;
 begin
-  for i := 0 to Self.ORs.Count - 1 do
+  for var i := 0 to Self.ORs.Count - 1 do
   begin
-    oblr := Self.ORs[i];
+    var oblr := Self.ORs[i];
     if (Self.ORMove.MovingOR = i) then
     begin
       case (Self.ORMove.MovingSymbol) of
@@ -856,7 +854,6 @@ end;
 
 // vykresluje kurzor pri pohybu
 function TRelief.PaintORCursor(CursorPos: TPoint): TCursorDraw;
-var tmp_or: TORGraf;
 begin
   Result.Color := -1;
 
@@ -865,7 +862,7 @@ begin
 
   if (Self.ORMove.MovingOR < 0) then
   begin
-    tmp_or := Self.GetORGraf(CursorPos);
+    var tmp_or := Self.GetORGraf(CursorPos);
     if (tmp_or.MovingOR = -1) then
       Exit;
 
@@ -912,7 +909,6 @@ begin
 end;
 
 function TRelief.ORMouseUp(Position: TPoint; Button: TMouseButton): Byte;
-var tmp_or: TORGraf;
 begin
   Result := 0;
 
@@ -922,7 +918,7 @@ begin
     if (Button <> mbLeft) then
       Exit;
 
-    tmp_or := Self.GetORGraf(Position);
+    var tmp_or := Self.GetORGraf(Position);
     if (Self.PanelObjects.selected_obj = nil) then
       Exit;
     if (tmp_or.MovingOR < 0) then
@@ -951,7 +947,7 @@ begin
         Sleep(50);
         Self.show(Self.LastPos);
       end else begin
-        tmp_or := Self.GetORGraf(Position);
+        var tmp_or := Self.GetORGraf(Position);
         if (tmp_or.MovingOR > -1) then
           Self.MessageEvent(Self, 'OŘ : ' + ORs[tmp_or.MovingOR].Name + ' (id = ' + ORs[tmp_or.MovingOR].id + ')');
 
@@ -976,12 +972,11 @@ end;
 
 // vraci OR na dane pozici
 function TRelief.GetORGraf(pos: TPoint): TORGraf;
-var i: Integer;
 begin
   Result.MovingOR := -1;
   Result.MovingSymbol := 0;
 
-  for i := 0 to Self.ORs.Count - 1 do
+  for var i := 0 to Self.ORs.Count - 1 do
   begin
     if ((pos.X >= Self.ORs[i].Poss.DK.X) and (pos.Y >= Self.ORs[i].Poss.DK.Y) and
       (Self.ORs[i].Poss.DK.X + _OR_Size[0] > pos.X) and (Self.ORs[i].Poss.DK.Y + _OR_Size[1] > pos.Y)) then
@@ -1004,7 +999,7 @@ begin
       Result.MovingSymbol := 2;
       Exit;
     end;
-  end; // for i
+  end;
 end;
 
 procedure TRelief.DKMenuInit();
@@ -1044,10 +1039,8 @@ end;
 // na kazdem radku je ulozena jedna oblast rizeni ve formatu:
 // nazev;nazev_zkratka;id;lichy_smer(0,1);orientace_DK(0,1);ModCasStart(0,1);ModCasStop(0,1);ModCasSet(0,1);dkposx;dkposy;qposx;qposy;timeposx;timeposy;osv_mtb|osv_port|osv_name;
 function TRelief.ORSave(): string;
-var j: Integer;
-  oblr: TOR;
 begin
-  for oblr in Self.ORs do
+  for var oblr in Self.ORs do
   begin
     Result := Result + oblr.Name + ';' + oblr.ShortName + ';' + oblr.id + ';' + IntToStr(oblr.Lichy) + ';' +
       IntToStr(oblr.Poss.DKOr) + ';' + BoolToStr(oblr.Rights.ModCasStart) + ';' + BoolToStr(oblr.Rights.ModCasStop) +
@@ -1055,7 +1048,7 @@ begin
       IntToStr(oblr.Poss.Queue.X) + ';' + IntToStr(oblr.Poss.Queue.Y) + ';' + IntToStr(oblr.Poss.Time.X) + ';' +
       IntToStr(oblr.Poss.Time.Y) + ';';
 
-    for j := 0 to oblr.Osvetleni.Cnt - 1 do
+    for var j := 0 to oblr.Osvetleni.Cnt - 1 do
       Result := Result + IntToStr(oblr.Osvetleni.data[j].board) + '#' + IntToStr(oblr.Osvetleni.data[j].port) + '#' +
         oblr.Osvetleni.data[j].Name + '|';
 
@@ -1069,9 +1062,6 @@ end;
 // nazev;nazev_zkratka;id;lichy_smer(0,1);orientace_DK(0,1);ModCasStart(0,1);ModCasStop(0,1);ModCasSet(0,1);dkposx;dkposy;qposx;qposy;timeposx;timeposy;osv_mtb|osv_port|osv_name;
 procedure TRelief.ORLoad(data: string);
 var lines, data_main, data_osv, data_osv2: TStrings;
-  j: Integer;
-  oblr: TOR;
-  line: string;
 begin
   Self.ORs.Clear();
 
@@ -1086,7 +1076,7 @@ begin
 
     ExtractStringsEx([#13], [], LeftStr(data, Length(data) - 2), lines);
 
-    for line in lines do
+    for var line in lines do
     begin
       data_main.Clear();
       ExtractStringsEx([';'], [], line, data_main);
@@ -1094,6 +1084,7 @@ begin
       if (data_main.Count < 14) then
         raise EORLoad.Create('Málo položek definující OŘ!');
 
+      var oblr: TOR;
       oblr.Name := data_main[0];
       oblr.ShortName := data_main[1];
       oblr.id := data_main[2];
@@ -1119,7 +1110,7 @@ begin
       begin
         ExtractStringsEx(['|'], [], data_main[14], data_osv);
         oblr.Osvetleni.Cnt := 0;
-        for j := 0 to data_osv.Count - 1 do
+        for var j := 0 to data_osv.Count - 1 do
         begin
           data_osv2.Clear();
           ExtractStringsEx(['#'], [], data_osv[j], data_osv2);
@@ -1182,9 +1173,8 @@ end;
 // vola se z bitmapoveho modu
 // vraci true, pokud je na dane pozici DK, zasobnik, ci mereni casu
 function TRelief.IsOREvent(pos: TPoint): Boolean;
-var oblr: TOR;
 begin
-  for oblr in Self.ORs do
+  for var oblr in Self.ORs do
   begin
     if ((pos.X >= oblr.Poss.DK.X) and (pos.X <= oblr.Poss.DK.X + 4) and (pos.Y >= oblr.Poss.DK.Y) and
       (pos.Y <= oblr.Poss.DK.Y + 2)) then

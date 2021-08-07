@@ -314,7 +314,6 @@ begin
 end;
 
 procedure TBitmapSymbols.Moving(Position: TPoint);
-var i, j: Integer;
 begin
   // overovani skupiny - 2. cast podminky pridana, kdyby nekdo po 1. kroku vypl IsGroup
   if ((Self.Operations.Group.IsGroup) or ((Self.Operations.Group.Start.X <> -1) and
@@ -346,9 +345,9 @@ begin
           Self.Operations.Move.aWidth := Position.X - Self.Operations.Group.Start.X + 1;
           Self.Operations.Move.aHeight := Position.Y - Self.Operations.Group.Start.Y + 1;
 
-          for i := Self.Operations.Group.Start.X to Position.X do
+          for var i := Self.Operations.Group.Start.X to Position.X do
           begin
-            for j := Self.Operations.Group.Start.Y to Position.Y do
+            for var j := Self.Operations.Group.Start.Y to Position.Y do
             begin
               Self.Operations.Move.Symbols[i - Self.Operations.Group.Start.X, j - Self.Operations.Group.Start.Y] :=
                 Self.GetSymbol(Point(i, j));
@@ -362,9 +361,9 @@ begin
       3:
         begin
           // kontrola obsazenosti
-          for i := 0 to Self.Operations.Move.aWidth - 1 do
+          for var i := 0 to Self.Operations.Move.aWidth - 1 do
           begin
-            for j := 0 to Self.Operations.Move.aHeight - 1 do
+            for var j := 0 to Self.Operations.Move.aHeight - 1 do
             begin
               if (Assigned(FIsSymbol)) then
               begin
@@ -379,9 +378,9 @@ begin
             end; // for j
           end; // for i
 
-          for i := 0 to Self.Operations.Move.aWidth - 1 do
+          for var i := 0 to Self.Operations.Move.aWidth - 1 do
           begin
-            for j := 0 to Self.Operations.Move.aHeight - 1 do
+            for var j := 0 to Self.Operations.Move.aHeight - 1 do
             begin
               Self.AddToStructure(Point(i + (Position.X - Self.Operations.Move.aWidth) + 1,
                 j + (Position.Y - Self.Operations.Move.aHeight) + 1), Self.Operations.Move.Symbols[i, j]);
@@ -459,7 +458,6 @@ begin
 end;
 
 procedure TBitmapSymbols.Deleting(Position: TPoint);
-var i, j: Integer;
 begin
   if ((Self.Operations.Group.IsGroup) or ((Self.Operations.Group.Start.X <> -1) and
     (Self.Operations.Group.Start.Y <> -1))) then
@@ -483,8 +481,8 @@ begin
             raise EInvalidPosition.Create('Výběr musí být zleva doprava a shora dolů!');
 
           // pokud jsme na 2. bode
-          for i := Self.Operations.Group.Start.X to Position.X do
-            for j := Self.Operations.Group.Start.Y to Position.Y do
+          for var i := Self.Operations.Group.Start.X to Position.X do
+            for var j := Self.Operations.Group.Start.Y to Position.Y do
               if (Self.Bitmap[i, j] <> -1) then
                 Self.DeleteFromStructure(Point(i, j));
 
@@ -560,8 +558,6 @@ end;
 
 // zabyva se vykreslovanim posouvanych objektu v bitmape
 procedure TBitmapSymbols.PaintBitmapMove(KurzorPos: TPoint);
-var i, j: Integer;
-  aPos: TPoint;
 begin
   // pohyb
   if (Self.Operations.Move.Krok > 1) then
@@ -574,10 +570,11 @@ begin
       // presun skupiny
       if (Self.Operations.Move.Krok > 2) then
       begin
-        for i := 0 to Self.Operations.Move.aWidth - 1 do
+        for var i := 0 to Self.Operations.Move.aWidth - 1 do
         begin
-          for j := 0 to Self.Operations.Move.aHeight - 1 do
+          for var j := 0 to Self.Operations.Move.aHeight - 1 do
           begin
+            var aPos: TPoint;
             aPos.X := i + KurzorPos.X - Self.Operations.Move.aWidth + 1;
             aPos.Y := j + KurzorPos.Y - Self.Operations.Move.aHeight + 1;
             if (Self.GetSymbol(aPos) = -1) then
@@ -597,8 +594,8 @@ begin
       Self.PaintSymbol(KurzorPos.X, KurzorPos.Y, Self.Operations.Add.Symbol);
     end else begin
       // presun skupiny
-      for i := Self.Operations.Group.Start.X to KurzorPos.X do
-        for j := Self.Operations.Group.Start.Y to KurzorPos.Y do
+      for var i := Self.Operations.Group.Start.X to KurzorPos.X do
+        for var j := Self.Operations.Group.Start.Y to KurzorPos.Y do
           if (Self.GetSymbol(Point(i, j)) = -1) then
             Self.PaintSymbol(i, j, Self.Operations.Add.Symbol);
     end; // else ((Self.Group.Start.X = -1) and (Self.Group.Start.Y = -1))
@@ -607,7 +604,6 @@ end;
 
 // vykresleni kurzoru - vraci data PIXELECH!
 function TBitmapSymbols.PaintCursor(CursorPos: TPoint): TCursorDraw;
-var SymbolI: Integer;
 begin
   Result.color := 0;
   Result.Pos1.X := CursorPos.X * _Symbol_Sirka;
@@ -631,7 +627,7 @@ begin
   end;
   if ((Self.Operations.Move.Krok = 1) or (Self.Operations.FDeleteKrok = 1)) then
   begin
-    SymbolI := Self.GetSymbol(CursorPos);
+    var SymbolI := Self.GetSymbol(CursorPos);
     Result.Pos2.X := CursorPos.X * _Symbol_Sirka;
     Result.Pos2.Y := CursorPos.Y * _Symbol_Vyska;
 

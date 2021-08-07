@@ -857,11 +857,9 @@ end;
 
 function TPanelBitmap.ImportMyJOP(fn: string; ORs: TList<TOR>): string;
 var f: TextFile;
-  line: string;
   splitted, gsplitted: TStrings;
-  i, X, Y, popx, popy, Width, Height, gref, linei, eloaded: Integer;
+  linei, eloaded: Integer;
   g: TDictionary<Integer, string>;
-  OblR: TOR;
 const
   OFFSET_X = 0;
   OFFSET_Y = 0;
@@ -881,6 +879,7 @@ begin
   try
     while (not Eof(f)) do
     begin
+      var line: string;
       ReadLn(f, line);
 
       splitted.Clear();
@@ -898,10 +897,10 @@ begin
         g.AddOrSetValue(StrToInt(splitted[1]), line);
       end else if (splitted[0] = 'E') then
       begin
-        X := StrToInt(splitted[5]) + OFFSET_X;
-        Y := StrToInt(splitted[6]) + OFFSET_Y;
-        popx := StrToInt(splitted[8]) + OFFSET_X;
-        popy := StrToInt(splitted[9]) + OFFSET_Y;
+        var X := StrToInt(splitted[5]) + OFFSET_X;
+        var Y := StrToInt(splitted[6]) + OFFSET_Y;
+        var popx := StrToInt(splitted[8]) + OFFSET_X;
+        var popy := StrToInt(splitted[9]) + OFFSET_Y;
 
         if (splitted[3] = '1') then
           Self.Symbols.Bitmap[X][Y] := _Usek_Detek_Start + StrToInt(splitted[12])
@@ -936,8 +935,8 @@ begin
           end;
         end else if (splitted[3] = '11') then
         begin
-          Width := StrToInt(splitted[15]);
-          for i := 0 to Width - 1 do
+          var Width := StrToInt(splitted[15]);
+          for var i := 0 to Width - 1 do
             Self.Symbols.Bitmap[X + i][Y] := _Peron_Start + StrToInt(splitted[12])
         end else if (splitted[3] = '20') then
           Self.Symbols.Bitmap[X][Y] := _Uvazka_Start
@@ -947,10 +946,11 @@ begin
           Self.Symbols.Bitmap[X][Y] := _Uvazka_Spr
         else if (splitted[3] = '30') then
         begin
-          gref := StrToInt(splitted[17]);
+          var gref := StrToInt(splitted[17]);
           gsplitted.Clear();
           ExtractStringsEx([';'], [], g[gref], gsplitted);
 
+          var OblR: TOR;
           OblR.Name := gsplitted[7];
           OblR.id := gsplitted[9];
           OblR.ShortName := gsplitted[9];
@@ -975,8 +975,8 @@ begin
           ORs.Add(OblR);
         end else if (splitted[3] = '50') then
         begin
-          Height := StrToInt(splitted[15]);
-          for i := 0 to Height - 1 do
+          var Height := StrToInt(splitted[15]);
+          for var i := 0 to Height - 1 do
             Self.Symbols.Bitmap[X][Y + i] := _Prejezd
         end else if (splitted[3] = '80') then
         begin
@@ -1005,7 +1005,7 @@ begin
         end;
         if ((splitted[3] = '4') or (splitted[3] = '5') or (splitted[3] = '10')) then
         begin
-          gref := StrToInt(splitted[17]);
+          var gref := StrToInt(splitted[17]);
           gsplitted.Clear();
           ExtractStringsEx([';'], [], g[gref], gsplitted);
           if ((gsplitted[12] = '0') and (gsplitted[13] = '0')) then

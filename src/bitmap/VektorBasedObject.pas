@@ -180,22 +180,20 @@ end;
 
 // ziskani surovych dat zapisovanych do souboru z dat programu
 function TVBO.GetSaveData(): TVBOData;
-var i: Integer;
 begin
   Result.Count := (Self.Data.Count * 2) + 1;
 
   Result.Data[0] := Self.Data.Count;
 
-  for i := 0 to Self.Data.Count - 1 do
+  for var i := 0 to Self.Data.Count - 1 do
   begin
     Result.Data[(i * 2) + 1] := Self.Data[i].X;
     Result.Data[(i * 2) + 2] := Self.Data[i].Y;
-  end; // for i
+  end;
 end;
 
 procedure TVBO.Paint();
-var i: Integer;
-  posun: TPoint;
+var posun: TPoint;
 begin
   if (Self.Separ = stVert) then
     posun := Point(_Symbol_Sirka div 2, 0)
@@ -204,7 +202,7 @@ begin
   else
     posun := Point(0, 0);
 
-  for i := 0 to Self.Data.Count - 1 do
+  for var i := 0 to Self.Data.Count - 1 do
     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Data[i].X * _Symbol_Sirka) + posun.X,
       (Self.Data[i].Y * _Symbol_Vyska) + posun.Y, SymbolIndex(Self.DrawObject.SymbolIndex, Self.DrawObject.symColor));
 end;

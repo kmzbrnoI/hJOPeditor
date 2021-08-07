@@ -170,12 +170,11 @@ end;
 
 // smazani popisku
 procedure TText.DeleteFromStructure(aPos: TPoint);
-var PIndex: Integer;
 begin
   if ((aPos.X < 0) or (aPos.Y < 0) or (aPos.X > (_MAX_WIDTH - 1)) or (aPos.Y > (_MAX_HEIGHT - 1))) then
     raise EInvalidPosition.Create('Neplatná pozice!');
 
-  PIndex := Self.GetPopisek(aPos);
+  var PIndex := Self.GetPopisek(aPos);
   if (PIndex = -1) then
     raise ENoSymbol.Create('Na této pozici není žádný symbol!');
 
@@ -184,36 +183,35 @@ end;
 
 // zjisteni, zda-li je na dane pozici popisek, popr jeho index v poli separatoru
 function TText.GetPopisek(aPos: TPoint): SmallInt;
-var i, j: Integer;
 begin
   Result := -1;
 
   // vychazime z toho, ze 1 popisek lze zapsat pouze na 1 radek
-  for i := 0 to Self.Count - 1 do
+  for var i := 0 to Self.Count - 1 do
     if (Self.Data[i].Position.Y = aPos.Y) then
-      for j := Self.Data[i].Position.X to Self.Data[i].Position.X + (Length(Self.Data[i].Text)) - 1 do
+      for var j := Self.Data[i].Position.X to Self.Data[i].Position.X + (Length(Self.Data[i].Text)) - 1 do
         if (j = aPos.X) then
           Exit(i);
 end;
 
 // nacteni surovych dat do struktur
 procedure TText.SetLoadedData(LoadData: TBytes);
-var i, j: Integer;
-  p: TPopisek;
+var
   Count: Integer;
 begin
   Self.Data.Clear();
   Count := Length(LoadData) div _Block_Length;
 
-  for i := 0 to Count - 1 do
+  for var i := 0 to Count - 1 do
   begin
+    var p: TPopisek;
     p.Position.X := LoadData[(i * _Block_Length)];
     p.Position.Y := LoadData[(i * _Block_Length) + 1];
     p.Color := SymbolColor(LoadData[(i * _Block_Length) + 2]);
     p.Text := '';
     p.BlokPopisek := false;
 
-    for j := 0 to _MAX_TEXT_LENGTH do
+    for var j := 0 to _MAX_TEXT_LENGTH do
     begin
       if ((LoadData[(i * _Block_Length) + 3 + (j * 2)] = 0) and (LoadData[(i * _Block_Length) + 3 + (j * 2) + 1] = 0))
       then
@@ -261,13 +259,11 @@ function TText.GetSaveData(): TBytes;
 var bytesBuf: TBytes;
   len: Integer;
   currentLen: Integer;
-  p: TPopisek;
-  offset: Integer;
 begin
   SetLength(Result, 1024);
   currentLen := 2;
 
-  for p in Self.Data do
+  for var p in Self.Data do
   begin
     len := TEncoding.UTF8.GetByteCount(p.Text);
     SetLength(bytesBuf, len);
@@ -280,6 +276,7 @@ begin
     Result[currentLen + 1] := p.Position.Y;
     Result[currentLen + 2] := Byte(p.Color);
 
+    var offset: Integer;
     if (p.BlokPopisek) then
     begin
       Result[currentLen + 3] := len + 1;
@@ -292,7 +289,7 @@ begin
 
     CopyMemory(@Result[offset], bytesBuf, len);
     currentLen := offset + len;
-  end; // for i
+  end;
 
   SetLength(Result, currentLen);
   Result[0] := hi(currentLen - 2);
@@ -346,11 +343,10 @@ end;
 
 // pridavani textu
 procedure TText.Adding(Position: TPoint);
-var i: Integer;
 begin
   // kontrola obsazenosti pozice
   if (Assigned(FIsSymbol)) then
-    for i := Position.X to Position.X + Length(Self.Operations.TextProperties.Text) - 1 do
+    for var i := Position.X to Position.X + Length(Self.Operations.TextProperties.Text) - 1 do
       if (FIsSymbol(Point(i, Position.Y))) then
         raise ENonemptyField.Create('Na pozici je již symbol!');
 
@@ -366,7 +362,6 @@ end;
 // pohyb textu
 procedure TText.Moving(Position: TPoint);
 var PopisekIndex: Integer;
-  i: Integer;
 begin
   // zde neni skupina pripustna
   case (Self.Operations.FMoveKrok) of
@@ -392,7 +387,7 @@ begin
       begin
         if (Assigned(FIsSymbol)) then
         begin
-          for i := Position.X to Position.X + Length(Self.Operations.TextProperties.Text) - 1 do
+          for var i := Position.X to Position.X + Length(Self.Operations.TextProperties.Text) - 1 do
             if (FIsSymbol(Point(i, Position.Y))) then
               raise ENonemptyField.Create('Pozice obsazena!');
         end else begin
@@ -443,13 +438,12 @@ begin
 end;
 
 function TText.IsObsazeno(Pos1, Pos2: TPoint): boolean;
-var i, j: Integer;
 begin
   Result := false;
 
   // kontrola obsazenosti
-  for i := Pos1.X to Pos2.X do
-    for j := Pos1.Y to Pos2.Y do
+  for var i := Pos1.X to Pos2.X do
+    for var j := Pos1.Y to Pos2.Y do
       if (Self.GetPopisek(Point(i, j)) <> -1) then
         Exit(true);
 end;

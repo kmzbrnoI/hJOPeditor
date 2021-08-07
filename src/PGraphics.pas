@@ -41,8 +41,6 @@ end; // ctor
 
 procedure TPanelGraphics.TextOutputI(Pos: TPoint; Text: string; Popredi: SymbolColor; Pozadi: TColor;
   underline: boolean = false; transparent: boolean = false);
-var j: integer;
-  TextIndex: integer;
 begin
   // transparent is faster
 
@@ -54,11 +52,12 @@ begin
       (Pos.X + Length(Text)) * _Symbol_Sirka, (Pos.Y + 1) * _Symbol_Vyska);
   end;
 
-  for j := 0 to Length(Text) - 1 do
+  for var j := 0 to Length(Text) - 1 do
   begin
     // prevedeni textu na indexy v ImageListu
     // texty v image listu jsou ilozeny v ASCII, coz tyto Delphi evidentne neumi zchroustat
     // proto tato silenost....
+    var TextIndex: Integer;
     case (Text[j + 1]) of
       #32 .. #90:
         TextIndex := ord(Text[j + 1]) - 32;

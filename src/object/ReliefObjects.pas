@@ -487,11 +487,10 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TPanelObjects.MouseMove(Position: TPoint);
-var tmp: Integer;
 begin
   if (Self.FMode = dmRoots) then
   begin
-    tmp := Self.GetObject(Position);
+    var tmp := Self.GetObject(Position);
     if ((tmp = -1) or (Self.Bloky[tmp].typ <> TBlkType.usek)) then
     begin
       Self.Selected := nil;
@@ -580,20 +579,19 @@ begin
 end;
 
 procedure TPanelObjects.KorenyMouseUp(Position: TPoint; Button: TMouseButton);
-var blk, i: Integer;
 begin
   // leve tlacitko mysi
   if (Button <> mbLeft) then
     Exit;
 
-  blk := Self.GetObject(Position);
+  var blk := Self.GetObject(Position);
   if (blk < 0) then
     Self.Selected := nil
   else if (Self.Bloky[blk].typ = TBlkType.usek) then
     Self.Selected := Self.Bloky[blk]
   else if (Self.Bloky[blk].typ = TBlkType.vyhybka) then
   begin
-    for i := 0 to Self.Bloky.count - 1 do
+    for var i := 0 to Self.Bloky.count - 1 do
       if ((Self.Bloky[i].typ = TBlkType.usek) and (Self.Bloky[i].index = (Self.Bloky[blk] as TVyhybka).obj)) then
       begin
         Self.Selected := Self.Bloky[i];
@@ -651,21 +649,21 @@ end;
 
 // checking data valid
 function TPanelObjects.CheckValid(var error_cnt: Byte): TStrings;
-var str: string;
-  i, j: Integer;
-  vetev: TVetev;
 begin
   Result := TStringList.Create();
 
-  DateTimeToString(str, 'yyyy-mm-dd hh:nn:ss', Now);
-  Result.Add('Validace objektů: ' + str);
+  begin
+    var str: string;
+    DateTimeToString(str, 'yyyy-mm-dd hh:nn:ss', Now);
+    Result.Add('Validace objektů: ' + str);
+  end;
 
   Result.Add('Ověřuji návaznost úseku na technologické bloky, návaznost na oblasti řízeni...');
   Result.Add('Ověřuji návaznost výhybek na úseky...');
   Result.Add('Ověřuji pojmenování kolejí...');
   Result.Add('Ověřuji kořeny...');
 
-  for i := 0 to Self.Bloky.count - 1 do
+  for var i := 0 to Self.Bloky.count - 1 do
   begin
     if ((Self.Bloky[i].Blok = -1) and (Self.Bloky[i].typ <> TBlkType.pomocny_obj) and
       ((Self.Bloky[i].typ <> TBlkType.text) or (Length((Self.Bloky[i] as TText).text) = 1))) then
@@ -695,9 +693,9 @@ begin
             error_cnt := error_cnt + 1;
           end;
 
-          for j := 0 to (Self.Bloky[i] as TUsek).Vetve.count - 1 do
+          for var j := 0 to (Self.Bloky[i] as TUsek).Vetve.count - 1 do
           begin
-            vetev := (Self.Bloky[i] as TUsek).Vetve[j];
+            var vetev := (Self.Bloky[i] as TUsek).Vetve[j];
             if (((Self.Bloky[i] as TUsek).DKStype <> TDKSType.dksNone) and (j < 3)) then
               continue;
             if (((vetev.node1.vyh >= 0) and ((vetev.node1.ref_plus = -1) or (vetev.node1.ref_minus = -1))) or
@@ -740,19 +738,18 @@ end;
 
 // prirazuje blokum flag, ktery rika, jestli jsou an nem vyhybky
 procedure TPanelObjects.ComputeVyhybkaFlag();
-var i, j: Integer;
 begin
   // reset flagu
-  for i := 0 to Self.Bloky.count - 1 do
+  for var i := 0 to Self.Bloky.count - 1 do
     if (Self.Bloky[i].typ = TBlkType.usek) then
       (Self.Bloky[i] as TUsek).IsVyhybka := false;
 
   // zjistime, jestli na danych blocich jsou vyhybky
-  for i := 0 to Self.Bloky.count - 1 do
+  for var i := 0 to Self.Bloky.count - 1 do
     if (Self.Bloky[i].typ = TBlkType.vyhybka) then
     begin
       // .obj referuje na index v seznamu useku -> musime vypocitat index v poli vsech bloku
-      for j := 0 to Self.Bloky.count - 1 do
+      for var j := 0 to Self.Bloky.count - 1 do
         if ((Self.Bloky[j].typ = TBlkType.usek) and (Self.Bloky[j].index = (Self.Bloky[i] as TVyhybka).obj)) then
         begin
           (Self.Bloky[j] as TUsek).IsVyhybka := true;
@@ -782,19 +779,17 @@ end;
 // jedna se o prostredni usek prejezdu
 // tento usek se priradi na zaklade leveho useku prejezdu
 procedure TPanelObjects.ComputePrjPanelUsek();
-var i, j, usek: Integer;
-  blik_point: TBlikPoint;
 begin
-  for i := 0 to Self.Bloky.count - 1 do
+  for var i := 0 to Self.Bloky.count - 1 do
   begin
     if (Self.Bloky[i].typ <> TBlkType.prejezd) then
       continue;
 
-    for j := 0 to (Self.Bloky[i] as TPrejezd).BlikPositions.count - 1 do
+    for var j := 0 to (Self.Bloky[i] as TPrejezd).BlikPositions.count - 1 do
     begin
-      usek := Self.GetObject(Point((Self.Bloky[i] as TPrejezd).BlikPositions[j].Pos.X - 1,
+      var usek := Self.GetObject(Point((Self.Bloky[i] as TPrejezd).BlikPositions[j].Pos.X - 1,
         (Self.Bloky[i] as TPrejezd).BlikPositions[j].Pos.Y));
-      blik_point := (Self.Bloky[i] as TPrejezd).BlikPositions[j];
+      var blik_point := (Self.Bloky[i] as TPrejezd).BlikPositions[j];
       blik_point.PanelUsek := usek;
       (Self.Bloky[i] as TPrejezd).BlikPositions[j] := blik_point;
     end; // for j
@@ -804,10 +799,9 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 
 class function TPanelObjects.FileSupportedVersionsStr(): string;
-var i: Integer;
 begin
   Result := '';
-  for i := 0 to Length(_FileVersion_accept) - 1 do
+  for var i := 0 to Length(_FileVersion_accept) - 1 do
     Result := Result + _FileVersion_accept[i] + ', ';
   Result := LeftStr(Result, Length(Result) - 2);
 end;
