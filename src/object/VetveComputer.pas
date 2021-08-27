@@ -245,8 +245,8 @@ begin
           for var i := 0 to up do
           begin
             var temp: TPoint;
-            temp.X := new.X + _TURNOUT_CONNECTIONS[data[new.X, new.Y] - _S_TURNOUT_B].dir(TNavDir(i * 2)).X;
-            temp.Y := new.Y + _TURNOUT_CONNECTIONS[data[new.X, new.Y] - _S_TURNOUT_B].dir(TNavDir(i * 2)).Y;
+            temp.X := new.X + _TURNOUT_CONNECTIONS[data[new.X, new.Y] - _S_TURNOUT_B].dir(TNavDir(i)).X;
+            temp.Y := new.Y + _TURNOUT_CONNECTIONS[data[new.X, new.Y] - _S_TURNOUT_B].dir(TNavDir(i)).Y;
 
             if (data[temp.X, temp.Y] > -1) then
             begin

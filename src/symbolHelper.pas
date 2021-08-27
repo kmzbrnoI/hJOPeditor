@@ -67,9 +67,12 @@ const
     (a: (X: 0; Y: -1); b: (X: 0; Y: 1); c: (X: 1; Y: 0)) // last dks
   );
 
+  // Turnout connections must folow strictly this rule for branches computation to work
+  // A = turnout +, B = turnout -, C = turnout source
+
   _TURNOUT_CONNECTIONS: array [0..3] of TSymbolConnection = (
-    (a: (X: -1; Y: 0); b: (X: 0; Y: -1); c: (X: 1; Y: 0)),
-    (a: (X: -1; Y: 0); b: (X: 0; Y: 1); c: (X: 1; Y: 0)),
+    (a: (X: 1; Y: 0); b: (X: 0; Y: -1); c: (X: -1; Y: 0)),
+    (a: (X: 1; Y: 0); b: (X: 0; Y: 1); c: (X: -1; Y: 0)),
     (a: (X: -1; Y: 0); b: (X: 0; Y: -1); c: (X: 1; Y: 0)),
     (a: (X: -1; Y: 0); b: (X: 0; Y: 1); c: (X: 1; Y: 0))
   );
