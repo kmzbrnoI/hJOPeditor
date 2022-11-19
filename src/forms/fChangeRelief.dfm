@@ -57,7 +57,7 @@ object F_ReliefProperties: TF_ReliefProperties
     MaxValue = 255
     MinValue = 5
     TabOrder = 2
-    Value = 0
+    Value = 5
   end
   object SE_Height: TSpinEdit
     Left = 120
@@ -67,6 +67,6 @@ object F_ReliefProperties: TF_ReliefProperties
     MaxValue = 255
     MinValue = 5
     TabOrder = 3
-    Value = 0
+    Value = 5
   end
 end
