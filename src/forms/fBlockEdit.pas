@@ -17,15 +17,14 @@ type
   EFileNotFound = class(Exception);
 
   TBloky = class
-  private const
-    _MAX_BLK = 1023;
   private
-    Bloky: array [0 .. _MAX_BLK] of TBlok;
-    Count: integer;
+    bloky: TList<TBlok>;
     iniFile: TMemIniFile;
     fTriedLoad: Boolean;
+
   public
     constructor Create();
+    destructor Destroy(); override;
 
     procedure LoadData(const FileName: string);
 
@@ -110,32 +109,38 @@ uses fMain, OblastRizeni, ObjBLokUvazkaSpr, ObjBlokVyhybka, ObjBlokUsek,
 constructor TBloky.Create();
 begin
   inherited;
+  Self.bloky := TList<TBlok>.Create();
   Self.fTriedLoad := false;
 end;
 
+destructor TBloky.Destroy();
+begin
+  Self.bloky.Free();
+end;
+
 procedure TBloky.LoadData(const FileName: string);
-var i: integer;
-  str: TStrings;
 begin
   Self.fTriedLoad := true;
+  Self.bloky.Clear();
 
   if (not FileExists(FileName)) then
     raise EFileNotFound.Create('Soubor ' + FileName + ' neexistuje!');
 
-  str := TStringList.Create();
+  var str: TStrings := TStringList.Create();
   Self.iniFile := TMemIniFile.Create(FileName, TEncoding.UTF8);
   try
     Self.iniFile.ReadSections(str);
-    Self.Count := str.Count;
 
-    for i := 0 to str.Count - 1 do
+    for var i := 0 to str.Count - 1 do
     begin
-      Self.Bloky[i].id := StrToInt(str[i]);
-      Self.Bloky[i].Nazev := Self.iniFile.ReadString(str[i], 'nazev', 'Blok ' + IntToStr(i));
-      Self.Bloky[i].typ := Self.iniFile.ReadInteger(str[i], 'typ', -1);
+      var blk: TBlok;
+      blk.id := StrToInt(str[i]);
+      blk.Nazev := Self.iniFile.ReadString(str[i], 'nazev', 'Blok ' + IntToStr(i));
+      blk.typ := Self.iniFile.ReadInteger(str[i], 'typ', -1);
+      Self.bloky.Add(blk);
     end; // for i
   finally
-    Self.iniFile.Free;
+    Self.iniFile.Free();
     str.Free();
   end;
 end;
@@ -431,7 +436,7 @@ begin
 end;
 
 procedure TF_BlockEdit.UpdateLB(text: string);
-var i, index: integer;
+var index: integer;
 begin
   Self.LB_Blocks.Clear();
 
@@ -450,7 +455,7 @@ begin
   else
     index := -1;
 
-  for i := 0 to Self.Bloky.Count - 1 do
+  for var i := 0 to Self.Bloky.bloky.Count - 1 do
   begin
     if ((LeftStr(Self.Bloky.Bloky[i].Nazev, Length(text)) = text) and
       ((Self.Bloky.Bloky[i].typ = Self.GetTechBlokType(Self.OpenBlok.typ)) or
