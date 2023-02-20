@@ -603,7 +603,7 @@ end;
 procedure TF_Hlavni.PM_AboutClick(Sender: TObject);
 begin
   Application.MessageBox(PChar('hJOPeditor' + #13#10 + 'v' + GetVersion(Application.ExeName) + #13#10 +
-    'Vytvořil Jan Horáček 2011–2021'), 'Info', MB_OK OR MB_ICONINFORMATION);
+    'Vytvořil Jan Horáček 2011–2023'), 'Info', MB_OK OR MB_ICONINFORMATION);
 end;
 
 procedure TF_Hlavni.PM_BitmapClick(Sender: TObject);
