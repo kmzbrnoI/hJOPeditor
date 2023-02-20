@@ -77,9 +77,7 @@ type
     procedure RB_UvazkaSmer2Click(Sender: TObject);
   private
     OpenBlok: TGraphBlok;
-
-    LB_BlocksIndexes: array [0 .. _MAX_BLK + 1] of integer;
-    // indexaci pole pro ListBox, zde jsou ulozeny inedxy bloku (nikoliv id!!)
+    LB_BlocksIndexes: TList<Integer>; // indexaci pole pro ListBox, zde jsou ulozeny inedxy bloku (nikoliv id!!)
 
     procedure LoadOR();
     procedure SaveData();
@@ -270,12 +268,14 @@ end;
 procedure TF_BlockEdit.FormCreate(Sender: TObject);
 begin
   Self.Bloky := TBloky.Create;
+  Self.LB_BlocksIndexes := TList<Integer>.Create();
   Self.OpenBlok := nil;
 end;
 
 procedure TF_BlockEdit.FormDestroy(Sender: TObject);
 begin
-  Self.Bloky.Free;
+  Self.LB_BlocksIndexes.Free();
+  Self.Bloky.Free();
 end;
 
 procedure TF_BlockEdit.FormKeyPress(Sender: TObject; var Key: Char);
@@ -439,14 +439,15 @@ procedure TF_BlockEdit.UpdateLB(text: string);
 var index: integer;
 begin
   Self.LB_Blocks.Clear();
+  Self.LB_BlocksIndexes.Clear();
 
   if (Self.OpenBlok = nil) then
     Exit();
 
   Self.LB_Blocks.Items.Add('--- Žádný blok ---');
   Self.LB_Blocks.Items.Add('--- Žádný blok záměrně ---');
-  Self.LB_BlocksIndexes[0] := -1;
-  Self.LB_BlocksIndexes[1] := -2;
+  Self.LB_BlocksIndexes.Add(-1);
+  Self.LB_BlocksIndexes.Add(-2);
 
   if (Self.OpenBlok.block = -2) then
     index := 1
@@ -462,7 +463,7 @@ begin
       ((Self.GetTechBlokType(Self.OpenBlok.typ) = 1) and (Self.Bloky.Bloky[i].typ = 9)) or
       (Self.GetTechBlokType(Self.OpenBlok.typ) = -1))) then
     begin
-      Self.LB_BlocksIndexes[Self.LB_Blocks.Items.Count] := i;
+      Self.LB_BlocksIndexes.Add(i);
       Self.LB_Blocks.Items.Add(Self.Bloky.Bloky[i].Nazev);
       if (Self.Bloky.Bloky[i].id = Self.OpenBlok.block) then
         index := Self.LB_Blocks.Items.Count - 1;

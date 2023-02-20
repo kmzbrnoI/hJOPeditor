@@ -9,7 +9,6 @@ uses
 
 const
   _Uvazka_Spr_Sirka = 9;
-  _MAX_BLK = 1023;
 
   _MAX_WIDTH = 256;
   _MAX_HEIGHT = 256;
