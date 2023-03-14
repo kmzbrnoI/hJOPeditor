@@ -419,7 +419,7 @@ begin
             if (((TempPos.X + GetTrackContinue(tempSym, ndPositive).X = cur.X) and
               (TempPos.Y + GetTrackContinue(tempSym, ndPositive).Y = cur.Y)) or
               ((TempPos.X + GetTrackContinue(tempSym, ndNegative).X = cur.X) and (TempPos.Y + GetTrackContinue(tempSym,
-              ndNegative).Y = cur.Y)) or ((((tempSym >= _S_DKS_DET_L) and (tempSym <= _S_DKS_DET_BOT)) or ((tempSym >= _S_DKS_NODET_TOP) and (tempSym <= _S_DKS_NODET_L))) and
+              ndNegative).Y = cur.Y)) or ((((tempSym >= _S_DKS_DET_TOP) and (tempSym <= _S_DKS_DET_L)) or ((tempSym >= _S_DKS_NODET_TOP) and (tempSym <= _S_DKS_NODET_L))) and
               ((TempPos.X + GetTrackContinue(tempSym, ndThird).X = cur.X) and (TempPos.Y + GetTrackContinue(tempSym,
               ndThird).Y = cur.Y)))) then
             begin
