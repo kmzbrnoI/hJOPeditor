@@ -84,6 +84,10 @@ const
   _S_DERAIL_E = 23;
 
   _S_TRACK_DET_B = 24;
+  _S_TRACK_DET_BR = 26;
+  _S_TRACK_DET_LU = 27;
+  _S_TRACK_DET_LD = 28;
+  _S_TRACK_DET_UR = 29;
   _S_DKS_DET_TOP = 30;
   _S_DKS_DET_BOT = 31;
   _S_DKS_DET_R = 32;
@@ -91,6 +95,10 @@ const
   _S_TRACK_DET_E = 33;
 
   _S_TRACK_NODET_B = 34;
+  _S_TRACK_NODET_BR = 36;
+  _S_TRACK_NODET_LU = 37;
+  _S_TRACK_NODET_LD = 38;
+  _S_TRACK_NODET_UR = 39;
   _S_DKS_NODET_TOP = 40;
   _S_DKS_NODET_BOT = 41;
   _S_DKS_NODET_R = 42;

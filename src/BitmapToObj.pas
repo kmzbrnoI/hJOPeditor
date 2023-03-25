@@ -479,49 +479,45 @@ end;
 // tato funkce predpoklada, ze jedeme odzhora dolu a narazime na prvni vyskyt symbolu uplne nahore
 // tato funkce prida kazdy druhy symbol do blikajicich
 procedure TBitmapToObj.AddPrj(Pos: TPoint; index: Integer);
-var blk: TGraphBlok;
-  blik_point: TBlikPoint;
-  height: Integer;
-  Y: Integer;
-  lefts: Integer;
 begin
-  blk := TCrossing.Create(index);
+  var crossing: TCrossing := TCrossing.Create(index);
 
-  height := 0;
+  var height := 0;
   while (Self.Bitmap.Symbols.GetSymbol(Point(Pos.X, Pos.Y + height)) = _S_CROSSING) do
     Inc(height);
 
-  // edges are always static
-  (blk as TCrossing).StaticPositions.Add(Point(Pos.X, Pos.Y));
-  (blk as TCrossing).StaticPositions.Add(Point(Pos.X, Pos.Y + height - 1));
+  // edges are always static points
+  crossing.StaticPositions.Add(Point(Pos.X, Pos.Y));
+  crossing.StaticPositions.Add(Point(Pos.X, Pos.Y + height - 1));
   Self.processed[Pos.X, Pos.Y] := true;
   Self.processed[Pos.X, Pos.Y + height - 1] := true;
 
   if (height = 3) then
   begin
     // special case
+    var blik_point: TBlikPoint;
     blik_point.Pos := Point(Pos.X, Pos.Y + 1);
     blik_point.PanelUsek := -1;
-    (blk as TCrossing).BlikPositions.Add(blik_point);
+    crossing.BlikPositions.Add(blik_point);
     Self.processed[Pos.X, Pos.Y + 1] := true;
   end else begin
-    for Y := 1 to height - 2 do
+    for var Y := 1 to height - 2 do
     begin
-      lefts := Self.Bitmap.Symbols.GetSymbol(Point(Pos.X - 1, Pos.Y + Y));
-      if ((lefts >= _S_TRACK_DET_B) and (lefts <= _S_TRACK_NODET_E) and (lefts <> 15) and (lefts <> 16) and (lefts <> 21) and
-        (lefts <> 22)) then
+      var lefts := Self.Bitmap.Symbols.GetSymbol(Point(Pos.X - 1, Pos.Y + Y));
+      if ((lefts >= _S_TRACK_DET_B) and (lefts <= _S_TRACK_NODET_E) and
+          (lefts <> _S_TRACK_DET_LU) and (lefts <> _S_TRACK_DET_LD) and (lefts <> _S_TRACK_NODET_LU) and (lefts <> _S_TRACK_NODET_LD)) then
       begin
+        var blik_point: TBlikPoint;
         blik_point.Pos := Point(Pos.X, Pos.Y + Y);
         blik_point.PanelUsek := -1;
-        (blk as TCrossing).BlikPositions.Add(blik_point)
-      end
-      else
-        (blk as TCrossing).StaticPositions.Add(Point(Pos.X, Pos.Y + Y));
+        crossing.BlikPositions.Add(blik_point);
+      end else
+        crossing.StaticPositions.Add(Point(Pos.X, Pos.Y + Y));
       Self.processed[Pos.X, Pos.Y + Y] := true;
     end;
   end;
 
-  Self.Objects.Bloky.Add(blk);
+  Self.Objects.Bloky.Add(crossing);
 end;
 
 function TBitmapToObj.IsSeparator(from, dir: TPoint): Boolean;
