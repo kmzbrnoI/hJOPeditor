@@ -169,9 +169,8 @@ end; // destructor
 
 // reset dat
 procedure TPanelObjects.ResetPanel();
-var Blok: TGraphBlok;
 begin
-  for Blok in Self.Bloky do
+  for var blok: TGraphBlok in Self.Bloky do
     Blok.Free();
   Self.Bloky.Clear();
   Self.Selected := nil;
@@ -179,21 +178,14 @@ end;
 
 // nacitani souboru
 procedure TPanelObjects.FLoad(aFile: string; var ORs: string);
-var i: Integer;
-  inifile: TMemIniFile;
+var inifile: TMemIniFile;
   ver: string;
   verWord: Word;
-  sect_str: TStrings;
-  Blok: TGraphBlok;
-  count: Integer;
-  blkTyp: TBlkType;
-  versionOk: boolean;
-  strs: TStrings;
 begin
   Self.FStav := 2;
   Self.FSoubor := aFile;
 
-  Self.ResetPanel;
+  Self.ResetPanel();
 
   // samotne nacitani dat
   inifile := TMemIniFile.Create(aFile, TEncoding.UTF8);
@@ -201,8 +193,8 @@ begin
     // kontrola verze
     ver := inifile.ReadString('G', 'ver', _FileVersion);
 
-    versionOk := false;
-    for i := 0 to Length(_FileVersion_accept) - 1 do
+    var versionOk: Boolean := false;
+    for var i := 0 to Length(_FileVersion_accept) - 1 do
     begin
       if (ver = _FileVersion_accept[i]) then
       begin
@@ -219,12 +211,14 @@ begin
         raise EFileLoad.Create('Uživatel zrušil načítání souboru!');
     end;
 
-    strs := TStringList.Create();
-    try
-      ExtractStringsEx(['.'], [], ver, strs);
-      verWord := (StrToInt(strs[0]) shl 8) + StrToInt(strs[1]);
-    finally
-      strs.Free();
+    begin
+      var strs: TStrings := TStringList.Create();
+      try
+        ExtractStringsEx(['.'], [], ver, strs);
+        verWord := (StrToInt(strs[0]) shl 8) + StrToInt(strs[1]);
+      finally
+        strs.Free();
+      end;
     end;
 
     Self.DrawObject.Height := inifile.ReadInteger('P', 'H', 0);
@@ -232,56 +226,62 @@ begin
 
     // oblati rizeni
     // tato silena metoda vytvoreni binarniho souboru opravdu zjednodusuje cely program
-    sect_str := TStringList.Create();
-    inifile.ReadSection('OR', sect_str);
-    ORs := '';
-    for i := 0 to sect_str.count - 1 do
-      ORs := ORs + inifile.ReadString('OR', sect_str[i], '') + #13;
-    ORs := ORs + #13;
-    sect_str.Free;
-
-    for blkTyp := Low(TBlkType) to High(TBlkType) do
     begin
-      count := inifile.ReadInteger('P', TGraphBlok.TypeToFileStr(blkTyp), 0);
-      for i := 0 to count - 1 do
+      var sect_str: TStrings := TStringList.Create();
+      try
+        inifile.ReadSection('OR', sect_str);
+        ORs := '';
+        for var i: Integer := 0 to sect_str.count - 1 do
+          ORs := ORs + inifile.ReadString('OR', sect_str[i], '') + #13;
+        ORs := ORs + #13;
+      finally
+        sect_str.Free();
+      end;
+    end;
+
+    for var blkTyp: TBlkType := Low(TBlkType) to High(TBlkType) do
+    begin
+      var count: Integer := inifile.ReadInteger('P', TGraphBlok.TypeToFileStr(blkTyp), 0);
+      for var i: Integer := 0 to count - 1 do
       begin
         try
+          var blok: TGraphBlok;
           case (blkTyp) of
             track:
-              Blok := ObjBlokUsek.TTrack.Create(i);
+              blok := ObjBlokUsek.TTrack.Create(i);
             signal:
-              Blok := ObjBlokNavestidlo.TSignal.Create(i);
+              blok := ObjBlokNavestidlo.TSignal.Create(i);
             turnout:
-              Blok := ObjBlokVyhybka.TTurnout.Create(i);
+              blok := ObjBlokVyhybka.TTurnout.Create(i);
             crossing:
-              Blok := ObjBlokPrejezd.TCrossing.Create(i);
+              blok := ObjBlokPrejezd.TCrossing.Create(i);
             text:
-              Blok := ObjBlokText.TText.Create(i);
+              blok := ObjBlokText.TText.Create(i);
             description:
               begin
-                Blok := ObjBlokText.TText.Create(i);
-                Blok.typ := TBlkType.description; // override type
+                blok := ObjBlokText.TText.Create(i);
+                blok.typ := TBlkType.description; // override type
               end;
             other:
-              Blok := ObjBlokPomocny.TObjOther.Create(i);
+              blok := ObjBlokPomocny.TObjOther.Create(i);
             linker:
-              Blok := ObjBlokUvazka.TLinker.Create(i);
+              blok := ObjBlokUvazka.TLinker.Create(i);
             linker_train:
-              Blok := ObjBlokUvazkaSpr.TLinkerTrain.Create(i);
+              blok := ObjBlokUvazkaSpr.TLinkerTrain.Create(i);
             lock:
-              Blok := ObjBlokZamek.TLock.Create(i);
+              blok := ObjBlokZamek.TLock.Create(i);
             derail:
-              Blok := ObjBlokVykol.TDerail.Create(i);
+              blok := ObjBlokVykol.TDerail.Create(i);
             disconnector:
-              Blok := ObjBlokRozp.TDisconnector.Create(i);
+              blok := ObjBlokRozp.TDisconnector.Create(i);
             pst:
-              Blok := ObjBlokPst.TPSt.Create(i);
+              blok := ObjBlokPst.TPSt.Create(i);
           else
-            Blok := nil;
+            blok := nil;
           end;
 
-          Blok.Load(inifile, TGraphBlok.TypeToFileStr(blkTyp) + IntToStr(i), verWord);
-          Self.Bloky.Add(Blok);
+          blok.Load(inifile, TGraphBlok.TypeToFileStr(blkTyp) + IntToStr(i), verWord);
+          Self.Bloky.Add(blok);
         except
 
         end;
@@ -291,17 +291,13 @@ begin
     Self.ComputeVyhybkaFlag();
     Self.Escape();
   finally
-    inifile.Free;
+    inifile.Free();
   end;
 end;
 
 procedure TPanelObjects.FSave(aFile: string; const ORs: string);
-var i: Integer;
-  inifile: TMemIniFile;
-  str_list: TStrings;
-  Blok: TGraphBlok;
+var inifile: TMemIniFile;
   counts: TDictionary<TBlkType, Integer>;
-  blkTyp: TBlkType;
 begin
   Self.FStav := 2;
 
@@ -321,18 +317,21 @@ begin
     Self.ComputePrjPanelUsek();
 
     // oblasti rizeni
-    str_list := TStringList.Create();
-    ExtractStringsEx([#13], [], LeftStr(ORs, Length(ORs) - 1), str_list);
-    for i := 0 to str_list.count - 1 do
-      inifile.WriteString('OR', IntToStr(i), str_list[i]);
-    str_list.Free;
+    var str_list: TStrings := TStringList.Create();
+    try
+      ExtractStringsEx([#13], [], LeftStr(ORs, Length(ORs) - 1), str_list);
+      for var i := 0 to str_list.count - 1 do
+        inifile.WriteString('OR', IntToStr(i), str_list[i]);
+    finally
+      str_list.Free();
+    end;
 
     // ulozit bloky v kanonickem poradi
-    for blkTyp := Low(TBlkType) to High(TBlkType) do
+    for var blkTyp: TBlkType := Low(TBlkType) to High(TBlkType) do
     begin
-      for Blok in Self.Bloky do
+      for var blok: TGraphBlok in Self.Bloky do
       begin
-        if (Blok.typ = blkTyp) then
+        if (blok.typ = blkTyp) then
         begin
           Blok.Save(inifile, TGraphBlok.TypeToFileStr(Blok.typ) + IntToStr(Blok.index));
           if (not counts.ContainsKey(Blok.typ)) then
@@ -342,7 +341,7 @@ begin
       end;
     end;
 
-    for blkTyp := Low(TBlkType) to High(TBlkType) do
+    for var blkTyp: TBlkType := Low(TBlkType) to High(TBlkType) do
       if (counts.ContainsKey(blkTyp)) then
         inifile.WriteInteger('P', TGraphBlok.TypeToFileStr(blkTyp), counts[blkTyp]);
 

@@ -307,13 +307,10 @@ end;
 
 // resetuje data potrebna pro operaci BitmapToObject - vola se pri startu operace
 procedure TBitmapToObj.ResetData;
-var i, j: Integer;
 begin
-  for i := 0 to _MAX_WIDTH - 1 do
-  begin
-    for j := 0 to _MAX_HEIGHT - 1 do
+  for var i: Integer := 0 to _MAX_WIDTH - 1 do
+    for var j: Integer := 0 to _MAX_HEIGHT - 1 do
       Self.processed[i, j] := false;
-  end; // for i
 end;
 
 // Tato metoda dostane na vstup libovolny symbol libovolne koleje a expanduje
