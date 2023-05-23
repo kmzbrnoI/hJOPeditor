@@ -790,7 +790,7 @@ begin
       var usek := Self.GetObject(Point((Self.Bloky[i] as TCrossing).BlikPositions[j].Pos.X - 1,
         (Self.Bloky[i] as TCrossing).BlikPositions[j].Pos.Y));
       var blik_point := (Self.Bloky[i] as TCrossing).BlikPositions[j];
-      blik_point.PanelUsek := usek;
+      blik_point.PanelUsek := Self.Bloky[usek].index;
       (Self.Bloky[i] as TCrossing).BlikPositions[j] := blik_point;
     end; // for j
   end; // for i
