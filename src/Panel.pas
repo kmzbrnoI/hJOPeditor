@@ -337,16 +337,16 @@ begin
 
   Self.DrawObject.Visible := false;
 
-  Self.IL_Symbols.Free;
-  Self.IL_Text.Free;
-  Self.IL_DK.Free;
+  Self.IL_Symbols.Free();
+  Self.IL_Text.Free();
+  Self.IL_DK.Free();
 
   Self.Graphics.Free();
 
   Self.DK_Menu.Free();
   Self.ORs.Free();
 
-  inherited Destroy;
+  inherited Destroy();
 end; // destructor
 
 // hlavni zobrazeni celeho reliefu

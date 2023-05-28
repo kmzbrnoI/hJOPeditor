@@ -105,24 +105,27 @@ begin
   Self.firstOR.Rights.ModCasStop := Self.CHB_ModCasStop.Checked;
   Self.firstOR.Rights.ModCasSet := Self.CHB_ModCasSet.Checked;
 
-  Self.Close;
-
-  // vytvareni objektu relief
-  F_Hlavni.Relief := TRelief.Create(F_Hlavni.DXD_Main, F_Hlavni);
-
-  F_Hlavni.AssignReliefEvents();
-
   try
+    F_Hlavni.Relief := TRelief.Create(F_Hlavni.DXD_Main, F_Hlavni);
+    F_Hlavni.AssignReliefEvents();
     F_Hlavni.Relief.New(Point(Self.SE_Width.Value, Self.SE_Height.Value), firstOR);
   except
     on E: Exception do
     begin
+      try
+        if (F_Hlavni.Relief <> nil) then
+          FreeAndNil(F_Hlavni.Relief);
+      except
+        F_Hlavni.Relief := nil;
+      end;
+
       Application.MessageBox(PChar('Vyskytla se chyba pri inicializaci panelu:#13#10' + E.Message), 'Chyba',
         MB_OK OR MB_ICONWARNING);
       Exit();
     end;
   end;
 
+  Self.Close();
   F_Hlavni.PM_BitmapClick(F_Hlavni.PM_Bitmap);
   ReliefOptions.UseData(F_Hlavni.Relief);
   F_Hlavni.DesignOpen('Nový projekt');

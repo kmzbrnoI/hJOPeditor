@@ -163,11 +163,6 @@ type
     DXD_main: TDXDraw;
     Relief: TRelief;
 
-    procedure CreateClasses;
-    procedure CreateReliefClasses;
-    procedure DestroyClasses;
-    procedure DestroyReliefClasses;
-
     procedure LoadFileUpdateGUI(fname: string);
     procedure OpenFile(fname: string);
     procedure ImportFile(fname: string);
@@ -262,52 +257,19 @@ begin
   Relief.Skupina := Self.CHB_Group.Checked;
 end;
 
-procedure TF_Hlavni.CreateClasses;
-begin
-  Self.DXD_main := TDXDraw.Create(Self);
-  Self.DXD_main.Parent := Self;
-  Self.DXD_main.Left := 8;
-  Self.DXD_main.Top := 80;
-  Self.DXD_main.Visible := false;
-  Self.DXD_main.Initialize; // tohleto tady musi byt, jinak nefunguje nacitani souboru jako argumentu !!
-
-  Self.CreateReliefClasses;
-end;
-
-procedure TF_Hlavni.CreateReliefClasses;
-begin
-  ReliefOptions := TReliefOptions.Create;
-end;
-
-procedure TF_Hlavni.DestroyClasses;
-begin
-  if (Assigned(ReliefOptions)) then
-  begin
-    ReliefOptions.Destroy;
-    ReliefOptions := nil;
-  end;
-
-  Self.DestroyReliefClasses;
-
-  if (Assigned(Self.DXD_main)) then
-    FreeAndNil(Self.DXD_main);
-end;
-
-procedure TF_Hlavni.DestroyReliefClasses;
-begin
-  if (Assigned(Relief)) then
-  begin
-    Relief.Destroy;
-    Relief := nil;
-  end;
-end;
-
 procedure TF_Hlavni.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  if (Assigned(ReliefOptions)) then
-    ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + _Config_File);
+  try
+    if (Assigned(ReliefOptions)) then
+      ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + _Config_File);
 
-  DestroyClasses;
+    FreeAndNil(Self.Relief);
+
+    if (Assigned(Self.DXD_main)) then
+      FreeAndNil(Self.DXD_main);
+  except
+
+  end;
 end;
 
 procedure TF_Hlavni.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -322,7 +284,14 @@ end;
 
 procedure TF_Hlavni.FormCreate(Sender: TObject);
 begin
-  CreateClasses;
+  Self.Relief := nil;
+
+  Self.DXD_main := TDXDraw.Create(Self);
+  Self.DXD_main.Parent := Self;
+  Self.DXD_main.Left := 8;
+  Self.DXD_main.Top := 80;
+  Self.DXD_main.Visible := false;
+  Self.DXD_main.Initialize(); // tohleto tady musi byt, jinak nefunguje nacitani souboru jako argumentu !!
 
   ReliefOptions.LoadData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + 'Config.ini');
   Self.MI_Mrizka.Checked := ReliefOptions.Mrizka;
@@ -498,7 +467,7 @@ end;
 
 procedure TF_Hlavni.PM_ReliefOptionsClick(Sender: TObject);
 begin
-  F_ReliefOptions.OpenForm;
+  F_ReliefOptions.OpenForm();
 end;
 
 procedure TF_Hlavni.PM_Reload_BlocksClick(Sender: TObject);
@@ -914,7 +883,7 @@ begin
     ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + _Config_File);
 
   Self.DesignClose();
-  Self.DestroyReliefClasses();
+  FreeAndNil(Self.Relief);
 end;
 
 procedure TF_Hlavni.MI_ImportClick(Sender: TObject);
