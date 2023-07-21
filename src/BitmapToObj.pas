@@ -355,7 +355,8 @@ begin
 
       if (((symbol >= _S_TRACK_DET_B) and (symbol <= _S_TRACK_NODET_E)) or
         ((symbol >= _S_DERAIL_B) and (symbol <= _S_DERAIL_E)) or
-        ((symbol >= _S_TURNOUT_B) and (symbol <= _S_TURNOUT_E)) or (symbol = _S_BUMPER_R) or (symbol = _S_BUMPER_L))
+        ((symbol >= _S_TURNOUT_B) and (symbol <= _S_TURNOUT_E)) or (symbol = _S_BUMPER_R) or (symbol = _S_BUMPER_L) or
+         (symbol = _S_CROSSING))
       then
       begin
         // cyklus kvuli smerum navaznosti (vyhybka ma az 3 smery navaznosti)
@@ -373,6 +374,11 @@ begin
                        ((symbol >= _S_DKS_NODET_TOP) and (symbol <= _S_DKS_NODET_L))) then
           begin
             dir := GetTrackContinue(Self.bitmap.Symbols.GetSymbol(cur), TNavDir(j));
+          end else if (symbol = _S_CROSSING) then
+          begin
+            if (j = 2) then
+              break;
+            dir := GetTrackContinue(_S_TRACK_DET_B, TNavDir(j));
           end else begin // usek
             if (j = 2) then
               break; // usek ma jen 2 smery navaznosti
@@ -401,6 +407,19 @@ begin
             derail.branch := -1;
             Self.objects.Bloky.Add(derail);
 
+            processed[tempPos.X, tempPos.Y] := true;
+            s.Push(tempPos);
+          end;
+
+          if (tempSym = _S_CROSSING) then
+          begin
+            var sym: TReliefSym;
+            if ((Self.bitmap.Symbols.Bitmap[cur.X, cur.Y] >= _S_TRACK_NODET_B) and (Self.bitmap.Symbols.Bitmap[cur.X, cur.Y] <= _S_TRACK_NODET_E)) then
+              sym.SymbolID := _S_TRACK_NODET_B
+            else
+              sym.SymbolID := _S_TRACK_DET_B;
+            sym.Position := tempPos;
+            track.Symbols.Add(sym);
             processed[tempPos.X, tempPos.Y] := true;
             s.Push(tempPos);
           end;
@@ -472,7 +491,6 @@ begin
 end;
 
 // tato funkce predpoklada, ze jedeme odzhora dolu a narazime na prvni vyskyt symbolu uplne nahore
-// tato funkce prida kazdy druhy symbol do blikajicich
 procedure TBitmapToObj.AddCrossing(Pos: TPoint; index: Integer);
 begin
   var crossing: TCrossing := TCrossing.Create(index);
