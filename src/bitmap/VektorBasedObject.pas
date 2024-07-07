@@ -27,12 +27,12 @@ type
 
   TVBO = class
   private
-    Data: TList<TPoint>;
+    data: TList<TPoint>;
 
-    DrawObject: record
-      Canvas: TCanvas;
-      SymbolIL: TImageList;
-      SymbolIndex: Integer;
+    drawObject: record
+      canvas: TCanvas;
+      symbolIL: TImageList;
+      symbolIndex: Integer;
       symColor: SymbolColor;
     end;
 
@@ -42,7 +42,14 @@ type
       FDeleteKrok: Byte;
     end;
 
-    Separ: TSeparType;
+    separ: TSeparType;
+
+    mOnShow: TNEvent;
+    mIsSymbol: TPosAskEvent;
+    mNullOperations: TNEvent;
+    mMoveActivate: TNEvent;
+    mDeleteActivate: TNEvent;
+    mOPAsk: TOpAskEvent;
 
     procedure Adding(Position: TPoint);
     procedure Moving(Position: TPoint);
@@ -52,15 +59,8 @@ type
     procedure CheckOpInProgressAndExcept();
 
   public
-    FOnShow: TNEvent;
-    FIsSymbol: TPosAskEvent;
-    FNullOperations: TNEvent;
-    FMoveActivate: TNEvent;
-    FDeleteActivate: TNEvent;
-    FOPAsk: TOpAskEvent;
-
-    constructor Create(DrawCanvas: TCanvas; SymbolIL: TImageList; SymbolIndex: Integer;
-                       SymColor: SymbolColor; Separ: TSeparType = stNone);
+    constructor Create(DrawCanvas: TCanvas; SymbolIL: TImageList; symbolIndex: Integer;
+                       SymColor: SymbolColor; separ: TSeparType = stNone);
     destructor Destroy(); override;
 
     procedure Add(Position: TPoint); overload;
@@ -89,41 +89,40 @@ type
     property DeleteKrok: Byte read Operations.FDeleteKrok;
     property Count: Integer read GetCount;
 
-    property OnShow: TNEvent read FOnShow write FOnShow;
-    property IsSymbol: TPosAskEvent read FIsSymbol write FIsSymbol;
-    property IsOp: TOpAskEvent read FOPAsk write FOPAsk;
-    property OnNullOperations: TNEvent read FNullOperations write FNullOperations;
-    property OnMoveActivate: TNEvent read FMoveActivate write FMoveActivate;
-    property OnDeleteActivate: TNEvent read FDeleteActivate write FDeleteActivate;
+    property OnShow: TNEvent read mOnShow write mOnShow;
+    property IsSymbol: TPosAskEvent read mIsSymbol write mIsSymbol;
+    property IsOp: TOpAskEvent read mOPAsk write mOPAsk;
+    property OnNullOperations: TNEvent read mNullOperations write mNullOperations;
+    property OnMoveActivate: TNEvent read mMoveActivate write mMoveActivate;
+    property OnDeleteActivate: TNEvent read mDeleteActivate write mDeleteActivate;
   end; // TVBO
 
 implementation
 
-constructor TVBO.Create(DrawCanvas: TCanvas; SymbolIL: TImageList; SymbolIndex: Integer; symColor: SymbolColor; Separ: TSeparType);
+constructor TVBO.Create(DrawCanvas: TCanvas; SymbolIL: TImageList; symbolIndex: Integer; symColor: SymbolColor; separ: TSeparType);
 begin
   inherited Create();
 
-  Self.Data := TList<TPoint>.Create();
-  Self.DrawObject.Canvas := DrawCanvas;
-  Self.DrawObject.SymbolIL := SymbolIL;
-  Self.DrawObject.SymbolIndex := SymbolIndex;
-  Self.DrawObject.symColor := symColor;
-  Self.Separ := Separ;
+  Self.data := TList<TPoint>.Create();
+  Self.drawObject.canvas := DrawCanvas;
+  Self.drawObject.symbolIL := SymbolIL;
+  Self.drawObject.symbolIndex := symbolIndex;
+  Self.drawObject.symColor := symColor;
+  Self.separ := separ;
 
   Self.Reset();
 end;
 
 destructor TVBO.Destroy();
 begin
-  Self.Data.Free();
+  Self.data.Free();
   inherited;
 end;
 
 procedure TVBO.Reset();
 begin
-  Self.Data.Count := 0;
-
-  Self.Escape;
+  Self.data.Count := 0;
+  Self.Escape();
 end;
 
 procedure TVBO.Escape();
@@ -139,19 +138,18 @@ begin
     raise EInvalidPosition.Create('Neplatná pozice!');
   if (Self.GetObject(Position) <> -1) then
     raise ENonemptyField.Create('Na pozici je již symbol!');
-  if (Self.Data.Count >= _MAX_DATA) then
+  if (Self.data.Count >= _MAX_DATA) then
     raise EMaxReached.Create('Dosaženo maximálního počtu symbolů!');
 
-  Self.Data.Add(Position);
+  Self.data.Add(Position);
 end;
 
 procedure TVBO.Delete(Position: TPoint);
-var OIndex: Integer;
 begin
   if ((Position.X < 0) or (Position.Y < 0)) then
     raise EInvalidPosition.Create('Neplatná pozice!');
 
-  OIndex := Self.GetObject(Position);
+  var OIndex: Integer := Self.GetObject(Position);
   if (OIndex = -1) then
     raise ENoSymbol.Create('Na této pozici není žádný symbol!');
 
@@ -160,75 +158,73 @@ end;
 
 // zjisteni, zda-li je na dane pozici objekt, popr. jeho index v poli
 function TVBO.GetObject(Position: TPoint): Integer;
-var i: Integer;
 begin
   Result := -1;
 
-  for i := 0 to Self.Data.Count - 1 do
-    if ((Self.Data[i].X = Position.X) and (Self.Data[i].Y = Position.Y)) then
+  for var i: Integer := 0 to Self.data.Count - 1 do
+    if ((Self.data[i].X = Position.X) and (Self.data[i].Y = Position.Y)) then
       Exit(i);
 end;
 
 // nacteni surovych dat do struktur
 procedure TVBO.SetLoadedData(LoadData: TVBOData);
-var i: Integer;
 begin
-  Self.Data.Clear();
-  for i := 0 to (LoadData.Count div 2) - 1 do
-    Self.Data.Add(Point(LoadData.Data[(i * 2)], LoadData.Data[(i * 2) + 1]));
+  Self.data.Clear();
+  for var i: Integer := 0 to (LoadData.Count div 2) - 1 do
+    Self.data.Add(Point(LoadData.Data[(i * 2)], LoadData.Data[(i * 2) + 1]));
 end;
 
 // ziskani surovych dat zapisovanych do souboru z dat programu
 function TVBO.GetSaveData(): TVBOData;
 begin
-  Result.Count := (Self.Data.Count * 2) + 1;
+  Result.Count := (Self.data.Count * 2) + 1;
 
-  Result.Data[0] := Self.Data.Count;
+  Result.Data[0] := Self.data.Count;
 
-  for var i := 0 to Self.Data.Count - 1 do
+  for var i := 0 to Self.data.Count - 1 do
   begin
-    Result.Data[(i * 2) + 1] := Self.Data[i].X;
-    Result.Data[(i * 2) + 2] := Self.Data[i].Y;
+    Result.Data[(i * 2) + 1] := Self.data[i].X;
+    Result.Data[(i * 2) + 2] := Self.data[i].Y;
   end;
 end;
 
 procedure TVBO.Paint();
 var posun: TPoint;
 begin
-  if (Self.Separ = stVert) then
+  if (Self.separ = stVert) then
     posun := Point(_Symbol_Sirka div 2, 0)
-  else if (Self.Separ = stHor) then
+  else if (Self.separ = stHor) then
     posun := Point(0, _Symbol_Vyska div 2)
   else
     posun := Point(0, 0);
 
-  for var i := 0 to Self.Data.Count - 1 do
-    Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, (Self.Data[i].X * _Symbol_Sirka) + posun.X,
-      (Self.Data[i].Y * _Symbol_Vyska) + posun.Y, SymbolIndex(Self.DrawObject.SymbolIndex, Self.DrawObject.symColor));
+  for var i := 0 to Self.data.Count - 1 do
+    Self.DrawObject.SymbolIL.Draw(Self.DrawObject.canvas, (Self.data[i].X * _Symbol_Sirka) + posun.X,
+      (Self.data[i].Y * _Symbol_Vyska) + posun.Y, SymbolIndex(Self.DrawObject.symbolIndex, Self.DrawObject.symColor));
 end;
 
 procedure TVBO.Adding(Position: TPoint);
 begin
   // kontrola obsazenosti
-  if (Assigned(FIsSymbol)) then
+  if (Assigned(mIsSymbol)) then
   begin
-    if (FIsSymbol(Position)) then
+    if (mIsSymbol(Position)) then
       raise ENonemptyField.Create('Na této pozici je již symbol!');
   end else begin
     if (Self.GetObject(Position) <> -1) then
       raise ENonemptyField.Create('Na této pozici je již symbol!');
   end;
 
-  if (Assigned(FNullOperations)) then
-    FNullOperations();
+  if (Assigned(mNullOperations)) then
+    mNullOperations();
 
   Self.Add(Position);
 
   // znovu pripraveni dosazeni objektu
   Self.Operations.FAddKrok := 0;
-  if (Assigned(FOnShow)) then
+  if (Assigned(mOnShow)) then
   begin
-    FOnShow();
+    mOnShow();
     Sleep(50);
   end;
 
@@ -243,8 +239,8 @@ begin
         if (Self.GetObject(Position) = -1) then
           Exit();
 
-        if (Assigned(FNullOperations)) then
-          FNullOperations;
+        if (Assigned(mNullOperations)) then
+          mNullOperations();
         Self.Delete(Position);
 
         Self.Operations.FMoveKrok := 2;
@@ -252,9 +248,9 @@ begin
 
     2:
       begin
-        if (Assigned(FIsSymbol)) then
+        if (Assigned(mIsSymbol)) then
         begin
-          if (FIsSymbol(Position)) then
+          if (mIsSymbol(Position)) then
             raise ENonemptyField.Create('Na této pozici je již symbol!');
         end else begin
           if (Self.GetObject(Position) <> -1) then
@@ -265,16 +261,16 @@ begin
         Self.Operations.FMoveKrok := 0;
 
         // znovu pripraveni dosazeni objektu
-        if Assigned(FOnShow) then
+        if Assigned(mOnShow) then
         begin
-          FOnShow();
+          mOnShow();
           Sleep(50);
         end;
 
-        if (Self.Separ = stNone) then
+        if (Self.separ = stNone) then
         begin
-          if (Assigned(Self.FMoveActivate)) then
-            Self.FMoveActivate();
+          if (Assigned(Self.mMoveActivate)) then
+            Self.mMoveActivate();
         end else begin
           Self.Move();
         end;
@@ -288,23 +284,23 @@ begin
   if (Self.GetObject(Position) = -1) then
     Exit();
 
-  if (Assigned(FNullOperations)) then
-    FNullOperations();
+  if (Assigned(mNullOperations)) then
+    mNullOperations();
 
   Self.Delete(Position);
   Self.Operations.FDeleteKrok := 0;
 
   // znovu pripraveni dosazeni objektu
-  if Assigned(FOnShow) then
+  if Assigned(mOnShow) then
   begin
-    FOnShow();
+    mOnShow();
     Sleep(50);
   end;
 
-  if (Self.Separ = stNone) then
+  if (Self.separ = stNone) then
   begin
-    if (Assigned(Self.FDeleteActivate)) then
-      Self.FDeleteActivate();
+    if (Assigned(Self.mDeleteActivate)) then
+      Self.mDeleteActivate();
   end else begin
     Self.Delete();
   end;
@@ -314,8 +310,8 @@ procedure TVBO.Add();
 begin
   Self.CheckOpInProgressAndExcept();
   Self.Operations.FAddKrok := 1;
-  if Assigned(FOnShow) then
-    FOnShow();
+  if Assigned(mOnShow) then
+    mOnShow();
 end;
 
 procedure TVBO.Move();
@@ -347,9 +343,9 @@ end;
 procedure TVBO.PaintMove(KurzorPos: TPoint);
 var posun: TPoint;
 begin
-  if (Self.Separ = stVert) then
+  if (Self.separ = stVert) then
     posun := Point(_Symbol_Sirka div 2, 0)
-  else if (Self.Separ = stHor) then
+  else if (Self.separ = stHor) then
     posun := Point(0, _Symbol_Vyska div 2)
   else
     posun := Point(0, 0);
@@ -357,8 +353,8 @@ begin
   // pridavani, posouvani
   if ((Self.Operations.FAddKrok = 1) or (Self.Operations.FMoveKrok = 2)) then
   begin
-    Self.DrawObject.SymbolIL.Draw(Self.DrawObject.Canvas, KurzorPos.X * _Symbol_Sirka + posun.X,
-      KurzorPos.Y * _Symbol_Vyska + posun.Y, SymbolIndex(Self.DrawObject.SymbolIndex, Self.DrawObject.symColor));
+    Self.DrawObject.SymbolIL.Draw(Self.DrawObject.canvas, KurzorPos.X * _Symbol_Sirka + posun.X,
+      KurzorPos.Y * _Symbol_Vyska + posun.Y, SymbolIndex(Self.DrawObject.symbolIndex, Self.DrawObject.symColor));
   end; // if (Self.Oddelovace.AddKrok = 1)
 end;
 
@@ -385,14 +381,14 @@ end;
 
 function TVBO.GetCount(): Integer;
 begin
-  Result := Self.Data.Count;
+  Result := Self.data.Count;
 end;
 
 procedure TVBO.CheckOpInProgressAndExcept();
 begin
-  if (Assigned(Self.FOPAsk)) then
+  if (Assigned(Self.mOPAsk)) then
   begin
-    if (Self.FOPAsk) then
+    if (Self.mOPAsk) then
       raise EOperationInProgress.Create('Právě probíhá operace!');
   end else begin
     if ((Self.Operations.FAddKrok > 0) or (Self.Operations.FMoveKrok > 0) or (Self.Operations.FDeleteKrok > 0)) then

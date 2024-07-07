@@ -485,44 +485,44 @@ begin
   Self.Symbols.FOPAsk := Self.IsOperationEvent;
 
   Self.SeparatorsVert := TVBO.Create(DrawCanvas, SymbolIL, _S_SEPAR_VERT, scRed, stVert);
-  Self.SeparatorsVert.FOnShow := Self.ShowEvent;
-  Self.SeparatorsVert.FIsSymbol := Self.IsSymbolSeparVertEvent;
-  Self.SeparatorsVert.FNullOperations := Self.NullOperationsEvent;
-  Self.SeparatorsVert.FMoveActivate := Self.MoveActivateEvent;
-  Self.SeparatorsVert.FDeleteActivate := Self.DeleteActivateEvent;
-  Self.SeparatorsVert.FOPAsk := Self.IsOperationEvent;
+  Self.SeparatorsVert.OnShow := Self.ShowEvent;
+  Self.SeparatorsVert.IsSymbol := Self.IsSymbolSeparVertEvent;
+  Self.SeparatorsVert.OnNullOperations := Self.NullOperationsEvent;
+  Self.SeparatorsVert.OnMoveActivate := Self.MoveActivateEvent;
+  Self.SeparatorsVert.OnDeleteActivate := Self.DeleteActivateEvent;
+  Self.SeparatorsVert.IsOp := Self.IsOperationEvent;
 
   Self.SeparatorsHor := TVBO.Create(DrawCanvas, SymbolIL, _S_SEPAR_HOR, scRed, stHor);
-  Self.SeparatorsHor.FOnShow := Self.ShowEvent;
-  Self.SeparatorsHor.FIsSymbol := Self.IsSymbolSeparHorEvent;
-  Self.SeparatorsHor.FNullOperations := Self.NullOperationsEvent;
-  Self.SeparatorsHor.FMoveActivate := Self.MoveActivateEvent;
-  Self.SeparatorsHor.FDeleteActivate := Self.DeleteActivateEvent;
-  Self.SeparatorsHor.FOPAsk := Self.IsOperationEvent;
+  Self.SeparatorsHor.OnShow := Self.ShowEvent;
+  Self.SeparatorsHor.IsSymbol := Self.IsSymbolSeparHorEvent;
+  Self.SeparatorsHor.OnNullOperations := Self.NullOperationsEvent;
+  Self.SeparatorsHor.OnMoveActivate := Self.MoveActivateEvent;
+  Self.SeparatorsHor.OnDeleteActivate := Self.DeleteActivateEvent;
+  Self.SeparatorsHor.IsOp := Self.IsOperationEvent;
 
   Self.KPopisky := TVBO.Create(DrawCanvas, SymbolIL, _S_FULL, scYellow);
-  Self.KPopisky.FOnShow := Self.ShowEvent;
-  Self.KPopisky.FIsSymbol := Self.IsSymbolKPopiskyJCClickSoupravyEvent;
-  Self.KPopisky.FNullOperations := Self.NullOperationsEvent;
-  Self.KPopisky.FMoveActivate := Self.MoveActivateEvent;
-  Self.KPopisky.FDeleteActivate := Self.DeleteActivateEvent;
-  Self.KPopisky.FOPAsk := Self.IsOperationEvent;
+  Self.KPopisky.OnShow := Self.ShowEvent;
+  Self.KPopisky.IsSymbol := Self.IsSymbolKPopiskyJCClickSoupravyEvent;
+  Self.KPopisky.OnNullOperations := Self.NullOperationsEvent;
+  Self.KPopisky.OnMoveActivate := Self.MoveActivateEvent;
+  Self.KPopisky.OnDeleteActivate := Self.DeleteActivateEvent;
+  Self.KPopisky.IsOp := Self.IsOperationEvent;
 
   Self.JCClick := TVBO.Create(DrawCanvas, SymbolIL, _S_KC, scLime);
-  Self.JCClick.FOnShow := Self.ShowEvent;
-  Self.JCClick.FIsSymbol := Self.IsSymbolKPopiskyJCClickSoupravyEvent;
-  Self.JCClick.FNullOperations := Self.NullOperationsEvent;
-  Self.JCClick.FMoveActivate := Self.MoveActivateEvent;
-  Self.JCClick.FDeleteActivate := Self.DeleteActivateEvent;
-  Self.JCClick.FOPAsk := Self.IsOperationEvent;
+  Self.JCClick.OnShow := Self.ShowEvent;
+  Self.JCClick.IsSymbol := Self.IsSymbolKPopiskyJCClickSoupravyEvent;
+  Self.JCClick.OnNullOperations := Self.NullOperationsEvent;
+  Self.JCClick.OnMoveActivate := Self.MoveActivateEvent;
+  Self.JCClick.OnDeleteActivate := Self.DeleteActivateEvent;
+  Self.JCClick.IsOp := Self.IsOperationEvent;
 
   Self.Soupravy := TVBO.Create(DrawCanvas, SymbolIL, _S_FULL, scBlue);
-  Self.Soupravy.FOnShow := Self.ShowEvent;
-  Self.Soupravy.FIsSymbol := Self.IsSymbolKPopiskyJCClickSoupravyEvent;
-  Self.Soupravy.FNullOperations := Self.NullOperationsEvent;
-  Self.Soupravy.FMoveActivate := Self.MoveActivateEvent;
-  Self.Soupravy.FDeleteActivate := Self.DeleteActivateEvent;
-  Self.Soupravy.FOPAsk := Self.IsOperationEvent;
+  Self.Soupravy.OnShow := Self.ShowEvent;
+  Self.Soupravy.IsSymbol := Self.IsSymbolKPopiskyJCClickSoupravyEvent;
+  Self.Soupravy.OnNullOperations := Self.NullOperationsEvent;
+  Self.Soupravy.OnMoveActivate := Self.MoveActivateEvent;
+  Self.Soupravy.OnDeleteActivate := Self.DeleteActivateEvent;
+  Self.Soupravy.IsOp := Self.IsOperationEvent;
 
   Self.Text := TText.Create(DrawCanvas, TextIL, Parent, Graphics);
   Self.Text.FOnShow := Self.ShowEvent;
