@@ -204,25 +204,16 @@ begin
       Self.Text.SetLoadedData(bytesBuf);
     end;
 
-    // prazdny radek
+    // oddelovac
     BlockRead(myFile, Buffer, 2, aCount);
     if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
       raise EFileLoad.Create('Chybí oddělovací sekvence mezi popisky a separátory!');
     // -------------------------------------------
 
-    // nacteni poctu vertikalnich separatoru
-    BlockRead(myFile, Buffer, 1, aCount);
+    // Vertikalni separatory
+    Self.SeparatorsVert.LoadBpnl(myFile, version);
 
-    // nacitani vertikalnich separatoru
-    BlockRead(myFile, Buffer, (Buffer[0] * 2), aCount);
-
-    VBOData.Count := aCount;
-    for var i: Integer := 0 to VBOData.Count - 1 do
-      VBOData.Data[i] := Buffer[i];
-
-    Self.SeparatorsVert.SetLoadedData(VBOData);
-
-    // prazdny radek
+    // oddelovac
     BlockRead(myFile, Buffer, 2, aCount);
     if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
       raise EFileLoad.Create('Chybí oddělovací sekvence mezi separátory!');
@@ -230,39 +221,20 @@ begin
 
     if (version >= $30) then
     begin
-      // nacteni poctu horizontalnich separatoru
-      BlockRead(myFile, Buffer, 1, aCount);
+      // Horizontalni separatory
+      Self.SeparatorsHor.LoadBpnl(myFile, version);
 
-      // nacitani horizontalnich separatoru
-      BlockRead(myFile, Buffer, (Buffer[0] * 2), aCount);
-
-      VBOData.Count := aCount;
-      for var i: Integer := 0 to aCount - 1 do
-        VBOData.Data[i] := Buffer[i];
-
-      Self.SeparatorsHor.SetLoadedData(VBOData);
-
-      // prazdny radek
+      // oddelovac
       BlockRead(myFile, Buffer, 2, aCount);
       if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
         raise EFileLoad.Create('Chybí oddělovací sekvence mezi hor. separátory a kpopisky!');
     end else begin
-      Self.SeparatorsHor.Reset();
+      Self.SeparatorsHor.Clear();
     end;
-
     // -------------------------------------------
 
-    // nacteni poctu KPopisky
-    BlockRead(myFile, Buffer, 1, aCount);
-
-    // nacitani KPopisky
-    BlockRead(myFile, Buffer, (Buffer[0] * 2), aCount);
-
-    VBOData.Count := aCount;
-    for var i: Integer := 0 to aCount - 1 do
-      VBOData.Data[i] := Buffer[i];
-
-    Self.KPopisky.SetLoadedData(VBOData);
+    // nacteni KPopisky
+    Self.KPopisky.LoadBpnl(myFile, version);
 
     // oddelovac
     BlockRead(myFile, Buffer, 2, aCount);
@@ -270,17 +242,8 @@ begin
       raise EFileLoad.Create('Chybí oddělovací sekvence mezi kolejovými popisky a JCClick!');
     // -------------------------------------------
 
-    // nacteni poctu JCClick
-    BlockRead(myFile, Buffer, 1, aCount);
-
-    // nacitani JCClick
-    BlockRead(myFile, Buffer, (Buffer[0] * 2), aCount);
-
-    VBOData.Count := aCount;
-    for var i: Integer := 0 to aCount - 1 do
-      VBOData.Data[i] := Buffer[i];
-
-    Self.JCClick.SetLoadedData(VBOData);
+    // nacteni JCClick
+    Self.JCClick.LoadBpnl(myFile, version);
 
     // oddelovac
     BlockRead(myFile, Buffer, 2, aCount);
@@ -290,17 +253,8 @@ begin
 
     if (version >= $31) then
     begin
-      // nacteni poctu symbolu souprav
-      BlockRead(myFile, Buffer, 1, aCount);
-
-      // nacitani symbolu souprav
-      BlockRead(myFile, Buffer, (Buffer[0] * 2), aCount);
-
-      VBOData.Count := aCount;
-      for var i: Integer := 0 to aCount - 1 do
-        VBOData.Data[i] := Buffer[i];
-
-      Self.Soupravy.SetLoadedData(VBOData);
+      // nacteni symbolu souprav
+      Self.Soupravy.LoadBpnl(myFile, version);
 
       // oddelovac
       BlockRead(myFile, Buffer, 2, aCount);

@@ -72,6 +72,7 @@ type
     procedure PaintMove(KurzorPos: TPoint);
     function PaintCursor(CursorPos: TPoint): TCursorDraw;
 
+    procedure LoadBpnl(var f: File; fileVersion: Byte);
     procedure SetLoadedData(LoadData: TVBOData);
     function GetSaveData: TVBOData;
 
@@ -98,6 +99,8 @@ type
   end; // TVBO
 
 implementation
+
+uses ReliefBitmap;
 
 constructor TVBO.Create(DrawCanvas: TCanvas; SymbolIL: TImageList; symbolIndex: Integer; symColor: SymbolColor; separ: TSeparType);
 begin
@@ -164,6 +167,33 @@ begin
   for var i: Integer := 0 to Self.data.Count - 1 do
     if ((Self.data[i].X = Position.X) and (Self.data[i].Y = Position.Y)) then
       Exit(i);
+end;
+
+procedure TVBO.LoadBpnl(var f: File; fileVersion: Byte);
+var buf: array [0 .. 1] of Byte;
+    readCount: Integer;
+begin
+  Self.data.Clear();
+
+  var countSize: Integer := 1;
+  if (fileVersion >= $41) then
+    countSize := 2;
+
+  BlockRead(f, buf, countSize, readCount);
+  if (readCount <> countSize) then
+    raise EFileLoad.Create('Chybí velikost bloku!');
+
+  var count: Integer := buf[0];
+  if (countSize = 2) then
+    count := (count shl 8) or buf[1];
+
+  for var i: Integer := 0 to count-1 do
+  begin
+    BlockRead(f, buf, 2, readCount);
+    if (readCount <> 2) then
+      raise EFileLoad.Create('Chybí data!');
+    Self.data.Add(Point(buf[0], buf[1]));
+  end;
 end;
 
 // nacteni surovych dat do struktur
