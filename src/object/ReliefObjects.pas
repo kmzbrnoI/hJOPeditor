@@ -69,8 +69,8 @@ type
 
     procedure Import(Data: TObject); // import dat zatim z PanelBitmap
 
-    procedure FLoad(aFile: string; var ORs: string);
-    procedure FSave(aFile: string; const ORs: string);
+    procedure OpnlLoad(aFile: string; var ORs: string);
+    procedure OpnlSave(aFile: string; const ORs: string);
 
     procedure Paint(); // obecny paint
     procedure PaintBloky(); // paint modu bloky
@@ -177,7 +177,7 @@ begin
 end;
 
 // nacitani souboru
-procedure TPanelObjects.FLoad(aFile: string; var ORs: string);
+procedure TPanelObjects.OpnlLoad(aFile: string; var ORs: string);
 var inifile: TMemIniFile;
   ver: string;
   verWord: Word;
@@ -295,7 +295,7 @@ begin
   end;
 end;
 
-procedure TPanelObjects.FSave(aFile: string; const ORs: string);
+procedure TPanelObjects.OpnlSave(aFile: string; const ORs: string);
 var inifile: TMemIniFile;
   counts: TDictionary<TBlkType, Integer>;
 begin

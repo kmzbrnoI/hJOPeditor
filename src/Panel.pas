@@ -675,7 +675,7 @@ begin
   case (Self.DrawMode) of
     dmBitmap, dmSepHor, dmSepVert:
       begin
-        Self.PanelBitmap.FLoad(aFile, ORs);
+        Self.PanelBitmap.BpnlLoad(aFile, ORs);
         Self.ORLoad(ORs);
         Self.Panel.FileStav := Self.PanelBitmap.FileStav;
         Self.Zobrazeni.PanelWidth := Self.PanelBitmap.PanelWidth;
@@ -683,7 +683,7 @@ begin
       end; // dmBitmap
     dmBloky, dmRoots:
       begin
-        Self.PanelObjects.FLoad(aFile, ORs);
+        Self.PanelObjects.OpnlLoad(aFile, ORs);
         Self.ORLoad(ORs);
         Self.Panel.FileStav := Self.PanelObjects.FileStav;
         Self.Zobrazeni.PanelWidth := Self.PanelObjects.PanelWidth;
@@ -702,13 +702,13 @@ begin
   case (Self.DrawMode) of
     dmBitmap, dmSepHor, dmSepVert:
       begin
-        Self.PanelBitmap.FSave(aFile, Self.ORSave());
+        Self.PanelBitmap.BpnlSave(aFile, Self.ORSave());
         Self.Panel.FileStav := Self.PanelBitmap.FileStav;
       end; // dmBitmap
 
     dmBloky, dmRoots:
       begin
-        Self.PanelObjects.FSave(aFile, Self.ORSave());
+        Self.PanelObjects.OpnlSave(aFile, Self.ORSave());
         Self.Panel.FileStav := Self.PanelObjects.FileStav;
       end; // dmBloky
   end;

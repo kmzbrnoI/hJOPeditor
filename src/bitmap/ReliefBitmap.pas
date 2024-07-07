@@ -72,8 +72,8 @@ type
       Parent: TForm; Graphics: TPanelGraphics);
     destructor Destroy; override;
 
-    procedure FLoad(aFile: string; var ORs: string);
-    procedure FSave(aFile: string; const ORs: string);
+    procedure BpnlLoad(aFile: string; var ORs: string);
+    procedure BpnlSave(aFile: string; const ORs: string);
 
     procedure Paint();
     function PaintCursor(CursorPos: TPoint): TCursorDraw;
@@ -116,7 +116,7 @@ implementation
 uses ReliefObjects, ownStrUtils;
 
 // nacitani souboru s bitmapovymi daty
-procedure TPanelBitmap.FLoad(aFile: string; var ORs: string);
+procedure TPanelBitmap.BpnlLoad(aFile: string; var ORs: string);
 var myFile: File;
   Buffer: array [0 .. 16383] of Byte;
   bytesBuf: TBytes;
@@ -284,7 +284,12 @@ begin
   end;
 end;
 
-procedure TPanelBitmap.FSave(aFile: string; const ORs: string);
+procedure TPanelBitmap.BpnlReadAndValidateSeparator();
+begin
+
+end;
+
+procedure TPanelBitmap.BpnlSave(aFile: string; const ORs: string);
 var myFile: File;
   Buffer: array [0 .. 1023] of Byte;
   bytesBuf: TBytes;
