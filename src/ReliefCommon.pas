@@ -13,6 +13,13 @@ type
     fsSaved = 2
   );
 
+  TGOpStep = ( // graphics operation step
+    gosNone = 0,
+    gosActive = 1,
+    gosSelecting = 2,
+    gosMoving = 3
+  );
+
 implementation
 
 end.

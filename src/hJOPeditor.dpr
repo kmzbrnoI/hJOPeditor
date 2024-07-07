@@ -42,7 +42,8 @@ uses
   ObjBlokVykol in 'object\blok\ObjBlokVykol.pas',
   ownStrUtils in 'helpers\ownStrUtils.pas',
   fImportLog in 'forms\fImportLog.pas' {F_ImportLog},
-  ObjBlokZamek in 'object\blok\ObjBlokZamek.pas';
+  ObjBlokZamek in 'object\blok\ObjBlokZamek.pas',
+  ReliefCommon in 'ReliefCommon.pas';
 
 {$R *.res}
 

@@ -14,74 +14,73 @@ const
 type
   TORAskEvent = function(Pos: TPoint): Boolean of object;
 
+  TBitmapOpType = (botNone = 0, botMove = 1, botDelete = 2);
+
   TPanelBitmap = class
-  private const
-
   private
-    FPanelWidth, FPanelHeight: Integer;
-    FMode: TMode;
-    FSoubor: string;
+    mPanelWidth, mPanelHeight: Integer;
+    mMode: TMode;
+    mFileName: string;
 
-    Operations: record
-      Disable: Boolean;
-      OpType: Byte;
+    operations: record
+      disable: Boolean;
+      opType: TBitmapOpType;
     end;
 
     mFileState: TReliefFileState;
-    Graphics: TPanelGraphics;
+    graphics: TPanelGraphics;
     fShowBlokPopisky: Boolean;
 
-    FORAskEvent: TORAskEvent;
-    FOnShow: TNEvent;
-    FOnTextEdit: TChangeTextEvent;
+    mORAskEvent: TORAskEvent;
+    mOnShow: TNEvent;
+    mOnTextEdit: TChangeTextEvent;
 
     procedure SetGroup(State: Boolean);
-    function GetGroup: Boolean;
+    function GetGroup(): Boolean;
 
-    function IsOperation: Boolean;
+    function IsOperation(): Boolean;
 
-    procedure CheckOperations;
+    procedure CheckOperations();
 
-    procedure ShowEvent;
+    procedure ShowEvent();
     function IsSymbolSymbolEvent(Pos: TPoint): Boolean;
     function IsSymbolTextEvent(Pos: TPoint): Boolean;
     function IsSymbolSeparVertEvent(Pos: TPoint): Boolean;
     function IsSymbolSeparHorEvent(Pos: TPoint): Boolean;
     function IsSymbolKPopiskyJCClickSoupravyEvent(Pos: TPoint): Boolean;
-    procedure NullOperationsEvent;
-    procedure MoveActivateEvent;
-    procedure DeleteActivateEvent;
-    function IsOperationEvent: Boolean;
+    procedure NullOperationsEvent();
+    procedure MoveActivateEvent();
+    procedure DeleteActivateEvent();
+    function IsOperationEvent(): Boolean;
     procedure ChangeTextEvent(Sender: TObject; var popisek: TPopisek);
     class procedure BpnlReadAndValidateSeparator(var f: File; where: string);
 
   public
 
-    Symbols: TBitmapSymbols;
-    SeparatorsVert: TVBO;
-    SeparatorsHor: TVBO;
-    KPopisky: TVBO;
+    symbols: TBitmapSymbols;
+    separatorsVert: TVBO;
+    separatorsHor: TVBO;
+    trackNames: TVBO;
     JCClick: TVBO;
-    Text: TText;
-    Soupravy: TVBO;
+    texts: TText;
+    trainPoss: TVBO;
 
-    Bitmap: array [0 .. _MAX_WIDTH - 1, 0 .. _MAX_HEIGHT - 1] of ShortInt;
+    bitmap: array [0 .. _MAX_WIDTH - 1, 0 .. _MAX_HEIGHT - 1] of ShortInt;
 
     constructor Create(SymbolIL, TextIL: TImageList; DrawCanvas: TCanvas; Width, Height: Integer; Mode: TMode;
       Parent: TForm; Graphics: TPanelGraphics);
-    destructor Destroy; override;
+    destructor Destroy(); override;
 
-    procedure BpnlLoad(aFile: string; var ORs: string);
-    procedure BpnlSave(aFile: string; const ORs: string);
+    procedure BpnlLoad(filename: string; var ORs: string);
+    procedure BpnlSave(filename: string; const ORs: string);
 
     procedure Paint();
     function PaintCursor(CursorPos: TPoint): TCursorDraw;
     procedure PaintMove(CursorPos: TPoint);
 
-    procedure SetRozmery(aWidth, aHeight: Byte);
+    procedure SetSize(aWidth, aHeight: Byte);
 
     procedure Escape(Group: Boolean);
-    procedure ResetPanel;
 
     procedure Move();
     procedure Delete();
@@ -91,16 +90,16 @@ type
 
     function ImportMyJOP(fn: string; ORs: TList<TOR>): string;
 
-    property Soubor: string read FSoubor;
+    property fileName: string read mFileName;
     property fileState: TReliefFileState read mFileState;
-    property PanelWidth: Integer read FPanelWidth;
-    property PanelHeight: Integer read FPanelHeight;
+    property PanelWidth: Integer read mPanelWidth;
+    property PanelHeight: Integer read mPanelHeight;
     property Group: Boolean read GetGroup write SetGroup;
-    property Mode: TMode read FMode write FMode;
+    property Mode: TMode read mMode write mMode;
 
-    property OnShow: TNEvent read FOnShow write FOnShow;
-    property OnTextEdit: TChangeTextEvent read FOnTextEdit write FOnTextEdit;
-    property OnORAsk: TORAskEvent read FORAskEvent write FORAskEvent;
+    property OnShow: TNEvent read mOnShow write mOnShow;
+    property OnTextEdit: TChangeTextEvent read mOnTextEdit write mOnTextEdit;
+    property OnORAsk: TORAskEvent read mORAskEvent write mORAskEvent;
     property ShowBlokPopisky: Boolean read fShowBlokPopisky write fShowBlokPopisky;
   end; // class
 
@@ -109,20 +108,20 @@ implementation
 uses ReliefObjects, ownStrUtils;
 
 // nacitani souboru s bitmapovymi daty
-procedure TPanelBitmap.BpnlLoad(aFile: string; var ORs: string);
+procedure TPanelBitmap.BpnlLoad(filename: string; var ORs: string);
 var buffer: array [0 .. 5] of Byte;
   aCount: Integer;
 begin
   Self.mFileState := fsSaved;
-  Self.FSoubor := aFile;
+  Self.mFileName := filename;
 
   Self.Symbols.Clear();
   Self.SeparatorsVert.Clear();
   Self.SeparatorsHor.Clear();
-  Self.Text.Clear();
+  Self.texts.Clear();
 
   var f: File;
-  AssignFile(f, aFile);
+  AssignFile(f, filename);
   Reset(f, 1);
 
   try
@@ -141,8 +140,8 @@ begin
       Application.MessageBox(PChar('Otevíráte soubor s verzí ' + IntToHex(version,
         2) + ', která není aplikací plně podporována!'), 'Varování', MB_OK OR MB_ICONWARNING);
 
-    Self.FPanelWidth := buffer[3];
-    Self.FPanelHeight := buffer[4];
+    Self.mPanelWidth := buffer[3];
+    Self.mPanelHeight := buffer[4];
 
     Self.BpnlReadAndValidateSeparator(f, 'mezi hlavičkou a bitmapovými daty');
 
@@ -165,7 +164,7 @@ begin
       var bytesBuf: TBytes;
       SetLength(bytesBuf, len);
       BlockRead(f, bytesBuf[0], len, aCount);
-      Self.Text.SetLoadedDataV32(bytesBuf);
+      Self.texts.SetLoadedDataV32(bytesBuf);
     end else begin
       // nacteni poctu popisku
       BlockRead(f, buffer, 1, aCount);
@@ -175,7 +174,7 @@ begin
       var bytesBuf: TBytes;
       SetLength(bytesBuf, len);
       BlockRead(f, bytesBuf[0], len, aCount);
-      Self.Text.SetLoadedData(bytesBuf);
+      Self.texts.SetLoadedData(bytesBuf);
     end;
 
     Self.BpnlReadAndValidateSeparator(f, 'mezi popisky a separátory');
@@ -197,7 +196,7 @@ begin
 
     // -------------------------------------------
 
-    Self.KPopisky.LoadBpnl(f, version);
+    Self.trackNames.LoadBpnl(f, version);
     Self.BpnlReadAndValidateSeparator(f, 'mezi kolejovými popisky a JCClick');
 
     // -------------------------------------------
@@ -209,7 +208,7 @@ begin
 
     if (version >= $31) then
     begin
-      Self.Soupravy.LoadBpnl(f, version);
+      Self.trainPoss.LoadBpnl(f, version);
       Self.BpnlReadAndValidateSeparator(f, 'mezi pozicemi pro soupravy a oblastmi řízení');
     end;
 
@@ -245,18 +244,18 @@ begin
     raise EFileLoad.Create('Chybí oddělovací sekvence '+where+'!');
 end;
 
-procedure TPanelBitmap.BpnlSave(aFile: string; const ORs: string);
+procedure TPanelBitmap.BpnlSave(filename: string; const ORs: string);
 var buffer: array [0 .. 4] of Byte;
   separator: array [0 .. 1] of Byte;
 begin
   Self.mFileState := fsSaved;
-  Self.FSoubor := aFile;
+  Self.mFileName := filename;
 
   separator[0] := $FF;
   separator[1] := $FF;
 
   var f: File;
-  AssignFile(f, aFile);
+  AssignFile(f, filename);
   Rewrite(f, 1);
 
   try
@@ -280,7 +279,7 @@ begin
 
     // -------------------------------------------
     // popisky
-    var bytesBuf := Self.Text.GetSaveData;
+    var bytesBuf := Self.texts.GetSaveData;
     BlockWrite(f, bytesBuf[0], Length(bytesBuf));
     BlockWrite(f, separator, 2);
 
@@ -296,7 +295,7 @@ begin
 
     // -------------------------------------------
     // KPopisky
-    Self.KPopisky.WriteBpnl(f);
+    Self.trackNames.WriteBpnl(f);
     BlockWrite(f, separator, 2);
 
     // -------------------------------------------
@@ -306,7 +305,7 @@ begin
 
     // -------------------------------------------
     // soupravy
-    Self.Soupravy.WriteBpnl(f);
+    Self.trainPoss.WriteBpnl(f);
     BlockWrite(f, separator, 2);
 
     // -------------------------------------------
@@ -328,13 +327,13 @@ begin
   end;
 end;
 
-procedure TPanelBitmap.SetRozmery(aWidth, aHeight: Byte);
+procedure TPanelBitmap.SetSize(aWidth, aHeight: Byte);
 begin
   if (Self.IsOperation) then
     raise Exception.Create('Právě probíhá jiná operace!');
 
-  Self.FPanelWidth := aWidth;
-  Self.FPanelHeight := aHeight;
+  Self.mPanelWidth := aWidth;
+  Self.mPanelHeight := aHeight;
 
   Self.Symbols.SetRozmery(aWidth, aHeight);
 end;
@@ -372,13 +371,13 @@ begin
   Self.SeparatorsHor.OnDeleteActivate := Self.DeleteActivateEvent;
   Self.SeparatorsHor.IsOp := Self.IsOperationEvent;
 
-  Self.KPopisky := TVBO.Create(DrawCanvas, SymbolIL, _S_FULL, scYellow);
-  Self.KPopisky.OnShow := Self.ShowEvent;
-  Self.KPopisky.IsSymbol := Self.IsSymbolKPopiskyJCClickSoupravyEvent;
-  Self.KPopisky.OnNullOperations := Self.NullOperationsEvent;
-  Self.KPopisky.OnMoveActivate := Self.MoveActivateEvent;
-  Self.KPopisky.OnDeleteActivate := Self.DeleteActivateEvent;
-  Self.KPopisky.IsOp := Self.IsOperationEvent;
+  Self.trackNames := TVBO.Create(DrawCanvas, SymbolIL, _S_FULL, scYellow);
+  Self.trackNames.OnShow := Self.ShowEvent;
+  Self.trackNames.IsSymbol := Self.IsSymbolKPopiskyJCClickSoupravyEvent;
+  Self.trackNames.OnNullOperations := Self.NullOperationsEvent;
+  Self.trackNames.OnMoveActivate := Self.MoveActivateEvent;
+  Self.trackNames.OnDeleteActivate := Self.DeleteActivateEvent;
+  Self.trackNames.IsOp := Self.IsOperationEvent;
 
   Self.JCClick := TVBO.Create(DrawCanvas, SymbolIL, _S_KC, scLime);
   Self.JCClick.OnShow := Self.ShowEvent;
@@ -388,24 +387,24 @@ begin
   Self.JCClick.OnDeleteActivate := Self.DeleteActivateEvent;
   Self.JCClick.IsOp := Self.IsOperationEvent;
 
-  Self.Soupravy := TVBO.Create(DrawCanvas, SymbolIL, _S_FULL, scBlue);
-  Self.Soupravy.OnShow := Self.ShowEvent;
-  Self.Soupravy.IsSymbol := Self.IsSymbolKPopiskyJCClickSoupravyEvent;
-  Self.Soupravy.OnNullOperations := Self.NullOperationsEvent;
-  Self.Soupravy.OnMoveActivate := Self.MoveActivateEvent;
-  Self.Soupravy.OnDeleteActivate := Self.DeleteActivateEvent;
-  Self.Soupravy.IsOp := Self.IsOperationEvent;
+  Self.trainPoss := TVBO.Create(DrawCanvas, SymbolIL, _S_FULL, scBlue);
+  Self.trainPoss.OnShow := Self.ShowEvent;
+  Self.trainPoss.IsSymbol := Self.IsSymbolKPopiskyJCClickSoupravyEvent;
+  Self.trainPoss.OnNullOperations := Self.NullOperationsEvent;
+  Self.trainPoss.OnMoveActivate := Self.MoveActivateEvent;
+  Self.trainPoss.OnDeleteActivate := Self.DeleteActivateEvent;
+  Self.trainPoss.IsOp := Self.IsOperationEvent;
 
-  Self.Text := TText.Create(DrawCanvas, TextIL, Parent, Graphics);
-  Self.Text.FOnShow := Self.ShowEvent;
-  Self.Text.FIsSymbol := Self.IsSymbolTextEvent;
-  Self.Text.FNullOperations := Self.NullOperationsEvent;
-  Self.Text.FMoveActivate := Self.MoveActivateEvent;
-  Self.Text.FDeleteActivate := Self.DeleteActivateEvent;
-  Self.Text.FOPAsk := Self.IsOperationEvent;
-  Self.Text.FOnChangeText := Self.ChangeTextEvent;
+  Self.texts := TText.Create(DrawCanvas, TextIL, Parent, Graphics);
+  Self.texts.FOnShow := Self.ShowEvent;
+  Self.texts.FIsSymbol := Self.IsSymbolTextEvent;
+  Self.texts.FNullOperations := Self.NullOperationsEvent;
+  Self.texts.FMoveActivate := Self.MoveActivateEvent;
+  Self.texts.FDeleteActivate := Self.DeleteActivateEvent;
+  Self.texts.FOPAsk := Self.IsOperationEvent;
+  Self.texts.FOnChangeText := Self.ChangeTextEvent;
 
-  Self.SetRozmery(Width, Height);
+  Self.SetSize(Width, Height);
 end;
 
 destructor TPanelBitmap.Destroy;
@@ -413,10 +412,10 @@ begin
   FreeAndNil(Self.Symbols);
   FreeAndNil(Self.SeparatorsVert);
   FreeAndNil(Self.SeparatorsHor);
-  FreeAndNil(Self.KPopisky);
+  FreeAndNil(Self.trackNames);
   FreeAndNil(Self.JCClick);
-  FreeAndNil(Self.Soupravy);
-  FreeAndNil(Self.Text);
+  FreeAndNil(Self.trainPoss);
+  FreeAndNil(Self.texts);
 
   inherited;
 end;
@@ -424,26 +423,26 @@ end;
 // vykresleni vseho
 procedure TPanelBitmap.Paint();
 begin
-  Self.JCClick.Paint;
-  Self.Soupravy.Paint;
-  Self.KPopisky.Paint;
-  Self.Symbols.Paint;
-  Self.SeparatorsVert.Paint;
-  Self.SeparatorsHor.Paint;
-  Self.Text.Paint(Self.fShowBlokPopisky);
+  Self.JCClick.Paint();
+  Self.trainPoss.Paint();
+  Self.trackNames.Paint();
+  Self.Symbols.Paint();
+  Self.SeparatorsVert.Paint();
+  Self.SeparatorsHor.Paint();
+  Self.texts.Paint(Self.fShowBlokPopisky);
 end;
 
 procedure TPanelBitmap.MouseUp(Position: TPoint; Button: TMouseButton);
 begin
-  Self.Operations.Disable := true;
+  Self.operations.disable := true;
 
   case (Self.Mode) of
     dmBitmap:
       begin
-        Self.Text.MouseUp(Position, Button);
-        Self.KPopisky.MouseUp(Position, Button);
+        Self.texts.MouseUp(Position, Button);
+        Self.trackNames.MouseUp(Position, Button);
         Self.JCClick.MouseUp(Position, Button);
-        Self.Soupravy.MouseUp(Position, Button);
+        Self.trainPoss.MouseUp(Position, Button);
         Self.Symbols.MouseUp(Position, Button);
       end;
 
@@ -453,8 +452,8 @@ begin
       Self.SeparatorsVert.MouseUp(Position, Button);
   end; // case
 
-  Self.Operations.Disable := false;
-  Self.CheckOperations;
+  Self.operations.disable := false;
+  Self.CheckOperations();
 end;
 
 procedure TPanelBitmap.DblClick(Position: TPoint);
@@ -464,8 +463,8 @@ end;
 
 procedure TPanelBitmap.ShowEvent();
 begin
-  if (Assigned(FOnShow)) then
-    FOnShow;
+  if (Assigned(Self.OnShow)) then
+    Self.OnShow();
 end;
 
 function TPanelBitmap.IsSymbolSymbolEvent(Pos: TPoint): Boolean;
@@ -475,8 +474,8 @@ begin
   if (Self.Symbols.GetSymbol(Pos) <> -1) then
     Exit(true);
   // Symbol (platform) could be placed over text
-  if (Assigned(Self.FORAskEvent)) then
-    Exit(Self.FORAskEvent(Pos));
+  if (Assigned(Self.OnORAsk)) then
+    Exit(Self.OnORAsk(Pos));
 end;
 
 function TPanelBitmap.IsSymbolTextEvent(Pos: TPoint): Boolean;
@@ -487,10 +486,10 @@ begin
   var symbol := Self.Symbols.GetSymbol(Pos);
   if ((symbol <> -1) and ((symbol < _S_PLATFORM_B) or (symbol > _S_PLATFORM_E))) then
     Exit(true);
-  if (Self.Text.GetPopisek(Pos) <> -1) then
+  if (Self.texts.GetPopisek(Pos) <> -1) then
     Exit(true);
-  if (Assigned(Self.FORAskEvent)) then
-    Exit(Self.FORAskEvent(Pos));
+  if (Assigned(Self.OnORAsk)) then
+    Exit(Self.OnORAsk(Pos));
 end;
 
 function TPanelBitmap.IsSymbolSeparVertEvent(Pos: TPoint): Boolean;
@@ -505,7 +504,7 @@ end;
 
 function TPanelBitmap.IsSymbolKPopiskyJCClickSoupravyEvent(Pos: TPoint): Boolean;
 begin
-  Result := (Self.KPopisky.GetObject(Pos) <> -1) or (Self.JCClick.GetObject(Pos) <> -1) or (Self.Soupravy.GetObject(Pos) <> -1);
+  Result := (Self.trackNames.GetObject(Pos) <> -1) or (Self.JCClick.GetObject(Pos) <> -1) or (Self.trainPoss.GetObject(Pos) <> -1);
 end;
 
 procedure TPanelBitmap.NullOperationsEvent();
@@ -515,23 +514,23 @@ end;
 
 procedure TPanelBitmap.MoveActivateEvent();
 begin
-  if (Self.Operations.Disable) then
-    Self.Operations.OpType := 1
+  if (Self.operations.disable) then
+    Self.operations.opType := botMove
   else
     Self.Move();
 end;
 
 procedure TPanelBitmap.DeleteActivateEvent();
 begin
-  if (Self.Operations.Disable) then
-    Self.Operations.OpType := 2
+  if (Self.operations.disable) then
+    Self.operations.opType := botDelete
   else
-    Self.Delete;
+    Self.Delete();
 end;
 
 function TPanelBitmap.IsOperationEvent(): Boolean;
 begin
-  Result := Self.IsOperation;
+  Result := Self.IsOperation();
 end;
 
 procedure TPanelBitmap.SetGroup(State: Boolean);
@@ -552,35 +551,17 @@ begin
   if (Assigned(Self.Symbols)) then
     Self.Symbols.Escape(Group);
   if (Assigned(Self.SeparatorsVert)) then
-    Self.SeparatorsVert.Escape;
+    Self.SeparatorsVert.Escape();
   if (Assigned(Self.SeparatorsHor)) then
-    Self.SeparatorsHor.Escape;
-  if (Assigned(Self.KPopisky)) then
-    Self.KPopisky.Escape;
+    Self.SeparatorsHor.Escape();
+  if (Assigned(Self.trackNames)) then
+    Self.trackNames.Escape();
   if (Assigned(Self.JCClick)) then
-    Self.JCClick.Escape;
-  if (Assigned(Self.Soupravy)) then
-    Self.Soupravy.Escape;
-  if (Assigned(Self.Text)) then
-    Self.Text.Escape;
-end;
-
-procedure TPanelBitmap.ResetPanel();
-begin
-  if (Assigned(Self.Symbols)) then
-    Self.Symbols.Clear();
-  if (Assigned(Self.SeparatorsVert)) then
-    Self.SeparatorsVert.Clear();
-  if (Assigned(Self.SeparatorsHor)) then
-    Self.SeparatorsHor.Clear();
-  if (Assigned(Self.KPopisky)) then
-    Self.KPopisky.Clear();
-  if (Assigned(Self.JCClick)) then
-    Self.JCClick.Clear();
-  if (Assigned(Self.Soupravy)) then
-    Self.Soupravy.Clear();
-  if (Assigned(Self.Text)) then
-    Self.Text.Clear();
+    Self.JCClick.Escape();
+  if (Assigned(Self.trainPoss)) then
+    Self.trainPoss.Escape();
+  if (Assigned(Self.texts)) then
+    Self.texts.Escape();
 end;
 
 function TPanelBitmap.PaintCursor(CursorPos: TPoint): TCursorDraw;
@@ -589,10 +570,10 @@ begin
   Return[0] := Self.Symbols.PaintCursor(CursorPos);
   Return[1] := Self.SeparatorsVert.PaintCursor(CursorPos);
   Return[2] := Self.SeparatorsHor.PaintCursor(CursorPos);
-  Return[3] := Self.KPopisky.PaintCursor(CursorPos);
+  Return[3] := Self.trackNames.PaintCursor(CursorPos);
   Return[4] := Self.JCClick.PaintCursor(CursorPos);
-  Return[5] := Self.Text.PaintCursor(CursorPos);
-  Return[6] := Self.Soupravy.PaintCursor(CursorPos);
+  Return[5] := Self.texts.PaintCursor(CursorPos);
+  Return[6] := Self.trainPoss.PaintCursor(CursorPos);
 
   if (Self.Mode = dmSepVert) then
   begin
@@ -629,24 +610,24 @@ begin
 
   // pokud je 1 OnObject
   for var i: Integer := 0 to Length(Return)-1 do
-    if (Return[i].Color = 2) then
+    if (Return[i].color = TCursorColor.ccOnObject) then
       Exit(Return[i]);
 
   // pokud je 1 Operation
   for var i: Integer := 0 to Length(Return)-1 do
-    if (Return[i].Color = 1) then
+    if (Return[i].Color = TCursorColor.ccActiveOperation) then
       Exit(Return[i]);
 end;
 
 function TPanelBitmap.IsOperation(): Boolean;
 begin
-  if ((Self.Symbols.AddKrok <> 0) or (Self.Symbols.MoveKrok > 1) or (Self.Symbols.DeleteKrok > 1) or
-    (Self.SeparatorsVert.AddKrok <> 0) or (Self.SeparatorsVert.MoveKrok > 1) or (Self.SeparatorsVert.DeleteKrok > 1) or
-    (Self.SeparatorsHor.AddKrok <> 0) or (Self.SeparatorsHor.MoveKrok > 1) or (Self.SeparatorsHor.DeleteKrok > 1) or
-    (Self.KPopisky.AddKrok <> 0) or (Self.KPopisky.MoveKrok > 1) or (Self.KPopisky.DeleteKrok > 1) or
-    (Self.JCClick.AddKrok <> 0) or (Self.JCClick.MoveKrok > 1) or (Self.JCClick.DeleteKrok > 1) or
-    (Self.Soupravy.AddKrok <> 0) or (Self.Soupravy.MoveKrok > 1) or (Self.Soupravy.DeleteKrok > 1) or
-    (Self.Text.AddKrok <> 0) or (Self.Text.MoveKrok > 1) or (Self.Text.DeleteKrok > 1)) then
+  if ((Self.Symbols.addStep <> gosNone) or (Self.Symbols.moveStep > gosActive) or
+    (Self.SeparatorsVert.addStep <> gosNone) or (Self.SeparatorsVert.moveStep > gosActive) or
+    (Self.SeparatorsHor.addStep <> gosNone) or (Self.SeparatorsHor.moveStep > gosActive) or
+    (Self.trackNames.addStep <> gosNone) or (Self.trackNames.moveStep > gosActive) or
+    (Self.JCClick.addStep <> gosNone) or (Self.JCClick.moveStep > gosActive) or
+    (Self.trainPoss.addStep <> gosNone) or (Self.trainPoss.moveStep > gosActive) or
+    (Self.texts.addStep <> gosNone) or (Self.texts.moveStep > gosActive)) then
     Result := true
   else
     Result := false;
@@ -659,14 +640,14 @@ begin
       begin
         if (Assigned(Self.Symbols)) then
           Self.Symbols.Move;
-        if (Assigned(Self.KPopisky)) then
-          Self.KPopisky.Move;
+        if (Assigned(Self.trackNames)) then
+          Self.trackNames.Move;
         if (Assigned(Self.JCClick)) then
           Self.JCClick.Move;
-        if (Assigned(Self.Soupravy)) then
-          Self.Soupravy.Move;
-        if (Assigned(Self.Text)) then
-          Self.Text.Move;
+        if (Assigned(Self.trainPoss)) then
+          Self.trainPoss.Move;
+        if (Assigned(Self.texts)) then
+          Self.texts.Move;
       end;
 
     dmSepHor:
@@ -685,14 +666,14 @@ begin
       begin
         if (Assigned(Self.Symbols)) then
           Self.Symbols.Delete();
-        if (Assigned(Self.KPopisky)) then
-          Self.KPopisky.Delete();
+        if (Assigned(Self.trackNames)) then
+          Self.trackNames.Delete();
         if (Assigned(Self.JCClick)) then
           Self.JCClick.Delete();
-        if (Assigned(Self.Soupravy)) then
-          Self.Soupravy.Delete();
-        if (Assigned(Self.Text)) then
-          Self.Text.Delete();
+        if (Assigned(Self.trainPoss)) then
+          Self.trainPoss.Delete();
+        if (Assigned(Self.texts)) then
+          Self.texts.Delete();
       end;
     dmSepHor:
       if (Assigned(Self.SeparatorsHor)) then
@@ -711,32 +692,32 @@ begin
     Self.SeparatorsVert.PaintMove(CursorPos);
   if (Assigned(Self.SeparatorsHor)) then
     Self.SeparatorsHor.PaintMove(CursorPos);
-  if (Assigned(Self.KPopisky)) then
-    Self.KPopisky.PaintMove(CursorPos);
+  if (Assigned(Self.trackNames)) then
+    Self.trackNames.PaintMove(CursorPos);
   if (Assigned(Self.JCClick)) then
     Self.JCClick.PaintMove(CursorPos);
-  if (Assigned(Self.Soupravy)) then
-    Self.Soupravy.PaintMove(CursorPos);
-  if (Assigned(Self.Text)) then
-    Self.Text.PaintTextMove(CursorPos);
+  if (Assigned(Self.trainPoss)) then
+    Self.trainPoss.PaintMove(CursorPos);
+  if (Assigned(Self.texts)) then
+    Self.texts.PaintTextMove(CursorPos);
 end;
 
 procedure TPanelBitmap.CheckOperations();
 begin
-  if ((not Self.Operations.Disable) and (Self.Operations.OpType <> 0)) then
+  if ((not Self.operations.disable) and (Self.operations.opType <> botNone)) then
   begin
-    case (Self.Operations.OpType) of
-      1: Self.Move();
-      2: Self.Delete();
+    case (Self.operations.opType) of
+      botMove: Self.Move();
+      botDelete: Self.Delete();
     end;
-    Self.Operations.OpType := 0;
+    Self.operations.opType := botNone;
   end;
 end;
 
 procedure TPanelBitmap.ChangeTextEvent(Sender: TObject; var popisek: TPopisek);
 begin
-  if (Assigned(FOnTextEdit)) then
-    FOnTextEdit(Self, popisek);
+  if (Assigned(Self.OnTextEdit)) then
+    Self.OnTextEdit(Self, popisek);
 end;
 
 /// ////////////////////////////////////////////////////////////////////////////
@@ -773,10 +754,10 @@ begin
 
       if (splitted[0] = 'JOP') then
       begin
-        Self.FPanelWidth := StrToInt(splitted[4]) + OFFSET_X;
-        Self.FPanelHeight := StrToInt(splitted[5]) + OFFSET_Y;
-        Self.Symbols.SetRozmery(Self.FPanelWidth, Self.FPanelHeight);
-        Result := 'INFO: Width: ' + IntToStr(Self.FPanelWidth) + ', height: ' + IntToStr(Self.FPanelHeight) + #13#10;
+        Self.mPanelWidth := StrToInt(splitted[4]) + OFFSET_X;
+        Self.mPanelHeight := StrToInt(splitted[5]) + OFFSET_Y;
+        Self.Symbols.SetRozmery(Self.mPanelWidth, Self.mPanelHeight);
+        Result := 'INFO: Width: ' + IntToStr(Self.mPanelWidth) + ', height: ' + IntToStr(Self.mPanelHeight) + #13#10;
 
       end else if (splitted[0] = 'G') then
       begin
@@ -802,7 +783,7 @@ begin
         begin
           Self.Symbols.Bitmap[X][Y] := _S_TURNOUT_B + StrToInt(splitted[12]);
           try
-            Self.Text.AddToStructure(Point(popx, popy), splitted[7], scWhite, true);
+            Self.texts.AddToStructure(Point(popx, popy), splitted[7], scWhite, true);
           except
             Result := Result + 'WARN: nepodařilo se přidat popisek bloku ' + splitted[7] + #13#10;
           end;
@@ -815,7 +796,7 @@ begin
           else
             Self.Symbols.Bitmap[X][Y] := _S_DERAIL_B + 1;
           try
-            Self.Text.AddToStructure(Point(popx, popy), splitted[7], scWhite, true);
+            Self.texts.AddToStructure(Point(popx, popy), splitted[7], scWhite, true);
           except
             Result := Result + 'WARN: nepodařilo se přidat popisek bloku ' + splitted[7] + #13#10;
           end;
@@ -854,7 +835,7 @@ begin
           end;
 
           try
-            Self.Text.AddToStructure(Point(popx, popy), OblR.Name, scWhite, false);
+            Self.texts.AddToStructure(Point(popx, popy), OblR.Name, scWhite, false);
           except
             Result := Result + 'WARN: nepodařilo se přidat název OŘ ' + OblR.Name + #13#10;
           end;
@@ -867,7 +848,7 @@ begin
         end else if (splitted[3] = '80') then
         begin
           try
-            Self.Text.AddToStructure(Point(X, Y), splitted[7], scGray, false);
+            Self.texts.AddToStructure(Point(X, Y), splitted[7], scGray, false);
           except
             Result := Result + 'WARN: nepodařilo se přidat popisek bloku ' + splitted[7] + #13#10;
           end;
@@ -884,7 +865,7 @@ begin
             Self.SeparatorsHor.Add(Point(X, Y));
           if (StrToBoolDef(splitted[35], false)) then
           begin
-            Self.KPopisky.Add(Point(X, Y));
+            Self.trackNames.Add(Point(X, Y));
             Self.JCClick.Add(Point(X - 1, Y));
             Self.JCClick.Add(Point(X + 1, Y));
           end;
@@ -903,7 +884,7 @@ begin
             popy := StrToInt(gsplitted[13]) + OFFSET_Y;
           end;
           try
-            Self.Text.AddToStructure(Point(popx, popy), gsplitted[8], scGray, true);
+            Self.texts.AddToStructure(Point(popx, popy), gsplitted[8], scGray, true);
           except
             Result := Result + 'WARN: nepodařilo se přidat popisek bloku ' + gsplitted[8] + #13#10;
           end;

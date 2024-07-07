@@ -35,7 +35,7 @@ type
 
     PM_Properties: TPopUpMenu;
 
-    FSoubor: string;
+    mFileName: string;
     mFileState: TReliefFileState;
     FMode: TMode;
     Graphics: TPanelGraphics;
@@ -95,7 +95,7 @@ type
 
     property PanelWidth: Integer read DrawObject.Width;
     property PanelHeight: Integer read DrawObject.Height;
-    property Soubor: string read FSoubor;
+    property fileName: string read mFileName;
     property FileStav: TReliefFileState read mFileState;
     property mode: TMode read FMode write SetMode;
 
@@ -178,7 +178,7 @@ var inifile: TMemIniFile;
   verWord: Word;
 begin
   Self.mFileState := fsSaved;
-  Self.FSoubor := aFile;
+  Self.mFileName := aFile;
 
   Self.ResetPanel();
 
@@ -378,7 +378,7 @@ end;
 function TPanelObjects.PaintCursor(CursorPos: TPoint): TCursorDraw;
 begin
   // vykreslit kurzor
-  Result.Color := 0;
+  Result.Color := TCursorColor.ccDefault;
   Result.Pos1.X := CursorPos.X * _Symbol_Sirka;
   Result.Pos1.Y := CursorPos.Y * _Symbol_Vyska;
   Result.Pos2.X := CursorPos.X * _Symbol_Sirka;

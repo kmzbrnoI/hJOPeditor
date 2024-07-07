@@ -91,13 +91,13 @@ begin
       continue;
     for var y: Integer := 0 to (Self.objects.Bloky[x] as TTrack).Symbols.Count - 1 do
     begin
-      if (Self.bitmap.KPopisky.GetObject((Self.objects.Bloky[x] as TTrack).Symbols[y].Position) <> -1) then
+      if (Self.bitmap.trackNames.GetObject((Self.objects.Bloky[x] as TTrack).Symbols[y].Position) <> -1) then
         (Self.objects.Bloky[x] as TTrack).labels.Add((Self.objects.Bloky[x] as TTrack).Symbols[y].Position);
 
       if (Self.bitmap.JCClick.GetObject((Self.objects.Bloky[x] as TTrack).Symbols[y].Position) <> -1) then
         (Self.objects.Bloky[x] as TTrack).JCClick.Add((Self.objects.Bloky[x] as TTrack).Symbols[y].Position);
 
-      if (Self.bitmap.Soupravy.GetObject((Self.objects.Bloky[x] as TTrack).Symbols[y].Position) <> -1) then
+      if (Self.bitmap.trainPoss.GetObject((Self.objects.Bloky[x] as TTrack).Symbols[y].Position) <> -1) then
         (Self.objects.Bloky[x] as TTrack).trains.Add((Self.objects.Bloky[x] as TTrack).Symbols[y].Position);
     end;
   end;
@@ -127,9 +127,9 @@ begin
   begin
     var index: Integer := 0;
     var popisek_index: Integer := 0;
-    for var x: Integer := 0 to Self.bitmap.Text.Count - 1 do
+    for var x: Integer := 0 to Self.bitmap.texts.Count - 1 do
     begin
-      var PopData := Self.bitmap.Text.GetPopisekData(x);
+      var PopData := Self.bitmap.texts.GetPopisekData(x);
 
       var blk: TText;
       if (PopData.BlokPopisek) then

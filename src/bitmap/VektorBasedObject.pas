@@ -32,9 +32,9 @@ type
     end;
 
     operations: record
-      FAddKrok: Byte;
-      FMoveKrok: Byte;
-      FDeleteKrok: Byte;
+      addStep: TGOpStep;
+      moveStep: TGOpStep;
+      deleteStep: TGOpStep;
     end;
 
     separ: TSeparType;
@@ -79,10 +79,10 @@ type
     procedure Move();
     procedure Delete(); overload;
 
-    property AddKrok: Byte read operations.FAddKrok;
-    property MoveKrok: Byte read operations.FMoveKrok;
-    property DeleteKrok: Byte read operations.FDeleteKrok;
-    property Count: Integer read GetCount;
+    property addStep: TGOpStep read operations.addStep;
+    property moveStep: TGOpStep read operations.moveStep;
+    property deleteStep: TGOpStep read operations.deleteStep;
+    property count: Integer read GetCount;
 
     property OnShow: TNEvent read mOnShow write mOnShow;
     property IsSymbol: TPosAskEvent read mIsSymbol write mIsSymbol;
@@ -122,9 +122,9 @@ end;
 
 procedure TVBO.Escape();
 begin
-  Self.operations.FAddKrok := 0;
-  Self.operations.FMoveKrok := 0;
-  Self.operations.FDeleteKrok := 0;
+  Self.operations.addStep := gosNone;
+  Self.operations.moveStep := gosNone;
+  Self.operations.deleteStep := gosNone;
 end;
 
 procedure TVBO.Add(Position: TPoint);
@@ -235,7 +235,7 @@ begin
   Self.Add(Position);
 
   // znovu pripraveni dosazeni objektu
-  Self.Operations.FAddKrok := 0;
+  Self.Operations.addStep := gosNone;
   if (Assigned(mOnShow)) then
   begin
     mOnShow();
@@ -247,8 +247,8 @@ end;
 
 procedure TVBO.Moving(Position: TPoint);
 begin
-  case (Self.Operations.FMoveKrok) of
-    1:
+  case (Self.Operations.moveStep) of
+    TGOpStep.gosActive:
       begin
         if (Self.GetObject(Position) = -1) then
           Exit();
@@ -257,10 +257,10 @@ begin
           mNullOperations();
         Self.Delete(Position);
 
-        Self.Operations.FMoveKrok := 2;
+        Self.Operations.moveStep := gosMoving;
       end; // case 1
 
-    2:
+    TGOpStep.gosMoving:
       begin
         if (Assigned(mIsSymbol)) then
         begin
@@ -272,7 +272,7 @@ begin
         end;
 
         Self.Add(Position);
-        Self.Operations.FMoveKrok := 0;
+        Self.Operations.moveStep := gosNone;
 
         // znovu pripraveni dosazeni objektu
         if Assigned(mOnShow) then
@@ -302,7 +302,7 @@ begin
     mNullOperations();
 
   Self.Delete(Position);
-  Self.Operations.FDeleteKrok := 0;
+  Self.Operations.deleteStep := gosNone;
 
   // znovu pripraveni dosazeni objektu
   if Assigned(mOnShow) then
@@ -323,7 +323,7 @@ end;
 procedure TVBO.Add();
 begin
   Self.CheckOpInProgressAndExcept();
-  Self.Operations.FAddKrok := 1;
+  Self.Operations.addStep := gosActive;
   if Assigned(mOnShow) then
     mOnShow();
 end;
@@ -331,24 +331,24 @@ end;
 procedure TVBO.Move();
 begin
   Self.CheckOpInProgressAndExcept();
-  Self.Operations.FMoveKrok := 1;
+  Self.Operations.moveStep := gosActive;
 end;
 
 procedure TVBO.Delete();
 begin
   Self.CheckOpInProgressAndExcept();
-  Self.Operations.FDeleteKrok := 1;
+  Self.Operations.deleteStep := gosActive;
 end;
 
 procedure TVBO.MouseUp(Position: TPoint; Button: TMouseButton);
 begin
   if (Button = mbLeft) then
   begin
-    if (Self.Operations.FAddKrok > 0) then
+    if (Self.Operations.addStep > gosNone) then
       Self.Adding(Position)
-    else if (Self.Operations.FMoveKrok > 0) then
+    else if (Self.Operations.moveStep > gosNone) then
       Self.Moving(Position)
-    else if (Self.Operations.FDeleteKrok > 0) then
+    else if (Self.Operations.deleteStep > gosNone) then
       Self.Deleting(Position);
   end;
 end;
@@ -365,7 +365,7 @@ begin
     posun := Point(0, 0);
 
   // pridavani, posouvani
-  if ((Self.Operations.FAddKrok = 1) or (Self.Operations.FMoveKrok = 2)) then
+  if ((Self.Operations.addStep = gosActive) or (Self.Operations.moveStep = gosMoving)) then
   begin
     Self.DrawObject.SymbolIL.Draw(Self.DrawObject.canvas, KurzorPos.X * _Symbol_Sirka + posun.X,
       KurzorPos.Y * _Symbol_Vyska + posun.Y, SymbolIndex(Self.DrawObject.symbolIndex, Self.DrawObject.symColor));
@@ -375,22 +375,22 @@ end;
 // vykresleni kurzoru - vraci data PIXELECH!
 function TVBO.PaintCursor(CursorPos: TPoint): TCursorDraw;
 begin
-  Result.Color := 0;
+  Result.color := TCursorColor.ccDefault;
 
   Result.Pos1.X := CursorPos.X * _Symbol_Sirka;
   Result.Pos1.Y := CursorPos.Y * _Symbol_Vyska;
   Result.Pos2.X := CursorPos.X * _Symbol_Sirka;
   Result.Pos2.Y := CursorPos.Y * _Symbol_Vyska;
 
-  if (Self.Operations.FAddKrok = 1) then
-    Result.Color := 2;
-  if ((Self.Operations.FMoveKrok = 1) or (Self.Operations.FDeleteKrok = 1)) then
+  if (Self.Operations.addStep = gosActive) then
+    Result.color := TCursorColor.ccOnObject;
+  if ((Self.Operations.moveStep = gosSelecting) or (Self.Operations.deleteStep = gosSelecting)) then
     if (Self.GetObject(CursorPos) = -1) then
-      Result.Color := 1
+      Result.color := TCursorColor.ccActiveOperation
     else
-      Result.Color := 2;
-  if (Self.Operations.FMoveKrok = 2) then
-    Result.Color := 2;
+      Result.color := TCursorColor.ccOnObject;
+  if (Self.Operations.moveStep = gosMoving) then
+    Result.color := TCursorColor.ccOnObject;
 end;
 
 function TVBO.GetCount(): Integer;
@@ -400,12 +400,12 @@ end;
 
 procedure TVBO.CheckOpInProgressAndExcept();
 begin
-  if (Assigned(Self.mOPAsk)) then
+  if (Assigned(Self.IsOp)) then
   begin
-    if (Self.mOPAsk) then
+    if (Self.IsOp) then
       raise EOperationInProgress.Create('Právě probíhá operace!');
   end else begin
-    if ((Self.Operations.FAddKrok > 0) or (Self.Operations.FMoveKrok > 0) or (Self.Operations.FDeleteKrok > 0)) then
+    if ((Self.Operations.addStep > gosNone) or (Self.Operations.moveStep > gosNone) or (Self.Operations.deleteStep > gosNone)) then
       raise EOperationInProgress.Create('Právě probíhá operace!');
   end;
 end;

@@ -99,7 +99,7 @@ type
     procedure Initialize(Rozmery: TPoint; Mode: TMode);
 
     procedure PaintMrizka(MrizkaColor: TColor);
-    function PaintKurzor(CursorData: TCursorDraw): Byte;
+    function PaintCursor(CursorData: TCursorDraw): Byte;
 
     procedure PaintOR();
     function PaintORCursor(CursorPos: TPoint): TCursorDraw;
@@ -153,7 +153,7 @@ type
     procedure Save(aFile: string);
     function Import(aFile: string): string;
 
-    procedure show(CursorPos: TPoint);
+    procedure Show(CursorPos: TPoint);
     procedure Escape(Group: Boolean);
     procedure SetRozmery(aWidth, aHeight: Byte);
 
@@ -274,7 +274,7 @@ begin
   Self.DrawObject.Width := Self.Zobrazeni.PanelWidth * _Symbol_Sirka;
   Self.DrawObject.Height := Self.Zobrazeni.PanelHeight * _Symbol_Vyska;
 
-  Self.show(Point(-1, -1));
+  Self.Show(Point(-1, -1));
 
   Self.DrawObject.Visible := true;
 end;
@@ -350,7 +350,7 @@ begin
 end; // destructor
 
 // hlavni zobrazeni celeho reliefu
-procedure TRelief.show(CursorPos: TPoint);
+procedure TRelief.Show(CursorPos: TPoint);
 begin
   if (not Assigned(Self.DrawObject)) then
     Exit();
@@ -358,7 +358,7 @@ begin
     Exit();
 
   Self.DrawObject.Surface.Canvas.Release();
-  Self.DrawObject.BeginScene;
+  Self.DrawObject.BeginScene();
 
   // smazani reliefu
   Self.DrawObject.Surface.Fill(Self.Colors.Pozadi);
@@ -379,35 +379,36 @@ begin
   if (Self.Zobrazeni.Mrizka) then
     Self.PaintMrizka(Self.Colors.Mrizka);
 
-  // prioritu ma posun OR
-  if (Self.PaintKurzor(Self.PaintORCursor(CursorPos)) <> 0) then
+  if ((Self.ORMove.MovingOR >= 0) or (Self.GetORGraf(CursorPos).MovingOR > -1)) then
   begin
+    // prioritu ma posun OR
+    Self.PaintCursor(Self.PaintORCursor(CursorPos));
+  end else begin
     // vykreslovani kurzoru a specialnich barev vzhledem k modum a operacim
     case (Self.DrawMode) of
       dmBitmap, dmSepHor, dmSepVert:
-        Self.PaintKurzor(Self.PanelBitmap.PaintCursor(CursorPos));
+        Self.PaintCursor(Self.PanelBitmap.PaintCursor(CursorPos));
       dmBloky, dmRoots:
-        Self.PaintKurzor(Self.PanelObjects.PaintCursor(CursorPos));
+        Self.PaintCursor(Self.PanelObjects.PaintCursor(CursorPos));
     end; // case
   end;
 
-  Self.DrawObject.EndScene;
-  Self.DrawObject.Surface.Canvas.Release;
-  Self.DrawObject.Flip;
+  Self.DrawObject.EndScene();
+  Self.DrawObject.Surface.Canvas.Release();
+  Self.DrawObject.Flip();
 end;
 
 // vykresleni mrizky
 procedure TRelief.PaintMrizka(MrizkaColor: TColor);
-var i: Integer;
 begin
   Self.DrawObject.Surface.Canvas.Pen.Color := MrizkaColor;
 
-  for i := 1 to Self.Zobrazeni.PanelWidth - 1 do
+  for var i: Integer := 1 to Self.Zobrazeni.PanelWidth - 1 do
   begin
     Self.DrawObject.Surface.Canvas.MoveTo((i * _Symbol_Sirka) - 1, 0);
     Self.DrawObject.Surface.Canvas.LineTo((i * _Symbol_Sirka) - 1, Self.Zobrazeni.PanelHeight * _Symbol_Vyska);
   end; // for i
-  for i := 1 to Self.Zobrazeni.PanelHeight - 1 do
+  for var i: Integer := 1 to Self.Zobrazeni.PanelHeight - 1 do
   begin
     Self.DrawObject.Surface.Canvas.MoveTo(0, (i * _Symbol_Vyska) - 1);
     Self.DrawObject.Surface.Canvas.LineTo(Self.Zobrazeni.PanelWidth * _Symbol_Sirka, (i * _Symbol_Vyska) - 1);
@@ -415,30 +416,22 @@ begin
 end;
 
 // vykresluje kurzor
-function TRelief.PaintKurzor(CursorData: TCursorDraw): Byte;
-var Colors: array [0 .. 2] of TColor;
+function TRelief.PaintCursor(CursorData: TCursorDraw): Byte;
 begin
-  if ((CursorData.Pos1.X < 0) and (CursorData.Pos1.Y < 0) and (CursorData.Pos2.X < 0) and (CursorData.Pos2.Y < 0)) then
-  begin
-    Result := 1;
-    Exit;
-  end;
-  if (CursorData.Color < 0) then
-  begin
-    Result := 2;
-    Exit;
-  end;
+  if ((CursorData.pos1.X < 0) and (CursorData.pos1.Y < 0) and (CursorData.pos2.X < 0) and (CursorData.pos2.Y < 0)) then
+    Exit(1);
 
   CursorData.Pos1.X := CursorData.Pos1.X - 1;
   CursorData.Pos1.Y := CursorData.Pos1.Y - 1;
   CursorData.Pos2.X := CursorData.Pos2.X - 1;
   CursorData.Pos2.Y := CursorData.Pos2.Y - 1;
 
-  Colors[0] := Self.Colors.Kurzor;
-  Colors[1] := Self.Colors.KurzorOperation;
-  Colors[2] := Self.Colors.KurzorOnObject;
+  case (CursorData.color) of
+    TCursorColor.ccDefault: Self.DrawObject.Surface.Canvas.Pen.Color := Self.Colors.Kurzor;
+    TCursorColor.ccActiveOperation: Self.DrawObject.Surface.Canvas.Pen.Color := Self.Colors.KurzorOperation;
+    TCursorColor.ccOnObject: Self.DrawObject.Surface.Canvas.Pen.Color := Self.Colors.KurzorOnObject;
+  end;
 
-  Self.DrawObject.Surface.Canvas.Pen.Color := Colors[CursorData.Color];
   if ((CursorData.Pos2.X >= CursorData.Pos1.X) and (CursorData.Pos2.Y >= CursorData.Pos1.Y)) then
   begin
     Self.DrawObject.Surface.Canvas.MoveTo(CursorData.Pos1.X, CursorData.Pos1.Y);
@@ -483,7 +476,7 @@ begin
     end; // case
   end; // ORMouseUp = 0
 
-  Self.show(LastPos);
+  Self.Show(LastPos);
 end;
 
 procedure TRelief.DXDMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -499,7 +492,7 @@ begin
       Self.PanelObjects.MouseMove(LastPos);
   end; // case
 
-  Self.show(LastPos);
+  Self.Show(LastPos);
 
   if Assigned(FOnMove) then
     FOnMove(Self, LastPos);
@@ -514,7 +507,7 @@ begin
       Self.ObjectDblClick(LastPos);
   end; // case
 
-  Self.show(LastPos);
+  Self.Show(LastPos);
 end;
 
 procedure TRelief.KeyPress(Key: Integer);
@@ -560,7 +553,7 @@ begin
   end;
 
   Self.FMove := false;
-  Self.show(LastPos);
+  Self.Show(LastPos);
 end;
 
 procedure TRelief.SwitchMode(aMode: TMode);
@@ -599,7 +592,7 @@ begin
 
   DrawMode := aMode;
 
-  Self.show(Point(-1, -1));
+  Self.Show(Point(-1, -1));
 end;
 
 procedure TRelief.BitmapMouseUp(Position: TPoint; Button: TMouseButton);
@@ -651,7 +644,7 @@ begin
   if (Self.Mode <> dmBitmap) then
     raise Exception.Create('Rozměny lze měnit jen v režimu bitmapy!');
 
-  PanelBitmap.SetRozmery(aWidth, aHeight);
+  PanelBitmap.SetSize(aWidth, aHeight);
 
   Self.Zobrazeni.PanelWidth := aWidth;
   Self.Zobrazeni.PanelHeight := aHeight;
@@ -659,14 +652,14 @@ begin
   Self.DrawObject.Width := aWidth * _Symbol_Sirka;
   Self.DrawObject.Height := aHeight * _Symbol_Vyska;
 
-  Self.show(LastPos);
+  Self.Show(LastPos);
 end;
 
 procedure TRelief.SetMrizka(aMrizka: Boolean);
 begin
   Self.Zobrazeni.Mrizka := aMrizka;
 
-  Self.show(Point(-1, -1));
+  Self.Show(Point(-1, -1));
 end;
 
 procedure TRelief.FLoad(aFile: string);
@@ -719,7 +712,7 @@ end;
 
 procedure TRelief.ShowEvent;
 begin
-  Self.show(LastPos);
+  Self.Show(LastPos);
 end;
 
 procedure TRelief.SetGroup(State: Boolean);
@@ -741,7 +734,7 @@ begin
   if (Assigned(Self.PanelBitmap)) then
     Self.PanelBitmap.Move;
   Self.FMove := true;
-  Self.show(Self.LastPos);
+  Self.Show(Self.LastPos);
 end;
 
 procedure TRelief.DeleteBitmapSymbol();
@@ -749,19 +742,19 @@ begin
   if (Assigned(Self.PanelBitmap)) then
     Self.PanelBitmap.Delete;
   Self.FMove := false;
-  Self.show(Self.LastPos);
+  Self.Show(Self.LastPos);
 end;
 
 procedure TRelief.AddSymbol(SymbolID: Integer);
 begin
   if (Assigned(Self.PanelBitmap)) then
-    Self.PanelBitmap.Symbols.Add(SymbolID);
+    Self.PanelBitmap.symbols.Add(SymbolID);
 end;
 
 procedure TRelief.AddText(Text: string; Color: SymbolColor; popisekBlok: Boolean);
 begin
   if (Assigned(Self.PanelBitmap)) then
-    Self.PanelBitmap.Text.Add(Text, Color, popisekBlok);
+    Self.PanelBitmap.texts.Add(Text, Color, popisekBlok);
 end;
 
 procedure TRelief.AddJCClick();
@@ -775,7 +768,7 @@ begin
   if (Self.Mode <> dmSepVert) then
     Self.SwitchMode(dmSepVert);
   if (Assigned(Self.PanelBitmap)) then
-    Self.PanelBitmap.SeparatorsVert.Add();
+    Self.PanelBitmap.separatorsVert.Add();
 end;
 
 procedure TRelief.AddSeparatorHor();
@@ -783,19 +776,19 @@ begin
   if (Self.Mode <> dmSepHor) then
     Self.SwitchMode(dmSepHor);
   if (Assigned(Self.PanelBitmap)) then
-    Self.PanelBitmap.SeparatorsHor.Add();
+    Self.PanelBitmap.separatorsHor.Add();
 end;
 
 procedure TRelief.AddKPopisek();
 begin
   if (Assigned(Self.PanelBitmap)) then
-    Self.PanelBitmap.KPopisky.Add();
+    Self.PanelBitmap.trackNames.Add();
 end;
 
 procedure TRelief.AddSouprava();
 begin
   if (Assigned(Self.PanelBitmap)) then
-    Self.PanelBitmap.Soupravy.Add();
+    Self.PanelBitmap.trainPoss.Add();
 end;
 
 procedure TRelief.MessageEvent(Sender: TObject; msg: string);
@@ -855,56 +848,51 @@ end;
 // vykresluje kurzor pri pohybu
 function TRelief.PaintORCursor(CursorPos: TPoint): TCursorDraw;
 begin
-  Result.Color := -1;
-
-  if (not Self.FMove) then
-    Exit;
-
   if (Self.ORMove.MovingOR < 0) then
   begin
     var tmp_or := Self.GetORGraf(CursorPos);
     if (tmp_or.MovingOR = -1) then
-      Exit;
+      Exit();
 
-    Result.Color := 2;
+    Result.color := TCursorColor.ccOnObject;
 
     case (tmp_or.MovingSymbol) of
       0:
         begin
-          Result.Pos1.X := (Self.ORs[tmp_or.MovingOR].Poss.DK.X) * _Symbol_Sirka;
-          Result.Pos1.Y := (Self.ORs[tmp_or.MovingOR].Poss.DK.Y) * _Symbol_Vyska;
-          Result.Pos2.X := (Self.ORs[tmp_or.MovingOR].Poss.DK.X + _OR_Size[tmp_or.MovingSymbol * 2] - 1) *
+          Result.pos1.X := (Self.ORs[tmp_or.MovingOR].Poss.DK.X) * _Symbol_Sirka;
+          Result.pos1.Y := (Self.ORs[tmp_or.MovingOR].Poss.DK.Y) * _Symbol_Vyska;
+          Result.pos2.X := (Self.ORs[tmp_or.MovingOR].Poss.DK.X + _OR_Size[tmp_or.MovingSymbol * 2] - 1) *
             _Symbol_Sirka;
           Result.Pos2.Y := (Self.ORs[tmp_or.MovingOR].Poss.DK.Y + _OR_Size[tmp_or.MovingSymbol * 2 + 1] - 1) *
             _Symbol_Vyska;
         end;
       1:
         begin
-          Result.Pos1.X := (Self.ORs[tmp_or.MovingOR].Poss.Queue.X) * _Symbol_Sirka;
-          Result.Pos1.Y := (Self.ORs[tmp_or.MovingOR].Poss.Queue.Y) * _Symbol_Vyska;
-          Result.Pos2.X := (Self.ORs[tmp_or.MovingOR].Poss.Queue.X + _OR_Size[tmp_or.MovingSymbol * 2] - 1) *
+          Result.pos1.X := (Self.ORs[tmp_or.MovingOR].Poss.Queue.X) * _Symbol_Sirka;
+          Result.pos1.Y := (Self.ORs[tmp_or.MovingOR].Poss.Queue.Y) * _Symbol_Vyska;
+          Result.pos2.X := (Self.ORs[tmp_or.MovingOR].Poss.Queue.X + _OR_Size[tmp_or.MovingSymbol * 2] - 1) *
             _Symbol_Sirka;
           Result.Pos2.Y := (Self.ORs[tmp_or.MovingOR].Poss.Queue.Y + _OR_Size[tmp_or.MovingSymbol * 2 + 1] - 1) *
             _Symbol_Vyska;
         end;
       2:
         begin
-          Result.Pos1.X := (Self.ORs[tmp_or.MovingOR].Poss.Time.X) * _Symbol_Sirka;
-          Result.Pos1.Y := (Self.ORs[tmp_or.MovingOR].Poss.Time.Y) * _Symbol_Vyska;
-          Result.Pos2.X := (Self.ORs[tmp_or.MovingOR].Poss.Time.X + _OR_Size[tmp_or.MovingSymbol * 2] - 1) *
+          Result.pos1.X := (Self.ORs[tmp_or.MovingOR].Poss.Time.X) * _Symbol_Sirka;
+          Result.pos1.Y := (Self.ORs[tmp_or.MovingOR].Poss.Time.Y) * _Symbol_Vyska;
+          Result.pos2.X := (Self.ORs[tmp_or.MovingOR].Poss.Time.X + _OR_Size[tmp_or.MovingSymbol * 2] - 1) *
             _Symbol_Sirka;
-          Result.Pos2.Y := (Self.ORs[tmp_or.MovingOR].Poss.Time.Y + _OR_Size[tmp_or.MovingSymbol * 2 + 1] - 1) *
+          Result.pos2.Y := (Self.ORs[tmp_or.MovingOR].Poss.Time.Y + _OR_Size[tmp_or.MovingSymbol * 2 + 1] - 1) *
             _Symbol_Vyska;
         end;
     end; // case
   end else begin
-    Result.Color := 2;
+    Result.color := TCursorColor.ccOnObject;
 
-    Result.Pos1.X := CursorPos.X * _Symbol_Sirka;
-    Result.Pos1.Y := CursorPos.Y * _Symbol_Vyska;
+    Result.pos1.X := CursorPos.X * _Symbol_Sirka;
+    Result.pos1.Y := CursorPos.Y * _Symbol_Vyska;
 
-    Result.Pos2.X := (CursorPos.X + _OR_Size[Self.ORMove.MovingSymbol * 2] - 1) * _Symbol_Sirka;
-    Result.Pos2.Y := (CursorPos.Y + _OR_Size[Self.ORMove.MovingSymbol * 2 + 1] - 1) * _Symbol_Vyska;
+    Result.pos2.X := (CursorPos.X + _OR_Size[Self.ORMove.MovingSymbol * 2] - 1) * _Symbol_Sirka;
+    Result.pos2.Y := (CursorPos.Y + _OR_Size[Self.ORMove.MovingSymbol * 2 + 1] - 1) * _Symbol_Vyska;
   end;
 end;
 
@@ -942,10 +930,10 @@ begin
         Self.ORMove.MovingSymbol := 0;
 
         Self.FMove := false;
-        Self.show(Self.LastPos);
+        Self.Show(Self.LastPos);
         Self.FMove := true;
         Sleep(50);
-        Self.show(Self.LastPos);
+        Self.Show(Self.LastPos);
       end else begin
         var tmp_or := Self.GetORGraf(Position);
         if (tmp_or.MovingOR > -1) then
@@ -1204,7 +1192,7 @@ procedure TRelief.HideMouse();
 begin
   if (Self.LastPos.X > 0) then
   begin
-    Self.show(Point(-1, -1));
+    Self.Show(Point(-1, -1));
 
     LastPos.X := -1;
     LastPos.Y := -1;
@@ -1241,7 +1229,7 @@ begin
     dmBloky, dmRoots:
       Self.PanelObjects.ShowBlokPopisky := show;
   end;
-  Self.show(Point(-1, -1));
+  Self.Show(Point(-1, -1));
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

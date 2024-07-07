@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
   StrUtils, Global, Menus, Forms, PGraphics, Generics.Collections, symbolHelper,
-  Types;
+  Types, ReliefCommon;
 
 const
   _MAX_POPISKY = 256;
@@ -36,24 +36,24 @@ type
   private
     Data: TList<TPopisek>;
 
-    TextMenu: TPopupMenu;
-    MenuPosition: TPoint;
-    Graphics: TPanelGraphics;
+    textMenu: TPopupMenu;
+    menuPosition: TPoint;
+    graphics: TPanelGraphics;
 
-    DrawObject: record
+    drawObject: record
       Canvas: TCanvas;
       TextIL: TImageList;
     end;
 
-    Operations: record
-      FAddKrok: Byte;
-      FMoveKrok: Byte;
-      FDeleteKrok: Byte;
+    operations: record
+      addStep: TGOpStep;
+      moveStep: TGOpStep;
+      deleteStep: TGOpStep;
 
-      TextProperties: record
-        Text: string;
-        Color: SymbolColor;
-        BlokPopisek: boolean;
+      textProperties: record
+        text: string;
+        color: SymbolColor;
+        blokPopisek: boolean;
       end;
     end; // Operations
 
@@ -105,10 +105,10 @@ type
 
     procedure MouseUp(Position: TPoint; Button: TMouseButton);
 
-    property AddKrok: Byte read Operations.FAddKrok;
-    property MoveKrok: Byte read Operations.FMoveKrok;
-    property DeleteKrok: Byte read Operations.FDeleteKrok;
-    property Count: Integer read GetCount;
+    property addStep: TGOpStep read operations.addStep;
+    property moveStep: TGOpStep read operations.moveStep;
+    property deleteStep: TGOpStep read operations.deleteStep;
+    property count: Integer read GetCount;
 
     property OnShow: TNEvent read FOnShow write FOnShow;
     property IsSymbol: TPosAskEvent read FIsSymbol write FIsSymbol;
@@ -125,12 +125,12 @@ constructor TText.Create(DrawCanvas: TCanvas; TextIL: TImageList; Parent: TForm;
 begin
   inherited Create();
 
-  Self.DrawObject.Canvas := DrawCanvas;
-  Self.DrawObject.TextIL := TextIL;
-  Self.Graphics := Graphics;
+  Self.drawObject.Canvas := DrawCanvas;
+  Self.drawObject.TextIL := TextIL;
+  Self.graphics := Graphics;
   Self.Data := TList<TPopisek>.Create();
 
-  Self.InitializeTextMenu(Self.TextMenu, Parent);
+  Self.InitializeTextMenu(Self.textMenu, Parent);
   Self.Clear();
 end;
 
@@ -138,10 +138,10 @@ destructor TText.Destroy();
 begin
   Self.Data.Free();
 
-  if (Assigned(Self.TextMenu)) then
+  if (Assigned(Self.textMenu)) then
   begin
-    Self.TextMenu.Free;
-    Self.TextMenu := nil;
+    Self.textMenu.Free;
+    Self.textMenu := nil;
   end;
 
   inherited;
@@ -155,7 +155,7 @@ begin
     raise EInvalidPosition.Create('Neplatná pozice!');
   if (Self.GetPopisek(aPos) <> -1) then
     raise ENonemptyField.Create('Na pozici je již symbol!');
-  if (Self.Count >= _MAX_POPISKY) then
+  if (Self.count >= _MAX_POPISKY) then
     raise EMaxReached.Create('Dosaženo maximálního počtu textů!');
   if (Length(aText) > _MAX_TEXT_LENGTH) then
     raise ETooLongText.Create('Text je příliš dlouhý!');
@@ -304,9 +304,9 @@ end;
 
 procedure TText.Escape();
 begin
-  Self.Operations.FAddKrok := 0;
-  Self.Operations.FMoveKrok := 0;
-  Self.Operations.FDeleteKrok := 0;
+  Self.Operations.addStep := gosNone;
+  Self.Operations.moveStep := gosNone;
+  Self.Operations.deleteStep := gosNone;
 end;
 
 procedure TText.Paint(showPopisky: boolean);
@@ -356,18 +356,17 @@ begin
   Self.AddToStructure(Position, Self.Operations.TextProperties.Text, Self.Operations.TextProperties.Color,
     Self.Operations.TextProperties.BlokPopisek);
 
-  Self.Operations.FAddKrok := 0;
+  Self.Operations.addStep := gosNone;
 end;
 
 // pohyb textu
 procedure TText.Moving(Position: TPoint);
-var PopisekIndex: Integer;
 begin
   // zde neni skupina pripustna
-  case (Self.Operations.FMoveKrok) of
-    1:
+  case (Self.Operations.moveStep) of
+    gosActive:
       begin
-        PopisekIndex := Self.GetPopisek(Position);
+        var PopisekIndex := Self.GetPopisek(Position);
         if (PopisekIndex = -1) then
           Exit();
 
@@ -380,10 +379,10 @@ begin
 
         if (Assigned(FNullOperations)) then
           FNullOperations;
-        Self.Operations.FMoveKrok := 2;
+        Self.Operations.moveStep := gosMoving;
       end;
 
-    2:
+    gosMoving:
       begin
         if (Assigned(FIsSymbol)) then
         begin
@@ -401,7 +400,7 @@ begin
 
         Self.Operations.TextProperties.Text := '';
         Self.Operations.TextProperties.Color := scPurple;
-        Self.Operations.FMoveKrok := 0;
+        Self.Operations.moveStep := gosNone;
 
         // znovu pripraveni pohybu objektu
         if Assigned(FOnShow) then
@@ -422,11 +421,11 @@ begin
   if (Self.GetPopisek(Position) = -1) then
     Exit();
 
-  Self.Operations.FDeleteKrok := 0;
+  Self.Operations.deleteStep := gosNone;
 
   Self.DeleteFromStructure(Position);
 
-  Self.Operations.FDeleteKrok := 0;
+  Self.Operations.deleteStep := gosNone;
   if Assigned(FOnShow) then
   begin
     FOnShow;
@@ -455,33 +454,33 @@ begin
 
   Self.CheckOpInProgressAndExcept();
 
-  Self.Operations.FAddKrok := 1;
-  Self.Operations.TextProperties.Text := aText;
-  Self.Operations.TextProperties.Color := aColor;
-  Self.Operations.TextProperties.BlokPopisek := popisekBlok;
+  Self.operations.addStep := gosActive;
+  Self.operations.TextProperties.Text := aText;
+  Self.operations.TextProperties.Color := aColor;
+  Self.operations.TextProperties.BlokPopisek := popisekBlok;
 end;
 
 procedure TText.Move();
 begin
   Self.CheckOpInProgressAndExcept();
-  Self.Operations.FMoveKrok := 1;
+  Self.Operations.moveStep := gosActive;
 end;
 
 procedure TText.Delete();
 begin
   Self.CheckOpInProgressAndExcept();
-  Self.Operations.FDeleteKrok := 1;
+  Self.Operations.deleteStep := gosActive;
 end;
 
 procedure TText.MouseUp(Position: TPoint; Button: TMouseButton);
 begin
   if (Button = mbLeft) then
   begin
-    if (Self.Operations.FAddKrok > 0) then
+    if (Self.Operations.addStep > gosNone) then
       Self.Adding(Position)
-    else if (Self.Operations.FMoveKrok > 0) then
+    else if (Self.Operations.moveStep > gosNone) then
       Self.Moving(Position)
-    else if (Self.Operations.FDeleteKrok > 0) then
+    else if (Self.Operations.deleteStep > gosNone) then
       Self.Deleting(Position);
   end;
 
@@ -497,7 +496,7 @@ end;
 procedure TText.PaintTextMove(KurzorPos: TPoint);
 begin
   // pridavani, posouvani
-  if ((Self.Operations.FAddKrok = 1) or (Self.Operations.FMoveKrok = 2)) then
+  if ((Self.operations.addStep > gosNone) or (Self.operations.moveStep > gosNone)) then
     Self.Graphics.TextOutputI(KurzorPos, Self.Operations.TextProperties.Text, Self.Operations.TextProperties.Color,
       clBlack, Self.Operations.TextProperties.BlokPopisek);
 end;
@@ -507,27 +506,27 @@ function TText.PaintCursor(CursorPos: TPoint): TCursorDraw;
 var PopisekI: Integer;
   PData: TPopisek;
 begin
-  Result.Color := 0;
+  Result.color := TCursorColor.ccDefault;
   Result.Pos1.X := CursorPos.X * _Symbol_Sirka;
   Result.Pos1.Y := CursorPos.Y * _Symbol_Vyska;
   Result.Pos2.X := CursorPos.X * _Symbol_Sirka;
   Result.Pos2.Y := CursorPos.Y * _Symbol_Vyska;
 
-  if (Self.Operations.FAddKrok = 1) then
+  if (Self.Operations.addStep = gosActive) then
   begin
     Result.Pos2.Y := CursorPos.Y * _Symbol_Vyska;
     Result.Pos2.X := (CursorPos.X + (Length(Self.Operations.TextProperties.Text) - 1)) * _Symbol_Sirka;
 
-    Result.Color := 2;
+    Result.color := TCursorColor.ccOnObject;
   end;
-  if ((Self.Operations.FMoveKrok = 1) or (Self.Operations.FDeleteKrok = 1)) then
+  if ((Self.Operations.moveStep = gosActive) or (Self.Operations.deleteStep = gosActive)) then
   begin
     PopisekI := Self.GetPopisek(CursorPos);
     if (PopisekI = -1) then
     begin
-      Result.Color := 1;
+      Result.color := TCursorColor.ccActiveOperation;
     end else begin
-      Result.Color := 2;
+      Result.color := TCursorColor.ccOnObject;
       PData := Self.GetPopisekData(PopisekI);
       Result.Pos1.X := PData.Position.X * _Symbol_Sirka;
       Result.Pos1.Y := PData.Position.Y * _Symbol_Vyska;
@@ -535,9 +534,9 @@ begin
       Result.Pos2.Y := PData.Position.Y * _Symbol_Vyska;
     end; // else PopisekI = -1
   end;
-  if (Self.Operations.FMoveKrok = 2) then
+  if (Self.Operations.moveStep = gosMoving) then
   begin
-    Result.Color := 2;
+    Result.color := TCursorColor.ccOnObject;
     Result.Pos2.X := (CursorPos.X + Length(Self.Operations.TextProperties.Text) - 1) * _Symbol_Sirka;
     Result.Pos2.Y := CursorPos.Y * _Symbol_Vyska;
   end;
@@ -584,7 +583,7 @@ begin
     if (Self.FOPAsk) then
       raise EOperationInProgress.Create('Právě probíhá operace!');
   end else begin
-    if ((Self.Operations.FAddKrok > 0) or (Self.Operations.FMoveKrok > 0) or (Self.Operations.FDeleteKrok > 0)) then
+    if ((Self.Operations.addStep > gosNone) or (Self.Operations.moveStep > gosNone) or (Self.Operations.deleteStep > gosNone)) then
       raise EOperationInProgress.Create('Právě probíhá operace!');
   end;
 end;

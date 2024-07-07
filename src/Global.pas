@@ -22,20 +22,22 @@ type
 
   TMode = (dmBitmap = 0, dmSepVert = 1, dmSepHor = 2, dmBloky = 3, dmRoots = 4);
 
+  TCursorColor = (ccDefault = 0, ccActiveOperation = 1, ccOnObject = 2);
+
   TCursorDraw = record
-    Color: ShortInt;
+    color: TCursorColor;
     // 0 - vychozi;1 - operace;2 - OnObject
-    Pos1, Pos2: TPoint;
+    pos1, pos2: TPoint;
   end;
 
   TDrawObject = record
-    Canvas: TCanvas;
-    SymbolIL, TextIL: TImageList;
-    Width, Height: Integer;
+    canvas: TCanvas;
+    symbolIL, textIL: TImageList;
+    width, height: Integer;
   end;
 
   TObjColors = record
-    Selected, Normal, Alert, IntUnassigned: SymbolColor;
+    selected, normal, alert, intUnassigned: SymbolColor;
   end;
 
 function GetVersion(const FileName: string): string; // cteni verze z nastaveni
