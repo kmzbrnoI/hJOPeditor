@@ -118,10 +118,7 @@ uses ReliefObjects, ownStrUtils;
 
 // nacitani souboru s bitmapovymi daty
 procedure TPanelBitmap.BpnlLoad(aFile: string; var ORs: string);
-var myFile: File;
-  Buffer: array [0 .. 16383] of Byte;
-  bytesBuf: TBytes;
-  len: Integer;
+var buffer: array [0 .. 5] of Byte;
   aCount: Integer;
 begin
   Self.FStav := 2;
@@ -132,115 +129,118 @@ begin
   Self.SeparatorsHor.Clear();
   Self.Text.Clear();
 
-  AssignFile(myFile, aFile);
-  Reset(myFile, 1);
+  var f: File;
+  AssignFile(f, aFile);
+  Reset(f, 1);
 
   try
-    BlockRead(myFile, Buffer, 5, aCount);
+    BlockRead(f, buffer, 5, aCount);
     if (aCount < 5) then
       raise EFileLoad.Create('Nesprávná délka hlavičky!');
 
     // --- hlavicka zacatek ---
     // kontrola identifikace
-    if ((Buffer[0] <> ord('b')) or (Buffer[1] <> ord('r'))) then
+    if ((buffer[0] <> ord('b')) or (buffer[1] <> ord('r'))) then
       raise EFileLoad.Create('Nesprávná identifikace v hlavičce!');
 
     // kontrola verze
-    var version: Byte := Buffer[2];
-    if ((version <> $21) and (version <> $30) and (version <> $31) and (version <> $32) and (version <> $40)) then
+    var version: Byte := buffer[2];
+    if ((version <> $21) and (version <> $30) and (version <> $31) and (version <> $32) and (version <> $40) and (version <> $41)) then
       Application.MessageBox(PChar('Otevíráte soubor s verzí ' + IntToHex(version,
         2) + ', která není aplikací plně podporována!'), 'Varování', MB_OK OR MB_ICONWARNING);
 
-    Self.FPanelWidth := Buffer[3];
-    Self.FPanelHeight := Buffer[4];
+    Self.FPanelWidth := buffer[3];
+    Self.FPanelHeight := buffer[4];
 
-    Self.BpnlReadAndValidateSeparator(myFile, 'mezi hlavičkou a bitmapovými daty');
+    Self.BpnlReadAndValidateSeparator(f, 'mezi hlavičkou a bitmapovými daty');
 
     // --- hlavicka konec ---
     // -------------------------------------------
     // nacitani bitmapovych dat
 
-    Self.Symbols.LoadBpnl(myFile, version, Self.PanelWidth, Self.PanelHeight);
-    Self.BpnlReadAndValidateSeparator(myFile, 'mezi bitmapovými daty a popisky');
+    Self.Symbols.LoadBpnl(f, version, Self.PanelWidth, Self.PanelHeight);
+    Self.BpnlReadAndValidateSeparator(f, 'mezi bitmapovými daty a popisky');
 
     // -------------------------------------------
 
     if (version >= $32) then
     begin
       // nacteni poctu popisku
-      BlockRead(myFile, Buffer, 2, aCount);
-      len := (Buffer[0] shl 8) + Buffer[1];
+      BlockRead(f, buffer, 2, aCount);
+      var len := (buffer[0] shl 8) + buffer[1];
 
       // nacitani popisku
+      var bytesBuf: TBytes;
       SetLength(bytesBuf, len);
-      BlockRead(myFile, bytesBuf[0], len, aCount);
+      BlockRead(f, bytesBuf[0], len, aCount);
       Self.Text.SetLoadedDataV32(bytesBuf);
     end else begin
       // nacteni poctu popisku
-      BlockRead(myFile, Buffer, 1, aCount);
-      len := Buffer[0] * ReliefText._Block_Length;
+      BlockRead(f, buffer, 1, aCount);
+      var len := buffer[0] * ReliefText._Block_Length;
 
       // nacitani popisku
+      var bytesBuf: TBytes;
       SetLength(bytesBuf, len);
-      BlockRead(myFile, bytesBuf[0], len, aCount);
+      BlockRead(f, bytesBuf[0], len, aCount);
       Self.Text.SetLoadedData(bytesBuf);
     end;
 
-    Self.BpnlReadAndValidateSeparator(myFile, 'mezi popisky a separátory');
+    Self.BpnlReadAndValidateSeparator(f, 'mezi popisky a separátory');
 
     // -------------------------------------------
 
-    Self.SeparatorsVert.LoadBpnl(myFile, version);
-    Self.BpnlReadAndValidateSeparator(myFile, 'za separátory');
+    Self.SeparatorsVert.LoadBpnl(f, version);
+    Self.BpnlReadAndValidateSeparator(f, 'za separátory');
 
     // -------------------------------------------
 
     if (version >= $30) then
     begin
-      Self.SeparatorsHor.LoadBpnl(myFile, version);
-      Self.BpnlReadAndValidateSeparator(myFile, 'mezi hor. separátory a kpopisky');
+      Self.SeparatorsHor.LoadBpnl(f, version);
+      Self.BpnlReadAndValidateSeparator(f, 'mezi hor. separátory a kpopisky');
     end else begin
       Self.SeparatorsHor.Clear();
     end;
 
     // -------------------------------------------
 
-    Self.KPopisky.LoadBpnl(myFile, version);
-    Self.BpnlReadAndValidateSeparator(myFile, 'mezi kolejovými popisky a JCClick');
+    Self.KPopisky.LoadBpnl(f, version);
+    Self.BpnlReadAndValidateSeparator(f, 'mezi kolejovými popisky a JCClick');
 
     // -------------------------------------------
 
-    Self.JCClick.LoadBpnl(myFile, version);
-    Self.BpnlReadAndValidateSeparator(myFile, 'mezi JCClick a pozicemi pro soupravy');
+    Self.JCClick.LoadBpnl(f, version);
+    Self.BpnlReadAndValidateSeparator(f, 'mezi JCClick a pozicemi pro soupravy');
 
     // -------------------------------------------
 
     if (version >= $31) then
     begin
-      Self.Soupravy.LoadBpnl(myFile, version);
-      Self.BpnlReadAndValidateSeparator(myFile, 'mezi pozicemi pro soupravy a oblastmi řízení');
+      Self.Soupravy.LoadBpnl(f, version);
+      Self.BpnlReadAndValidateSeparator(f, 'mezi pozicemi pro soupravy a oblastmi řízení');
     end;
 
     // -------------------------------------------
 
     // nacitani oblasti rizeni
-
     ORs := '';
 
     // precteme delku
-    BlockRead(myFile, Buffer, 2, aCount);
+    BlockRead(f, buffer, 2, aCount);
 
     // pokud je delka 0, je neco spatne
     if (aCount = 0) then
       raise EFileLoad.Create('Prázdné oblasti řízení!');
 
-    len := (Buffer[0] shl 8) + Buffer[1];
+    var len := (buffer[0] shl 8) + buffer[1];
 
+    var bytesBuf: TBytes;
     SetLength(bytesBuf, len);
-    BlockRead(myFile, bytesBuf[0], len, aCount);
+    BlockRead(f, bytesBuf[0], len, aCount);
     ORs := TEncoding.UTF8.GetString(bytesBuf, 0, aCount);
   finally
-    CloseFile(myFile);
+    CloseFile(f);
   end;
 end;
 
@@ -254,124 +254,85 @@ begin
 end;
 
 procedure TPanelBitmap.BpnlSave(aFile: string; const ORs: string);
-var myFile: File;
-  Buffer: array [0 .. 1023] of Byte;
-  bytesBuf: TBytes;
-  VBOData: TVBOData;
-  len: Cardinal;
+var buffer: array [0 .. 4] of Byte;
+  separator: array [0 .. 1] of Byte;
 begin
   Self.FStav := 2;
   Self.FSoubor := aFile;
 
-  AssignFile(myFile, aFile);
-  Rewrite(myFile, 1);
+  separator[0] := $FF;
+  separator[1] := $FF;
+
+  var f: File;
+  AssignFile(f, aFile);
+  Rewrite(f, 1);
 
   try
-    // --- hlavicka zacatek ---
+    // --- hlavicka ---
     // identifikace
-    Buffer[0] := ord('b');
-    Buffer[1] := ord('r');
+    buffer[0] := ord('b');
+    buffer[1] := ord('r');
     // verze
-    Buffer[2] := $40;
+    buffer[2] := $41;
     // sirka a vyska
-    Buffer[3] := Self.PanelWidth;
-    Buffer[4] := Self.PanelHeight;
-    // ukonceni hlavicky
-    Buffer[5] := 255;
-    Buffer[6] := 255;
+    buffer[3] := Self.PanelWidth;
+    buffer[4] := Self.PanelHeight;
 
-    // zapsani hlavicky
-    BlockWrite(myFile, Buffer, 7);
-    // --- hlavicka konec ---
+    BlockWrite(f, buffer, 5);
+    BlockWrite(f, separator, 2);
 
     // -------------------------------------------
-    // ukladani bitmapovych dat
-    Self.Symbols.WriteBpnl(myFile);
-
-    // ukonceni bloku
-    Buffer[0] := 255;
-    Buffer[1] := 255;
-    BlockWrite(myFile, Buffer, 2);
+    // bitmapova data
+    Self.Symbols.WriteBpnl(f);
+    BlockWrite(f, separator, 2);
 
     // -------------------------------------------
     // popisky
-    bytesBuf := Self.Text.GetSaveData;
-    BlockWrite(myFile, bytesBuf[0], Length(bytesBuf));
+    var bytesBuf := Self.Text.GetSaveData;
+    BlockWrite(f, bytesBuf[0], Length(bytesBuf));
+    BlockWrite(f, separator, 2);
 
-    // ukonceni bloku
-    Buffer[0] := 255;
-    Buffer[1] := 255;
-    BlockWrite(myFile, Buffer, 2);
     // -------------------------------------------
     // vertikalni oddelovace
-    VBOData := Self.SeparatorsVert.GetSaveData;
-    BlockWrite(myFile, VBOData.Data, VBOData.Count);
-
-    // ukonceni bloku
-    Buffer[0] := 255;
-    Buffer[1] := 255;
-    BlockWrite(myFile, Buffer, 2);
+    Self.SeparatorsVert.WriteBpnl(f);
+    BlockWrite(f, separator, 2);
 
     // -------------------------------------------
     // horizontalni oddelovace
-    VBOData := Self.SeparatorsHor.GetSaveData;
-    BlockWrite(myFile, VBOData.Data, VBOData.Count);
-
-    // ukonceni bloku
-    Buffer[0] := 255;
-    Buffer[1] := 255;
-    BlockWrite(myFile, Buffer, 2);
+    Self.SeparatorsHor.WriteBpnl(f);
+    BlockWrite(f, separator, 2);
 
     // -------------------------------------------
     // KPopisky
-    VBOData := Self.KPopisky.GetSaveData;
-    BlockWrite(myFile, VBOData.Data, VBOData.Count);
-
-    // ukonceni bloku
-    Buffer[0] := 255;
-    Buffer[1] := 255;
-    BlockWrite(myFile, Buffer, 2);
+    Self.KPopisky.WriteBpnl(f);
+    BlockWrite(f, separator, 2);
 
     // -------------------------------------------
     // JCClick
-    VBOData := Self.JCClick.GetSaveData;
-    BlockWrite(myFile, VBOData.Data, VBOData.Count);
-
-    // ukonceni bloku
-    Buffer[0] := 255;
-    Buffer[1] := 255;
-    BlockWrite(myFile, Buffer, 2);
+    Self.JCClick.WriteBpnl(f);
+    BlockWrite(f, separator, 2);
 
     // -------------------------------------------
     // soupravy
-    VBOData := Self.Soupravy.GetSaveData;
-    BlockWrite(myFile, VBOData.Data, VBOData.Count);
-
-    // ukonceni bloku
-    Buffer[0] := 255;
-    Buffer[1] := 255;
-    BlockWrite(myFile, Buffer, 2);
+    Self.Soupravy.WriteBpnl(f);
+    BlockWrite(f, separator, 2);
 
     // -------------------------------------------
-
-    len := TEncoding.UTF8.GetByteCount(ORs);
+    var len := TEncoding.UTF8.GetByteCount(ORs);
     SetLength(bytesBuf, len);
 
     // delka zpravy
-    Buffer[0] := hi(len);
-    Buffer[1] := lo(len);
-    BlockWrite(myFile, Buffer, 2);
+    buffer[0] := hi(len);
+    buffer[1] := lo(len);
+    BlockWrite(f, buffer, 2);
 
     bytesBuf := TEncoding.UTF8.GetBytes(ORs);
-    BlockWrite(myFile, bytesBuf[0], len);
+    BlockWrite(f, bytesBuf[0], len);
+    BlockWrite(f, separator, 2);
 
-    // ukonceni bloku
-    Buffer[0] := 255;
-    Buffer[1] := 255;
-    BlockWrite(myFile, Buffer, 2);
     // -------------------------------------------
   finally
-    CloseFile(myFile);
+    CloseFile(f);
   end;
 end;
 

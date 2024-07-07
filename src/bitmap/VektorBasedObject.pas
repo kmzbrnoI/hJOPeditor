@@ -7,16 +7,11 @@ uses
   StrUtils, Global, Generics.Collections, symbolHelper, Types;
 
 const
-  _MAX_DATA = 256;
+  _MAX_VBO = 65535;
 
 type
 
   TSeparType = (stNone, stVert, stHor);
-
-  TVBOData = record
-    Count: Integer;
-    Data: array [0 .. (_MAX_DATA * 2)] of Byte;
-  end;
 
   EInvalidPosition = class(Exception);
   ENonemptyField = class(Exception);
@@ -73,10 +68,10 @@ type
     function PaintCursor(CursorPos: TPoint): TCursorDraw;
 
     procedure LoadBpnl(var f: File; fileVersion: Byte);
-    function GetSaveData: TVBOData;
+    procedure WriteBpnl(var f: File);
 
-    procedure Clear;
-    procedure Escape;
+    procedure Clear();
+    procedure Escape();
 
     procedure MouseUp(Position: TPoint; Button: TMouseButton);
 
@@ -140,7 +135,7 @@ begin
     raise EInvalidPosition.Create('Neplatná pozice!');
   if (Self.GetObject(Position) <> -1) then
     raise ENonemptyField.Create('Na pozici je již symbol!');
-  if (Self.data.Count >= _MAX_DATA) then
+  if (Self.data.Count >= _MAX_VBO) then
     raise EMaxReached.Create('Dosaženo maximálního počtu symbolů!');
 
   Self.data.Add(Position);
@@ -195,17 +190,17 @@ begin
   end;
 end;
 
-// ziskani surovych dat zapisovanych do souboru z dat programu
-function TVBO.GetSaveData(): TVBOData;
+procedure TVBO.WriteBpnl(var f: File);
+var buf: array [0 .. 1] of Byte;
 begin
-  Result.Count := (Self.data.Count * 2) + 1;
-
-  Result.Data[0] := Self.data.Count;
-
-  for var i := 0 to Self.data.Count - 1 do
+  buf[0] := Self.data.Count shr 8;
+  buf[1] := Self.data.Count and $FF;
+  BlockWrite(f, buf, 2);
+  for var point: TPoint in Self.data do
   begin
-    Result.Data[(i * 2) + 1] := Self.data[i].X;
-    Result.Data[(i * 2) + 2] := Self.data[i].Y;
+    buf[0] := point.X;
+    buf[1] := point.Y;
+    BlockWrite(f, buf, 2);
   end;
 end;
 
