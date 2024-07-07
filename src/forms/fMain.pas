@@ -390,6 +390,7 @@ procedure TF_Hlavni.OpenFile(fname: string);
 begin
   Relief := TRelief.Create(Self.DXD_main, Self);
   Self.AssignReliefEvents();
+  Screen.Cursor := crHourGlass;
 
   try
     Relief.Open(fname);
@@ -399,12 +400,14 @@ begin
       if (Assigned(Relief)) then
         FreeAndNil(Relief);
       Self.DesignClose();
+      Screen.Cursor := crDefault;
       Application.MessageBox(PChar('Otevření souboru skončilo s chybou:' + #13#10 + E.message), 'Chyba',
         MB_OK OR MB_ICONERROR);
       Exit();
     end;
   end;
 
+  Screen.Cursor := crDefault;
   Self.LoadFileUpdateGUI(fname);
 end;
 
@@ -413,7 +416,7 @@ var log: string;
 begin
   Relief := TRelief.Create(Self.DXD_main, Self);
   Self.AssignReliefEvents();
-
+  Screen.Cursor := crHourGlass;
   try
     log := Relief.Import(fname);
   except
@@ -422,12 +425,14 @@ begin
       if (Assigned(Relief)) then
         FreeAndNil(Relief);
       Self.DesignClose();
+      Screen.Cursor := crDefault;
       Application.MessageBox(PChar('Import suboru skončil s chybou:' + #13#10 + E.message), 'Chyba',
         MB_OK OR MB_ICONERROR);
       Exit();
     end;
   end;
 
+  Screen.Cursor := crDefault;
   Self.LoadFileUpdateGUI('Nový projekt');
   F_ImportLog.Open(log);
 end;
