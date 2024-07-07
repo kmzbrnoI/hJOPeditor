@@ -55,6 +55,7 @@ type
     procedure DeleteActivateEvent;
     function IsOperationEvent: Boolean;
     procedure ChangeTextEvent(Sender: TObject; var popisek: TPopisek);
+    class procedure BpnlReadAndValidateSeparator(var f: File; where: string);
 
   public
 
@@ -122,7 +123,6 @@ var myFile: File;
   bytesBuf: TBytes;
   len: Integer;
   aCount: Integer;
-  VBOData: TVBOData;
   BitmapData: TBSData;
 begin
   Self.FStav := 2;
@@ -137,14 +137,14 @@ begin
   Reset(myFile, 1);
 
   try
-    BlockRead(myFile, Buffer, 7, aCount);
-    if (aCount < 7) then
+    BlockRead(myFile, Buffer, 5, aCount);
+    if (aCount < 5) then
       raise EFileLoad.Create('Nesprávná délka hlavičky!');
 
     // --- hlavicka zacatek ---
     // kontrola identifikace
     if ((Buffer[0] <> ord('b')) or (Buffer[1] <> ord('r'))) then
-      raise EFileLoad.Create('Nesprávná identifika v hlavičce!');
+      raise EFileLoad.Create('Nesprávná identifikace v hlavičce!');
 
     // kontrola verze
     var version: Byte := Buffer[2];
@@ -157,13 +157,12 @@ begin
     Self.FPanelWidth := Buffer[3];
     Self.FPanelHeight := Buffer[4];
 
-    // kontrola 2x #255
-    if ((Buffer[5] <> 255) or (Buffer[6] <> 255)) then
-      raise EFileLoad.Create('Chybí oddělovací sekvence mezi hlavičkou a bitmapovými daty!');
+    Self.BpnlReadAndValidateSeparator(myFile, 'mezi hlavičkou a bitmapovými daty');
 
     // --- hlavicka konec ---
     // -------------------------------------------
     // nacitani bitmapovych dat
+
     BlockRead(myFile, BitmapData.Data, BitmapData.Width * BitmapData.Height, aCount);
     if (aCount < BitmapData.Width * BitmapData.Height) then
       raise EFileLoad.Create('Málo bitmapových dat!');
@@ -177,10 +176,8 @@ begin
 
     Self.Symbols.SetLoadedData(BitmapData);
 
-    // oddelovac
-    BlockRead(myFile, Buffer, 2, aCount);
-    if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
-      raise EFileLoad.Create('Chybí oddělovací sekvence mezi bitmapovými daty a popisky!');
+    Self.BpnlReadAndValidateSeparator(myFile, 'mezi bitmapovými daty a popisky');
+
     // -------------------------------------------
 
     if (version >= $32) then
@@ -204,63 +201,41 @@ begin
       Self.Text.SetLoadedData(bytesBuf);
     end;
 
-    // oddelovac
-    BlockRead(myFile, Buffer, 2, aCount);
-    if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
-      raise EFileLoad.Create('Chybí oddělovací sekvence mezi popisky a separátory!');
+    Self.BpnlReadAndValidateSeparator(myFile, 'mezi popisky a separátory');
+
     // -------------------------------------------
 
-    // Vertikalni separatory
     Self.SeparatorsVert.LoadBpnl(myFile, version);
+    Self.BpnlReadAndValidateSeparator(myFile, 'za separátory');
 
-    // oddelovac
-    BlockRead(myFile, Buffer, 2, aCount);
-    if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
-      raise EFileLoad.Create('Chybí oddělovací sekvence mezi separátory!');
     // -------------------------------------------
 
     if (version >= $30) then
     begin
-      // Horizontalni separatory
       Self.SeparatorsHor.LoadBpnl(myFile, version);
-
-      // oddelovac
-      BlockRead(myFile, Buffer, 2, aCount);
-      if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
-        raise EFileLoad.Create('Chybí oddělovací sekvence mezi hor. separátory a kpopisky!');
+      Self.BpnlReadAndValidateSeparator(myFile, 'mezi hor. separátory a kpopisky');
     end else begin
       Self.SeparatorsHor.Clear();
     end;
+
     // -------------------------------------------
 
-    // nacteni KPopisky
     Self.KPopisky.LoadBpnl(myFile, version);
+    Self.BpnlReadAndValidateSeparator(myFile, 'mezi kolejovými popisky a JCClick');
 
-    // oddelovac
-    BlockRead(myFile, Buffer, 2, aCount);
-    if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
-      raise EFileLoad.Create('Chybí oddělovací sekvence mezi kolejovými popisky a JCClick!');
     // -------------------------------------------
 
-    // nacteni JCClick
     Self.JCClick.LoadBpnl(myFile, version);
+    Self.BpnlReadAndValidateSeparator(myFile, 'mezi JCClick a pozicemi pro soupravy');
 
-    // oddelovac
-    BlockRead(myFile, Buffer, 2, aCount);
-    if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
-      raise EFileLoad.Create('Chybí oddělovací sekvence mezi JCClick a pozicemi pro souupravy!');
     // -------------------------------------------
 
     if (version >= $31) then
     begin
-      // nacteni symbolu souprav
       Self.Soupravy.LoadBpnl(myFile, version);
-
-      // oddelovac
-      BlockRead(myFile, Buffer, 2, aCount);
-      if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
-        raise EFileLoad.Create('Chybí oddělovací sekvence mezi pozicemi pro soupravy a oblastmi řízení!');
+      Self.BpnlReadAndValidateSeparator(myFile, 'mezi pozicemi pro soupravy a oblastmi řízení');
     end;
+
     // -------------------------------------------
 
     // nacitani oblasti rizeni
@@ -284,9 +259,13 @@ begin
   end;
 end;
 
-procedure TPanelBitmap.BpnlReadAndValidateSeparator();
+class procedure TPanelBitmap.BpnlReadAndValidateSeparator(var f: File; where: string);
+var buf: array [0..1] of Byte;
+    count: Integer;
 begin
-
+  BlockRead(f, buf, 2, count);
+  if ((count < 2) or (buf[0] <> $FF) or (buf[1] <> $FF)) then
+    raise EFileLoad.Create('Chybí oddělovací sekvence '+where+'!');
 end;
 
 procedure TPanelBitmap.BpnlSave(aFile: string; const ORs: string);
