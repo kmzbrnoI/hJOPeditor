@@ -73,7 +73,6 @@ type
     function PaintCursor(CursorPos: TPoint): TCursorDraw;
 
     procedure LoadBpnl(var f: File; fileVersion: Byte);
-    procedure SetLoadedData(LoadData: TVBOData);
     function GetSaveData: TVBOData;
 
     procedure Clear;
@@ -194,14 +193,6 @@ begin
       raise EFileLoad.Create('Chybí data!');
     Self.data.Add(Point(buf[0], buf[1]));
   end;
-end;
-
-// nacteni surovych dat do struktur
-procedure TVBO.SetLoadedData(LoadData: TVBOData);
-begin
-  Self.data.Clear();
-  for var i: Integer := 0 to (LoadData.Count div 2) - 1 do
-    Self.data.Add(Point(LoadData.Data[(i * 2)], LoadData.Data[(i * 2) + 1]));
 end;
 
 // ziskani surovych dat zapisovanych do souboru z dat programu

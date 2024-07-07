@@ -10,12 +10,6 @@ const
   _MAX_MOVE = 64;
 
 type
-
-  TBSData = record
-    Width, Height: Integer;
-    Data: array [0 .. ((_MAX_WIDTH * _MAX_HEIGHT) - 1 + 2)] of Byte; // +2 - 2 na rozmery
-  end;
-
   EInvalidPosition = class(Exception);
   ENonemptyField = class(Exception);
   EEmptyField = class(Exception);
@@ -96,8 +90,8 @@ type
     procedure Move();
     procedure Delete();
 
-    procedure SetLoadedData(LoadData: TBSData);
-    function GetSaveData: TBSData;
+    procedure LoadBpnl(var f: File; fileVersion: Byte; width: Integer; height: Integer);
+    procedure WriteBpnl(var f: File);
 
     property AddKrok: Byte read Operations.Add.Krok;
     property MoveKrok: Byte read Operations.Move.Krok;
@@ -113,6 +107,8 @@ type
   end; // class
 
 implementation
+
+uses ReliefBitmap;
 
 // construcotr
 constructor TBitmapSymbols.Create(IL: TImageList; DrawCanvas: TCanvas; Width, Height: Integer);
@@ -188,26 +184,40 @@ begin
       Self.PaintSymbol(i, j, Self.Bitmap[i, j]);
 end;
 
-// nacteni surovych dat do struktur
-procedure TBitmapSymbols.SetLoadedData(LoadData: TBSData);
+procedure TBitmapSymbols.LoadBpnl(var f: File; fileVersion: Byte; width: Integer; height: Integer);
+var count: Integer;
+    buf: array [0 .. (_MAX_WIDTH*_MAX_HEIGHT)] of Byte;
 begin
-  Self.Panel.Width := LoadData.Width;
-  Self.Panel.Height := LoadData.Height;
+  const total: Integer = width*height;
+
+  BlockRead(f, buf, width*height, count);
+  if (count < total) then
+    raise EFileLoad.Create('Málo bitmapových dat!');
+
+  for var i: Integer := 0 to total-1 do
+    buf[i] := buf[i]-1;
+
+  if (fileVersion < $40) then
+    for var i: Integer := 0 to total-1 do
+      buf[i] := TranscodeSymbolFromBpnlV3(buf[i]);
+
+  Self.Panel.Width := width;
+  Self.Panel.Height := height;
 
   for var i: Integer := 0 to Self.Panel.Height - 1 do
     for var j: Integer := 0 to Self.Panel.Width - 1 do
-      Self.Bitmap[j, i] := LoadData.Data[(i * Self.Panel.Width) + j]
+      Self.Bitmap[j, i] := buf[(i * Self.Panel.Width) + j];
 end;
 
-// ziskani surovych dat zapisovanych do souboru z dat programu
-function TBitmapSymbols.GetSaveData(): TBSData;
+procedure TBitmapSymbols.WriteBpnl(var f: File);
+var buf: array [0.._MAX_WIDTH] of Byte;
 begin
-  Result.Width := Self.Panel.Width;
-  Result.Height := Self.Panel.Height;
-
   for var i: Integer := 0 to Self.Panel.Height - 1 do
+  begin
     for var j: Integer := 0 to Self.Panel.Width - 1 do
-      Result.Data[(i * Self.Panel.Width) + j] := Self.Bitmap[j, i] + 1;
+      buf[j] := Self.Bitmap[j, i]+1;
+    BlockWrite(f, buf, Self.Panel.Width);
+  end;
 end;
 
 procedure TBitmapSymbols.SetRozmery(Width, Height: Integer);

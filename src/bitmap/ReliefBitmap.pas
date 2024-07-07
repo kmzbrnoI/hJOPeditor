@@ -123,7 +123,6 @@ var myFile: File;
   bytesBuf: TBytes;
   len: Integer;
   aCount: Integer;
-  BitmapData: TBSData;
 begin
   Self.FStav := 2;
   Self.FSoubor := aFile;
@@ -152,8 +151,6 @@ begin
       Application.MessageBox(PChar('Otevíráte soubor s verzí ' + IntToHex(version,
         2) + ', která není aplikací plně podporována!'), 'Varování', MB_OK OR MB_ICONWARNING);
 
-    BitmapData.Width := Buffer[3];
-    BitmapData.Height := Buffer[4];
     Self.FPanelWidth := Buffer[3];
     Self.FPanelHeight := Buffer[4];
 
@@ -163,19 +160,7 @@ begin
     // -------------------------------------------
     // nacitani bitmapovych dat
 
-    BlockRead(myFile, BitmapData.Data, BitmapData.Width * BitmapData.Height, aCount);
-    if (aCount < BitmapData.Width * BitmapData.Height) then
-      raise EFileLoad.Create('Málo bitmapových dat!');
-
-    for var j: Integer := 0 to BitmapData.Width*BitmapData.Height-1 do
-      BitmapData.Data[j] := BitmapData.Data[j] - 1;
-
-    if (version < $40) then
-      for var j: Integer := 0 to BitmapData.Width*BitmapData.Height-1 do
-        BitmapData.Data[j] := TranscodeSymbolFromBpnlV3(BitmapData.Data[j]);
-
-    Self.Symbols.SetLoadedData(BitmapData);
-
+    Self.Symbols.LoadBpnl(myFile, version, Self.PanelWidth, Self.PanelHeight);
     Self.BpnlReadAndValidateSeparator(myFile, 'mezi bitmapovými daty a popisky');
 
     // -------------------------------------------
@@ -273,7 +258,6 @@ var myFile: File;
   Buffer: array [0 .. 1023] of Byte;
   bytesBuf: TBytes;
   VBOData: TVBOData;
-  BitmapData: TBSData;
   len: Cardinal;
 begin
   Self.FStav := 2;
@@ -289,11 +273,9 @@ begin
     Buffer[1] := ord('r');
     // verze
     Buffer[2] := $40;
-    // vyska a sirka
-    BitmapData := Self.Symbols.GetSaveData;
-
-    Buffer[3] := BitmapData.Width;
-    Buffer[4] := BitmapData.Height;
+    // sirka a vyska
+    Buffer[3] := Self.PanelWidth;
+    Buffer[4] := Self.PanelHeight;
     // ukonceni hlavicky
     Buffer[5] := 255;
     Buffer[6] := 255;
@@ -304,8 +286,7 @@ begin
 
     // -------------------------------------------
     // ukladani bitmapovych dat
-    BitmapData := Self.Symbols.GetSaveData;
-    BlockWrite(myFile, BitmapData.Data, BitmapData.Width * BitmapData.Height);
+    Self.Symbols.WriteBpnl(myFile);
 
     // ukonceni bloku
     Buffer[0] := 255;
