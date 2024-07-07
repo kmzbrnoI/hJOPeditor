@@ -101,7 +101,7 @@ type
     procedure SetLoadedData(LoadData: TBytes);
     procedure SetLoadedDataV32(LoadData: TBytes);
     function GetSaveData: TBytes;
-    procedure Reset;
+    procedure Clear();
 
     procedure MouseUp(Position: TPoint; Button: TMouseButton);
 
@@ -131,7 +131,7 @@ begin
   Self.Data := TList<TPopisek>.Create();
 
   Self.InitializeTextMenu(Self.TextMenu, Parent);
-  Self.Reset();
+  Self.Clear();
 end;
 
 destructor TText.Destroy();
@@ -296,10 +296,10 @@ begin
   Result[1] := lo(currentLen - 2);
 end;
 
-procedure TText.Reset();
+procedure TText.Clear();
 begin
-  Self.Data.Count := 0;
-  Self.Escape;
+  Self.Data.Clear();
+  Self.Escape();
 end;
 
 procedure TText.Escape();

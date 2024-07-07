@@ -36,7 +36,7 @@ type
       symColor: SymbolColor;
     end;
 
-    Operations: record
+    operations: record
       FAddKrok: Byte;
       FMoveKrok: Byte;
       FDeleteKrok: Byte;
@@ -75,7 +75,7 @@ type
     procedure SetLoadedData(LoadData: TVBOData);
     function GetSaveData: TVBOData;
 
-    procedure Reset;
+    procedure Clear;
     procedure Escape;
 
     procedure MouseUp(Position: TPoint; Button: TMouseButton);
@@ -84,9 +84,9 @@ type
     procedure Move();
     procedure Delete(); overload;
 
-    property AddKrok: Byte read Operations.FAddKrok;
-    property MoveKrok: Byte read Operations.FMoveKrok;
-    property DeleteKrok: Byte read Operations.FDeleteKrok;
+    property AddKrok: Byte read operations.FAddKrok;
+    property MoveKrok: Byte read operations.FMoveKrok;
+    property DeleteKrok: Byte read operations.FDeleteKrok;
     property Count: Integer read GetCount;
 
     property OnShow: TNEvent read mOnShow write mOnShow;
@@ -110,7 +110,7 @@ begin
   Self.drawObject.symColor := symColor;
   Self.separ := separ;
 
-  Self.Reset();
+  Self.Clear();
 end;
 
 destructor TVBO.Destroy();
@@ -119,17 +119,17 @@ begin
   inherited;
 end;
 
-procedure TVBO.Reset();
+procedure TVBO.Clear();
 begin
-  Self.data.Count := 0;
+  Self.data.Clear();
   Self.Escape();
 end;
 
 procedure TVBO.Escape();
 begin
-  Self.Operations.FAddKrok := 0;
-  Self.Operations.FMoveKrok := 0;
-  Self.Operations.FDeleteKrok := 0;
+  Self.operations.FAddKrok := 0;
+  Self.operations.FMoveKrok := 0;
+  Self.operations.FDeleteKrok := 0;
 end;
 
 procedure TVBO.Add(Position: TPoint);
@@ -153,7 +153,7 @@ begin
   if (OIndex = -1) then
     raise ENoSymbol.Create('Na této pozici není žádný symbol!');
 
-  Self.Data.Remove(Position);
+  Self.data.Remove(Position);
 end;
 
 // zjisteni, zda-li je na dane pozici objekt, popr. jeho index v poli

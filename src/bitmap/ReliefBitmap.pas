@@ -128,10 +128,10 @@ begin
   Self.FStav := 2;
   Self.FSoubor := aFile;
 
-  Self.Symbols.Reset();
-  Self.SeparatorsVert.Reset();
-  Self.SeparatorsHor.Reset();
-  Self.Text.Reset();
+  Self.Symbols.Clear();
+  Self.SeparatorsVert.Clear();
+  Self.SeparatorsHor.Clear();
+  Self.Text.Clear();
 
   AssignFile(myFile, aFile);
   Reset(myFile, 1);
@@ -177,7 +177,7 @@ begin
 
     Self.Symbols.SetLoadedData(BitmapData);
 
-    // prazdny radek
+    // oddelovac
     BlockRead(myFile, Buffer, 2, aCount);
     if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
       raise EFileLoad.Create('Chybí oddělovací sekvence mezi bitmapovými daty a popisky!');
@@ -264,7 +264,7 @@ begin
 
     Self.KPopisky.SetLoadedData(VBOData);
 
-    // prazdny radek
+    // oddelovac
     BlockRead(myFile, Buffer, 2, aCount);
     if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
       raise EFileLoad.Create('Chybí oddělovací sekvence mezi kolejovými popisky a JCClick!');
@@ -282,7 +282,7 @@ begin
 
     Self.JCClick.SetLoadedData(VBOData);
 
-    // prazdny radek
+    // oddelovac
     BlockRead(myFile, Buffer, 2, aCount);
     if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
       raise EFileLoad.Create('Chybí oddělovací sekvence mezi JCClick a pozicemi pro souupravy!');
@@ -302,7 +302,7 @@ begin
 
       Self.Soupravy.SetLoadedData(VBOData);
 
-      // prazdny radek
+      // oddelovac
       BlockRead(myFile, Buffer, 2, aCount);
       if (aCount < 2) or (Buffer[0] <> 255) or (Buffer[1] <> 255) then
         raise EFileLoad.Create('Chybí oddělovací sekvence mezi pozicemi pro soupravy a oblastmi řízení!');
@@ -696,19 +696,19 @@ end;
 procedure TPanelBitmap.ResetPanel();
 begin
   if (Assigned(Self.Symbols)) then
-    Self.Symbols.Reset;
+    Self.Symbols.Clear();
   if (Assigned(Self.SeparatorsVert)) then
-    Self.SeparatorsVert.Reset;
+    Self.SeparatorsVert.Clear();
   if (Assigned(Self.SeparatorsHor)) then
-    Self.SeparatorsHor.Reset;
+    Self.SeparatorsHor.Clear();
   if (Assigned(Self.KPopisky)) then
-    Self.KPopisky.Reset;
+    Self.KPopisky.Clear();
   if (Assigned(Self.JCClick)) then
-    Self.JCClick.Reset;
+    Self.JCClick.Clear();
   if (Assigned(Self.Soupravy)) then
-    Self.Soupravy.Reset;
+    Self.Soupravy.Clear();
   if (Assigned(Self.Text)) then
-    Self.Text.Reset;
+    Self.Text.Clear();
 end;
 
 function TPanelBitmap.PaintCursor(CursorPos: TPoint): TCursorDraw;

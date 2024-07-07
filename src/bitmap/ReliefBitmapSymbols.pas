@@ -86,7 +86,7 @@ type
     function GetSymbol(Position: TPoint): ShortInt;
 
     procedure Escape(Group: Boolean);
-    procedure Reset;
+    procedure Clear();
 
     procedure Paint;
     procedure PaintBitmapMove(KurzorPos: TPoint);
@@ -126,7 +126,7 @@ begin
   Self.Operations.Group.Start.X := -1;
   Self.Operations.Group.Start.Y := -1;
 
-  Self.Reset;
+  Self.Clear();
 end;
 
 procedure TBitmapSymbols.Escape(Group: Boolean);
@@ -173,7 +173,7 @@ begin
   Result := Self.Bitmap[Position.X, Position.Y];
 end;
 
-procedure TBitmapSymbols.Reset();
+procedure TBitmapSymbols.Clear();
 begin
   for var i: Integer := 0 to _MAX_WIDTH - 1 do
     for var j: Integer := 0 to _MAX_HEIGHT - 1 do
