@@ -2,8 +2,8 @@ object F_Hlavni: TF_Hlavni
   Left = 0
   Top = 0
   Caption = 'hJOPeditor'
-  ClientHeight = 585
-  ClientWidth = 1098
+  ClientHeight = 584
+  ClientWidth = 1094
   Color = clBtnFace
   Constraints.MinHeight = 400
   Constraints.MinWidth = 800
@@ -3130,23 +3130,22 @@ object F_Hlavni: TF_Hlavni
     FFFFFFFFFFFFFFFFFFFFFFC00000FFFFFFFFFFFFFFFFFFFFFFFFFFE00000}
   KeyPreview = True
   Menu = MM_Hlavni
-  OldCreateOrder = False
   OnClose = FormClose
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
-  PixelsPerInch = 96
   TextHeight = 13
   object P_Menu: TPanel
     Left = 0
     Top = 0
-    Width = 1098
+    Width = 1094
     Height = 65
     Align = alTop
     BevelOuter = bvNone
     Color = clScrollBar
     ParentBackground = False
     TabOrder = 0
+    ExplicitWidth = 1098
     object TB_Separator: TToolBar
       Left = 8
       Top = 10
@@ -3827,8 +3826,8 @@ object F_Hlavni: TF_Hlavni
   end
   object SB_Main: TStatusBar
     Left = 0
-    Top = 566
-    Width = 1098
+    Top = 565
+    Width = 1094
     Height = 19
     Panels = <
       item
@@ -3845,6 +3844,8 @@ object F_Hlavni: TF_Hlavni
       item
         Width = 400
       end>
+    ExplicitTop = 566
+    ExplicitWidth = 1098
   end
   object MM_Hlavni: TMainMenu
     Left = 16

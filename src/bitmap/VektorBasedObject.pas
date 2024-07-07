@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
-  StrUtils, Global, Generics.Collections, symbolHelper, Types;
+  StrUtils, Global, Generics.Collections, symbolHelper, Types, ReliefCommon;
 
 const
   _MAX_VBO = 65535;
@@ -93,8 +93,6 @@ type
   end; // TVBO
 
 implementation
-
-uses ReliefBitmap;
 
 constructor TVBO.Create(DrawCanvas: TCanvas; SymbolIL: TImageList; symbolIndex: Integer; symColor: SymbolColor; separ: TSeparType);
 begin

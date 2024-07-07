@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
-  StrUtils, ReliefText, VektorBasedObject, Global, symbolHelper, Types;
+  StrUtils, ReliefText, VektorBasedObject, Global, symbolHelper, Types, ReliefCommon;
 
 const
   _MAX_MOVE = 64;
@@ -107,8 +107,6 @@ type
   end; // class
 
 implementation
-
-uses ReliefBitmap;
 
 // construcotr
 constructor TBitmapSymbols.Create(IL: TImageList; DrawCanvas: TCanvas; Width, Height: Integer);

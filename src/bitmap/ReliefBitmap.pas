@@ -6,15 +6,13 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
   StrUtils, ReliefText, VektorBasedObject, ReliefBitmapSymbols, Global, Forms,
-  OblastRizeni, PGraphics, symbolHelper, Generics.Collections, Types;
+  OblastRizeni, PGraphics, symbolHelper, Generics.Collections, Types, ReliefCommon;
 
 const
   _IMPORT_MYJOP_SUFFIX = '.pnj';
 
 type
   TORAskEvent = function(Pos: TPoint): Boolean of object;
-
-  EFileLoad = class(Exception);
 
   TPanelBitmap = class
   private const
@@ -29,7 +27,7 @@ type
       OpType: Byte;
     end;
 
-    FStav: ShortInt;
+    mFileState: TReliefFileState;
     Graphics: TPanelGraphics;
     fShowBlokPopisky: Boolean;
 
@@ -94,23 +92,17 @@ type
     function ImportMyJOP(fn: string; ORs: TList<TOR>): string;
 
     property Soubor: string read FSoubor;
-    property Stav: ShortInt read FStav;
+    property fileState: TReliefFileState read mFileState;
     property PanelWidth: Integer read FPanelWidth;
     property PanelHeight: Integer read FPanelHeight;
     property Group: Boolean read GetGroup write SetGroup;
     property Mode: TMode read FMode write FMode;
-    property FileStav: ShortInt read FStav;
 
     property OnShow: TNEvent read FOnShow write FOnShow;
     property OnTextEdit: TChangeTextEvent read FOnTextEdit write FOnTextEdit;
     property OnORAsk: TORAskEvent read FORAskEvent write FORAskEvent;
     property ShowBlokPopisky: Boolean read fShowBlokPopisky write fShowBlokPopisky;
   end; // class
-
-  // FileSystemStav:
-  // 0 - soubor zavren
-  // 1 - soubor neulozen
-  // 2 - soubor ulozen
 
 implementation
 
@@ -121,7 +113,7 @@ procedure TPanelBitmap.BpnlLoad(aFile: string; var ORs: string);
 var buffer: array [0 .. 5] of Byte;
   aCount: Integer;
 begin
-  Self.FStav := 2;
+  Self.mFileState := fsSaved;
   Self.FSoubor := aFile;
 
   Self.Symbols.Clear();
@@ -257,7 +249,7 @@ procedure TPanelBitmap.BpnlSave(aFile: string; const ORs: string);
 var buffer: array [0 .. 4] of Byte;
   separator: array [0 .. 1] of Byte;
 begin
-  Self.FStav := 2;
+  Self.mFileState := fsSaved;
   Self.FSoubor := aFile;
 
   separator[0] := $FF;
@@ -761,7 +753,7 @@ begin
   Result := 'INFO: OFFSET_X:' + IntToStr(OFFSET_X) + ', OFFSET_Y:' + IntToStr(OFFSET_Y) + #13#10;
 
   eloaded := 0;
-  Self.FStav := 1;
+  Self.mFileState := fsSaved;
   AssignFile(f, fn);
   Reset(f);
   ORs.Clear();

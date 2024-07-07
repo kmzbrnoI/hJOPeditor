@@ -5,7 +5,7 @@ interface
 uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes, Types,
   ReliefObjects, Forms, StdCtrls, ExtCtrls, ReliefBitmap, Menus, ReliefText,
   Global, BitmapToObj, OblastRizeni, StrUtils, DirectX, PGraphics,
-  ObjBlok, symbolHelper, Generics.Collections;
+  ObjBlok, symbolHelper, Generics.Collections, ReliefCommon;
 
 type
   TObjectPointer = record
@@ -79,8 +79,8 @@ type
     LastPos: TPoint;
 
     Panel: record
-      FileStav: SmallInt;
-      FileCesta: string;
+      fileState: TReliefFileState;
+      filePath: string;
     end;
 
     DK_Menu: TPopUpMenu;
@@ -192,8 +192,8 @@ type
     property PanelWidth: SmallInt read Zobrazeni.PanelWidth;
     property PanelHeight: SmallInt read Zobrazeni.PanelHeight;
 
-    property FileStav: SmallInt read Panel.FileStav;
-    property FileCesta: string read Panel.FileCesta;
+    property fileState: TReliefFileState read Panel.fileState;
+    property filePath: string read Panel.filePath;
 
     // events
     property OnError: TErrorEvent read FOnError write FOnError;
@@ -241,7 +241,7 @@ begin
 
   Self.DrawMode := Mode;
   Self.Zobrazeni.Mrizka := _Def_Mrizka;
-  Self.Panel.FileStav := 1;
+  Self.Panel.fileState := fsUnsaved;
 
   Self.ORs.Clear();
   Self.ORMove.MovingOR := -1;
@@ -310,7 +310,7 @@ begin
   Self.Initialize(Point(0, 0), dmBitmap);
   log := log + Self.PanelBitmap.ImportMyJOP(aFile, Self.ORs);
 
-  Self.Panel.FileStav := Self.PanelBitmap.FileStav;
+  Self.Panel.fileState := Self.PanelBitmap.fileState;
   Self.Zobrazeni.PanelWidth := Self.PanelBitmap.PanelWidth;
   Self.Zobrazeni.PanelHeight := Self.PanelBitmap.PanelHeight;
 
@@ -583,7 +583,7 @@ begin
 
     Self.PanelObjects.ShowBlokPopisky := Self.PanelBitmap.ShowBlokPopisky;
     FreeAndNil(Self.PanelBitmap);
-    Self.Panel.FileStav := 1;
+    Self.Panel.fileState := fsUnsaved;
   end
   else
 
@@ -677,7 +677,7 @@ begin
       begin
         Self.PanelBitmap.BpnlLoad(aFile, ORs);
         Self.ORLoad(ORs);
-        Self.Panel.FileStav := Self.PanelBitmap.FileStav;
+        Self.Panel.fileState := Self.PanelBitmap.fileState;
         Self.Zobrazeni.PanelWidth := Self.PanelBitmap.PanelWidth;
         Self.Zobrazeni.PanelHeight := Self.PanelBitmap.PanelHeight;
       end; // dmBitmap
@@ -685,7 +685,7 @@ begin
       begin
         Self.PanelObjects.OpnlLoad(aFile, ORs);
         Self.ORLoad(ORs);
-        Self.Panel.FileStav := Self.PanelObjects.FileStav;
+        Self.Panel.fileState := Self.PanelObjects.FileStav;
         Self.Zobrazeni.PanelWidth := Self.PanelObjects.PanelWidth;
         Self.Zobrazeni.PanelHeight := Self.PanelObjects.PanelHeight;
       end; // dmBloky
@@ -694,7 +694,7 @@ begin
   Self.DrawObject.Width := Self.Zobrazeni.PanelWidth * _Symbol_Sirka;
   Self.DrawObject.Height := Self.Zobrazeni.PanelHeight * _Symbol_Vyska;
 
-  Self.Panel.FileCesta := aFile;
+  Self.Panel.filePath := aFile;
 end;
 
 procedure TRelief.Save(aFile: string);
@@ -703,18 +703,18 @@ begin
     dmBitmap, dmSepHor, dmSepVert:
       begin
         Self.PanelBitmap.BpnlSave(aFile, Self.ORSave());
-        Self.Panel.FileStav := Self.PanelBitmap.FileStav;
+        Self.Panel.fileState := Self.PanelBitmap.fileState;
       end; // dmBitmap
 
     dmBloky, dmRoots:
       begin
         Self.PanelObjects.OpnlSave(aFile, Self.ORSave());
-        Self.Panel.FileStav := Self.PanelObjects.FileStav;
+        Self.Panel.fileState := Self.PanelObjects.FileStav;
       end; // dmBloky
   end;
   /// case
 
-  Self.Panel.FileCesta := aFile;
+  Self.Panel.filePath := aFile;
 end;
 
 procedure TRelief.ShowEvent;

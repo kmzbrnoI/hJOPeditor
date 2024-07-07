@@ -7,7 +7,7 @@ uses
   Dialogs, Menus, ReliefObjects, Buttons, ToolWin, ComCtrls, ExtCtrls, Panel,
   ImgList, DXDraws, StdCtrls, AppEvnts, StrUtils, ReliefBitmap, Global, Math,
   ReliefSettings, fBlockEdit, DXSprite, DIB, ObjBlok, ReliefText, Types,
-  System.ImageList, symbolHelper;
+  System.ImageList, symbolHelper, ReliefCommon;
 
 type
   TF_Hlavni = class(TForm)
@@ -352,7 +352,7 @@ procedure TF_Hlavni.PM_NewClick(Sender: TObject);
 begin
   if (Assigned(Relief)) then
   begin
-    if (Relief.FileStav <> 0) then
+    if (Relief.fileState <> fsClosed) then
       if (Application.MessageBox('Otevřením nového projektu ztratíte všechna neuložená data, pokračovat?',
         'Pokračovat?', MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
         Exit();
@@ -448,7 +448,7 @@ begin
   begin
     if (Assigned(Relief)) then
     begin
-      if (Relief.FileStav <> 0) then
+      if (Relief.fileState <> fsClosed) then
         FreeAndNil(Relief);
     end;
 
@@ -530,7 +530,7 @@ begin
     begin
       Self.SD_Save.Filter := 'Bitmapové soubory panelu (*.bpnl)|*.bpnl';
 
-      if (Relief.FileStav = 1) then
+      if (Relief.fileState = fsUnsaved) then
       begin
         if (not Self.SD_Save.Execute(Self.Handle)) then
           Exit;
@@ -539,8 +539,8 @@ begin
         else
           Relief.Save(Self.SD_Save.FileName);
       end else begin
-        if (Relief.FileStav = 2) then
-          Relief.Save(Relief.FileCesta);
+        if (Relief.fileState = fsSaved) then
+          Relief.Save(Relief.filePath);
       end; // else .Stav = 1
     end; // bitmapovy mod
 
@@ -548,7 +548,7 @@ begin
     begin
       Self.SD_Save.Filter := 'Objektové soubory panelu (*.opnl)|*.opnl';
 
-      if (Relief.FileStav = 1) then
+      if (Relief.fileState = fsUnsaved) then
       begin
         if (not Self.SD_Save.Execute(Self.Handle)) then
           Exit;
@@ -557,8 +557,8 @@ begin
         else
           Relief.Save(Self.SD_Save.FileName);
       end else begin
-        if (Relief.FileStav = 2) then
-          Relief.Save(Relief.FileCesta);
+        if (Relief.fileState = fsSaved) then
+          Relief.Save(Relief.filePath);
       end; // else .Stav = 1
     end; // objektovy mod
   except
@@ -571,7 +571,7 @@ begin
   end;
 
   Self.SB_Main.Panels.Items[1].Text := 'Soubor uložen';
-  Self.Caption := ExtractFileName(Relief.FileCesta) + ' - ' + _Caption + '     v' + GetVersion(Application.ExeName);
+  Self.Caption := ExtractFileName(Relief.filePath) + ' - ' + _Caption + '     v' + GetVersion(Application.ExeName);
 end;
 
 procedure TF_Hlavni.PM_AboutClick(Sender: TObject);
@@ -901,7 +901,7 @@ begin
   if (Self.OD_Import.Execute(Self.Handle)) then
   begin
     if (Assigned(Relief)) then
-      if (Relief.FileStav <> 0) then
+      if (Relief.fileState <> fsClosed) then
         FreeAndNil(Relief);
 
     Self.ImportFile(Self.OD_Import.FileName);

@@ -6,7 +6,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
   StrUtils, Global, Menus, Forms, DXDraws, OblastRizeni, PGraphics, Types,
-  Generics.Collections, symbolHelper, vetev, ObjBlok;
+  Generics.Collections, symbolHelper, vetev, ObjBlok, ReliefCommon;
 
 const
   _Def_Color_Selected: SymbolColor = scRed;
@@ -36,7 +36,7 @@ type
     PM_Properties: TPopUpMenu;
 
     FSoubor: string;
-    FStav: ShortInt;
+    mFileState: TReliefFileState;
     FMode: TMode;
     Graphics: TPanelGraphics;
     fShowBlokPopisky: boolean;
@@ -96,7 +96,7 @@ type
     property PanelWidth: Integer read DrawObject.Width;
     property PanelHeight: Integer read DrawObject.Height;
     property Soubor: string read FSoubor;
-    property FileStav: ShortInt read FStav;
+    property FileStav: TReliefFileState read mFileState;
     property mode: TMode read FMode write SetMode;
 
     property ColorSelected: SymbolColor read Colors.Selected write Colors.Selected;
@@ -112,11 +112,6 @@ type
     property OnFormBlkClose: TGlobalEvent read FFormBlkClose write FFormBlkClose;
     property ShowBlokPopisky: boolean read fShowBlokPopisky write fShowBlokPopisky;
   end; // TPanelObjects
-
-  // FileSystemStav:
-  // 0 - soubor zavren
-  // 1 - soubor neulozen
-  // 2 - soubor ulozen
 
 implementation
 
@@ -182,7 +177,7 @@ var inifile: TMemIniFile;
   ver: string;
   verWord: Word;
 begin
-  Self.FStav := 2;
+  Self.mFileState := fsSaved;
   Self.FSoubor := aFile;
 
   Self.ResetPanel();
@@ -299,7 +294,7 @@ procedure TPanelObjects.OpnlSave(aFile: string; const ORs: string);
 var inifile: TMemIniFile;
   counts: TDictionary<TBlkType, Integer>;
 begin
-  Self.FStav := 2;
+  Self.mFileState := fsSaved;
 
   Self.ComputeVyhybkaFlag();
   ComputeBranches(Self);
