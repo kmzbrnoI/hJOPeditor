@@ -109,7 +109,7 @@ begin
   Self.area.Lights.AddRange(Self.lights);
 
   if (Self.openindex = -1) then
-    F_Hlavni.Relief.AddOR(Self.area);
+    F_Main.Relief.AddOR(Self.area);
 
   Self.Close();
 end;
@@ -177,7 +177,7 @@ end;
 procedure TF_OREdit.EditOR(orindex: Integer);
 begin
   Self.openindex := orindex;
-  Self.EditOR(F_Hlavni.Relief.ORs[orindex]);
+  Self.EditOR(F_Main.Relief.ORs[orindex]);
 end;
 
 procedure TF_OREdit.EditOR(oblRizeni: TOR);

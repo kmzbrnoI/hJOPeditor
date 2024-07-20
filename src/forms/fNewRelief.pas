@@ -114,17 +114,17 @@ begin
   area.Lights.AddRange(Self.lights);
 
   try
-    F_Hlavni.Relief := TRelief.Create(F_Hlavni.DXD_Main, F_Hlavni);
-    F_Hlavni.AssignReliefEvents();
-    F_Hlavni.Relief.New(Point(Self.SE_Width.Value, Self.SE_Height.Value), area);
+    F_Main.Relief := TRelief.Create(F_Main.DXD_Main, F_Main);
+    F_Main.AssignReliefEvents();
+    F_Main.Relief.New(Point(Self.SE_Width.Value, Self.SE_Height.Value), area);
   except
     on E: Exception do
     begin
       try
-        if (F_Hlavni.Relief <> nil) then
-          FreeAndNil(F_Hlavni.Relief);
+        if (F_Main.Relief <> nil) then
+          FreeAndNil(F_Main.Relief);
       except
-        F_Hlavni.Relief := nil;
+        F_Main.Relief := nil;
       end;
 
       Application.MessageBox(PChar('Vyskytla se chyba pri inicializaci panelu:#13#10' + E.Message), 'Chyba',
@@ -134,9 +134,9 @@ begin
   end;
 
   Self.Close();
-  F_Hlavni.PM_BitmapClick(F_Hlavni.PM_Bitmap);
-  ReliefOptions.UseData(F_Hlavni.Relief);
-  F_Hlavni.DesignOpen('Nový projekt');
+  F_Main.PM_BitmapClick(F_Main.PM_Bitmap);
+  ReliefOptions.UseData(F_Main.Relief);
+  F_Main.DesignOpen('Nový projekt');
 end;
 
 procedure TF_NewRelief.B_StornoClick(Sender: TObject);

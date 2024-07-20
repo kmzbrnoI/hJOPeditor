@@ -58,8 +58,8 @@ begin
 
   ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + _Config_File);
 
-  if (Assigned(F_Hlavni.Relief)) then
-    ReliefOptions.UseData(F_Hlavni.Relief);
+  if (Assigned(F_Main.Relief)) then
+    ReliefOptions.UseData(F_Main.Relief);
 
   try
     F_BlockEdit.Bloky.LoadData(ReliefOptions.BlockFile);

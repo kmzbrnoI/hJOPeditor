@@ -31,8 +31,8 @@ implementation
 
 procedure TF_ReliefProperties.OpenForm();
 begin
-  Self.SE_Width.Value := F_Hlavni.Relief.PanelWidth;
-  Self.SE_Height.Value := F_Hlavni.Relief.PanelHeight;
+  Self.SE_Width.Value := F_Main.Relief.PanelWidth;
+  Self.SE_Height.Value := F_Main.Relief.PanelHeight;
 
   Self.ShowModal();
 end;
@@ -40,7 +40,7 @@ end;
 procedure TF_ReliefProperties.B_ApplyClick(Sender: TObject);
 begin
   try
-    F_Hlavni.Relief.SetSize(SE_Width.Value, SE_Height.Value);
+    F_Main.Relief.SetSize(SE_Width.Value, SE_Height.Value);
     Self.Close();
   except
     on E: Exception do

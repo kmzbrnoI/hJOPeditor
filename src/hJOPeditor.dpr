@@ -4,7 +4,7 @@ program hJOPeditor;
 
 uses
   Forms,
-  fMain in 'forms\fMain.pas' {F_Hlavni},
+  fMain in 'forms\fMain.pas' {F_Main},
   ReliefObjects in 'object\ReliefObjects.pas',
   Panel in 'Panel.pas',
   fNewRelief in 'forms\fNewRelief.pas' {F_NewRelief},
@@ -51,7 +51,7 @@ begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.Title := 'hJOPeditor';
-  Application.CreateForm(TF_Hlavni, F_Hlavni);
+  Application.CreateForm(TF_Main, F_Main);
   Application.CreateForm(TF_NewRelief, F_NewRelief);
   Application.CreateForm(TF_ReliefProperties, F_ReliefProperties);
   Application.CreateForm(TF_ReliefOptions, F_ReliefOptions);
@@ -63,7 +63,7 @@ begin
   if (ParamCount = 1) then
    begin
     //open the file
-    F_Hlavni.OpenFile(ParamStr(1));
+    F_Main.OpenFile(ParamStr(1));
    end;
 
   Application.Run;

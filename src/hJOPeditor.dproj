@@ -155,7 +155,7 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="forms\fMain.pas">
-            <Form>F_Hlavni</Form>
+            <Form>F_Main</Form>
         </DCCReference>
         <DCCReference Include="object\ReliefObjects.pas"/>
         <DCCReference Include="Panel.pas"/>

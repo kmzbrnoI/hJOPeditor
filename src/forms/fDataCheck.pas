@@ -31,7 +31,7 @@ uses fMain;
 
 procedure TF_DataCheck.B_UpdateClick(Sender: TObject);
 begin
-  F_Hlavni.MI_CheckDataClick(F_Hlavni.MI_CheckData);
+  F_Main.MI_CheckDataClick(F_Main.MI_CheckData);
 end;
 
 procedure TF_DataCheck.LV_ErrorsCustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState;

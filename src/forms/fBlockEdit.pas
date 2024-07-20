@@ -425,14 +425,14 @@ procedure TF_BlockEdit.LoadOR();
 var oblr: TOR;
 begin
   Self.CB_OR.Clear();
-  for oblr in F_Hlavni.Relief.ORs do
+  for oblr in F_Main.Relief.ORs do
     Self.CB_OR.Items.Add(oblr.Name);
 end;
 
 procedure TF_BlockEdit.SaveData();
 begin
-  if (Assigned(F_Hlavni.Relief)) then
-    F_Hlavni.Relief.Show(Point(-1, -1));
+  if (Assigned(F_Main.Relief)) then
+    F_Main.Relief.Show(Point(-1, -1));
 end;
 
 procedure TF_BlockEdit.UpdateLB(text: string);

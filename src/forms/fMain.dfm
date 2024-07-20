@@ -1,4 +1,4 @@
-object F_Hlavni: TF_Hlavni
+object F_Main: TF_Main
   Left = 0
   Top = 0
   Caption = 'hJOPeditor'
@@ -3145,7 +3145,7 @@ object F_Hlavni: TF_Hlavni
     Color = clScrollBar
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 1098
+    ExplicitWidth = 1090
     object TB_Separator: TToolBar
       Left = 8
       Top = 10
@@ -3844,8 +3844,8 @@ object F_Hlavni: TF_Hlavni
       item
         Width = 400
       end>
-    ExplicitTop = 566
-    ExplicitWidth = 1098
+    ExplicitTop = 564
+    ExplicitWidth = 1090
   end
   object MM_Hlavni: TMainMenu
     Left = 16
