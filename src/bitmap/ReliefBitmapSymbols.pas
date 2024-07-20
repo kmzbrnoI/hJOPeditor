@@ -18,32 +18,32 @@ type
 
   TBitmapSymbols = class
   private
-    panel: record
-      width, height: Integer;
+    Panel: record
+      Width, Height: Integer;
     end;
 
-    drawObject: record
-      canvas: TCanvas;
+    DrawObject: record
+      Canvas: TCanvas;
       IL: TImageList;
     end;
 
-    operations: record
-      add: record
-        step: TGOpStep;
-        symbol: Integer;
+    Operations: record
+      Add: record
+        Step: TGOpStep;
+        Symbol: Integer;
       end;
 
-      deleteStep: TGOpStep;
+      DeleteStep: TGOpStep;
 
-      move: record
-        step: TGOpStep;
+      Move: record
+        Step: TGOpStep;
         aWidth, aHeight: Byte;
         Symbols: array [0 .. _MAX_MOVE - 1, 0 .. _MAX_MOVE - 1] of ShortInt;
       end; // Move
 
-      group: record
-        isGroup: Boolean;
-        start: TPoint;
+      Group: record
+        IsGroup: Boolean;
+        Start: TPoint;
       end;
     end; // Operations
 
@@ -92,10 +92,10 @@ type
     procedure LoadBpnl(var f: File; fileVersion: Byte; width: Integer; height: Integer);
     procedure WriteBpnl(var f: File);
 
-    property addStep: TGOpStep read operations.add.step;
-    property moveStep: TGOpStep read operations.move.step;
-    property deleteStep: TGOpStep read operations.deleteStep;
-    property Group: Boolean read operations.group.isGroup write operations.group.isGroup;
+    property addStep: TGOpStep read Operations.Add.Step;
+    property moveStep: TGOpStep read Operations.Move.Step;
+    property deleteStep: TGOpStep read Operations.DeleteStep;
+    property Group: Boolean read Operations.Group.IsGroup write Operations.Group.IsGroup;
 
     property OnShow: TNEvent read FOnShow write FOnShow;
     property IsSymbol: TPosAskEvent read FIsSymbol write FIsSymbol;
@@ -110,36 +110,36 @@ implementation
 // construcotr
 constructor TBitmapSymbols.Create(IL: TImageList; DrawCanvas: TCanvas; Width, Height: Integer);
 begin
-  Self.drawObject.canvas := DrawCanvas;
-  Self.drawObject.IL := IL;
-  Self.panel.width := Width;
-  Self.panel.height := Height;
-  Self.operations.group.isGroup := false;
+  Self.DrawObject.Canvas := DrawCanvas;
+  Self.DrawObject.IL := IL;
+  Self.Panel.Width := Width;
+  Self.Panel.Height := Height;
+  Self.Operations.Group.IsGroup := false;
 
-  Self.operations.group.start.X := -1;
-  Self.operations.group.start.Y := -1;
+  Self.Operations.Group.Start.X := -1;
+  Self.Operations.Group.Start.Y := -1;
 
   Self.Clear();
 end;
 
 procedure TBitmapSymbols.Escape(Group: Boolean);
 begin
-  Self.operations.add.step := TGOpStep.gosNone;
-  Self.operations.move.step := TGOpStep.gosNone;
-  Self.operations.deleteStep := TGOpStep.gosNone;
+  Self.Operations.Add.Step := TGOpStep.gosNone;
+  Self.Operations.Move.Step := TGOpStep.gosNone;
+  Self.Operations.DeleteStep := TGOpStep.gosNone;
 
   if (Group) then
   begin
-    Self.operations.group.isGroup := false;
-    Self.operations.group.start.X := -1;
-    Self.operations.group.start.Y := -1;
+    Self.Operations.Group.IsGroup := false;
+    Self.Operations.Group.Start.X := -1;
+    Self.Operations.Group.Start.Y := -1;
   end;
 end;
 
 // pridani noveho bitmapoveho symbolu
 procedure TBitmapSymbols.AddToStructure(aPos: TPoint; SymbolID: Integer);
 begin
-  if ((aPos.X < 0) or (aPos.Y < 0) or (aPos.X > Self.panel.width) or (aPos.Y > Self.panel.height)) then
+  if ((aPos.X < 0) or (aPos.Y < 0) or (aPos.X > Self.Panel.Width) or (aPos.Y > Self.Panel.Height)) then
     raise EInvalidPosition.Create('Neplatná pozice!');
   if (Self.Bitmap[aPos.X, aPos.Y] <> -1) then
     raise ENonemptyField.Create('Na pozici je již symbol!');

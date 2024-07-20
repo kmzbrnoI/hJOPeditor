@@ -36,24 +36,24 @@ type
   private
     Data: TList<TPopisek>;
 
-    textMenu: TPopupMenu;
-    menuPosition: TPoint;
-    graphics: TPanelGraphics;
+    TextMenu: TPopupMenu;
+    MenuPosition: TPoint;
+    Graphics: TPanelGraphics;
 
-    drawObject: record
+    DrawObject: record
       Canvas: TCanvas;
       TextIL: TImageList;
     end;
 
-    operations: record
-      addStep: TGOpStep;
-      moveStep: TGOpStep;
-      deleteStep: TGOpStep;
+    Operations: record
+      AddStep: TGOpStep;
+      MoveStep: TGOpStep;
+      DeleteStep: TGOpStep;
 
-      textProperties: record
-        text: string;
-        color: SymbolColor;
-        blokPopisek: boolean;
+      TextProperties: record
+        Text: string;
+        Color: SymbolColor;
+        BlokPopisek: boolean;
       end;
     end; // Operations
 
@@ -89,7 +89,7 @@ type
     procedure PaintTextMove(KurzorPos: TPoint);
     function PaintCursor(CursorPos: TPoint): TCursorDraw;
 
-    procedure Escape;
+    procedure Escape();
 
     function GetPopisek(aPos: TPoint): SmallInt;
     function IsObsazeno(Pos1, Pos2: TPoint): boolean;
@@ -105,9 +105,9 @@ type
 
     procedure MouseUp(Position: TPoint; Button: TMouseButton);
 
-    property addStep: TGOpStep read operations.addStep;
-    property moveStep: TGOpStep read operations.moveStep;
-    property deleteStep: TGOpStep read operations.deleteStep;
+    property addStep: TGOpStep read Operations.AddStep;
+    property moveStep: TGOpStep read Operations.MoveStep;
+    property deleteStep: TGOpStep read Operations.DeleteStep;
     property count: Integer read GetCount;
 
     property OnShow: TNEvent read FOnShow write FOnShow;
@@ -125,12 +125,12 @@ constructor TText.Create(DrawCanvas: TCanvas; TextIL: TImageList; Parent: TForm;
 begin
   inherited Create();
 
-  Self.drawObject.Canvas := DrawCanvas;
-  Self.drawObject.TextIL := TextIL;
-  Self.graphics := Graphics;
+  Self.DrawObject.Canvas := DrawCanvas;
+  Self.DrawObject.TextIL := TextIL;
+  Self.Graphics := Graphics;
   Self.Data := TList<TPopisek>.Create();
 
-  Self.InitializeTextMenu(Self.textMenu, Parent);
+  Self.InitializeTextMenu(Self.TextMenu, Parent);
   Self.Clear();
 end;
 
@@ -138,10 +138,10 @@ destructor TText.Destroy();
 begin
   Self.Data.Free();
 
-  if (Assigned(Self.textMenu)) then
+  if (Assigned(Self.TextMenu)) then
   begin
-    Self.textMenu.Free;
-    Self.textMenu := nil;
+    Self.TextMenu.Free;
+    Self.TextMenu := nil;
   end;
 
   inherited;

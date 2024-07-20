@@ -142,8 +142,7 @@
         <SanitizedProjectName>hJOPeditor</SanitizedProjectName>
         <VerInfo_MinorVer>14</VerInfo_MinorVer>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=;FileDescription=Editor panelů hJOP;FileVersion=1.14.0.0;InternalName=hJOPeditor;LegalCopyright=Jan Horáček;LegalTrademarks=Jan Horáček;OriginalFilename=hJOPeditor.exe;ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=;ProgramID=</VerInfo_Keys>
-        <VerInfo_MajorVer>1</VerInfo_MajorVer>
+        <VerInfo_Keys>CompanyName=;FileDescription=Editor panelů hJOP;FileVersion=2.14.0.0;InternalName=hJOPeditor;LegalCopyright=Jan Horáček;LegalTrademarks=Jan Horáček;OriginalFilename=hJOPeditor.exe;ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=;ProgramID=</VerInfo_Keys>
         <VerInfo_Release>0</VerInfo_Release>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
     </PropertyGroup>

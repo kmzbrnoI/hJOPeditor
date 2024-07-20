@@ -22,22 +22,22 @@ type
 
   TVBO = class
   private
-    data: TList<TPoint>;
+    Data: TList<TPoint>;
 
-    drawObject: record
-      canvas: TCanvas;
-      symbolIL: TImageList;
-      symbolIndex: Integer;
-      symColor: SymbolColor;
+    DrawObject: record
+      Canvas: TCanvas;
+      SymbolIL: TImageList;
+      SymbolIndex: Integer;
+      SymColor: SymbolColor;
     end;
 
-    operations: record
-      addStep: TGOpStep;
-      moveStep: TGOpStep;
-      deleteStep: TGOpStep;
+    Operations: record
+      AddStep: TGOpStep;
+      MoveStep: TGOpStep;
+      DeleteStep: TGOpStep;
     end;
 
-    separ: TSeparType;
+    Separ: TSeparType;
 
     mOnShow: TNEvent;
     mIsSymbol: TPosAskEvent;
@@ -63,7 +63,7 @@ type
 
     function GetObject(Position: TPoint): Integer;
 
-    procedure Paint;
+    procedure Paint();
     procedure PaintMove(KurzorPos: TPoint);
     function PaintCursor(CursorPos: TPoint): TCursorDraw;
 
@@ -79,9 +79,9 @@ type
     procedure Move();
     procedure Delete(); overload;
 
-    property addStep: TGOpStep read operations.addStep;
-    property moveStep: TGOpStep read operations.moveStep;
-    property deleteStep: TGOpStep read operations.deleteStep;
+    property addStep: TGOpStep read Operations.AddStep;
+    property moveStep: TGOpStep read Operations.MoveStep;
+    property deleteStep: TGOpStep read Operations.DeleteStep;
     property count: Integer read GetCount;
 
     property OnShow: TNEvent read mOnShow write mOnShow;
@@ -98,33 +98,33 @@ constructor TVBO.Create(DrawCanvas: TCanvas; SymbolIL: TImageList; symbolIndex: 
 begin
   inherited Create();
 
-  Self.data := TList<TPoint>.Create();
-  Self.drawObject.canvas := DrawCanvas;
-  Self.drawObject.symbolIL := SymbolIL;
-  Self.drawObject.symbolIndex := symbolIndex;
-  Self.drawObject.symColor := symColor;
-  Self.separ := separ;
+  Self.Data := TList<TPoint>.Create();
+  Self.DrawObject.Canvas := DrawCanvas;
+  Self.DrawObject.SymbolIL := SymbolIL;
+  Self.DrawObject.SymbolIndex := symbolIndex;
+  Self.DrawObject.SymColor := symColor;
+  Self.Separ := separ;
 
   Self.Clear();
 end;
 
 destructor TVBO.Destroy();
 begin
-  Self.data.Free();
+  Self.Data.Free();
   inherited;
 end;
 
 procedure TVBO.Clear();
 begin
-  Self.data.Clear();
+  Self.Data.Clear();
   Self.Escape();
 end;
 
 procedure TVBO.Escape();
 begin
-  Self.operations.addStep := gosNone;
-  Self.operations.moveStep := gosNone;
-  Self.operations.deleteStep := gosNone;
+  Self.Operations.AddStep := gosNone;
+  Self.Operations.MoveStep := gosNone;
+  Self.Operations.DeleteStep := gosNone;
 end;
 
 procedure TVBO.Add(Position: TPoint);
@@ -133,10 +133,10 @@ begin
     raise EInvalidPosition.Create('Neplatná pozice!');
   if (Self.GetObject(Position) <> -1) then
     raise ENonemptyField.Create('Na pozici je již symbol!');
-  if (Self.data.Count >= _MAX_VBO) then
+  if (Self.Data.Count >= _MAX_VBO) then
     raise EMaxReached.Create('Dosaženo maximálního počtu symbolů!');
 
-  Self.data.Add(Position);
+  Self.Data.Add(Position);
 end;
 
 procedure TVBO.Delete(Position: TPoint);

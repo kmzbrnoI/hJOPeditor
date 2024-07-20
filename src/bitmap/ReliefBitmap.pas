@@ -22,13 +22,13 @@ type
     mMode: TMode;
     mFileName: string;
 
-    operations: record
+    Operations: record
       disable: Boolean;
       opType: TBitmapOpType;
     end;
 
     mFileState: TReliefFileState;
-    graphics: TPanelGraphics;
+    Graphics: TPanelGraphics;
     fShowBlokPopisky: Boolean;
 
     mORAskEvent: TORAskEvent;
@@ -57,13 +57,13 @@ type
 
   public
 
-    symbols: TBitmapSymbols;
-    separatorsVert: TVBO;
-    separatorsHor: TVBO;
-    trackNames: TVBO;
+    Symbols: TBitmapSymbols;
+    SeparatorsVert: TVBO;
+    SeparatorsHor: TVBO;
+    TrackNames: TVBO;
     JCClick: TVBO;
-    texts: TText;
-    trainPoss: TVBO;
+    Texts: TText;
+    TrainPoss: TVBO;
 
     bitmap: array [0 .. _MAX_WIDTH - 1, 0 .. _MAX_HEIGHT - 1] of ShortInt;
 
