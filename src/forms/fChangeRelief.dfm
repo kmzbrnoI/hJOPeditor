@@ -4,17 +4,15 @@ object F_ReliefProperties: TF_ReliefProperties
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'Zm'#283'nit vlastnosti reli'#233'fu'
-  ClientHeight = 113
-  ClientWidth = 249
+  ClientHeight = 101
+  ClientWidth = 241
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
-  PixelsPerInch = 96
   TextHeight = 13
   object Label2: TLabel
     Left = 8

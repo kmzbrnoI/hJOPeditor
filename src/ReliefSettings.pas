@@ -8,32 +8,33 @@ type
   TReliefOptions = class
 
   private const
-    _Def_Color_Pozadi = clBlack;
-    _Def_Color_Mrizka = clGray;
-    _Def_Color_Kurzor = clYellow;
-    _Def_Color_Kurzor_OnObject = clRed;
-    _Def_Color_Kurzor_Operation = clFuchsia;
-    _Def_Color_Objects = 1;
-    _Def_Mrizka = true;
+    _DEF_COLOR_BACK = clBlack;
+    _DEF_COLOR_GRID = clGray;
+    _DEF_COLOR_CURSOR = clYellow;
+    _DEF_COLOR_CURSOR_ON_OBJECT = clRed;
+    _DEF_COLOR_CURSOR_OPERATION = clFuchsia;
+    _DEF_COLOR_OBJECTS = 1;
+    _DEF_GRID = true;
 
   private
     Colors: record
-      Mrizka, Pozadi, Kurzor, KurzorOnObject, KurzorOperation: TColor;
+      Grid, Back, Cursor, CursorOnObject, CursorOperation: TColor;
     end; // Colors
 
-    FBlockFile: string;
-    aMrizka: boolean;
+    FBlockFile: String;
+    mGrid: Boolean;
+
   public
     procedure LoadData(FileName: string);
     procedure SaveData(FileName: string);
     procedure UseData(Relief: TRelief);
 
-    property MrizkaColor: TColor read Colors.Mrizka write Colors.Mrizka;
-    property PozadiColor: TColor read Colors.Pozadi write Colors.Pozadi;
-    property KurzorColor: TColor read Colors.Kurzor write Colors.Kurzor;
-    property KurzorOnObjectColor: TColor read Colors.KurzorOnObject write Colors.KurzorOnObject;
-    property KurzorOperation: TColor read Colors.KurzorOperation write Colors.KurzorOperation;
-    property Mrizka: boolean read aMrizka write aMrizka;
+    property GridColor: TColor read Colors.Grid write Colors.Grid;
+    property BackColor: TColor read Colors.Back write Colors.Back;
+    property CursorColor: TColor read Colors.Cursor write Colors.Cursor;
+    property CursorOnObjectColor: TColor read Colors.CursorOnObject write Colors.CursorOnObject;
+    property CursorOperationColor: TColor read Colors.CursorOperation write Colors.CursorOperation;
+    property Grid: boolean read mGrid write mGrid;
     property BlockFile: string read FBlockFile write FBlockFile;
   end; // TReliefOptions
 
@@ -48,17 +49,17 @@ begin
   ini := TMemIniFile.Create(FileName, TEncoding.UTF8);
 
   try
-    Self.Colors.Mrizka := StringToColor(ini.ReadString('Colors', 'Mrizka',
-      ColorToString(_Def_Color_Mrizka)));
-    Self.Colors.Pozadi := StringToColor(ini.ReadString('Colors', 'Pozadi',
-      ColorToString(_Def_Color_Pozadi)));
-    Self.Colors.Kurzor := StringToColor(ini.ReadString('Colors', 'Kurzor',
-      ColorToString(_Def_Color_Kurzor)));
-    Self.Colors.KurzorOnObject := StringToColor(ini.ReadString('Colors', 'KurzorOnObject',
-      ColorToString(_Def_Color_Kurzor_OnObject)));
-    Self.Colors.KurzorOperation := StringToColor(ini.ReadString('Colors', 'KurzorOperation',
-      ColorToString(_Def_Color_Kurzor_Operation)));
-    Self.Mrizka := ini.ReadBool('Obecne', 'Mrizka', _Def_Mrizka);
+    Self.Colors.Grid := StringToColor(ini.ReadString('Colors', 'Mrizka',
+      ColorToString(_DEF_COLOR_GRID)));
+    Self.Colors.Back := StringToColor(ini.ReadString('Colors', 'Pozadi',
+      ColorToString(_DEF_COLOR_BACK)));
+    Self.Colors.Cursor := StringToColor(ini.ReadString('Colors', 'Kurzor',
+      ColorToString(_DEF_COLOR_CURSOR)));
+    Self.Colors.CursorOnObject := StringToColor(ini.ReadString('Colors', 'KurzorOnObject',
+      ColorToString(_DEF_COLOR_CURSOR_ON_OBJECT)));
+    Self.Colors.CursorOperation := StringToColor(ini.ReadString('Colors', 'KurzorOperation',
+      ColorToString(_DEF_COLOR_CURSOR_OPERATION)));
+    Self.Grid := ini.ReadBool('Obecne', 'Mrizka', _DEF_GRID);
     Self.FBlockFile := ini.ReadString('Obecne', 'BlockFile', '');
   finally
     ini.Free();
@@ -71,12 +72,12 @@ begin
   ini := TMemIniFile.Create(FileName, TEncoding.UTF8);
 
   try
-    ini.WriteString('Colors', 'Mrizka', ColorToString(Self.Colors.Mrizka));
-    ini.WriteString('Colors', 'Pozadi', ColorToString(Self.Colors.Pozadi));
-    ini.WriteString('Colors', 'Kurzor', ColorToString(Self.Colors.Kurzor));
-    ini.WriteString('Colors', 'KurzorOnObject', ColorToString(Self.Colors.KurzorOnObject));
-    ini.WriteString('Colors', 'KurzorOperation', ColorToString(Self.Colors.KurzorOperation));
-    ini.WriteBool('Obecne', 'Mrizka', Self.Mrizka);
+    ini.WriteString('Colors', 'Mrizka', ColorToString(Self.Colors.Grid));
+    ini.WriteString('Colors', 'Pozadi', ColorToString(Self.Colors.Back));
+    ini.WriteString('Colors', 'Kurzor', ColorToString(Self.Colors.Cursor));
+    ini.WriteString('Colors', 'KurzorOnObject', ColorToString(Self.Colors.CursorOnObject));
+    ini.WriteString('Colors', 'KurzorOperation', ColorToString(Self.Colors.CursorOperation));
+    ini.WriteBool('Obecne', 'Mrizka', Self.Grid);
     ini.WriteString('Obecne', 'BlockFile', Self.FBlockFile);
 
     ini.UpdateFile();
@@ -87,12 +88,12 @@ end;
 
 procedure TReliefOptions.UseData(Relief: TRelief);
 begin
-  Relief.MrizkaColor := Self.MrizkaColor;
-  Relief.PozadiColor := Self.PozadiColor;
-  Relief.KurzorColor := Self.KurzorColor;
-  Relief.KurzorOnObjectColor := Self.KurzorOnObjectColor;
-  Relief.KurzorOperation := Self.KurzorOperation;
-  Relief.Mrizka := Self.Mrizka;
+  Relief.GridColor := Self.GridColor;
+  Relief.BackColor := Self.BackColor;
+  Relief.CursorColor := Self.CursorColor;
+  Relief.CursorOnObjectColor := Self.CursorOnObjectColor;
+  Relief.CursorOperationColor := Self.CursorOperationColor;
+  Relief.Grid := Self.Grid;
 end;
 
 initialization

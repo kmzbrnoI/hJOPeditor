@@ -37,8 +37,8 @@ type
   end;
 
 const
-  _Symbol_Sirka = 8;
-  _Symbol_Vyska = 12;
+  _SYMBOL_WIDTH = 8;
+  _SYMBOL_HEIGHT = 12;
 
   _SYMBOL_COLORS: array [0..9] of TColor = (
     $FF00FF, // purple
@@ -191,7 +191,7 @@ end;
 
 procedure SymbolDraw(IL: TImageList; Canvas: TCanvas; X, Y: Integer; symbol: Integer; color: SymbolColor); overload;
 begin
-  IL.Draw(Canvas, X*_Symbol_Sirka, Y*_Symbol_Vyska, (symbol*Length(_SYMBOL_COLORS)) + Integer(color));
+  IL.Draw(Canvas, X*_SYMBOL_WIDTH, Y*_SYMBOL_HEIGHT, (symbol*Length(_SYMBOL_COLORS)) + Integer(color));
 end;
 
 procedure SymbolDraw(IL: TImageList; Canvas: TCanvas; pos: TPoint; symbol: Integer; color: SymbolColor); overload;

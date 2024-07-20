@@ -206,15 +206,15 @@ procedure TVBO.Paint();
 var posun: TPoint;
 begin
   if (Self.separ = stVert) then
-    posun := Point(_Symbol_Sirka div 2, 0)
+    posun := Point(_SYMBOL_WIDTH div 2, 0)
   else if (Self.separ = stHor) then
-    posun := Point(0, _Symbol_Vyska div 2)
+    posun := Point(0, _SYMBOL_HEIGHT div 2)
   else
     posun := Point(0, 0);
 
   for var i := 0 to Self.data.Count - 1 do
-    Self.DrawObject.SymbolIL.Draw(Self.DrawObject.canvas, (Self.data[i].X * _Symbol_Sirka) + posun.X,
-      (Self.data[i].Y * _Symbol_Vyska) + posun.Y, SymbolIndex(Self.DrawObject.symbolIndex, Self.DrawObject.symColor));
+    Self.DrawObject.SymbolIL.Draw(Self.DrawObject.canvas, (Self.data[i].X * _SYMBOL_WIDTH) + posun.X,
+      (Self.data[i].Y * _SYMBOL_HEIGHT) + posun.Y, SymbolIndex(Self.DrawObject.symbolIndex, Self.DrawObject.symColor));
 end;
 
 procedure TVBO.Adding(Position: TPoint);
@@ -358,17 +358,17 @@ procedure TVBO.PaintMove(KurzorPos: TPoint);
 var posun: TPoint;
 begin
   if (Self.separ = stVert) then
-    posun := Point(_Symbol_Sirka div 2, 0)
+    posun := Point(_SYMBOL_WIDTH div 2, 0)
   else if (Self.separ = stHor) then
-    posun := Point(0, _Symbol_Vyska div 2)
+    posun := Point(0, _SYMBOL_HEIGHT div 2)
   else
     posun := Point(0, 0);
 
   // pridavani, posouvani
   if ((Self.Operations.addStep = gosActive) or (Self.Operations.moveStep = gosMoving)) then
   begin
-    Self.DrawObject.SymbolIL.Draw(Self.DrawObject.canvas, KurzorPos.X * _Symbol_Sirka + posun.X,
-      KurzorPos.Y * _Symbol_Vyska + posun.Y, SymbolIndex(Self.DrawObject.symbolIndex, Self.DrawObject.symColor));
+    Self.DrawObject.SymbolIL.Draw(Self.DrawObject.canvas, KurzorPos.X * _SYMBOL_WIDTH + posun.X,
+      KurzorPos.Y * _SYMBOL_HEIGHT + posun.Y, SymbolIndex(Self.DrawObject.symbolIndex, Self.DrawObject.symColor));
   end; // if (Self.Oddelovace.AddKrok = 1)
 end;
 
@@ -377,10 +377,10 @@ function TVBO.PaintCursor(CursorPos: TPoint): TCursorDraw;
 begin
   Result.color := TCursorColor.ccDefault;
 
-  Result.Pos1.X := CursorPos.X * _Symbol_Sirka;
-  Result.Pos1.Y := CursorPos.Y * _Symbol_Vyska;
-  Result.Pos2.X := CursorPos.X * _Symbol_Sirka;
-  Result.Pos2.Y := CursorPos.Y * _Symbol_Vyska;
+  Result.Pos1.X := CursorPos.X * _SYMBOL_WIDTH;
+  Result.Pos1.Y := CursorPos.Y * _SYMBOL_HEIGHT;
+  Result.Pos2.X := CursorPos.X * _SYMBOL_WIDTH;
+  Result.Pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
 
   if (Self.Operations.addStep = gosActive) then
     Result.color := TCursorColor.ccOnObject;

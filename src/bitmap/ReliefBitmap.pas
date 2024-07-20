@@ -579,15 +579,15 @@ begin
   begin
     for var i: Integer := 0 to 6 do
     begin
-      Return[i].Pos1.X := Return[i].Pos1.X + (_Symbol_Sirka div 2);
-      Return[i].Pos2.X := Return[i].Pos2.X + (_Symbol_Sirka div 2);
+      Return[i].Pos1.X := Return[i].Pos1.X + (_SYMBOL_WIDTH div 2);
+      Return[i].Pos2.X := Return[i].Pos2.X + (_SYMBOL_WIDTH div 2);
     end;
   end else begin
     if (Self.Mode = dmSepHor) then
       for var i: Integer := 0 to 6 do
       begin
-        Return[i].Pos1.Y := Return[i].Pos1.Y + (_Symbol_Vyska div 2);
-        Return[i].Pos2.Y := Return[i].Pos2.Y + (_Symbol_Vyska div 2);
+        Return[i].Pos1.Y := Return[i].Pos1.Y + (_SYMBOL_HEIGHT div 2);
+        Return[i].Pos2.Y := Return[i].Pos2.Y + (_SYMBOL_HEIGHT div 2);
       end;
   end;
 
@@ -817,7 +817,7 @@ begin
           gsplitted.Clear();
           ExtractStringsEx([';'], [], g[gref], gsplitted);
 
-          var OblR: TOR;
+          var OblR: TOR := TOR.Create();
           OblR.Name := gsplitted[7];
           OblR.id := gsplitted[9];
           OblR.ShortName := gsplitted[9];

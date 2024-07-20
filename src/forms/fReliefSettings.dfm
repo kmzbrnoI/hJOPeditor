@@ -12,9 +12,7 @@ object F_ReliefOptions: TF_ReliefOptions
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
-  PixelsPerInch = 96
   TextHeight = 13
   object Label6: TLabel
     Left = 8

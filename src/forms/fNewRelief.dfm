@@ -12,9 +12,9 @@ object F_NewRelief: TF_NewRelief
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
-  PixelsPerInch = 96
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
   TextHeight = 13
   object B_Create: TButton
     Left = 638

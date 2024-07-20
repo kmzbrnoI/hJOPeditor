@@ -613,10 +613,10 @@ end;
 function TBitmapSymbols.PaintCursor(CursorPos: TPoint): TCursorDraw;
 begin
   Result.color := TCursorColor.ccDefault;
-  Result.Pos1.X := CursorPos.X * _Symbol_Sirka;
-  Result.Pos1.Y := CursorPos.Y * _Symbol_Vyska;
-  Result.Pos2.X := CursorPos.X * _Symbol_Sirka;
-  Result.Pos2.Y := CursorPos.Y * _Symbol_Vyska;
+  Result.Pos1.X := CursorPos.X * _SYMBOL_WIDTH;
+  Result.Pos1.Y := CursorPos.Y * _SYMBOL_HEIGHT;
+  Result.Pos2.X := CursorPos.X * _SYMBOL_WIDTH;
+  Result.Pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
 
   if (Self.operations.add.step = TGOpStep.gosActive) then
   begin
@@ -626,8 +626,8 @@ begin
   begin
     if (Self.operations.group.isGroup) then
     begin
-      Result.pos1.X := (Self.operations.group.start.X) * _Symbol_Sirka;
-      Result.pos1.Y := (Self.operations.group.start.Y) * _Symbol_Vyska;
+      Result.pos1.X := (Self.operations.group.start.X) * _SYMBOL_WIDTH;
+      Result.pos1.Y := (Self.operations.group.start.Y) * _SYMBOL_HEIGHT;
     end; // else IsGroup
 
     Result.color := TCursorColor.ccOnObject;
@@ -635,8 +635,8 @@ begin
   if ((Self.operations.move.step = TGOpStep.gosActive) or (Self.operations.deleteStep = TGOpStep.gosActive)) then
   begin
     var SymbolI := Self.GetSymbol(CursorPos);
-    Result.Pos2.X := CursorPos.X * _Symbol_Sirka;
-    Result.Pos2.Y := CursorPos.Y * _Symbol_Vyska;
+    Result.Pos2.X := CursorPos.X * _SYMBOL_WIDTH;
+    Result.Pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
 
     if (SymbolI = -1) then
       Result.color := TCursorColor.ccActiveOperation
@@ -650,8 +650,8 @@ begin
 
     if (Self.operations.Group.IsGroup) then
     begin
-      Result.Pos1.X := (CursorPos.X - Self.operations.move.aWidth + 1) * _Symbol_Sirka;
-      Result.Pos1.Y := (CursorPos.Y - Self.operations.move.aHeight + 1) * _Symbol_Vyska;
+      Result.Pos1.X := (CursorPos.X - Self.operations.move.aWidth + 1) * _SYMBOL_WIDTH;
+      Result.Pos1.Y := (CursorPos.Y - Self.operations.move.aHeight + 1) * _SYMBOL_HEIGHT;
     end; // if (Self.operations.Group.IsGroup)
   end;
 end;
@@ -666,8 +666,8 @@ begin
     Self.DrawObject.Canvas.Pen.color := clYellow;
     Self.DrawObject.Canvas.Brush.color := clBlack;
 
-    Self.DrawObject.Canvas.Rectangle(X * _Symbol_Sirka, Y * _Symbol_Vyska, (X + _Uvazka_Spr_Sirka) * _Symbol_Sirka - 1,
-      Y * _Symbol_Vyska + _Symbol_Vyska - 1);
+    Self.DrawObject.Canvas.Rectangle(X * _SYMBOL_WIDTH, Y * _SYMBOL_HEIGHT, (X + _Uvazka_Spr_Sirka) * _SYMBOL_WIDTH - 1,
+      Y * _SYMBOL_HEIGHT + _SYMBOL_HEIGHT - 1);
   end;
 
   // specialni pripad: k trati a k Pst vykreslujeme druhy symbol do paru

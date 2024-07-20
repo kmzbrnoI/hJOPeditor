@@ -40,7 +40,7 @@ end;
 procedure TF_ReliefProperties.B_ApplyClick(Sender: TObject);
 begin
   try
-    F_Hlavni.Relief.SetRozmery(SE_Width.Value, SE_Height.Value);
+    F_Hlavni.Relief.SetSize(SE_Width.Value, SE_Height.Value);
     Self.Close();
   except
     on E: Exception do

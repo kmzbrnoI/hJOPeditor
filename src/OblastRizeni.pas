@@ -4,24 +4,22 @@ unit OblastRizeni;
 
 interface
 
-uses Types;
+uses Types, Generics.Collections;
 
 const
   _MAX_OR = 8;
   _MAX_OSV = 8;
 
+  _OR_DK_SIZE: TPoint = (X: 5; Y: 3);
+  _OR_QUEUE_SIZE: TPoint = (X: 14; Y: 1);
+  _OR_TIME_SIZE: TPoint = (X: 16; Y: 1);
+
 type
   // 1 osvetleni
-  TOsv = record
-    board: Byte;
-    port: Byte;
-    name: string; // max 5 znaku
-  end;
-
-  // vsechna osvetleni
-  TOsvs = record
-    Cnt: Byte;
-    Data: array [0 .. _MAX_OSV - 1] of TOsv;
+  TORLight = record
+    Board: Cardinal;
+    Port: Cardinal;
+    Name: string; // max 5 characters
   end;
 
   // prava
@@ -31,31 +29,53 @@ type
     ModCasSet: Boolean;
   end;
 
+  TDKOrientation = (dkoDown = 0, dkoUp = 1);
+
   // pozice symbolu OR
   TPoss = record
     DK: TPoint;
-    DKOr: Byte; // orientace DK (0,1)
+    DKOr: TDKOrientation;
     Queue: TPoint;
     Time: TPoint;
   end;
 
-  // 1 oR
-  TOR = record
-    name: string;
+  TOROddDirection = (ordLeftToRight = 0, ordRightToLeft = 1);
+
+  // 1 OR
+  TOR = class
+  public
+    Name: string;
     ShortName: string;
-    id: string;
-    Lichy: Byte;
+    Id: string;
+    OddDirection: TOROddDirection;
     Rights: TORRights;
-    Osvetleni: TOsvs;
+    Lights: TList<TORLight>;
     Poss: TPoss;
+
+    constructor Create();
+    destructor Destroy(); override;
   end;
+
+  TORGraphSymbol = (orsDK = 0, orsQueue = 1, orsTime = 2);
 
   // pouzivao pri presunech OR apod.
   TORGraf = record
-    MovingOR: Integer; // index v poli
-    MovingSymbol: Byte; // DK, queue, cas
+    movingOR: Integer; // index or a moving or (-1 = no moving)
+    movingSymbol: TORGraphSymbol;
   end;
 
 implementation
+
+constructor TOR.Create();
+begin
+  inherited;
+  Self.Lights := TList<TORLight>.Create();
+end;
+
+destructor TOR.Destroy();
+begin
+  Self.Lights.Free();
+  inherited;
+end;
 
 end.// unit

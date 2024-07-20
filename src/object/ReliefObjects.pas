@@ -379,10 +379,10 @@ function TPanelObjects.PaintCursor(CursorPos: TPoint): TCursorDraw;
 begin
   // vykreslit kurzor
   Result.Color := TCursorColor.ccDefault;
-  Result.Pos1.X := CursorPos.X * _Symbol_Sirka;
-  Result.Pos1.Y := CursorPos.Y * _Symbol_Vyska;
-  Result.Pos2.X := CursorPos.X * _Symbol_Sirka;
-  Result.Pos2.Y := CursorPos.Y * _Symbol_Vyska;
+  Result.Pos1.X := CursorPos.X * _SYMBOL_WIDTH;
+  Result.Pos1.Y := CursorPos.Y * _SYMBOL_HEIGHT;
+  Result.Pos2.X := CursorPos.X * _SYMBOL_WIDTH;
+  Result.Pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
 
   // vykreslit koren pod kurzorem
   if (Self.FMode = dmRoots) then

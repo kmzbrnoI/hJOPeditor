@@ -48,8 +48,8 @@ begin
   begin
     Self.DrawObject.Surface.Canvas.Pen.Color := bg;
     Self.DrawObject.Surface.Canvas.Brush.Color := bg;
-    Self.DrawObject.Surface.Canvas.Rectangle(Pos.X * _Symbol_Sirka, Pos.Y * _Symbol_Vyska,
-      (Pos.X + Length(Text)) * _Symbol_Sirka, (Pos.Y + 1) * _Symbol_Vyska);
+    Self.DrawObject.Surface.Canvas.Rectangle(Pos.X * _SYMBOL_WIDTH, Pos.Y * _SYMBOL_HEIGHT,
+      (Pos.X + Length(Text)) * _SYMBOL_WIDTH, (Pos.Y + 1) * _SYMBOL_HEIGHT);
   end;
 
   for var j := 0 to Length(Text) - 1 do
@@ -128,15 +128,15 @@ begin
       TextIndex := 0;
     end;
 
-    Self.IL_Text.Draw(Self.DrawObject.Surface.Canvas, Pos.X * _Symbol_Sirka + (j * _Symbol_Sirka),
-      Pos.Y * _Symbol_Vyska, (TextIndex * 10) + Integer(fg))
+    Self.IL_Text.Draw(Self.DrawObject.Surface.Canvas, Pos.X * _SYMBOL_WIDTH + (j * _SYMBOL_WIDTH),
+      Pos.Y * _SYMBOL_HEIGHT, (TextIndex * 10) + Integer(fg))
   end; // for j
 
   if (underline) then
   begin
     Self.DrawObject.Surface.Canvas.Pen.Color := _Symbol_Colors[Integer(fg)];
-    Self.DrawObject.Surface.Canvas.Rectangle(Pos.X * _Symbol_Sirka, (Pos.Y + 1) * _Symbol_Vyska - 1,
-      (Pos.X + Length(Text)) * _Symbol_Sirka, (Pos.Y + 1) * _Symbol_Vyska);
+    Self.DrawObject.Surface.Canvas.Rectangle(Pos.X * _SYMBOL_WIDTH, (Pos.Y + 1) * _SYMBOL_HEIGHT - 1,
+      (Pos.X + Length(Text)) * _SYMBOL_WIDTH, (Pos.Y + 1) * _SYMBOL_HEIGHT);
   end;
 end;
 

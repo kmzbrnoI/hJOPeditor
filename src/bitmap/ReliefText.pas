@@ -507,15 +507,15 @@ var PopisekI: Integer;
   PData: TPopisek;
 begin
   Result.color := TCursorColor.ccDefault;
-  Result.Pos1.X := CursorPos.X * _Symbol_Sirka;
-  Result.Pos1.Y := CursorPos.Y * _Symbol_Vyska;
-  Result.Pos2.X := CursorPos.X * _Symbol_Sirka;
-  Result.Pos2.Y := CursorPos.Y * _Symbol_Vyska;
+  Result.Pos1.X := CursorPos.X * _SYMBOL_WIDTH;
+  Result.Pos1.Y := CursorPos.Y * _SYMBOL_HEIGHT;
+  Result.Pos2.X := CursorPos.X * _SYMBOL_WIDTH;
+  Result.Pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
 
   if (Self.Operations.addStep = gosActive) then
   begin
-    Result.Pos2.Y := CursorPos.Y * _Symbol_Vyska;
-    Result.Pos2.X := (CursorPos.X + (Length(Self.Operations.TextProperties.Text) - 1)) * _Symbol_Sirka;
+    Result.Pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
+    Result.Pos2.X := (CursorPos.X + (Length(Self.Operations.TextProperties.Text) - 1)) * _SYMBOL_WIDTH;
 
     Result.color := TCursorColor.ccOnObject;
   end;
@@ -528,17 +528,17 @@ begin
     end else begin
       Result.color := TCursorColor.ccOnObject;
       PData := Self.GetPopisekData(PopisekI);
-      Result.Pos1.X := PData.Position.X * _Symbol_Sirka;
-      Result.Pos1.Y := PData.Position.Y * _Symbol_Vyska;
-      Result.Pos2.X := (PData.Position.X + Length(PData.Text) - 1) * _Symbol_Sirka;
-      Result.Pos2.Y := PData.Position.Y * _Symbol_Vyska;
+      Result.Pos1.X := PData.Position.X * _SYMBOL_WIDTH;
+      Result.Pos1.Y := PData.Position.Y * _SYMBOL_HEIGHT;
+      Result.Pos2.X := (PData.Position.X + Length(PData.Text) - 1) * _SYMBOL_WIDTH;
+      Result.Pos2.Y := PData.Position.Y * _SYMBOL_HEIGHT;
     end; // else PopisekI = -1
   end;
   if (Self.Operations.moveStep = gosMoving) then
   begin
     Result.color := TCursorColor.ccOnObject;
-    Result.Pos2.X := (CursorPos.X + Length(Self.Operations.TextProperties.Text) - 1) * _Symbol_Sirka;
-    Result.Pos2.Y := CursorPos.Y * _Symbol_Vyska;
+    Result.Pos2.X := (CursorPos.X + Length(Self.Operations.TextProperties.Text) - 1) * _SYMBOL_WIDTH;
+    Result.Pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
   end;
 end;
 

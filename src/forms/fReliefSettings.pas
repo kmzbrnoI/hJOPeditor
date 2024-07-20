@@ -49,11 +49,11 @@ uses fMain, fBlockEdit;
 
 procedure TF_ReliefOptions.B_ApplyClick(Sender: TObject);
 begin
-  ReliefOptions.MrizkaColor := Self.CB_Mrizka.Selected;
-  ReliefOptions.PozadiColor := Self.CB_Pozadi.Selected;
-  ReliefOptions.KurzorColor := Self.CB_Kurzor.Selected;
-  ReliefOptions.KurzorOnObjectColor := Self.CB_KurzorOnObject.Selected;
-  ReliefOptions.KurzorOperation := Self.CB_KurzorOperation.Selected;
+  ReliefOptions.GridColor := Self.CB_Mrizka.Selected;
+  ReliefOptions.BackColor := Self.CB_Pozadi.Selected;
+  ReliefOptions.CursorColor := Self.CB_Kurzor.Selected;
+  ReliefOptions.CursorOnObjectColor := Self.CB_KurzorOnObject.Selected;
+  ReliefOptions.CursorOperationColor := Self.CB_KurzorOperation.Selected;
   ReliefOptions.BlockFile := Self.E_BlocksFileName.Text;
 
   ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + _Config_File);
@@ -99,11 +99,11 @@ end;
 
 procedure TF_ReliefOptions.OpenForm;
 begin
-  Self.CB_Mrizka.Selected := ReliefOptions.MrizkaColor;
-  Self.CB_Pozadi.Selected := ReliefOptions.PozadiColor;
-  Self.CB_Kurzor.Selected := ReliefOptions.KurzorColor;
-  Self.CB_KurzorOnObject.Selected := ReliefOptions.KurzorOnObjectColor;
-  Self.CB_KurzorOperation.Selected := ReliefOptions.KurzorOperation;
+  Self.CB_Mrizka.Selected := ReliefOptions.GridColor;
+  Self.CB_Pozadi.Selected := ReliefOptions.BackColor;
+  Self.CB_Kurzor.Selected := ReliefOptions.CursorColor;
+  Self.CB_KurzorOnObject.Selected := ReliefOptions.CursorOnObjectColor;
+  Self.CB_KurzorOperation.Selected := ReliefOptions.CursorOperationColor;
   Self.E_BlocksFileName.Text := ReliefOptions.BlockFile;
 
   Self.ShowModal;

@@ -85,14 +85,14 @@ begin
   case (Self.vertical_dir) of
     TUvazkaSprVertDir.top:
       begin
-        DrawObject.Canvas.Rectangle(Self.Pos.X * _Symbol_Sirka, Self.Pos.Y * _Symbol_Vyska + _Symbol_Vyska - 1,
-          (Self.Pos.X + _Uvazka_Spr_Sirka) * _Symbol_Sirka - 1, (Self.Pos.Y - Self.spr_cnt + 1) * _Symbol_Vyska);
+        DrawObject.Canvas.Rectangle(Self.Pos.X * _SYMBOL_WIDTH, Self.Pos.Y * _SYMBOL_HEIGHT + _SYMBOL_HEIGHT - 1,
+          (Self.Pos.X + _Uvazka_Spr_Sirka) * _SYMBOL_WIDTH - 1, (Self.Pos.Y - Self.spr_cnt + 1) * _SYMBOL_HEIGHT);
       end;
 
     TUvazkaSprVertDir.bottom:
       begin
-        DrawObject.Canvas.Rectangle(Self.Pos.X * _Symbol_Sirka, Self.Pos.Y * _Symbol_Vyska,
-          (Self.Pos.X + _Uvazka_Spr_Sirka) * _Symbol_Sirka - 1, (Self.Pos.Y + Self.spr_cnt) * _Symbol_Vyska - 1);
+        DrawObject.Canvas.Rectangle(Self.Pos.X * _SYMBOL_WIDTH, Self.Pos.Y * _SYMBOL_HEIGHT,
+          (Self.Pos.X + _Uvazka_Spr_Sirka) * _SYMBOL_WIDTH - 1, (Self.Pos.Y + Self.spr_cnt) * _SYMBOL_HEIGHT - 1);
       end;
   end;
 

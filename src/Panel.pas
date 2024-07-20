@@ -30,27 +30,22 @@ type
     _MAX_TEXT_LENGTH = 32;
     _MIN_TEXT_LENGTH = 1;
 
-    _Resource_Symbols = 'All8';
-    _Resource_Text = 'Text8';
-    _Resource_DK = 'DK8';
+    _RESOURCE_SYMBOLS = 'All8';
+    _RESOURCE_TEXT = 'Text8';
+    _RESOURCE_DK = 'DK8';
 
-    // vychozi data
-    _Def_Color_Pozadi = clBlack;
-    _Def_Color_Mrizka = clGray;
-    _Def_Color_Kurzor = clYellow;
-    _Def_Color_Kurzor_OnObject = clRed;
-    _Def_Color_Kurzor_Operation = clFuchsia;
-    _Def_Color_Objects = 1;
-    _Def_Mrizka = true;
+    // default colors
+    _DEF_COLOR_BACK = clBlack;
+    _DEF_COLOR_GRID = clGray;
+    _DEF_COLOR_CURSOR = clYellow;
+    _DEF_COLOR_CURSOR_ON_OBJECT = clRed;
+    _DEF_COLOR_CURSOR_OPERATION = clFuchsia;
+    _DEF_COLOR_OBJECTS = 1;
+    _DEF_GRID = true;
 
-    // rozmery DK, zasobniku, casovace
-    _OR_Size: array [0 .. 5] of Byte = (5, 3, 14, 1, 16, 1);
-
-    _Separator_BitmapIndex = 352;
-
-    // pripony bitmapoveho a vektoroveho formatu souboru
-    _Suf_bmp = '.bpnl';
-    _Suf_obj = '.opnl';
+    // file suffixes
+    _FILESUFFIX_BPNL = '.bpnl';
+    _FILESUFFIX_OBJ = '.opnl';
 
   private
     DrawObject: TDXDraw;
@@ -66,21 +61,19 @@ type
     DrawMode: TMode;
     Graphics: TPanelGraphics;
 
-    Zobrazeni: record
-      PanelWidth, PanelHeight: SmallInt;
-      Mrizka: Boolean;
-    end;
+    mPanelWidth, mPanelHeight: SmallInt;
+    mGrid: Boolean;
 
     Colors: record
-      Mrizka, Pozadi, Kurzor, KurzorOnObject, KurzorOperation: TColor;
+      Grid, Back, Cursor, CursorOnObject, CursorOperation: TColor;
       Objects: ShortInt;
     end;
 
     LastPos: TPoint;
 
     Panel: record
-      fileState: TReliefFileState;
-      filePath: string;
+      FileState: TReliefFileState;
+      FilePath: string;
     end;
 
     DK_Menu: TPopUpMenu;
@@ -89,16 +82,16 @@ type
     ORClick: TORGraf;
     FMove: Boolean;
 
-    FOnError: TErrorEvent;
-    FOnMove: TMoveEvent;
-    FOnChangeText: TChangeTextEvent;
-    FOnBlokEdit: TBlokAskEvent;
-    FOnMsg: TMsgEvent;
-    FFormBlkClose: TGlobalEvent;
+    mOnError: TErrorEvent;
+    mOnMove: TMoveEvent;
+    mOnChangeText: TChangeTextEvent;
+    mOnBlokEdit: TBlokAskEvent;
+    mOnMsg: TMsgEvent;
+    mFormBlkClose: TGlobalEvent;
 
     procedure Initialize(Rozmery: TPoint; Mode: TMode);
 
-    procedure PaintMrizka(MrizkaColor: TColor);
+    procedure PaintGrid(MrizkaColor: TColor);
     function PaintCursor(CursorData: TCursorDraw): Byte;
 
     procedure PaintOR();
@@ -109,7 +102,7 @@ type
     procedure DKPropClick(Sender: TObject);
     procedure DKDeleteClick(Sender: TObject);
 
-    function ORSave: string;
+    function ORSave(): string;
     procedure ORLoad(data: string);
 
     procedure DXDMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -122,11 +115,11 @@ type
     procedure BitmapDblClick(Position: TPoint);
     procedure ObjectDblClick(Position: TPoint);
 
-    procedure SetMrizka(aMrizka: Boolean);
+    procedure SetGrid(aMrizka: Boolean);
 
-    procedure FLoad(aFile: string);
+    procedure FileLoad(aFile: string);
 
-    procedure ShowEvent;
+    procedure ShowEvent();
     procedure BlokEditEvent(Sender: TObject; Blok: TGraphBlok);
     procedure MessageEvent(Sender: TObject; msg: string);
     procedure BlkFormCloseEvent(Sender: TObject);
@@ -134,7 +127,7 @@ type
     function IsOREvent(pos: TPoint): Boolean;
 
     procedure SetGroup(State: Boolean);
-    function GetGroup: Boolean;
+    function GetGroup(): Boolean;
 
     procedure AssignBitmapEvents();
     procedure AssignObjectEvents();
@@ -143,7 +136,7 @@ type
     procedure SetShowBlokPopisky(show: Boolean);
 
   public
-    ORs: TList<TOR>;
+    ORs: TObjectList<TOR>;
 
     constructor Create(DDRaw: TDXDraw; aParentForm: TForm);
     destructor Destroy; override;
@@ -155,18 +148,18 @@ type
 
     procedure Show(CursorPos: TPoint);
     procedure Escape(Group: Boolean);
-    procedure SetRozmery(aWidth, aHeight: Byte);
+    procedure SetSize(aWidth, aHeight: Byte);
 
     procedure AddSymbol(SymbolID: Integer);
     procedure AddText(Text: string; Color: SymbolColor; popisekBlok: Boolean);
     procedure AddJCClick();
     procedure AddSeparatorVert();
     procedure AddSeparatorHor();
-    procedure AddKPopisek();
-    procedure AddSouprava();
+    procedure AddTrackName();
+    procedure AddTrainPos();
 
-    procedure MoveBitmapSymbol;
-    procedure DeleteBitmapSymbol;
+    procedure MoveBitmapSymbol();
+    procedure DeleteBitmapSymbol();
     procedure KeyPress(Key: Integer); // accepts keys from ApplicationEvent component
 
     procedure SwitchMode(aMode: TMode);
@@ -178,30 +171,30 @@ type
 
     function CheckValid(var error_cnt: Byte): TStrings; // overi validitu naeditovanych dat a vrati chybove hlasky
 
-    property MrizkaColor: TColor read Colors.Mrizka write Colors.Mrizka;
-    property PozadiColor: TColor read Colors.Pozadi write Colors.Pozadi;
-    property KurzorColor: TColor read Colors.Kurzor write Colors.Kurzor;
-    property KurzorOnObjectColor: TColor read Colors.KurzorOnObject write Colors.KurzorOnObject;
-    property KurzorOperation: TColor read Colors.KurzorOperation write Colors.KurzorOperation;
+    property GridColor: TColor read Colors.Grid write Colors.Grid;
+    property BackColor: TColor read Colors.Back write Colors.Back;
+    property CursorColor: TColor read Colors.Cursor write Colors.Cursor;
+    property CursorOnObjectColor: TColor read Colors.CursorOnObject write Colors.CursorOnObject;
+    property CursorOperationColor: TColor read Colors.CursorOperation write Colors.CursorOperation;
     property ObjectColor: ShortInt read Colors.Objects write Colors.Objects;
 
     property Mode: TMode read DrawMode;
-    property Skupina: Boolean read GetGroup write SetGroup;
-    property Mrizka: Boolean read Zobrazeni.Mrizka write SetMrizka;
+    property Group: Boolean read GetGroup write SetGroup;
+    property Grid: Boolean read mGrid write SetGrid;
 
-    property PanelWidth: SmallInt read Zobrazeni.PanelWidth;
-    property PanelHeight: SmallInt read Zobrazeni.PanelHeight;
+    property PanelWidth: SmallInt read mPanelWidth;
+    property PanelHeight: SmallInt read mPanelHeight;
 
-    property fileState: TReliefFileState read Panel.fileState;
-    property filePath: string read Panel.filePath;
+    property FileState: TReliefFileState read Panel.FileState;
+    property FilePath: string read Panel.FilePath;
 
     // events
-    property OnError: TErrorEvent read FOnError write FOnError;
-    property OnMove: TMoveEvent read FOnMove write FOnMove;
-    property OnChangeText: TChangeTextEvent read FOnChangeText write FOnChangeText;
-    property OnBlokEdit: TBlokAskEvent read FOnBlokEdit write FOnBlokEdit;
-    property OnMsg: TMsgEvent read FOnMsg write FOnMsg;
-    property FormBlkClose: TGlobalEvent read FFormBlkClose write FFormBlkClose;
+    property OnError: TErrorEvent read mOnError write mOnError;
+    property OnMove: TMoveEvent read mOnMove write mOnMove;
+    property OnChangeText: TChangeTextEvent read mOnChangeText write mOnChangeText;
+    property OnBlokEdit: TBlokAskEvent read mOnBlokEdit write mOnBlokEdit;
+    property OnMsg: TMsgEvent read mOnMsg write mOnMsg;
+    property FormBlkClose: TGlobalEvent read mFormBlkClose write mFormBlkClose;
     property ShowBlokPopisky: Boolean read GetShowBlokPopisky write SetShowBlokPopisky;
   end;
 
@@ -215,7 +208,7 @@ constructor TRelief.Create(DDRaw: TDXDraw; aParentForm: TForm);
 begin
   inherited Create;
 
-  Self.ORs := TList<TOR>.Create();
+  Self.ORs := TObjectList<TOR>.Create();
 
   Self.DrawObject := DDRaw;
   Self.ParentForm := aParentForm;
@@ -232,25 +225,25 @@ begin
   Self.DrawObject.OnMouseMove := Self.DXDMouseMove;
   Self.DrawObject.OnDblClick := Self.DXDDoubleClick;
 
-  Self.Colors.Mrizka := _Def_Color_Mrizka;
-  Self.Colors.Pozadi := _Def_Color_Pozadi;
-  Self.Colors.Kurzor := _Def_Color_Kurzor;
-  Self.Colors.KurzorOnObject := _Def_Color_Kurzor_OnObject;
-  Self.Colors.Objects := _Def_Color_Objects;
-  Self.Colors.KurzorOperation := _Def_Color_Kurzor_Operation;
+  Self.Colors.Grid := _DEF_COLOR_GRID;
+  Self.Colors.Back := _DEF_COLOR_BACK;
+  Self.Colors.Cursor := _DEF_COLOR_CURSOR;
+  Self.Colors.CursorOnObject := _DEF_COLOR_CURSOR_ON_OBJECT;
+  Self.Colors.Objects := _DEF_COLOR_OBJECTS;
+  Self.Colors.CursorOperation := _DEF_COLOR_CURSOR_OPERATION;
 
   Self.DrawMode := Mode;
-  Self.Zobrazeni.Mrizka := _Def_Mrizka;
-  Self.Panel.fileState := fsUnsaved;
+  Self.mGrid := _DEF_GRID;
+  Self.Panel.FileState := fsUnsaved;
 
   Self.ORs.Clear();
-  Self.ORMove.MovingOR := -1;
-  Self.ORClick.MovingOR := -1;
+  Self.ORMove.movingOR := -1;
+  Self.ORClick.movingOR := -1;
   Self.FMove := false;
 
-  Self.IL_Symbols := LoadIL(_Resource_Symbols, 8, 12);
+  Self.IL_Symbols := LoadIL(_RESOURCE_SYMBOLS, 8, 12);
   Self.IL_Text := LoadIL(_Resource_Text, 8, 12);
-  Self.IL_DK := LoadIL(_Resource_DK, 8 * _OR_Size[0], 12 * _OR_Size[1]);
+  Self.IL_DK := LoadIL(_Resource_DK, _OR_DK_SIZE.X*_SYMBOL_WIDTH, _OR_DK_SIZE.Y*_SYMBOL_HEIGHT);
 
   Self.Graphics := TPanelGraphics.Create(Self.DrawObject, Self.IL_Text);
 
@@ -269,10 +262,10 @@ begin
       end; // dmBitmap
   end; // case
 
-  Self.Zobrazeni.PanelWidth := Rozmery.X;
-  Self.Zobrazeni.PanelHeight := Rozmery.Y;
-  Self.DrawObject.Width := Self.Zobrazeni.PanelWidth * _Symbol_Sirka;
-  Self.DrawObject.Height := Self.Zobrazeni.PanelHeight * _Symbol_Vyska;
+  Self.mPanelWidth := Rozmery.X;
+  Self.mPanelHeight := Rozmery.Y;
+  Self.DrawObject.Width := Self.mPanelWidth * _SYMBOL_WIDTH;
+  Self.DrawObject.Height := Self.mPanelHeight * _SYMBOL_HEIGHT;
 
   Self.Show(Point(-1, -1));
 
@@ -289,15 +282,15 @@ end;
 procedure TRelief.Open(aFile: string);
 var Mode: TMode;
 begin
-  if (RightStr(aFile, 5) = _Suf_bmp) then
+  if (RightStr(aFile, 5) = _FILESUFFIX_BPNL) then
     Mode := dmBitmap
-  else if (RightStr(aFile, 5) = _Suf_obj) then
+  else if (RightStr(aFile, 5) = _FILESUFFIX_OBJ) then
     Mode := dmBloky
   else
     raise EGeneralFileOpen.Create('Soubor s nepodporovanou příponou!');
 
   Self.Initialize(Point(0, 0), Mode);
-  Self.FLoad(aFile);
+  Self.FileLoad(aFile);
 end;
 
 function TRelief.Import(aFile: string): string;
@@ -310,12 +303,12 @@ begin
   Self.Initialize(Point(0, 0), dmBitmap);
   log := log + Self.PanelBitmap.ImportMyJOP(aFile, Self.ORs);
 
-  Self.Panel.fileState := Self.PanelBitmap.fileState;
-  Self.Zobrazeni.PanelWidth := Self.PanelBitmap.PanelWidth;
-  Self.Zobrazeni.PanelHeight := Self.PanelBitmap.PanelHeight;
+  Self.Panel.FileState := Self.PanelBitmap.fileState;
+  Self.mPanelWidth := Self.PanelBitmap.PanelWidth;
+  Self.mPanelHeight := Self.PanelBitmap.PanelHeight;
 
-  Self.DrawObject.Width := Self.Zobrazeni.PanelWidth * _Symbol_Sirka;
-  Self.DrawObject.Height := Self.Zobrazeni.PanelHeight * _Symbol_Vyska;
+  Self.DrawObject.Width := Self.mPanelWidth * _SYMBOL_WIDTH;
+  Self.DrawObject.Height := Self.mPanelHeight * _SYMBOL_HEIGHT;
 
   log := log + 'Import dat proběhl úspěšně.' + #13#10;
   Result := log;
@@ -361,7 +354,7 @@ begin
   Self.DrawObject.BeginScene();
 
   // smazani reliefu
-  Self.DrawObject.Surface.Fill(Self.Colors.Pozadi);
+  Self.DrawObject.Surface.Fill(Self.Colors.Back);
 
   case (Self.DrawMode) of
     dmBitmap, dmSepHor, dmSepVert:
@@ -376,10 +369,10 @@ begin
       Self.PanelObjects.Paint;
   end;
   Self.PaintOR();
-  if (Self.Zobrazeni.Mrizka) then
-    Self.PaintMrizka(Self.Colors.Mrizka);
+  if (Self.Grid) then
+    Self.PaintGrid(Self.Colors.Grid);
 
-  if ((Self.ORMove.MovingOR >= 0) or (Self.GetORGraf(CursorPos).MovingOR > -1)) then
+  if ((Self.ORMove.movingOR >= 0) or (Self.GetORGraf(CursorPos).movingOR > -1)) then
   begin
     // prioritu ma posun OR
     Self.PaintCursor(Self.PaintORCursor(CursorPos));
@@ -399,19 +392,19 @@ begin
 end;
 
 // vykresleni mrizky
-procedure TRelief.PaintMrizka(MrizkaColor: TColor);
+procedure TRelief.PaintGrid(MrizkaColor: TColor);
 begin
   Self.DrawObject.Surface.Canvas.Pen.Color := MrizkaColor;
 
-  for var i: Integer := 1 to Self.Zobrazeni.PanelWidth - 1 do
+  for var i: Integer := 1 to Self.PanelWidth - 1 do
   begin
-    Self.DrawObject.Surface.Canvas.MoveTo((i * _Symbol_Sirka) - 1, 0);
-    Self.DrawObject.Surface.Canvas.LineTo((i * _Symbol_Sirka) - 1, Self.Zobrazeni.PanelHeight * _Symbol_Vyska);
+    Self.DrawObject.Surface.Canvas.MoveTo((i * _SYMBOL_WIDTH) - 1, 0);
+    Self.DrawObject.Surface.Canvas.LineTo((i * _SYMBOL_WIDTH) - 1, Self.PanelHeight * _SYMBOL_HEIGHT);
   end; // for i
-  for var i: Integer := 1 to Self.Zobrazeni.PanelHeight - 1 do
+  for var i: Integer := 1 to Self.PanelHeight - 1 do
   begin
-    Self.DrawObject.Surface.Canvas.MoveTo(0, (i * _Symbol_Vyska) - 1);
-    Self.DrawObject.Surface.Canvas.LineTo(Self.Zobrazeni.PanelWidth * _Symbol_Sirka, (i * _Symbol_Vyska) - 1);
+    Self.DrawObject.Surface.Canvas.MoveTo(0, (i * _SYMBOL_HEIGHT) - 1);
+    Self.DrawObject.Surface.Canvas.LineTo(Self.PanelWidth * _SYMBOL_WIDTH, (i * _SYMBOL_HEIGHT) - 1);
   end; // for i
 end;
 
@@ -427,9 +420,9 @@ begin
   CursorData.Pos2.Y := CursorData.Pos2.Y - 1;
 
   case (CursorData.color) of
-    TCursorColor.ccDefault: Self.DrawObject.Surface.Canvas.Pen.Color := Self.Colors.Kurzor;
-    TCursorColor.ccActiveOperation: Self.DrawObject.Surface.Canvas.Pen.Color := Self.Colors.KurzorOperation;
-    TCursorColor.ccOnObject: Self.DrawObject.Surface.Canvas.Pen.Color := Self.Colors.KurzorOnObject;
+    TCursorColor.ccDefault: Self.DrawObject.Surface.Canvas.Pen.Color := Self.colors.cursor;
+    TCursorColor.ccActiveOperation: Self.DrawObject.Surface.Canvas.Pen.Color := Self.colors.cursorOperation;
+    TCursorColor.ccOnObject: Self.DrawObject.Surface.Canvas.Pen.Color := Self.colors.cursorOnObject;
   end;
 
   if ((CursorData.Pos2.X >= CursorData.Pos1.X) and (CursorData.Pos2.Y >= CursorData.Pos1.Y)) then
@@ -463,8 +456,8 @@ end;
 
 procedure TRelief.DXDMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  LastPos.X := X div _Symbol_Sirka;
-  LastPos.Y := Y div _Symbol_Vyska;
+  LastPos.X := X div _SYMBOL_WIDTH;
+  LastPos.Y := Y div _SYMBOL_HEIGHT;
 
   if (Self.ORMouseUp(LastPos, Button) = 0) then
   begin
@@ -481,11 +474,11 @@ end;
 
 procedure TRelief.DXDMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin
-  if ((X div _Symbol_Sirka = LastPos.X) and (Y div _Symbol_Vyska = LastPos.Y)) then
+  if ((X div _SYMBOL_WIDTH = LastPos.X) and (Y div _SYMBOL_HEIGHT = LastPos.Y)) then
     Exit;
 
-  LastPos.X := X div _Symbol_Sirka;
-  LastPos.Y := Y div _Symbol_Vyska;
+  LastPos.X := X div _SYMBOL_WIDTH;
+  LastPos.Y := Y div _SYMBOL_HEIGHT;
 
   case (Self.DrawMode) of
     dmBloky, dmRoots:
@@ -494,8 +487,8 @@ begin
 
   Self.Show(LastPos);
 
-  if Assigned(FOnMove) then
-    FOnMove(Self, LastPos);
+  if Assigned(Self.OnMove) then
+    Self.OnMove(Self, LastPos);
 end;
 
 procedure TRelief.DXDDoubleClick(Sender: TObject);
@@ -523,20 +516,20 @@ begin
 
         case (Key) of
           VK_LEFT:
-            mouse.X := mouse.X - _Symbol_Sirka;
+            mouse.X := mouse.X - _SYMBOL_WIDTH;
           VK_RIGHT:
-            mouse.X := mouse.X + _Symbol_Sirka;
+            mouse.X := mouse.X + _SYMBOL_WIDTH;
           VK_UP:
-            mouse.Y := mouse.Y - _Symbol_Vyska;
+            mouse.Y := mouse.Y - _SYMBOL_HEIGHT;
           VK_DOWN:
-            mouse.Y := mouse.Y + _Symbol_Vyska;
+            mouse.Y := mouse.Y + _SYMBOL_HEIGHT;
         end;
 
         SetCursorPos(mouse.X, mouse.Y);
       end;
 
     VK_RETURN:
-      Self.DXDMouseUp(Self.DrawObject, mbLeft, [], Self.LastPos.X * _Symbol_Sirka, Self.LastPos.Y * _Symbol_Vyska);
+      Self.DXDMouseUp(Self.DrawObject, mbLeft, [], Self.LastPos.X * _SYMBOL_WIDTH, Self.LastPos.Y * _SYMBOL_HEIGHT);
       // enter
   end;
 end;
@@ -564,7 +557,7 @@ begin
     // konverze z Bitmap na Objects
 
     Self.PanelObjects := TPanelObjects.Create(Self.IL_Symbols, Self.IL_Text, Self.DrawObject.Surface.Canvas,
-      Self.Zobrazeni.PanelWidth, Self.Zobrazeni.PanelHeight, Self.DrawObject, Self.Graphics);
+      Self.PanelWidth, Self.PanelHeight, Self.DrawObject, Self.Graphics);
     Self.AssignObjectEvents();
 
     try
@@ -601,8 +594,8 @@ begin
     Self.PanelBitmap.MouseUp(Position, Button);
   except
     on E: Exception do
-      if Assigned(FOnError) then
-        FOnError(Self, E.Message);
+      if Assigned(Self.OnError) then
+        Self.OnError(Self, E.Message);
   end;
 end;
 
@@ -612,8 +605,8 @@ begin
     Self.PanelObjects.MouseUp(Position, Button);
   except
     on E: Exception do
-      if Assigned(FOnError) then
-        FOnError(Self, E.Message);
+      if Assigned(Self.OnError) then
+        Self.OnError(Self, E.Message);
   end;
 end;
 
@@ -623,8 +616,8 @@ begin
     Self.PanelBitmap.DblClick(Position);
   except
     on E: Exception do
-      if Assigned(FOnError) then
-        FOnError(Self, E.Message);
+      if Assigned(Self.OnError) then
+        Self.OnError(Self, E.Message);
   end;
 end;
 
@@ -634,58 +627,58 @@ begin
     Self.PanelObjects.DblClick(Position);
   except
     on E: Exception do
-      if Assigned(FOnError) then
-        FOnError(Self, E.Message);
+      if Assigned(Self.OnError) then
+        Self.OnError(Self, E.Message);
   end;
 end;
 
-procedure TRelief.SetRozmery(aWidth, aHeight: Byte);
+procedure TRelief.SetSize(aWidth, aHeight: Byte);
 begin
   if (Self.Mode <> dmBitmap) then
     raise Exception.Create('Rozměny lze měnit jen v režimu bitmapy!');
 
   PanelBitmap.SetSize(aWidth, aHeight);
 
-  Self.Zobrazeni.PanelWidth := aWidth;
-  Self.Zobrazeni.PanelHeight := aHeight;
+  Self.mPanelWidth := aWidth;
+  Self.mPanelHeight := aHeight;
 
-  Self.DrawObject.Width := aWidth * _Symbol_Sirka;
-  Self.DrawObject.Height := aHeight * _Symbol_Vyska;
+  Self.DrawObject.Width := aWidth * _SYMBOL_WIDTH;
+  Self.DrawObject.Height := aHeight * _SYMBOL_HEIGHT;
 
   Self.Show(LastPos);
 end;
 
-procedure TRelief.SetMrizka(aMrizka: Boolean);
+procedure TRelief.SetGrid(aMrizka: Boolean);
 begin
-  Self.Zobrazeni.Mrizka := aMrizka;
-
+  Self.mGrid := aMrizka;
   Self.Show(Point(-1, -1));
 end;
 
-procedure TRelief.FLoad(aFile: string);
-var ORs: string;
+procedure TRelief.FileLoad(aFile: string);
 begin
   case (Self.DrawMode) of
     dmBitmap, dmSepHor, dmSepVert:
       begin
+        var ORs: string;
         Self.PanelBitmap.BpnlLoad(aFile, ORs);
         Self.ORLoad(ORs);
         Self.Panel.fileState := Self.PanelBitmap.fileState;
-        Self.Zobrazeni.PanelWidth := Self.PanelBitmap.PanelWidth;
-        Self.Zobrazeni.PanelHeight := Self.PanelBitmap.PanelHeight;
+        Self.mPanelWidth := Self.PanelBitmap.PanelWidth;
+        Self.mPanelHeight := Self.PanelBitmap.PanelHeight;
       end; // dmBitmap
     dmBloky, dmRoots:
       begin
+        var ORs: string;
         Self.PanelObjects.OpnlLoad(aFile, ORs);
         Self.ORLoad(ORs);
         Self.Panel.fileState := Self.PanelObjects.FileStav;
-        Self.Zobrazeni.PanelWidth := Self.PanelObjects.PanelWidth;
-        Self.Zobrazeni.PanelHeight := Self.PanelObjects.PanelHeight;
+        Self.mPanelWidth := Self.PanelObjects.PanelWidth;
+        Self.mPanelHeight := Self.PanelObjects.PanelHeight;
       end; // dmBloky
   end; // case
 
-  Self.DrawObject.Width := Self.Zobrazeni.PanelWidth * _Symbol_Sirka;
-  Self.DrawObject.Height := Self.Zobrazeni.PanelHeight * _Symbol_Vyska;
+  Self.DrawObject.Width := Self.PanelWidth * _SYMBOL_WIDTH;
+  Self.DrawObject.Height := Self.PanelHeight * _SYMBOL_HEIGHT;
 
   Self.Panel.filePath := aFile;
 end;
@@ -779,13 +772,13 @@ begin
     Self.PanelBitmap.separatorsHor.Add();
 end;
 
-procedure TRelief.AddKPopisek();
+procedure TRelief.AddTrackName();
 begin
   if (Assigned(Self.PanelBitmap)) then
     Self.PanelBitmap.trackNames.Add();
 end;
 
-procedure TRelief.AddSouprava();
+procedure TRelief.AddTrainPos();
 begin
   if (Assigned(Self.PanelBitmap)) then
     Self.PanelBitmap.trainPoss.Add();
@@ -793,8 +786,8 @@ end;
 
 procedure TRelief.MessageEvent(Sender: TObject; msg: string);
 begin
-  if (Assigned(Self.FOnMsg)) then
-    Self.FOnMsg(Self, msg);
+  if (Assigned(Self.OnMsg)) then
+    Self.OnMsg(Self, msg);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -804,7 +797,7 @@ procedure TRelief.AddOR(oblr: TOR);
 begin
   Self.ORs.Add(oblr);
   Self.ORMove.MovingOR := Self.ORs.Count - 1;
-  Self.ORMove.MovingSymbol := 0; // 0 = dopravni kancelar
+  Self.ORMove.movingSymbol := TORGraphSymbol.orsDK;
 end;
 
 procedure TRelief.DeleteOR(pos: TPoint);
@@ -825,19 +818,18 @@ begin
     var oblr := Self.ORs[i];
     if (Self.ORMove.MovingOR = i) then
     begin
-      case (Self.ORMove.MovingSymbol) of
-        0:
+      case (Self.ORMove.movingSymbol) of
+        TORGraphSymbol.orsDK:
           oblr.Poss.DK := Self.LastPos;
-        1:
+        TORGraphSymbol.orsQueue:
           oblr.Poss.Queue := Self.LastPos;
-        2:
+        TORGraphSymbol.orsTime:
           oblr.Poss.Time := Self.LastPos;
       end;
-      Self.ORs[i] := oblr;
     end;
 
-    Self.IL_DK.Draw(Self.DrawObject.Surface.Canvas, oblr.Poss.DK.X * _Symbol_Sirka, oblr.Poss.DK.Y * _Symbol_Vyska,
-      (oblr.Poss.DKOr * 10) + 1);
+    Self.IL_DK.Draw(Self.DrawObject.Surface.Canvas, oblr.Poss.DK.X * _SYMBOL_WIDTH, oblr.Poss.DK.Y * _SYMBOL_HEIGHT,
+      (Integer(oblr.Poss.DKOr) * 10) + 1);
 
     Self.Graphics.TextOutputI(oblr.Poss.Queue, '00 VZ PV EZ 00', scGray, clBlack);
     Self.Graphics.TextOutputI(oblr.Poss.Time, 'MER CASU', scGray, clBlack);
@@ -848,7 +840,7 @@ end;
 // vykresluje kurzor pri pohybu
 function TRelief.PaintORCursor(CursorPos: TPoint): TCursorDraw;
 begin
-  if (Self.ORMove.MovingOR < 0) then
+  if (Self.ORMove.movingOR < 0) then
   begin
     var tmp_or := Self.GetORGraf(CursorPos);
     if (tmp_or.MovingOR = -1) then
@@ -856,43 +848,52 @@ begin
 
     Result.color := TCursorColor.ccOnObject;
 
-    case (tmp_or.MovingSymbol) of
-      0:
+    case (tmp_or.movingSymbol) of
+      TORGraphSymbol.orsDK:
         begin
-          Result.pos1.X := (Self.ORs[tmp_or.MovingOR].Poss.DK.X) * _Symbol_Sirka;
-          Result.pos1.Y := (Self.ORs[tmp_or.MovingOR].Poss.DK.Y) * _Symbol_Vyska;
-          Result.pos2.X := (Self.ORs[tmp_or.MovingOR].Poss.DK.X + _OR_Size[tmp_or.MovingSymbol * 2] - 1) *
-            _Symbol_Sirka;
-          Result.Pos2.Y := (Self.ORs[tmp_or.MovingOR].Poss.DK.Y + _OR_Size[tmp_or.MovingSymbol * 2 + 1] - 1) *
-            _Symbol_Vyska;
+          Result.pos1.X := (Self.ORs[tmp_or.MovingOR].Poss.DK.X) * _SYMBOL_WIDTH;
+          Result.pos1.Y := (Self.ORs[tmp_or.MovingOR].Poss.DK.Y) * _SYMBOL_HEIGHT;
+          Result.pos2.X := (Self.ORs[tmp_or.MovingOR].Poss.DK.X+_OR_DK_SIZE.X-1) * _SYMBOL_WIDTH;
+          Result.Pos2.Y := (Self.ORs[tmp_or.MovingOR].Poss.DK.Y+_OR_DK_SIZE.Y-1) * _SYMBOL_HEIGHT;
         end;
-      1:
+      TORGraphSymbol.orsQueue:
         begin
-          Result.pos1.X := (Self.ORs[tmp_or.MovingOR].Poss.Queue.X) * _Symbol_Sirka;
-          Result.pos1.Y := (Self.ORs[tmp_or.MovingOR].Poss.Queue.Y) * _Symbol_Vyska;
-          Result.pos2.X := (Self.ORs[tmp_or.MovingOR].Poss.Queue.X + _OR_Size[tmp_or.MovingSymbol * 2] - 1) *
-            _Symbol_Sirka;
-          Result.Pos2.Y := (Self.ORs[tmp_or.MovingOR].Poss.Queue.Y + _OR_Size[tmp_or.MovingSymbol * 2 + 1] - 1) *
-            _Symbol_Vyska;
+          Result.pos1.X := (Self.ORs[tmp_or.MovingOR].Poss.Queue.X) * _SYMBOL_WIDTH;
+          Result.pos1.Y := (Self.ORs[tmp_or.MovingOR].Poss.Queue.Y) * _SYMBOL_HEIGHT;
+          Result.pos2.X := (Self.ORs[tmp_or.MovingOR].Poss.Queue.X+_OR_QUEUE_SIZE.X-1) * _SYMBOL_WIDTH;
+          Result.Pos2.Y := (Self.ORs[tmp_or.MovingOR].Poss.Queue.Y+_OR_QUEUE_SIZE.Y-1) * _SYMBOL_HEIGHT;
         end;
-      2:
+      TORGraphSymbol.orsTime:
         begin
-          Result.pos1.X := (Self.ORs[tmp_or.MovingOR].Poss.Time.X) * _Symbol_Sirka;
-          Result.pos1.Y := (Self.ORs[tmp_or.MovingOR].Poss.Time.Y) * _Symbol_Vyska;
-          Result.pos2.X := (Self.ORs[tmp_or.MovingOR].Poss.Time.X + _OR_Size[tmp_or.MovingSymbol * 2] - 1) *
-            _Symbol_Sirka;
-          Result.pos2.Y := (Self.ORs[tmp_or.MovingOR].Poss.Time.Y + _OR_Size[tmp_or.MovingSymbol * 2 + 1] - 1) *
-            _Symbol_Vyska;
+          Result.pos1.X := (Self.ORs[tmp_or.MovingOR].Poss.Time.X) * _SYMBOL_WIDTH;
+          Result.pos1.Y := (Self.ORs[tmp_or.MovingOR].Poss.Time.Y) * _SYMBOL_HEIGHT;
+          Result.pos2.X := (Self.ORs[tmp_or.MovingOR].Poss.Time.X+_OR_TIME_SIZE.X-1) * _SYMBOL_WIDTH;
+          Result.pos2.Y := (Self.ORs[tmp_or.MovingOR].Poss.Time.Y+_OR_TIME_SIZE.Y-1) * _SYMBOL_HEIGHT;
         end;
     end; // case
   end else begin
     Result.color := TCursorColor.ccOnObject;
 
-    Result.pos1.X := CursorPos.X * _Symbol_Sirka;
-    Result.pos1.Y := CursorPos.Y * _Symbol_Vyska;
+    Result.pos1.X := CursorPos.X * _SYMBOL_WIDTH;
+    Result.pos1.Y := CursorPos.Y * _SYMBOL_HEIGHT;
 
-    Result.pos2.X := (CursorPos.X + _OR_Size[Self.ORMove.MovingSymbol * 2] - 1) * _Symbol_Sirka;
-    Result.pos2.Y := (CursorPos.Y + _OR_Size[Self.ORMove.MovingSymbol * 2 + 1] - 1) * _Symbol_Vyska;
+    case (Self.ORMove.movingSymbol) of
+      TORGraphSymbol.orsDK:
+        begin
+          Result.pos2.X := (CursorPos.X+_OR_DK_SIZE.X-1) * _SYMBOL_WIDTH;
+          Result.pos2.Y := (CursorPos.Y+_OR_DK_SIZE.Y-1) * _SYMBOL_HEIGHT;
+        end;
+      TORGraphSymbol.orsQueue:
+        begin
+          Result.pos2.X := (CursorPos.X+_OR_QUEUE_SIZE.X-1) * _SYMBOL_WIDTH;
+          Result.pos2.Y := (CursorPos.Y+_OR_QUEUE_SIZE.Y-1) * _SYMBOL_HEIGHT;
+        end;
+      TORGraphSymbol.orsTime:
+        begin
+          Result.pos2.X := (CursorPos.X+_OR_TIME_SIZE.X-1) * _SYMBOL_WIDTH;
+          Result.pos2.Y := (CursorPos.Y+_OR_TIME_SIZE.Y-1) * _SYMBOL_HEIGHT;
+        end;
+    end;
   end;
 end;
 
@@ -908,14 +909,12 @@ begin
 
     var tmp_or := Self.GetORGraf(Position);
     if (Self.PanelObjects.selected_obj = nil) then
-      Exit;
+      Exit();
     if (tmp_or.MovingOR < 0) then
-      Exit;
-    if (tmp_or.MovingSymbol <> 0) then
-      Exit;
+      Exit();
     Self.PanelObjects.SetOR(tmp_or.MovingOR);
-    if (Assigned(Self.FOnBlokEdit)) then
-      Self.FOnBlokEdit(Self, Self.PanelObjects.selected_obj);
+    if (Assigned(Self.OnBlokEdit)) then
+      Self.OnBlokEdit(Self, Self.PanelObjects.selected_obj);
     Result := 1;
   end; // dmBloky
 
@@ -927,7 +926,6 @@ begin
       begin
         // ukonceni pohybu
         Self.ORMove.MovingOR := -1;
-        Self.ORMove.MovingSymbol := 0;
 
         Self.FMove := false;
         Self.Show(Self.LastPos);
@@ -950,8 +948,8 @@ begin
       Self.ORClick := Self.GetORGraf(Position);
       if (Self.ORClick.MovingOR < 0) then
         Exit;
-      case (Self.ORClick.MovingSymbol) of
-        0:
+      case (Self.ORClick.movingSymbol) of
+       TORGraphSymbol.orsDK:
           Self.DK_Menu.Popup(mouse.CursorPos.X, mouse.CursorPos.Y);
       end; // case
     end;
@@ -962,30 +960,29 @@ end;
 function TRelief.GetORGraf(pos: TPoint): TORGraf;
 begin
   Result.MovingOR := -1;
-  Result.MovingSymbol := 0;
 
   for var i := 0 to Self.ORs.Count - 1 do
   begin
     if ((pos.X >= Self.ORs[i].Poss.DK.X) and (pos.Y >= Self.ORs[i].Poss.DK.Y) and
-      (Self.ORs[i].Poss.DK.X + _OR_Size[0] > pos.X) and (Self.ORs[i].Poss.DK.Y + _OR_Size[1] > pos.Y)) then
+      (Self.ORs[i].Poss.DK.X + _OR_DK_SIZE.X > pos.X) and (Self.ORs[i].Poss.DK.Y + _OR_DK_SIZE.Y > pos.Y)) then
     begin
-      Result.MovingOR := i;
-      Result.MovingSymbol := 0;
-      Exit;
+      Result.movingOR := i;
+      Result.movingSymbol := TORGraphSymbol.orsDK;
+      Exit();
     end;
     if ((pos.X >= Self.ORs[i].Poss.Queue.X) and (pos.Y >= Self.ORs[i].Poss.Queue.Y) and
-      (Self.ORs[i].Poss.Queue.X + _OR_Size[2] > pos.X) and (Self.ORs[i].Poss.Queue.Y + _OR_Size[3] > pos.Y)) then
+      (Self.ORs[i].Poss.Queue.X + _OR_QUEUE_SIZE.X > pos.X) and (Self.ORs[i].Poss.Queue.Y + _OR_QUEUE_SIZE.Y > pos.Y)) then
     begin
-      Result.MovingOR := i;
-      Result.MovingSymbol := 1;
-      Exit;
+      Result.movingOR := i;
+      Result.movingSymbol := TORGraphSymbol.orsQueue;
+      Exit();
     end;
     if ((pos.X >= Self.ORs[i].Poss.Time.X) and (pos.Y >= Self.ORs[i].Poss.Time.Y) and
-      (Self.ORs[i].Poss.Time.X + _OR_Size[4] > pos.X) and (Self.ORs[i].Poss.Time.Y + _OR_Size[5] > pos.Y)) then
+      (Self.ORs[i].Poss.Time.X + _OR_TIME_SIZE.X > pos.X) and (Self.ORs[i].Poss.Time.Y + _OR_TIME_SIZE.Y > pos.Y)) then
     begin
-      Result.MovingOR := i;
-      Result.MovingSymbol := 2;
-      Exit;
+      Result.movingOR := i;
+      Result.movingSymbol := TORGraphSymbol.orsTime;
+      Exit();
     end;
   end;
 end;
@@ -1009,7 +1006,7 @@ end;
 
 procedure TRelief.DKPropClick(Sender: TObject);
 begin
-  F_OREdit.OpenForm(Self.ORClick.MovingOR);
+  F_OREdit.EditOR(Self.ORClick.MovingOR);
 end;
 
 procedure TRelief.DKDeleteClick(Sender: TObject);
@@ -1030,15 +1027,14 @@ function TRelief.ORSave(): string;
 begin
   for var oblr in Self.ORs do
   begin
-    Result := Result + oblr.Name + ';' + oblr.ShortName + ';' + oblr.id + ';' + IntToStr(oblr.Lichy) + ';' +
-      IntToStr(oblr.Poss.DKOr) + ';' + BoolToStr(oblr.Rights.ModCasStart) + ';' + BoolToStr(oblr.Rights.ModCasStop) +
+    Result := Result + oblr.Name + ';' + oblr.ShortName + ';' + oblr.id + ';' + IntToStr(Integer(oblr.oddDirection)) + ';' +
+      IntToStr(Integer(oblr.Poss.DKOr)) + ';' + BoolToStr(oblr.Rights.ModCasStart) + ';' + BoolToStr(oblr.Rights.ModCasStop) +
       ';' + BoolToStr(oblr.Rights.ModCasSet) + ';' + IntToStr(oblr.Poss.DK.X) + ';' + IntToStr(oblr.Poss.DK.Y) + ';' +
       IntToStr(oblr.Poss.Queue.X) + ';' + IntToStr(oblr.Poss.Queue.Y) + ';' + IntToStr(oblr.Poss.Time.X) + ';' +
       IntToStr(oblr.Poss.Time.Y) + ';';
 
-    for var j := 0 to oblr.Osvetleni.Cnt - 1 do
-      Result := Result + IntToStr(oblr.Osvetleni.data[j].board) + '#' + IntToStr(oblr.Osvetleni.data[j].port) + '#' +
-        oblr.Osvetleni.data[j].Name + '|';
+    for var light in oblr.Lights do
+      Result := Result + IntToStr(light.board) + '#' + IntToStr(light.port) + '#' + light.Name + '|';
 
     Result := Result + #13;
   end;
@@ -1072,32 +1068,45 @@ begin
       if (data_main.Count < 14) then
         raise EORLoad.Create('Málo položek definující OŘ!');
 
-      var oblr: TOR;
-      oblr.Name := data_main[0];
-      oblr.ShortName := data_main[1];
-      oblr.id := data_main[2];
-      oblr.Lichy := StrToInt(data_main[3]);
-      oblr.Poss.DKOr := StrToInt(data_main[4]);
+      var area: TOR;
+      area := TOR.Create();
+      area.Name := data_main[0];
+      area.ShortName := data_main[1];
+      area.id := data_main[2];
 
-      oblr.Rights.ModCasStart := StrToBool(data_main[5]);
-      oblr.Rights.ModCasStop := StrToBool(data_main[6]);
-      oblr.Rights.ModCasSet := StrToBool(data_main[7]);
+      var dir: Integer := StrToInt(data_main[3]);
+      case (dir) of
+        Integer(TOROddDirection.ordLeftToRight): area.oddDirection := TOROddDirection.ordLeftToRight;
+        Integer(TOROddDirection.ordRightToLeft): area.oddDirection := TOROddDirection.ordRightToLeft;
+      else
+        area.oddDirection := TOROddDirection.ordLeftToRight;
+      end;
 
-      oblr.Poss.DK.X := StrToInt(data_main[8]);
-      oblr.Poss.DK.Y := StrToInt(data_main[9]);
+      var dkor: Integer := StrToInt(data_main[4]);
+      case (dkor) of
+        Integer(TDKOrientation.dkoDown): area.Poss.DKOr := TDKOrientation.dkoDown;
+        Integer(TDKOrientation.dkoUp): area.Poss.DKOr := TDKOrientation.dkoUp;
+      else
+        area.Poss.DKOr := TDKOrientation.dkoDown; // default
+      end;
 
-      oblr.Poss.Queue.X := StrToInt(data_main[10]);
-      oblr.Poss.Queue.Y := StrToInt(data_main[11]);
+      area.Rights.ModCasStart := StrToBool(data_main[5]);
+      area.Rights.ModCasStop := StrToBool(data_main[6]);
+      area.Rights.ModCasSet := StrToBool(data_main[7]);
 
-      oblr.Poss.Time.X := StrToInt(data_main[12]);
-      oblr.Poss.Time.Y := StrToInt(data_main[13]);
+      area.Poss.DK.X := StrToInt(data_main[8]);
+      area.Poss.DK.Y := StrToInt(data_main[9]);
 
-      oblr.Osvetleni.Cnt := 0;
+      area.Poss.Queue.X := StrToInt(data_main[10]);
+      area.Poss.Queue.Y := StrToInt(data_main[11]);
+
+      area.Poss.Time.X := StrToInt(data_main[12]);
+      area.Poss.Time.Y := StrToInt(data_main[13]);
+
       data_osv.Clear();
       if (data_main.Count >= 15) then
       begin
         ExtractStringsEx(['|'], [], data_main[14], data_osv);
-        oblr.Osvetleni.Cnt := 0;
         for var j := 0 to data_osv.Count - 1 do
         begin
           data_osv2.Clear();
@@ -1106,17 +1115,18 @@ begin
           if (data_osv2.Count < 2) then
             raise EORLoad.Create('Málo položek definující osvětlení!');
 
-          oblr.Osvetleni.Cnt := oblr.Osvetleni.Cnt + 1;
-          oblr.Osvetleni.data[oblr.Osvetleni.Cnt - 1].board := StrToInt(data_osv2[0]);
-          oblr.Osvetleni.data[oblr.Osvetleni.Cnt - 1].port := StrToInt(data_osv2[1]);
+          var light: TORLight;
+          light.Board := StrToInt(data_osv2[0]);
+          light.Port := StrToInt(data_osv2[1]);
           if (data_osv2.Count > 2) then
-            oblr.Osvetleni.data[oblr.Osvetleni.Cnt - 1].Name := data_osv2[2]
+            light.Name := data_osv2[2]
           else
-            oblr.Osvetleni.data[oblr.Osvetleni.Cnt - 1].Name := '';
+            light.Name := '';
+          area.Lights.Add(light);
         end;
       end;
 
-      Self.ORs.Add(oblr);
+      Self.ORs.Add(area);
     end;
   finally
     FreeAndNil(lines);
@@ -1162,16 +1172,16 @@ end;
 // vraci true, pokud je na dane pozici DK, zasobnik, ci mereni casu
 function TRelief.IsOREvent(pos: TPoint): Boolean;
 begin
-  for var oblr in Self.ORs do
+  for var area in Self.ORs do
   begin
-    if ((pos.X >= oblr.Poss.DK.X) and (pos.X <= oblr.Poss.DK.X + 4) and (pos.Y >= oblr.Poss.DK.Y) and
-      (pos.Y <= oblr.Poss.DK.Y + 2)) then
+    if ((pos.X >= area.Poss.DK.X) and (pos.X <= area.Poss.DK.X + 4) and (pos.Y >= area.Poss.DK.Y) and
+      (pos.Y <= area.Poss.DK.Y + 2)) then
       Exit(true);
 
-    if ((pos.X >= oblr.Poss.Queue.X) and (pos.X <= oblr.Poss.Queue.X + 13) and (pos.Y = oblr.Poss.Queue.Y)) then
+    if ((pos.X >= area.Poss.Queue.X) and (pos.X <= area.Poss.Queue.X + 13) and (pos.Y = area.Poss.Queue.Y)) then
       Exit(true);
 
-    if ((pos.X >= oblr.Poss.Time.X) and (pos.X <= oblr.Poss.Time.X + 15) and (pos.Y = oblr.Poss.Time.Y)) then
+    if ((pos.X >= area.Poss.Time.X) and (pos.X <= area.Poss.Time.X + 15) and (pos.Y = area.Poss.Time.Y)) then
       Exit(true);
   end;
 
@@ -1182,8 +1192,8 @@ end;
 
 procedure TRelief.BlkFormCloseEvent(Sender: TObject);
 begin
-  if (Assigned(Self.FFormBlkClose)) then
-    Self.FFormBlkClose(Self);
+  if (Assigned(Self.FormBlkClose)) then
+    Self.FormBlkClose(Self);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -1203,8 +1213,8 @@ end;
 
 procedure TRelief.BlokEditEvent(Sender: TObject; Blok: TGraphBlok);
 begin
-  if (Assigned(Self.FOnBlokEdit)) then
-    Self.FOnBlokEdit(Self, Blok);
+  if (Assigned(Self.OnBlokEdit)) then
+    Self.OnBlokEdit(Self, Blok);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

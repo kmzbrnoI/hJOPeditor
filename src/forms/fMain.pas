@@ -254,7 +254,7 @@ end;
 
 procedure TF_Hlavni.CHB_GroupClick(Sender: TObject);
 begin
-  Relief.Skupina := Self.CHB_Group.Checked;
+  Relief.Group := Self.CHB_Group.Checked;
 end;
 
 procedure TF_Hlavni.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -294,7 +294,7 @@ begin
   Self.DXD_main.Initialize(); // tohleto tady musi byt, jinak nefunguje nacitani souboru jako argumentu !!
 
   ReliefOptions.LoadData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + 'Config.ini');
-  Self.MI_Mrizka.Checked := ReliefOptions.Mrizka;
+  Self.MI_Mrizka.Checked := ReliefOptions.Grid;
 
   Self.DXD_main.Cursor := crNone;
   Self.Caption := _Caption + '     v' + GetVersion(Application.ExeName);
@@ -352,7 +352,7 @@ procedure TF_Hlavni.PM_NewClick(Sender: TObject);
 begin
   if (Assigned(Relief)) then
   begin
-    if (Relief.fileState <> fsClosed) then
+    if (Relief.FileState <> fsClosed) then
       if (Application.MessageBox('Otevřením nového projektu ztratíte všechna neuložená data, pokračovat?',
         'Pokračovat?', MB_YESNO OR MB_ICONQUESTION) <> mrYes) then
         Exit();
@@ -448,7 +448,7 @@ begin
   begin
     if (Assigned(Relief)) then
     begin
-      if (Relief.fileState <> fsClosed) then
+      if (Relief.FileState <> fsClosed) then
         FreeAndNil(Relief);
     end;
 
@@ -457,17 +457,8 @@ begin
 end;
 
 procedure TF_Hlavni.PM_ORAddClick(Sender: TObject);
-var tmpOR: TOR;
 begin
-  tmpOR.Osvetleni.Cnt := 0;
-  tmpOR.Poss.DK := Point(0, 0);
-  tmpOR.Poss.Queue := Point(0, 0);
-  tmpOR.Poss.Time := Point(0, 0);
-  tmpOR.Rights.ModCasStart := true;
-  tmpOR.Rights.ModCasStop := true;
-  tmpOR.Rights.ModCasSet := true;
-
-  F_OREdit.OpenForm(tmpOR);
+  F_OREdit.NewOR();
 end;
 
 procedure TF_Hlavni.PM_ReliefOptionsClick(Sender: TObject);
@@ -530,7 +521,7 @@ begin
     begin
       Self.SD_Save.Filter := 'Bitmapové soubory panelu (*.bpnl)|*.bpnl';
 
-      if (Relief.fileState = fsUnsaved) then
+      if (Relief.FileState = fsUnsaved) then
       begin
         if (not Self.SD_Save.Execute(Self.Handle)) then
           Exit;
@@ -539,8 +530,8 @@ begin
         else
           Relief.Save(Self.SD_Save.FileName);
       end else begin
-        if (Relief.fileState = fsSaved) then
-          Relief.Save(Relief.filePath);
+        if (Relief.FileState = fsSaved) then
+          Relief.Save(Relief.FilePath);
       end; // else .Stav = 1
     end; // bitmapovy mod
 
@@ -548,7 +539,7 @@ begin
     begin
       Self.SD_Save.Filter := 'Objektové soubory panelu (*.opnl)|*.opnl';
 
-      if (Relief.fileState = fsUnsaved) then
+      if (Relief.FileState = fsUnsaved) then
       begin
         if (not Self.SD_Save.Execute(Self.Handle)) then
           Exit;
@@ -557,8 +548,8 @@ begin
         else
           Relief.Save(Self.SD_Save.FileName);
       end else begin
-        if (Relief.fileState = fsSaved) then
-          Relief.Save(Relief.filePath);
+        if (Relief.FileState = fsSaved) then
+          Relief.Save(Relief.FilePath);
       end; // else .Stav = 1
     end; // objektovy mod
   except
@@ -571,7 +562,7 @@ begin
   end;
 
   Self.SB_Main.Panels.Items[1].Text := 'Soubor uložen';
-  Self.Caption := ExtractFileName(Relief.filePath) + ' - ' + _Caption + '     v' + GetVersion(Application.ExeName);
+  Self.Caption := ExtractFileName(Relief.FilePath) + ' - ' + _Caption + '     v' + GetVersion(Application.ExeName);
 end;
 
 procedure TF_Hlavni.PM_AboutClick(Sender: TObject);
@@ -764,7 +755,7 @@ procedure TF_Hlavni.MI_MrizkaClick(Sender: TObject);
 begin
   (Sender as TMenuItem).Checked := not(Sender as TMenuItem).Checked;
 
-  ReliefOptions.Mrizka := (Sender as TMenuItem).Checked;
+  ReliefOptions.Grid := (Sender as TMenuItem).Checked;
   ReliefOptions.SaveData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + 'Config.ini');
 
   if (Assigned(Relief)) then
@@ -849,7 +840,7 @@ procedure TF_Hlavni.TB_KCisloClick(Sender: TObject);
 begin
   Relief.Escape(false);
   try
-    Relief.AddKPopisek();
+    Relief.AddTrackName();
   except
     on E: Exception do
       Application.MessageBox(PChar('Chyba při přidávání objektu:' + #13#10 + E.message), 'Chyba',
@@ -862,7 +853,7 @@ begin
   Relief.Escape(false);
 
   try
-    Relief.AddSouprava();
+    Relief.AddTrainPos();
   except
     on E: Exception do
       Application.MessageBox(PChar('Chyba při přidávání objektu:' + #13#10 + E.message), 'Chyba',
@@ -901,7 +892,7 @@ begin
   if (Self.OD_Import.Execute(Self.Handle)) then
   begin
     if (Assigned(Relief)) then
-      if (Relief.fileState <> fsClosed) then
+      if (Relief.FileState <> fsClosed) then
         FreeAndNil(Relief);
 
     Self.ImportFile(Self.OD_Import.FileName);

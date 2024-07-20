@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, Panel, Global, ReliefSettings, OblastRizeni, Spin, ExtCtrls,
-  Types;
+  Types, Generics.Collections;
 
 type
   TF_NewRelief = class(TForm)
@@ -51,8 +51,11 @@ type
     procedure LB_OsvClick(Sender: TObject);
     procedure E_OsvAddrExit(Sender: TObject);
     procedure E_NameKeyPress(Sender: TObject; var Key: Char);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
-    firstOR: TOR;
+    lights: TList<TORLight>;
+
   public
     procedure OpenForm;
   end;
@@ -91,24 +94,29 @@ begin
     Exit;
   end;
 
-  Self.firstOR.Name := Self.E_Name.Text;
-  Self.firstOR.ShortName := Self.E_NameShort.Text;
-  Self.firstOR.id := Self.E_NameUniq.Text;
-  Self.firstOR.Lichy := Self.CB_Lichy.ItemIndex;
+  var area: TOR;
+  area := TOR.Create();
+
+  area.Name := Self.E_Name.Text;
+  area.ShortName := Self.E_NameShort.Text;
+  area.Id := Self.E_NameUniq.Text;
+  area.OddDirection := TOROddDirection(Self.CB_Lichy.ItemIndex);
 
   if (Self.RB_OR1.Checked) then
-    Self.firstOR.Poss.DKOr := 0;
+    area.Poss.DKOr := TDKOrientation.dkoDown;
   if (Self.RB_OR2.Checked) then
-    Self.firstOR.Poss.DKOr := 1;
+    area.Poss.DKOr := TDKOrientation.dkoUp;
 
-  Self.firstOR.Rights.ModCasStart := Self.CHB_ModCasStart.Checked;
-  Self.firstOR.Rights.ModCasStop := Self.CHB_ModCasStop.Checked;
-  Self.firstOR.Rights.ModCasSet := Self.CHB_ModCasSet.Checked;
+  area.Rights.ModCasStart := Self.CHB_ModCasStart.Checked;
+  area.Rights.ModCasStop := Self.CHB_ModCasStop.Checked;
+  area.Rights.ModCasSet := Self.CHB_ModCasSet.Checked;
+
+  area.Lights.AddRange(Self.lights);
 
   try
     F_Hlavni.Relief := TRelief.Create(F_Hlavni.DXD_Main, F_Hlavni);
     F_Hlavni.AssignReliefEvents();
-    F_Hlavni.Relief.New(Point(Self.SE_Width.Value, Self.SE_Height.Value), firstOR);
+    F_Hlavni.Relief.New(Point(Self.SE_Width.Value, Self.SE_Height.Value), area);
   except
     on E: Exception do
     begin
@@ -133,7 +141,7 @@ end;
 
 procedure TF_NewRelief.B_StornoClick(Sender: TObject);
 begin
-  Self.Close;
+  Self.Close();
 end;
 
 procedure TF_NewRelief.E_NameKeyPress(Sender: TObject; var Key: Char);
@@ -145,9 +153,25 @@ end;
 
 procedure TF_NewRelief.E_OsvAddrExit(Sender: TObject);
 begin
-  Self.firstOR.Osvetleni.Data[Self.LB_Osv.ItemIndex].board := StrToInt(Self.E_OsvAddr.Text);
-  Self.firstOR.Osvetleni.Data[Self.LB_Osv.ItemIndex].port := StrToInt(Self.E_OsvPort.Text);
-  Self.firstOR.Osvetleni.Data[Self.LB_Osv.ItemIndex].Name := Self.E_OsvName.Text;
+  var i := Self.LB_Osv.ItemIndex;
+  if ((i >= 0) and (i < Self.lights.Count)) then
+  begin
+    var light := Self.lights[i];
+    light.Board := StrToInt(Self.E_OsvAddr.Text);
+    light.Port := StrToInt(Self.E_OsvPort.Text);
+    light.Name := Self.E_OsvName.Text;
+    Self.lights[i] := light;
+  end;
+end;
+
+procedure TF_NewRelief.FormCreate(Sender: TObject);
+begin
+  Self.lights := TList<TORLight>.Create();
+end;
+
+procedure TF_NewRelief.FormDestroy(Sender: TObject);
+begin
+  Self.lights.Free();
 end;
 
 procedure TF_NewRelief.LB_OsvClick(Sender: TObject);
@@ -155,29 +179,26 @@ begin
   if ((Sender as TListBox).ItemIndex = -1) then
   begin
     Self.GB_OsvOne.Visible := false;
-    Exit;
+    Exit();
   end;
 
-  Self.E_OsvAddr.Text := IntToStr(Self.firstOR.Osvetleni.Data[(Sender as TListBox).ItemIndex].board);
-  Self.E_OsvPort.Text := IntToStr(Self.firstOR.Osvetleni.Data[(Sender as TListBox).ItemIndex].port);
-  Self.E_OsvName.Text := Self.firstOR.Osvetleni.Data[(Sender as TListBox).ItemIndex].Name;
+  var i: Integer := (Sender as TListBox).ItemIndex;
+  if (i < Self.lights.Count) then
+  begin
+    Self.E_OsvAddr.Text := IntToStr(Self.lights[i].board);
+    Self.E_OsvPort.Text := IntToStr(Self.lights[i].port);
+    Self.E_OsvName.Text := Self.lights[i].Name;
+  end;
 
   Self.GB_OsvOne.Visible := true;
 end;
 
-procedure TF_NewRelief.OpenForm;
-var i: Integer;
+procedure TF_NewRelief.OpenForm();
 begin
   Self.SE_Height.Value := 20;
   Self.SE_Width.Value := 40;
 
-  Self.firstOR.Osvetleni.Cnt := 0;
-  for i := 0 to _MAX_OSV - 1 do
-  begin
-    Self.firstOR.Osvetleni.Data[i].board := 0;
-    Self.firstOR.Osvetleni.Data[i].port := 0;
-    Self.firstOR.Osvetleni.Data[i].Name := '';
-  end;
+  Self.lights.Clear();
 
   Self.E_Name.Text := '';
   Self.E_NameShort.Text := '';
@@ -194,13 +215,22 @@ begin
 end;
 
 procedure TF_NewRelief.SE_OsvCntChange(Sender: TObject);
-var i: Integer;
 begin
-  Self.firstOR.Osvetleni.Cnt := (Sender as TSpinEdit).Value;
-  Self.LB_Osv.Clear();
-  for i := 0 to (Sender as TSpinEdit).Value - 1 do
-    Self.LB_Osv.Items.Add(IntToStr(i + 1));
-  Self.GB_OsvOne.Visible := false;
+  while (Self.lights.Count < Self.SE_OsvCnt.Value) do
+  begin
+    var empty: TORLight;
+    empty.Board := 0;
+    empty.Port := 0;
+    empty.Name := '';
+    Self.lights.Add(empty);
+    Self.LB_Osv.Items.Add(IntToStr(Self.lights.Count));
+  end;
+
+  while (Self.lights.Count > Self.SE_OsvCnt.Value) do
+  begin
+    Self.lights.Delete(Self.lights.Count-1);
+    Self.LB_Osv.Items.Delete(Self.lights.Count);
+  end;
 end;
 
 end.// unit
