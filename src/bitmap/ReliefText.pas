@@ -496,7 +496,7 @@ end;
 procedure TText.PaintTextMove(KurzorPos: TPoint);
 begin
   // pridavani, posouvani
-  if ((Self.operations.addStep > gosNone) or (Self.operations.moveStep > gosNone)) then
+  if ((Self.operations.addStep = gosActive) or (Self.operations.moveStep = gosMoving)) then
     Self.Graphics.TextOutputI(KurzorPos, Self.Operations.TextProperties.Text, Self.Operations.TextProperties.Color,
       clBlack, Self.Operations.TextProperties.BlokPopisek);
 end;
