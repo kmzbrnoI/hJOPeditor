@@ -639,23 +639,23 @@ begin
     dmBitmap:
       begin
         if (Assigned(Self.Symbols)) then
-          Self.Symbols.Move;
+          Self.Symbols.Move();
         if (Assigned(Self.trackNames)) then
-          Self.trackNames.Move;
+          Self.trackNames.Move();
         if (Assigned(Self.JCClick)) then
-          Self.JCClick.Move;
+          Self.JCClick.Move();
         if (Assigned(Self.trainPoss)) then
-          Self.trainPoss.Move;
+          Self.trainPoss.Move();
         if (Assigned(Self.texts)) then
-          Self.texts.Move;
+          Self.texts.Move();
       end;
 
     dmSepHor:
       if (Assigned(Self.SeparatorsHor)) then
-        Self.SeparatorsHor.Move;
+        Self.SeparatorsHor.Move();
     dmSepVert:
       if (Assigned(Self.SeparatorsVert)) then
-        Self.SeparatorsVert.Move;
+        Self.SeparatorsVert.Move();
   end;
 end;
 
