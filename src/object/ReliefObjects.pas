@@ -61,7 +61,7 @@ type
     class function FileSupportedVersionsStr(): string;
 
   public
-    Bloky: TList<TGraphBlok>;
+    Bloky: TObjectList<TGraphBlok>;
 
     constructor Create(SymbolIL, TextIL: TImageList; DrawCanvas: TCanvas; Width, Height: Integer; Parent: TDXDraw;
       Graphics: TPanelGraphics);
@@ -145,12 +145,12 @@ begin
 
   Self.FMode := dmBloky;
 
-  Self.Bloky := TList<TGraphBlok>.Create();
+  Self.Bloky := TObjectList<TGraphBlok>.Create();
 
   Self.CreatePM(Self.PM_Properties, Parent);
 end; // constructor
 
-destructor TPanelObjects.Destroy;
+destructor TPanelObjects.Destroy();
 begin
   Self.ResetPanel();
   Self.Bloky.Free();
@@ -165,8 +165,6 @@ end; // destructor
 // reset dat
 procedure TPanelObjects.ResetPanel();
 begin
-  for var blok: TGraphBlok in Self.Bloky do
-    Blok.Free();
   Self.Bloky.Clear();
   Self.Selected := nil;
 end;
