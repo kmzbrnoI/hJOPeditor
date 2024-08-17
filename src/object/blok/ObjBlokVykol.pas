@@ -2,7 +2,7 @@ unit ObjBlokVykol;
 
 interface
 
-uses ObjBlok, Types, IniFiles, Global, symbolHelper, Graphics, PGraphics;
+uses ObjBlok, Types, IniFiles, Global, symbolHelper, Graphics, PGraphics, Generics.Collections;
 
 type
 
@@ -17,6 +17,8 @@ type
     procedure Save(ini: TMemIniFile; key: string); override;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
+
+    function GetEqDerail(blocks: TList<TGraphBlok>): TDerail;
   end;
 
 implementation
@@ -73,6 +75,16 @@ begin
 
   DrawObject.Canvas.Brush.color := clBlack;
   SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _S_DERAIL_B + Self.symbol, color);
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+function TDerail.GetEqDerail(blocks: TList<TGraphBlok>): TDerail;
+begin
+  for var block: TGraphBlok in blocks do
+    if ((block.typ = TBlkType.derail) and (TDerail(block).Pos = Self.Pos)) then
+      Exit(TDerail(block));
+  Result := nil;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

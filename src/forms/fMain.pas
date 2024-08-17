@@ -117,6 +117,8 @@ type
     ToolButton10: TToolButton;
     ToolButton11: TToolButton;
     ToolButton20: TToolButton;
+    MI_OldOpnlImport: TMenuItem;
+    OD_OpnlImport: TOpenDialog;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure PM_NewClick(Sender: TObject);
@@ -149,6 +151,7 @@ type
     procedure PM_Reload_BlocksClick(Sender: TObject);
     procedure PM_Show_Blk_DescriptionsClick(Sender: TObject);
     procedure MI_ImportClick(Sender: TObject);
+    procedure MI_OldOpnlImportClick(Sender: TObject);
   private
     pushedButton: TToolButton; // last pushed button
 
@@ -167,7 +170,8 @@ type
     procedure OpenFile(fname: string);
     procedure ImportFile(fname: string);
     procedure DesignOpen(fname: string);
-    procedure DesignClose;
+    procedure DesignClose();
+    procedure ImportOldOpnl(fname: string);
 
     procedure RepaintModes(cur: TMode);
 
@@ -293,7 +297,7 @@ begin
   Self.MI_Mrizka.Checked := ReliefOptions.Grid;
 
   Self.DXD_main.Cursor := crNone;
-  Self.Caption := _Caption + '     v' + GetVersion(Application.ExeName);
+  Self.Caption := _Caption + ' – v' + GetVersion(Application.ExeName);
 
   Self.pushedButton := nil;
 end;
@@ -422,7 +426,7 @@ begin
         FreeAndNil(Relief);
       Self.DesignClose();
       Screen.Cursor := crDefault;
-      Application.MessageBox(PChar('Import suboru skončil s chybou:' + #13#10 + E.message), 'Chyba',
+      Application.MessageBox(PChar('Import souboru skončil s chybou:' + #13#10 + E.message), 'Chyba',
         MB_OK OR MB_ICONERROR);
       Exit();
     end;
@@ -432,6 +436,27 @@ begin
   Self.LoadFileUpdateGUI('Nový projekt');
   F_ImportLog.Open(log);
 end;
+
+procedure TF_Main.ImportOldOpnl(fname: string);
+begin
+  Screen.Cursor := crHourGlass;
+  try
+    Relief.ImportOldOpnl(fname);
+  except
+    on E: Exception do
+    begin
+      Screen.Cursor := crDefault;
+      Application.MessageBox(PChar('Import souboru skončil s chybou:' + #13#10 + E.message), 'Chyba',
+        MB_OK OR MB_ICONERROR);
+      Exit();
+    end;
+  end;
+  Screen.Cursor := crDefault;
+  Self.Show();
+  Application.ProcessMessages();
+  Application.MessageBox('Import úspěšně dokončen.', 'OK', MB_OK OR MB_ICONINFORMATION);
+end;
+
 
 procedure TF_Main.PM_OpenClick(Sender: TObject);
 begin
@@ -590,6 +615,7 @@ begin
   Self.TB_Other.Visible := false;
   Self.MI_Relief.Visible := false;
   Self.MI_Data.Visible := false;
+  Self.MI_OldOpnlImport.Visible := false;
 
   case (Sender as TMenuItem).Tag of
     0:
@@ -698,6 +724,7 @@ begin
         end;
 
         Self.MI_Data.Visible := true;
+        Self.MI_OldOpnlImport.Visible := true;
       end;
 
     4:
@@ -715,6 +742,7 @@ begin
 
         F_BlockEdit.Close();
         Self.MI_Data.Visible := true;
+        Self.MI_OldOpnlImport.Visible := true;
       end;
   end; // case (Sender as TMenuItem).Tag
 
@@ -756,6 +784,14 @@ begin
 
   if (Assigned(Relief)) then
     ReliefOptions.UseData(F_Main.Relief);
+end;
+
+procedure TF_Main.MI_OldOpnlImportClick(Sender: TObject);
+begin
+  if (not Assigned(Relief)) then
+    Exit();
+  if (Self.OD_OpnlImport.Execute(Self.Handle)) then
+    Self.ImportOldOpnl(Self.OD_OpnlImport.FileName);
 end;
 
 procedure TF_Main.MI_SaveShowOptionsClick(Sender: TObject);

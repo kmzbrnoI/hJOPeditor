@@ -19,6 +19,8 @@ type
     procedure Save(ini: TMemIniFile; key: string); override;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
+
+    function GetEqOther(blocks: TList<TGraphBlok>): TObjOther;
   end;
 
 implementation
@@ -105,6 +107,17 @@ begin
 
   for pos in Self.Positions do
     SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, Self.Symbol, color);
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+function TObjOther.GetEqOther(blocks: TList<TGraphBlok>): TObjOther;
+begin
+  // TODO
+//  for var block: TGraphBlok in blocks do
+//    if ((block.typ = TBlkType.linker_train) and (TObjOther(block).Pos = Self.Pos)) then
+//      Exit(TLinkerTrain(block));
+  Result := nil;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

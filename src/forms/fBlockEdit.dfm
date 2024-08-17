@@ -4,8 +4,8 @@ object F_BlockEdit: TF_BlockEdit
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'Editace bloku [blok]'
-  ClientHeight = 633
-  ClientWidth = 193
+  ClientHeight = 645
+  ClientWidth = 202
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

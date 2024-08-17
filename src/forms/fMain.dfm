@@ -3870,6 +3870,11 @@ object F_Main: TF_Main
         ShortCut = 16457
         OnClick = MI_ImportClick
       end
+      object MI_OldOpnlImport: TMenuItem
+        Caption = 'Importovat vazby z p'#345'edchoz'#237'ho opnl'
+        Visible = False
+        OnClick = MI_OldOpnlImportClick
+      end
       object N2: TMenuItem
         Caption = '-'
       end
@@ -4901,5 +4906,13 @@ object F_Main: TF_Main
     Title = 'Na'#269#237'st soubor'
     Left = 360
     Top = 504
+  end
+  object OD_OpnlImport: TOpenDialog
+    Filter = 'Objektov'#233' soubory panelu (*.opnl)|*.opnl'
+    FilterIndex = 3
+    Options = [ofHideReadOnly, ofFileMustExist, ofEnableSizing]
+    Title = 'Na'#269#237'st soubor'
+    Left = 80
+    Top = 448
   end
 end

@@ -2,7 +2,7 @@ unit ObjBlokVyhybka;
 
 interface
 
-uses ObjBlok, Types, IniFiles, Global, symbolHelper, PGraphics;
+uses ObjBlok, Types, IniFiles, Global, symbolHelper, PGraphics, Generics.Collections;
 
 type
 
@@ -17,6 +17,8 @@ type
     procedure Save(ini: TMemIniFile; key: string); override;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
+
+    function GetEqTurnout(blocks: TList<TGraphBlok>): TTurnout;
   end;
 
 implementation
@@ -69,6 +71,16 @@ begin
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, Self.SymbolID, colors.Normal);
     end;
   end;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+function TTurnout.GetEqTurnout(blocks: TList<TGraphBlok>): TTurnout;
+begin
+  for var block: TGraphBlok in blocks do
+    if ((block.typ = TBlkType.turnout) and (TTurnout(block).Position = Self.Position)) then
+      Exit(TTurnout(block));
+  Result := nil;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

@@ -32,7 +32,6 @@ type
 
   TPanelObjects = class
   private
-
     PM_Properties: TPopUpMenu;
 
     mFileName: string;
@@ -59,15 +58,21 @@ type
     procedure ComputeVyhybkaFlag(); // volano pri prechodu z Bloky do Koreny
 
     class function FileSupportedVersionsStr(): string;
+    class function BlockCreate(typ: TBlkType; i: Integer): TGraphBlok;
+    class function IsOpnlVersionSupported(version: string): Boolean;
+    class function OpnlVersionToWord(version: string): Word;
+    class procedure OpnlLoadBlocks(var ini: TMemIniFile; verWord: Word; var blocks: TObjectList<TGraphBlok>);
+    class function OpnlLoadAreas(var ini: TMemIniFile): string;
 
   public
     Bloky: TObjectList<TGraphBlok>;
 
     constructor Create(SymbolIL, TextIL: TImageList; DrawCanvas: TCanvas; Width, Height: Integer; Parent: TDXDraw;
       Graphics: TPanelGraphics);
-    destructor Destroy; override;
+    destructor Destroy(); override;
 
     procedure Import(Data: TObject); // import dat zatim z PanelBitmap
+    procedure ImportOldOpnl(aFile: string);
 
     procedure OpnlLoad(aFile: string; var ORs: string);
     procedure OpnlSave(aFile: string; const ORs: string);
@@ -76,8 +81,8 @@ type
     procedure PaintBloky(); // paint modu bloky
     function PaintCursor(CursorPos: TPoint): TCursorDraw;
 
-    procedure ResetPanel;
-    procedure Escape;
+    procedure ResetPanel();
+    procedure Escape();
 
     procedure MouseUp(Position: TPoint; Button: TMouseButton);
     procedure MouseMove(Position: TPoint);
@@ -172,8 +177,6 @@ end;
 // nacitani souboru
 procedure TPanelObjects.OpnlLoad(aFile: string; var ORs: string);
 var inifile: TMemIniFile;
-  ver: string;
-  verWord: Word;
 begin
   Self.mFileState := fsSaved;
   Self.mFileName := aFile;
@@ -184,19 +187,8 @@ begin
   inifile := TMemIniFile.Create(aFile, TEncoding.UTF8);
   try
     // kontrola verze
-    ver := inifile.ReadString('G', 'ver', _FileVersion);
-
-    var versionOk: Boolean := false;
-    for var i := 0 to Length(_FileVersion_accept) - 1 do
-    begin
-      if (ver = _FileVersion_accept[i]) then
-      begin
-        versionOk := true;
-        break;
-      end;
-    end;
-
-    if (not versionOk) then
+    var ver: string := inifile.ReadString('G', 'ver', _FileVersion);
+    if (not IsOpnlVersionSupported(ver)) then
     begin
       if (Application.MessageBox(PChar('Načítáte soubor s verzí ' + ver + #13#10 +
         'Aplikace momentálně podporuje verze ' + Self.FileSupportedVersionsStr() + #13#10 + 'Chcete pokračovat?'),
@@ -204,82 +196,13 @@ begin
         raise EFileLoad.Create('Uživatel zrušil načítání souboru!');
     end;
 
-    begin
-      var strs: TStrings := TStringList.Create();
-      try
-        ExtractStringsEx(['.'], [], ver, strs);
-        verWord := (StrToInt(strs[0]) shl 8) + StrToInt(strs[1]);
-      finally
-        strs.Free();
-      end;
-    end;
+    var verWord: Word := Self.OpnlVersionToWord(ver);
 
     Self.DrawObject.Height := inifile.ReadInteger('P', 'H', 0);
     Self.DrawObject.Width := inifile.ReadInteger('P', 'W', 0);
 
-    // oblati rizeni
-    // tato silena metoda vytvoreni binarniho souboru opravdu zjednodusuje cely program
-    begin
-      var sect_str: TStrings := TStringList.Create();
-      try
-        inifile.ReadSection('OR', sect_str);
-        ORs := '';
-        for var i: Integer := 0 to sect_str.count - 1 do
-          ORs := ORs + inifile.ReadString('OR', sect_str[i], '') + #13;
-        ORs := ORs + #13;
-      finally
-        sect_str.Free();
-      end;
-    end;
-
-    for var blkTyp: TBlkType := Low(TBlkType) to High(TBlkType) do
-    begin
-      var count: Integer := inifile.ReadInteger('P', TGraphBlok.TypeToFileStr(blkTyp), 0);
-      for var i: Integer := 0 to count - 1 do
-      begin
-        try
-          var blok: TGraphBlok;
-          case (blkTyp) of
-            track:
-              blok := ObjBlokUsek.TTrack.Create(i);
-            signal:
-              blok := ObjBlokNavestidlo.TSignal.Create(i);
-            turnout:
-              blok := ObjBlokVyhybka.TTurnout.Create(i);
-            crossing:
-              blok := ObjBlokPrejezd.TCrossing.Create(i);
-            text:
-              blok := ObjBlokText.TText.Create(i);
-            description:
-              begin
-                blok := ObjBlokText.TText.Create(i);
-                blok.typ := TBlkType.description; // override type
-              end;
-            other:
-              blok := ObjBlokPomocny.TObjOther.Create(i);
-            linker:
-              blok := ObjBlokUvazka.TLinker.Create(i);
-            linker_train:
-              blok := ObjBlokUvazkaSpr.TLinkerTrain.Create(i);
-            lock:
-              blok := ObjBlokZamek.TLock.Create(i);
-            derail:
-              blok := ObjBlokVykol.TDerail.Create(i);
-            disconnector:
-              blok := ObjBlokRozp.TDisconnector.Create(i);
-            pst:
-              blok := ObjBlokPst.TPSt.Create(i);
-          else
-            blok := nil;
-          end;
-
-          blok.Load(inifile, TGraphBlok.TypeToFileStr(blkTyp) + IntToStr(i), verWord);
-          Self.Bloky.Add(blok);
-        except
-
-        end;
-      end;
-    end; // for blkTyp
+    ORs := Self.OpnlLoadAreas(inifile);
+    Self.OpnlLoadBlocks(inifile, verWord, Self.Bloky);
 
     Self.ComputeVyhybkaFlag();
     Self.Escape();
@@ -796,6 +719,257 @@ begin
   for var i := 0 to Length(_FileVersion_accept) - 1 do
     Result := Result + _FileVersion_accept[i] + ', ';
   Result := LeftStr(Result, Length(Result) - 2);
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+class function TPanelObjects.BlockCreate(typ: TBlkType; i: Integer): TGraphBlok;
+begin
+  case (typ) of
+    track:
+      Result := ObjBlokUsek.TTrack.Create(i);
+    signal:
+      Result := ObjBlokNavestidlo.TSignal.Create(i);
+    turnout:
+      Result := ObjBlokVyhybka.TTurnout.Create(i);
+    crossing:
+      Result := ObjBlokPrejezd.TCrossing.Create(i);
+    text:
+      Result := ObjBlokText.TText.Create(i);
+    description:
+      begin
+        Result := ObjBlokText.TText.Create(i);
+        Result.typ := TBlkType.description; // override type
+      end;
+    other:
+      Result := ObjBlokPomocny.TObjOther.Create(i);
+    linker:
+      Result := ObjBlokUvazka.TLinker.Create(i);
+    linker_train:
+      Result := ObjBlokUvazkaSpr.TLinkerTrain.Create(i);
+    lock:
+      Result := ObjBlokZamek.TLock.Create(i);
+    derail:
+      Result := ObjBlokVykol.TDerail.Create(i);
+    disconnector:
+      Result := ObjBlokRozp.TDisconnector.Create(i);
+    pst:
+      Result := ObjBlokPst.TPSt.Create(i);
+  else
+    Result := nil;
+  end;
+end;
+
+class function TPanelObjects.IsOpnlVersionSupported(version: string): Boolean;
+begin
+  Result := False;
+  for var i := 0 to Length(_FileVersion_accept) - 1 do
+    if (version = _FileVersion_accept[i]) then
+      Exit(True);
+end;
+
+class function TPanelObjects.OpnlVersionToWord(version: string): Word;
+begin
+  var strs: TStrings := TStringList.Create();
+  try
+    ExtractStringsEx(['.'], [], version, strs);
+    Result := (StrToInt(strs[0]) shl 8) + StrToInt(strs[1]);
+  finally
+    strs.Free();
+  end;
+end;
+
+class procedure TPanelObjects.OpnlLoadBlocks(var ini: TMemIniFile; verWord: Word; var blocks: TObjectList<TGraphBlok>);
+begin
+  for var blkTyp: TBlkType := Low(TBlkType) to High(TBlkType) do
+  begin
+    var count: Integer := ini.ReadInteger('P', TGraphBlok.TypeToFileStr(blkTyp), 0);
+    for var i: Integer := 0 to count - 1 do
+    begin
+      try
+        var blok: TGraphBlok := Self.BlockCreate(blkTyp, i);
+        blok.Load(ini, TGraphBlok.TypeToFileStr(blkTyp) + IntToStr(i), verWord);
+        blocks.Add(blok);
+      except
+
+      end;
+    end;
+  end;
+end;
+
+class function TPanelObjects.OpnlLoadAreas(var ini: TMemIniFile): string;
+begin
+  var sect_str: TStrings := TStringList.Create();
+  try
+    ini.ReadSection('OR', sect_str);
+    Result := '';
+    for var i: Integer := 0 to sect_str.count - 1 do
+      Result := Result + ini.ReadString('OR', sect_str[i], '') + #13;
+    Result := Result + #13;
+  finally
+    sect_str.Free();
+  end;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+procedure TPanelObjects.ImportOldOpnl(aFile: string);
+var inifile: TMemIniFile;
+    oldBlocks: TObjectList<TGraphBlok>;
+begin
+  // samotne nacitani dat
+  oldBlocks := TObjectList<TGraphBlok>.Create();
+  try
+    inifile := TMemIniFile.Create(aFile, TEncoding.UTF8);
+    try
+      // kontrola verze
+      var ver: string := inifile.ReadString('G', 'ver', _FileVersion);
+      if (not IsOpnlVersionSupported(ver)) then
+      begin
+        if (Application.MessageBox(PChar('Importujete soubor s verzí ' + ver + #13#10 +
+          'Aplikace momentálně podporuje verze ' + Self.FileSupportedVersionsStr() + #13#10 + 'Chcete pokračovat?'),
+          'Varování', MB_YESNO OR MB_ICONQUESTION) = mrNo) then
+          raise EFileLoad.Create('Uživatel zrušil načítání souboru!');
+      end;
+
+      var verWord: Word := OpnlVersionToWord(ver);
+      Self.OpnlLoadBlocks(inifile, verWord, oldBlocks);
+    finally
+      inifile.Free();
+    end;
+
+    for var block: TGraphBlok in oldBlocks do
+      if (block.typ = TBlkType.track) then
+        TTrack(block).FillSymbolsSorted();
+
+    for var block: TGraphBlok in Self.Bloky do
+    begin
+      case (block.typ) of
+        TBlkType.track:
+        begin
+          var current: TTrack := TTrack(block);
+          current.FillSymbolsSorted();
+          var old: TTrack := current.GetEqTrack(oldBlocks);
+          if (old <> nil) then
+          begin
+            current.area := old.area;
+            if (current.Root = Point(-1, -1)) then
+              current.Root := old.Root;
+            if (current.block = -1) then
+              current.block := old.block;
+            if (current.caption = '') then
+              current.caption := old.caption;
+          end;
+        end;
+        TBlkType.signal:
+        begin
+          var current: TSignal := TSignal(block);
+          var old := current.GetEqSignal(oldBlocks);
+          if (old <> nil) then
+          begin
+            current.area := old.area;
+            if (current.block = -1) then
+              current.block := old.block;
+          end;
+        end;
+        TBlkType.turnout:
+        begin
+          var current: TTurnout := TTurnout(block);
+          var old := current.GetEqTurnout(oldBlocks);
+          if (old <> nil) then
+          begin
+            current.area := old.area;
+            if (current.block = -1) then
+              current.block := old.block;
+            current.PolohaPlus := old.PolohaPlus;
+          end;
+        end;
+        TBlkType.crossing:
+        begin
+          var current: TCrossing := TCrossing(block);
+          var old := current.GetEqCrossing(oldBlocks);
+          if (old <> nil) then
+          begin
+            current.area := old.area;
+            if (current.block = -1) then
+              current.block := old.block;
+          end;
+        end;
+        TBlkType.linker:
+        begin
+          var current: TLinker := TLinker(block);
+          var old := current.GetEqLinker(oldBlocks);
+          if (old <> nil) then
+          begin
+            current.area := old.area;
+            if (current.block = -1) then
+              current.block := old.block;
+            current.defalt_dir := old.defalt_dir;
+          end;
+        end;
+        TBlkType.linker_train:
+        begin
+          var current: TLinkerTrain := TLinkerTrain(block);
+          var old := current.GetEqLinkerTrain(oldBlocks);
+          if (old <> nil) then
+          begin
+            current.area := old.area;
+            if (current.block = -1) then
+              current.block := old.block;
+            current.vertical_dir := old.vertical_dir;
+            current.spr_cnt := old.spr_cnt;
+          end;
+        end;
+        TBlkType.lock:
+        begin
+          var current: TLock := TLock(block);
+          var old := current.GetEqLock(oldBlocks);
+          if (old <> nil) then
+          begin
+            current.area := old.area;
+            if (current.block = -1) then
+              current.block := old.block;
+          end;
+        end;
+        TBlkType.derail:
+        begin
+          var current: TDerail := TDerail(block);
+          var old := current.GetEqDerail(oldBlocks);
+          if (old <> nil) then
+          begin
+            current.area := old.area;
+            if (current.block = -1) then
+              current.block := old.block;
+          end;
+        end;
+        TBlkType.disconnector:
+        begin
+          var current: TDisconnector := TDisconnector(block);
+          var old := current.GetEqDisconnector(oldBlocks);
+          if (old <> nil) then
+          begin
+            current.area := old.area;
+            if (current.block = -1) then
+              current.block := old.block;
+          end;
+        end;
+        TBlkType.pst:
+        begin
+          var current: TPst := TPst(block);
+          var old := current.GetEqPst(oldBlocks);
+          if (old <> nil) then
+          begin
+            current.area := old.area;
+            if (current.block = -1) then
+              current.block := old.block;
+          end;
+        end;
+      end;
+    end;
+
+  finally
+    oldBlocks.Free();
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

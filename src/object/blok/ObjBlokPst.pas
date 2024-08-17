@@ -2,7 +2,8 @@ unit ObjBlokPst;
 
 interface
 
-uses ObjBlok, IniFiles, Types, Global, PGraphics, Graphics, symbolHelper;
+uses ObjBlok, IniFiles, Types, Global, PGraphics, Graphics, symbolHelper,
+  Generics.Collections;
 
 type
 
@@ -14,6 +15,8 @@ type
     procedure Save(ini: TMemIniFile; key: string); override;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
+
+    function GetEqPst(blocks: TList<TGraphBlok>): TPSt;
   end;
 
 implementation
@@ -65,6 +68,16 @@ begin
   DrawObject.Canvas.Brush.color := clBlack;
   SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _S_PST_TOP, color);
   SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos.X, Self.Pos.Y+1, _S_PST_BOT, color);
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+function TPSt.GetEqPst(blocks: TList<TGraphBlok>): TPSt;
+begin
+  for var block: TGraphBlok in blocks do
+    if ((block.typ = TBlkType.pst) and (TPSt(block).Pos = Self.Pos)) then
+      Exit(TPSt(block));
+  Result := nil;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

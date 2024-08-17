@@ -3,7 +3,7 @@ unit ObjBlokUsek;
 interface
 
 uses ObjBlok, Generics.Collections, Types, symbolHelper, vetev, IniFiles,
-  SysUtils, StrUtils, Global, Graphics, PGraphics;
+  SysUtils, StrUtils, Global, Graphics, PGraphics, System.Generics.Defaults;
 
 type
 
@@ -13,6 +13,7 @@ type
     Root: TPoint;
     IsTurnout: boolean; // pomocny flag pro vykreslovani v modu korenu
     Symbols: TList<TReliefSym>; // pokud je v useku vykolejka, je zde ulozena jako klasicky symbol
+    SymbolsSorted: TList<TReliefSym>;
     JCClick: TList<TPoint>;
     labels: TList<TPoint>;
     trains: TList<TPoint>;
@@ -33,6 +34,10 @@ type
     procedure Save(ini: TMemIniFile; key: string); override;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
+    procedure FillSymbolsSorted();
+
+    function IsSymbolsSortedEq(symbolsSorted: TList<TReliefSym>): Boolean;
+    function GetEqTrack(blocks: TList<TGraphBlok>): TTrack;
   end;
 
 implementation
@@ -46,6 +51,7 @@ begin
   inherited;
   Self.typ := TBlkType.track;
   Self.Symbols := TList<TReliefSym>.Create();
+  Self.SymbolsSorted := TList<TReliefSym>.Create(TComparer<TReliefSym>.Construct(CompareReliefSymPos));
   Self.JCClick := TList<TPoint>.Create();
   Self.labels := TList<TPoint>.Create();
   Self.trains := TList<TPoint>.Create();
@@ -55,6 +61,7 @@ end;
 destructor TTrack.Destroy();
 begin
   Self.Symbols.Free();
+  Self.SymbolsSorted.Free();
   Self.JCClick.Free();
   Self.labels.Free();
   Self.trains.Free();
@@ -324,5 +331,32 @@ begin
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
+
+procedure TTrack.FillSymbolsSorted();
+begin
+  Self.SymbolsSorted.Clear();
+  Self.SymbolsSorted.AddRange(Self.Symbols);
+  Self.SymbolsSorted.Sort();
+end;
+
+function TTrack.IsSymbolsSortedEq(symbolsSorted: TList<TReliefSym>): Boolean;
+begin
+  if (Self.SymbolsSorted.Count <> symbolsSorted.Count) then
+    Exit(False);
+  for var i := 0 to Self.SymbolsSorted.Count-1 do
+    if (Self.SymbolsSorted[i].Position <> symbolsSorted[i].Position) then
+      Exit(False);
+  Result := True;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+function TTrack.GetEqTrack(blocks: TList<TGraphBlok>): TTrack;
+begin
+  for var block: TGraphBlok in blocks do
+    if ((block.typ = TBlkType.track) and (TTrack(block).IsSymbolsSortedEq(Self.SymbolsSorted))) then
+      Exit(TTrack(block));
+  Result := nil;
+end;
 
 end.

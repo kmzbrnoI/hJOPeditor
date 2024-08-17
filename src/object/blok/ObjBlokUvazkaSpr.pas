@@ -2,7 +2,7 @@ unit ObjBlokUvazkaSpr;
 
 interface
 
-uses ObjBlok, Types, IniFiles, Global, PGraphics, Graphics, symbolHelper;
+uses ObjBlok, Types, IniFiles, Global, PGraphics, Graphics, symbolHelper, Generics.Collections;
 
 type
 
@@ -18,6 +18,8 @@ type
     procedure Save(ini: TMemIniFile; key: string); override;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
+
+    function GetEqLinkerTrain(blocks: TList<TGraphBlok>): TLinkerTrain;
   end;
 
 implementation
@@ -97,6 +99,16 @@ begin
   end;
 
   SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _S_LINKER_TRAIN, color);
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+function TLinkerTrain.GetEqLinkerTrain(blocks: TList<TGraphBlok>): TLinkerTrain;
+begin
+  for var block: TGraphBlok in blocks do
+    if ((block.typ = TBlkType.linker_train) and (TLinkerTrain(block).Pos = Self.Pos)) then
+      Exit(TLinkerTrain(block));
+  Result := nil;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

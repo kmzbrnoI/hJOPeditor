@@ -6,7 +6,7 @@ unit symbolHelper;
 
 interface
 
-uses Types, SysUtils, Graphics, Vcl.Controls, Classes;
+uses Types, SysUtils, Graphics, Vcl.Controls, Classes, Generics.Collections;
 
 type
   TNavDir = (ndPositive = 0, ndNegative = 1, ndThird = 2);
@@ -139,6 +139,9 @@ function SymbolIndex(symbol: Integer; color: SymbolColor): Integer;
 procedure SymbolDraw(IL: TImageList; Canvas: TCanvas; X, Y: Integer; symbol: Integer; color: SymbolColor); overload;
 procedure SymbolDraw(IL: TImageList; Canvas: TCanvas; pos: TPoint; symbol: Integer; color: SymbolColor); overload;
 function TranscodeSymbolFromBpnlV3(symbol: Integer): Integer;
+
+function CompareReliefSymPos(const left: TReliefSym; const right: TReliefSym): Integer;
+function ArePointListsEq(a: TList<TPoint>; b: TList<TPoint>): Boolean;
 
 implementation
 
@@ -282,6 +285,27 @@ begin
    Result := symbol-58 + _S_DKS_DET_TOP
  else
    Result := symbol;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function CompareReliefSymPos(const left: TReliefSym; const right: TReliefSym): Integer;
+begin
+  Result := left.Position.Y - right.Position.Y;
+  if (Result = 0) then
+    Result := left.Position.X - right.Position.X;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function ArePointListsEq(a: TList<TPoint>; b: TList<TPoint>): Boolean;
+begin
+  if (a.Count <> b.Count) then
+    Exit(False);
+  for var i: Integer := 0 to a.Count-1 do
+    if (a[i] <> b[i]) then
+      Exit(False);
+  Result := True;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@ unit ObjBlokZamek;
 
 interface
 
-uses ObjBlok, IniFiles, Types, Global, PGraphics, Graphics, symbolHelper;
+uses ObjBlok, IniFiles, Types, Global, PGraphics, Graphics, symbolHelper, Generics.Collections;
 
 type
 
@@ -14,6 +14,8 @@ type
     procedure Save(ini: TMemIniFile; key: string); override;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
+
+    function GetEqLock(blocks: TList<TGraphBlok>): TLock;
   end;
 
 implementation
@@ -64,6 +66,16 @@ begin
 
   DrawObject.Canvas.Brush.color := clBlack;
   SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _S_LOCK, color);
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+function TLock.GetEqLock(blocks: TList<TGraphBlok>): TLock;
+begin
+  for var block: TGraphBlok in blocks do
+    if ((block.typ = TBlkType.lock) and (TLock(block).Pos = Self.Pos)) then
+      Exit(TLock(block));
+  Result := nil;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

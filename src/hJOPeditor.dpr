@@ -4,6 +4,7 @@ program hJOPeditor;
 
 uses
   Forms,
+  Windows,
   fMain in 'forms\fMain.pas' {F_Main},
   ReliefObjects in 'object\ReliefObjects.pas',
   Panel in 'Panel.pas',

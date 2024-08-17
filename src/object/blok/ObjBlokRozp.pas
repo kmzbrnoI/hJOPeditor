@@ -2,7 +2,8 @@ unit ObjBlokRozp;
 
 interface
 
-uses ObjBlok, IniFiles, Types, Global, Graphics, symbolHelper, PGraphics;
+uses ObjBlok, IniFiles, Types, Global, Graphics, symbolHelper, PGraphics,
+  Generics.Collections;
 
 type
 
@@ -14,6 +15,8 @@ type
     procedure Save(ini: TMemIniFile; key: string); override;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
+
+    function GetEqDisconnector(blocks: TList<TGraphBlok>): TDisconnector;
   end;
 
 implementation
@@ -63,6 +66,16 @@ begin
   end; // else (Self.Selected > 255)
 
   SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _S_DISC_ALONE, color);
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+function TDisconnector.GetEqDisconnector(blocks: TList<TGraphBlok>): TDisconnector;
+begin
+  for var block: TGraphBlok in blocks do
+    if ((block.typ = TBlkType.disconnector) and (TDisconnector(block).Pos = Self.Pos)) then
+      Exit(TDisconnector(block));
+  Result := nil;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

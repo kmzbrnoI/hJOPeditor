@@ -2,7 +2,7 @@ unit ObjBlokNavestidlo;
 
 interface
 
-uses ObjBlok, Types, IniFiles, Global, SymbolHelper, PGraphics;
+uses ObjBlok, Types, IniFiles, Global, SymbolHelper, PGraphics, Generics.Collections;
 
 type
 
@@ -15,6 +15,8 @@ type
     procedure Save(ini: TMemIniFile; key: string); override;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
+
+    function GetEqSignal(blocks: TList<TGraphBlok>): TSignal;
   end;
 
 implementation
@@ -67,6 +69,16 @@ begin
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _S_SIGNAL_B + Self.SymbolID, colors.Normal);
     end;
   end;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+function TSignal.GetEqSignal(blocks: TList<TGraphBlok>): TSignal;
+begin
+  for var block: TGraphBlok in blocks do
+    if ((block.typ = TBlkType.signal) and (TSignal(block).Position = Self.Position)) then
+      Exit(TSignal(block));
+  Result := nil;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

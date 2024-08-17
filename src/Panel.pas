@@ -145,6 +145,7 @@ type
     procedure Open(aFile: string);
     procedure Save(aFile: string);
     function Import(aFile: string): string;
+    procedure ImportOldOpnl(aFile: string);
 
     procedure Show(CursorPos: TPoint);
     procedure Escape(Group: Boolean);
@@ -1240,6 +1241,15 @@ begin
       Self.PanelObjects.ShowBlokPopisky := show;
   end;
   Self.Show(Point(-1, -1));
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+procedure TRelief.ImportOldOpnl(aFile: string);
+begin
+  if ((Self.Mode <> dmBloky) and (Self.Mode <> dmRoots)) then
+    raise Exception.Create('Panel musí být v režimu bloků nebo kořenů!');
+  Self.PanelObjects.ImportOldOpnl(aFile);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
