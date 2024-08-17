@@ -66,11 +66,6 @@ end;
 
 procedure TTrack.Load(ini: TMemIniFile; key: string; version: Word);
 var obj: string;
-  j, k: Integer;
-  symbol: TReliefSym;
-  pos: TPoint;
-  vetevCount: Integer;
-  vetev: TTrackBranch;
 begin
   inherited;
 
@@ -80,8 +75,9 @@ begin
   // Symbols
   Self.Symbols.Clear();
   obj := ini.ReadString(key, 'S', '');
-  for j := 0 to (Length(obj) div 8) - 1 do
+  for var j: Integer := 0 to (Length(obj) div 8) - 1 do
   begin
+    var symbol: TReliefSym;
     try
       symbol.Position.X := StrToInt(copy(obj, j * 8 + 1, 3));
       symbol.Position.Y := StrToInt(copy(obj, j * 8 + 4, 3));
@@ -97,8 +93,9 @@ begin
   // JCClick
   Self.JCClick.Clear();
   obj := ini.ReadString(key, 'C', '');
-  for j := 0 to (Length(obj) div 6) - 1 do
+  for var j: Integer := 0 to (Length(obj) div 6) - 1 do
   begin
+    var pos: TPoint;
     try
       pos.X := StrToInt(copy(obj, j * 6 + 1, 3));
       pos.Y := StrToInt(copy(obj, j * 6 + 4, 3));
@@ -111,8 +108,9 @@ begin
   // KPopisek
   obj := ini.ReadString(key, 'P', '');
   Self.labels.Clear();
-  for j := 0 to (Length(obj) div 6) - 1 do
+  for var j: Integer := 0 to (Length(obj) div 6) - 1 do
   begin
+    var pos: TPoint;
     try
       pos.X := StrToIntDef(copy(obj, j * 6 + 1, 3), 0);
       pos.Y := StrToIntDef(copy(obj, j * 6 + 4, 3), 0);
@@ -125,8 +123,9 @@ begin
   // soupravy
   obj := ini.ReadString(key, 'Spr', '');
   Self.trains.Clear();
-  for j := 0 to (Length(obj) div 6) - 1 do
+  for var j: Integer := 0 to (Length(obj) div 6) - 1 do
   begin
+    var pos: TPoint;
     try
       pos.X := StrToIntDef(copy(obj, j * 6 + 1, 3), 0);
       pos.Y := StrToIntDef(copy(obj, j * 6 + 4, 3), 0);
@@ -141,11 +140,12 @@ begin
   Self.branches.Clear();
 
   // vetve
-  vetevCount := ini.ReadInteger(key, 'VC', 0);
-  for j := 0 to vetevCount - 1 do
+  var vetevCount: Integer := ini.ReadInteger(key, 'VC', 0);
+  for var j: Integer := 0 to vetevCount - 1 do
   begin
     obj := ini.ReadString(key, 'V' + IntToStr(j), '');
 
+    var vetev: TTrackBranch;
     vetev.node1.vyh := StrToIntDef(copy(obj, 0, 3), 0);
     vetev.node1.ref_plus := StrToIntDef(copy(obj, 4, 2), 0);
     vetev.node1.ref_minus := StrToIntDef(copy(obj, 6, 2), 0);
@@ -158,7 +158,7 @@ begin
 
     SetLength(vetev.Symbols, Length(obj) div 9);
 
-    for k := 0 to Length(vetev.Symbols) - 1 do
+    for var k: Integer := 0 to Length(vetev.Symbols) - 1 do
     begin
       vetev.Symbols[k].Position.X := StrToIntDef(copy(obj, 9 * k + 1, 3), 0);
       vetev.Symbols[k].Position.Y := StrToIntDef(copy(obj, (9 * k + 4), 3), 0);
@@ -172,11 +172,6 @@ begin
 end;
 
 procedure TTrack.Save(ini: TMemIniFile; key: string);
-var obj: string;
-  sym: TReliefSym;
-  point: TPoint;
-  vetev: TTrackBranch;
-  i: Integer;
 begin
   inherited;
 
@@ -188,32 +183,40 @@ begin
     ini.WriteInteger(key, 'DKS', Integer(Self.DKStype));
 
   // objekty
-  obj := '';
-  for sym in Self.Symbols do
-    obj := obj + Format('%.3d%.3d%.2d', [sym.Position.X, sym.Position.Y, sym.SymbolID]);
-  if (obj <> '') then
-    ini.WriteString(key, 'S', obj);
+  begin
+    var obj: string := '';
+    for var sym in Self.Symbols do
+      obj := obj + Format('%.3d%.3d%.2d', [sym.Position.X, sym.Position.Y, sym.SymbolID]);
+    if (obj <> '') then
+      ini.WriteString(key, 'S', obj);
+  end;
 
   // JCClick
-  obj := '';
-  for point in Self.JCClick do
-    obj := obj + Format('%.3d%.3d', [point.X, point.Y]);
-  if (obj <> '') then
-    ini.WriteString(key, 'C', obj);
+  begin
+    var obj: string := '';
+    for var point: TPoint in Self.JCClick do
+      obj := obj + Format('%.3d%.3d', [point.X, point.Y]);
+    if (obj <> '') then
+      ini.WriteString(key, 'C', obj);
+  end;
 
   // KPopisek
-  obj := '';
-  for point in Self.labels do
-    obj := obj + Format('%.3d%.3d', [point.X, point.Y]);
-  if (obj <> '') then
-    ini.WriteString(key, 'P', obj);
+  begin
+    var obj: string := '';
+    for var point: TPoint in Self.labels do
+      obj := obj + Format('%.3d%.3d', [point.X, point.Y]);
+    if (obj <> '') then
+      ini.WriteString(key, 'P', obj);
+  end;
 
   // soupravy
-  obj := '';
-  for point in Self.trains do
-    obj := obj + Format('%.3d%.3d', [point.X, point.Y]);
-  if (obj <> '') then
-    ini.WriteString(key, 'Spr', obj);
+  begin
+    var obj: string := '';
+    for var point: TPoint in Self.trains do
+      obj := obj + Format('%.3d%.3d', [point.X, point.Y]);
+    if (obj <> '') then
+      ini.WriteString(key, 'Spr', obj);
+  end;
 
   // Nazev
   if (Self.caption <> '') then
@@ -223,9 +226,10 @@ begin
   if (Self.branches.Count > 0) then
     ini.WriteInteger(key, 'VC', Self.branches.Count);
 
-  for i := 0 to Self.branches.Count - 1 do
+  for var i: Integer := 0 to Self.branches.Count - 1 do
   begin
-    vetev := Self.branches[i];
+    var obj: string := '';
+    var vetev := Self.branches[i];
     if (vetev.node1.vyh < 0) then
       obj := Format('%.2d', [vetev.node1.vyh])
     else
@@ -260,45 +264,43 @@ begin
 
     /// /////
 
-    for sym in vetev.Symbols do
+    for var sym in vetev.Symbols do
       obj := obj + Format('%.3d%.3d%.3d', [sym.Position.X, sym.Position.Y, sym.SymbolID]);
     ini.WriteString(key, 'V' + IntToStr(i), obj);
-  end; // for j
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
 procedure TTrack.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
   mode: TMode);
-var pos: TPoint;
-  sym: TReliefSym;
-  color: SymbolColor;
 begin
   if (selected) then
   begin
-    for pos in Self.JCClick do
+    for var pos: TPoint in Self.JCClick do
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_FULL, scYellow);
 
-    for pos in Self.labels do
+    for var pos: TPoint in Self.labels do
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_KC, scLime);
 
-    for pos in Self.trains do
+    for var pos: TPoint in Self.trains do
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_FULL, scBlue);
 
-    for sym in Self.Symbols do
+    for var sym: TReliefSym in Self.Symbols do
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, sym.Position, sym.SymbolID, colors.Selected);
 
     SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Root, _S_CIRCLE, colors.Selected);
   end else begin
-    for pos in Self.JCClick do
+    for var pos: TPoint in Self.JCClick do
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_KC, scLime);
 
-    for pos in Self.labels do
+    for var pos: TPoint in Self.labels do
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_FULL, scYellow);
 
-    for pos in Self.trains do
+    for var pos: TPoint in Self.trains do
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_FULL, scBlue);
 
+    var color: SymbolColor;
     if (mode = TMode.dmBloky) then
     begin
       case (Self.block) of
@@ -314,7 +316,7 @@ begin
         color := colors.Normal;
     end;
 
-    for sym in Self.Symbols do
+    for var sym: TReliefSym in Self.Symbols do
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, sym.Position, sym.SymbolID, color);
 
     SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Root, _S_CIRCLE, scAqua);
