@@ -227,8 +227,6 @@ end;
 
 procedure TF_Main.B_DeleteClick(Sender: TObject);
 begin
-  Relief.Escape(false);
-
   if (Assigned(Self.pushedButton)) then
     Self.pushedButton.Down := false;
 
@@ -241,8 +239,6 @@ end;
 // move
 procedure TF_Main.B_MoveClick(Sender: TObject);
 begin
-  Relief.Escape(false);
-
   if (Assigned(Self.pushedButton)) then
     Self.pushedButton.Down := false;
 
@@ -772,7 +768,6 @@ begin
   if (Relief.Mode <> dmSepHor) then
     Self.PM_BitmapClick(Self.PM_Sep_Hor);
 
-  Relief.Escape(false);
   try
     Relief.AddSeparatorHor();
   except
@@ -787,7 +782,6 @@ begin
   if (Relief.Mode <> dmSepVert) then
     Self.PM_BitmapClick(Self.PM_Sep_Vert);
 
-  Relief.Escape(false);
   try
     Relief.AddSeparatorVert();
   except
@@ -799,7 +793,6 @@ end;
 
 procedure TF_Main.ToolButton0Click(Sender: TObject);
 begin
-  Relief.Escape(false);
   try
     Relief.AddSymbol((Sender as TToolButton).Tag);
   except
@@ -817,7 +810,6 @@ end;
 
 procedure TF_Main.TB_TextClick(Sender: TObject);
 begin
-  Relief.Escape(false);
   F_Popisek.NewPopisek();
 
   if (F_Popisek.PopisekColor <> -1) then
@@ -826,7 +818,6 @@ end;
 
 procedure TF_Main.TB_EndJCClick(Sender: TObject);
 begin
-  Relief.Escape(false);
   try
     Relief.AddJCClick();
   except
@@ -838,7 +829,6 @@ end;
 
 procedure TF_Main.TB_KCisloClick(Sender: TObject);
 begin
-  Relief.Escape(false);
   try
     Relief.AddTrackName();
   except
@@ -850,8 +840,6 @@ end;
 
 procedure TF_Main.TB_SoupravaPosClick(Sender: TObject);
 begin
-  Relief.Escape(false);
-
   try
     Relief.AddTrainPos();
   except

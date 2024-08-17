@@ -91,13 +91,13 @@ begin
       continue;
     for var y: Integer := 0 to (Self.objects.Bloky[x] as TTrack).Symbols.Count - 1 do
     begin
-      if (Self.bitmap.trackNames.GetObject((Self.objects.Bloky[x] as TTrack).Symbols[y].Position) <> -1) then
+      if (Self.bitmap.trackNames.IsObject((Self.objects.Bloky[x] as TTrack).Symbols[y].Position)) then
         (Self.objects.Bloky[x] as TTrack).labels.Add((Self.objects.Bloky[x] as TTrack).Symbols[y].Position);
 
-      if (Self.bitmap.JCClick.GetObject((Self.objects.Bloky[x] as TTrack).Symbols[y].Position) <> -1) then
+      if (Self.bitmap.JCClick.IsObject((Self.objects.Bloky[x] as TTrack).Symbols[y].Position)) then
         (Self.objects.Bloky[x] as TTrack).JCClick.Add((Self.objects.Bloky[x] as TTrack).Symbols[y].Position);
 
-      if (Self.bitmap.trainPoss.GetObject((Self.objects.Bloky[x] as TTrack).Symbols[y].Position) <> -1) then
+      if (Self.bitmap.trainPoss.IsObject((Self.objects.Bloky[x] as TTrack).Symbols[y].Position)) then
         (Self.objects.Bloky[x] as TTrack).trains.Add((Self.objects.Bloky[x] as TTrack).Symbols[y].Position);
     end;
   end;
@@ -442,11 +442,11 @@ begin
               // pri pohybu vlevo a nahoru je zapotrebi overovat separator uz tady, protoze jenom tady vime, ze se pohybujeme doleva nebo nahoru
               // pohyb doprava a dolu resi podminka vyse
 
-              var vertSep: Integer := Self.bitmap.SeparatorsVert.GetObject(tempPos);
-              var horSep: Integer := Self.bitmap.SeparatorsHor.GetObject(tempPos);
+              var vertSep: Boolean := Self.bitmap.SeparatorsVert.IsObject(tempPos);
+              var horSep: Boolean := Self.bitmap.SeparatorsHor.IsObject(tempPos);
 
-              if (((vertSep = -1) and (horSep = -1)) or ((horSep = -1) and ((tempPos.X > cur.X) or (tempPos.Y <> cur.Y))
-                ) or ((vertSep = -1) and ((tempPos.Y > cur.Y) or (tempPos.X <> cur.X)))) then
+              if (((not vertSep) and (not horSep)) or ((not horSep) and ((tempPos.X > cur.X) or (tempPos.Y <> cur.Y))
+                ) or ((not vertSep) and ((tempPos.Y > cur.Y) or (tempPos.X <> cur.X)))) then
               begin
                 var sym: TReliefSym;
                 sym.SymbolID := tempSym;
@@ -536,13 +536,13 @@ end;
 function TBitmapToObj.IsSeparator(from, dir: TPoint): Boolean;
 begin
   if (dir.X = 1) then
-    Result := (Self.bitmap.SeparatorsVert.GetObject(from) <> -1)
+    Result := (Self.bitmap.SeparatorsVert.IsObject(from))
   else if (dir.X = -1) then
-    Result := (Self.bitmap.SeparatorsVert.GetObject(Point(from.X - 1, from.Y)) <> -1)
+    Result := (Self.bitmap.SeparatorsVert.IsObject(Point(from.X - 1, from.Y)))
   else if (dir.Y = 1) then
-    Result := (Self.bitmap.SeparatorsHor.GetObject(from) <> -1)
+    Result := (Self.bitmap.SeparatorsHor.IsObject(from))
   else if (dir.Y = -1) then
-    Result := (Self.bitmap.SeparatorsHor.GetObject(Point(from.X, from.Y - 1)) <> -1)
+    Result := (Self.bitmap.SeparatorsHor.IsObject(Point(from.X, from.Y - 1)))
   else
     Result := false;
 end;

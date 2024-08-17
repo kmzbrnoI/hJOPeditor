@@ -34,7 +34,6 @@ type
     Operations: record
       AddStep: TGOpStep;
       MoveStep: TGOpStep;
-      DeleteStep: TGOpStep;
     end;
 
     Separ: TSeparType;
@@ -43,12 +42,10 @@ type
     mIsSymbol: TPosAskEvent;
     mNullOperations: TNEvent;
     mMoveActivate: TNEvent;
-    mDeleteActivate: TNEvent;
     mOPAsk: TOpAskEvent;
 
     procedure Adding(Position: TPoint);
     procedure Moving(Position: TPoint);
-    procedure Deleting(Position: TPoint);
 
     function GetCount(): Integer;
     procedure CheckOpInProgressAndExcept();
@@ -61,7 +58,8 @@ type
     procedure Add(Position: TPoint); overload;
     procedure Delete(Position: TPoint); overload;
 
-    function GetObject(Position: TPoint): Integer;
+    function GetObjectI(Position: TPoint): Integer;
+    function IsObject(Position: TPoint): Boolean;
 
     procedure Paint();
     procedure PaintMove(KurzorPos: TPoint);
@@ -77,11 +75,10 @@ type
 
     procedure Add(); overload;
     procedure Move();
-    procedure Delete(); overload;
+    function Delete(pos1: TPoint; pos2: TPoint): Boolean; overload; // returns if anything deleted
 
     property addStep: TGOpStep read Operations.AddStep;
     property moveStep: TGOpStep read Operations.MoveStep;
-    property deleteStep: TGOpStep read Operations.DeleteStep;
     property count: Integer read GetCount;
 
     property OnShow: TNEvent read mOnShow write mOnShow;
@@ -89,7 +86,6 @@ type
     property IsOp: TOpAskEvent read mOPAsk write mOPAsk;
     property OnNullOperations: TNEvent read mNullOperations write mNullOperations;
     property OnMoveActivate: TNEvent read mMoveActivate write mMoveActivate;
-    property OnDeleteActivate: TNEvent read mDeleteActivate write mDeleteActivate;
   end; // TVBO
 
 implementation
@@ -124,14 +120,13 @@ procedure TVBO.Escape();
 begin
   Self.Operations.AddStep := gosNone;
   Self.Operations.MoveStep := gosNone;
-  Self.Operations.DeleteStep := gosNone;
 end;
 
 procedure TVBO.Add(Position: TPoint);
 begin
   if ((Position.X < 0) or (Position.Y < 0)) then
     raise EInvalidPosition.Create('Neplatná pozice!');
-  if (Self.GetObject(Position) <> -1) then
+  if (Self.IsObject(Position)) then
     raise ENonemptyField.Create('Na pozici je již symbol!');
   if (Self.Data.Count >= _MAX_VBO) then
     raise EMaxReached.Create('Dosaženo maximálního počtu symbolů!');
@@ -144,21 +139,25 @@ begin
   if ((Position.X < 0) or (Position.Y < 0)) then
     raise EInvalidPosition.Create('Neplatná pozice!');
 
-  var OIndex: Integer := Self.GetObject(Position);
-  if (OIndex = -1) then
+  if (not Self.IsObject(Position)) then
     raise ENoSymbol.Create('Na této pozici není žádný symbol!');
 
   Self.data.Remove(Position);
 end;
 
 // zjisteni, zda-li je na dane pozici objekt, popr. jeho index v poli
-function TVBO.GetObject(Position: TPoint): Integer;
+function TVBO.GetObjectI(Position: TPoint): Integer;
 begin
   Result := -1;
 
   for var i: Integer := 0 to Self.data.Count - 1 do
     if ((Self.data[i].X = Position.X) and (Self.data[i].Y = Position.Y)) then
       Exit(i);
+end;
+
+function TVBO.IsObject(Position: TPoint): Boolean;
+begin
+  Result := (Self.GetObjectI(Position) <> -1);
 end;
 
 procedure TVBO.LoadBpnl(var f: File; fileVersion: Byte);
@@ -225,7 +224,7 @@ begin
     if (mIsSymbol(Position)) then
       raise ENonemptyField.Create('Na této pozici je již symbol!');
   end else begin
-    if (Self.GetObject(Position) <> -1) then
+    if (Self.IsObject(Position)) then
       raise ENonemptyField.Create('Na této pozici je již symbol!');
   end;
 
@@ -250,7 +249,7 @@ begin
   case (Self.Operations.moveStep) of
     TGOpStep.gosActive:
       begin
-        if (Self.GetObject(Position) = -1) then
+        if (not Self.IsObject(Position)) then
           Exit();
 
         if (Assigned(mNullOperations)) then
@@ -267,7 +266,7 @@ begin
           if (mIsSymbol(Position)) then
             raise ENonemptyField.Create('Na této pozici je již symbol!');
         end else begin
-          if (Self.GetObject(Position) <> -1) then
+          if (Self.IsObject(Position)) then
             raise ENonemptyField.Create('Na této pozici je již symbol!');
         end;
 
@@ -292,34 +291,6 @@ begin
   end; // case
 end;
 
-procedure TVBO.Deleting(Position: TPoint);
-begin
-  // kontrola obsazenosti
-  if (Self.GetObject(Position) = -1) then
-    Exit();
-
-  if (Assigned(mNullOperations)) then
-    mNullOperations();
-
-  Self.Delete(Position);
-  Self.Operations.deleteStep := gosNone;
-
-  // znovu pripraveni dosazeni objektu
-  if Assigned(mOnShow) then
-  begin
-    mOnShow();
-    Sleep(50);
-  end;
-
-  if (Self.separ = stNone) then
-  begin
-    if (Assigned(Self.mDeleteActivate)) then
-      Self.mDeleteActivate();
-  end else begin
-    Self.Delete();
-  end;
-end;
-
 procedure TVBO.Add();
 begin
   Self.CheckOpInProgressAndExcept();
@@ -334,10 +305,20 @@ begin
   Self.Operations.moveStep := gosActive;
 end;
 
-procedure TVBO.Delete();
+function TVBO.Delete(pos1: TPoint; pos2: TPoint): Boolean;
 begin
-  Self.CheckOpInProgressAndExcept();
-  Self.Operations.deleteStep := gosActive;
+  Result := False;
+  for var x := pos1.X to pos2.X do
+  begin
+    for var y := pos1.Y to pos2.Y do
+    begin
+      if (Self.IsObject(Point(x, y))) then
+      begin
+        Self.Delete(Point(x, y));
+        Result := True;
+      end;
+    end;
+  end;
 end;
 
 procedure TVBO.MouseUp(Position: TPoint; Button: TMouseButton);
@@ -347,9 +328,7 @@ begin
     if (Self.Operations.addStep > gosNone) then
       Self.Adding(Position)
     else if (Self.Operations.moveStep > gosNone) then
-      Self.Moving(Position)
-    else if (Self.Operations.deleteStep > gosNone) then
-      Self.Deleting(Position);
+      Self.Moving(Position);
   end;
 end;
 
@@ -384,8 +363,8 @@ begin
 
   if (Self.Operations.addStep = gosActive) then
     Result.color := TCursorColor.ccOnObject;
-  if ((Self.Operations.moveStep = gosSelecting) or (Self.Operations.deleteStep = gosSelecting)) then
-    if (Self.GetObject(CursorPos) = -1) then
+  if (Self.Operations.moveStep = gosSelecting) then
+    if (not Self.IsObject(CursorPos)) then
       Result.color := TCursorColor.ccActiveOperation
     else
       Result.color := TCursorColor.ccOnObject;
@@ -405,7 +384,7 @@ begin
     if (Self.IsOp) then
       raise EOperationInProgress.Create('Právě probíhá operace!');
   end else begin
-    if ((Self.Operations.addStep > gosNone) or (Self.Operations.moveStep > gosNone) or (Self.Operations.deleteStep > gosNone)) then
+    if (Self.Operations.addStep > gosNone) or (Self.Operations.moveStep > gosNone) then
       raise EOperationInProgress.Create('Právě probíhá operace!');
   end;
 end;

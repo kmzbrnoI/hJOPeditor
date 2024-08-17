@@ -34,6 +34,13 @@ type
 
   TText = class
   private
+    FOnShow: TNEvent;
+    FIsSymbol: TPosAskEvent;
+    FNullOperations: TNEvent;
+    FMoveActivate: TNEvent;
+    FOPAsk: TOpAskEvent;
+    FOnChangeText: TChangeTextEvent;
+
     Data: TList<TPopisek>;
 
     TextMenu: TPopupMenu;
@@ -59,7 +66,6 @@ type
 
     procedure Adding(Position: TPoint);
     procedure Moving(Position: TPoint);
-    procedure Deleting(Position: TPoint);
 
     procedure MITextPropertiesClick(Sender: TObject);
     procedure InitializeTextMenu(var Menu: TPopupMenu; Parent: TForm);
@@ -68,19 +74,12 @@ type
     procedure CheckOpInProgressAndExcept();
 
   public
-    FOnShow: TNEvent;
-    FIsSymbol: TPosAskEvent;
-    FNullOperations: TNEvent;
-    FMoveActivate: TNEvent;
-    FDeleteActivate: TNEvent;
-    FOPAsk: TOpAskEvent;
-    FOnChangeText: TChangeTextEvent;
 
     constructor Create(DrawCanvas: TCanvas; TextIL: TImageList; Parent: TForm; Graphics: TPanelGraphics);
-    destructor Destroy; override;
+    destructor Destroy(); override;
 
-    procedure AddToStructure(aPos: TPoint; aText: string; aColor: SymbolColor; aBlokDesc: boolean);
-    procedure DeleteFromStructure(aPos: TPoint);
+    procedure Add(aPos: TPoint; aText: string; aColor: SymbolColor; aBlokDesc: boolean); overload;
+    procedure Delete(aPos: TPoint); overload;
 
     function GetPopisekData(Index: Integer): TPopisek;
     function SetPopisekData(Index: Integer; Data: TPopisek): Byte;
@@ -91,12 +90,12 @@ type
 
     procedure Escape();
 
-    function GetPopisek(aPos: TPoint): SmallInt;
-    function IsObsazeno(Pos1, Pos2: TPoint): boolean;
+    function GetTextI(aPos: TPoint): SmallInt;
+    function IsOccupied(Pos1, Pos2: TPoint): boolean;
 
-    procedure Add(aText: string; aColor: SymbolColor; popisekBlok: boolean);
+    procedure Add(aText: string; aColor: SymbolColor; popisekBlok: boolean); overload;
     procedure Move();
-    procedure Delete();
+    procedure Delete(pos1: TPoint; pos2: TPoint); overload;
 
     procedure SetLoadedData(LoadData: TBytes);
     procedure SetLoadedDataV32(LoadData: TBytes);
@@ -115,7 +114,6 @@ type
     property IsOp: TOpAskEvent read FOPAsk write FOPAsk;
     property OnNullOperations: TNEvent read FNullOperations write FNullOperations;
     property OnMoveActivate: TNEvent read FMoveActivate write FMoveActivate;
-    property OnDeleteActivate: TNEvent read FDeleteActivate write FDeleteActivate;
     property OnChangeText: TChangeTextEvent read FOnChangeText write FOnChangeText;
   end; // TText
 
@@ -148,12 +146,12 @@ begin
 end;
 
 // pridani popisku
-procedure TText.AddToStructure(aPos: TPoint; aText: string; aColor: SymbolColor; aBlokDesc: boolean);
+procedure TText.Add(aPos: TPoint; aText: string; aColor: SymbolColor; aBlokDesc: boolean);
 var p: TPopisek;
 begin
   if ((aPos.X < 0) or (aPos.Y < 0) or (aPos.X > (_MAX_WIDTH - 1)) or (aPos.Y > (_MAX_HEIGHT - 1))) then
     raise EInvalidPosition.Create('Neplatná pozice!');
-  if (Self.GetPopisek(aPos) <> -1) then
+  if (Self.GetTextI(aPos) <> -1) then
     raise ENonemptyField.Create('Na pozici je již symbol!');
   if (Self.count >= _MAX_POPISKY) then
     raise EMaxReached.Create('Dosaženo maximálního počtu textů!');
@@ -169,12 +167,12 @@ begin
 end;
 
 // smazani popisku
-procedure TText.DeleteFromStructure(aPos: TPoint);
+procedure TText.Delete(aPos: TPoint);
 begin
   if ((aPos.X < 0) or (aPos.Y < 0) or (aPos.X > (_MAX_WIDTH - 1)) or (aPos.Y > (_MAX_HEIGHT - 1))) then
     raise EInvalidPosition.Create('Neplatná pozice!');
 
-  var PIndex := Self.GetPopisek(aPos);
+  var PIndex := Self.GetTextI(aPos);
   if (PIndex = -1) then
     raise ENoSymbol.Create('Na této pozici není žádný symbol!');
 
@@ -182,16 +180,14 @@ begin
 end;
 
 // zjisteni, zda-li je na dane pozici popisek, popr jeho index v poli separatoru
-function TText.GetPopisek(aPos: TPoint): SmallInt;
+function TText.GetTextI(aPos: TPoint): SmallInt;
 begin
   Result := -1;
 
   // vychazime z toho, ze 1 popisek lze zapsat pouze na 1 radek
   for var i := 0 to Self.Count - 1 do
-    if (Self.Data[i].Position.Y = aPos.Y) then
-      for var j := Self.Data[i].Position.X to Self.Data[i].Position.X + (Length(Self.Data[i].Text)) - 1 do
-        if (j = aPos.X) then
-          Exit(i);
+    if ((Self.Data[i].Position.Y = aPos.Y) and (aPos.X >= Self.Data[i].Position.X) and (aPos.X < (Self.Data[i].Position.X+Length(Self.Data[i].Text)))) then
+      Exit(i);
 end;
 
 // nacteni surovych dat do struktur
@@ -350,10 +346,10 @@ begin
       if (FIsSymbol(Point(i, Position.Y))) then
         raise ENonemptyField.Create('Na pozici je již symbol!');
 
-  if (Self.IsObsazeno(Position, Point(Position.X + Length(Self.Operations.TextProperties.Text), Position.Y))) then
+  if (Self.IsOccupied(Position, Point(Position.X + Length(Self.Operations.TextProperties.Text), Position.Y))) then
     raise ENonemptyField.Create('Na pozici je již symbol!');
 
-  Self.AddToStructure(Position, Self.Operations.TextProperties.Text, Self.Operations.TextProperties.Color,
+  Self.Add(Position, Self.Operations.TextProperties.Text, Self.Operations.TextProperties.Color,
     Self.Operations.TextProperties.BlokPopisek);
 
   Self.Operations.addStep := gosNone;
@@ -366,7 +362,7 @@ begin
   case (Self.Operations.moveStep) of
     gosActive:
       begin
-        var PopisekIndex := Self.GetPopisek(Position);
+        var PopisekIndex := Self.GetTextI(Position);
         if (PopisekIndex = -1) then
           Exit();
 
@@ -375,7 +371,7 @@ begin
         Self.Operations.TextProperties.Color := Self.GetPopisekData(PopisekIndex).Color;
         Self.Operations.TextProperties.BlokPopisek := Self.GetPopisekData(PopisekIndex).BlokPopisek;
 
-        Self.DeleteFromStructure(Position);
+        Self.Delete(Position);
 
         if (Assigned(FNullOperations)) then
           FNullOperations;
@@ -390,12 +386,12 @@ begin
             if (FIsSymbol(Point(i, Position.Y))) then
               raise ENonemptyField.Create('Pozice obsazena!');
         end else begin
-          if (Self.IsObsazeno(Position, Point(Position.X + Length(Self.Operations.TextProperties.Text), Position.Y)))
+          if (Self.IsOccupied(Position, Point(Position.X + Length(Self.Operations.TextProperties.Text), Position.Y)))
           then
             raise ENonemptyField.Create('Pozice obsazena!');
         end;
 
-        Self.AddToStructure(Position, Self.Operations.TextProperties.Text, Self.Operations.TextProperties.Color,
+        Self.Add(Position, Self.Operations.TextProperties.Text, Self.Operations.TextProperties.Color,
           Self.Operations.TextProperties.BlokPopisek);
 
         Self.Operations.TextProperties.Text := '';
@@ -415,35 +411,14 @@ begin
   end; // case
 end;
 
-// mazani textu
-procedure TText.Deleting(Position: TPoint);
-begin
-  if (Self.GetPopisek(Position) = -1) then
-    Exit();
-
-  Self.Operations.deleteStep := gosNone;
-
-  Self.DeleteFromStructure(Position);
-
-  Self.Operations.deleteStep := gosNone;
-  if Assigned(FOnShow) then
-  begin
-    FOnShow;
-    Sleep(50);
-  end;
-
-  if (Assigned(Self.FDeleteActivate)) then
-    Self.FDeleteActivate;
-end;
-
-function TText.IsObsazeno(Pos1, Pos2: TPoint): boolean;
+function TText.IsOccupied(Pos1, Pos2: TPoint): boolean;
 begin
   Result := false;
 
   // kontrola obsazenosti
   for var i := Pos1.X to Pos2.X do
     for var j := Pos1.Y to Pos2.Y do
-      if (Self.GetPopisek(Point(i, j)) <> -1) then
+      if (Self.GetTextI(Point(i, j)) <> -1) then
         Exit(true);
 end;
 
@@ -466,10 +441,12 @@ begin
   Self.Operations.moveStep := gosActive;
 end;
 
-procedure TText.Delete();
+procedure TText.Delete(pos1: TPoint; pos2: TPoint);
 begin
-  Self.CheckOpInProgressAndExcept();
-  Self.Operations.deleteStep := gosActive;
+  for var x := pos1.X to pos2.X do
+    for var y := pos1.Y to pos2.Y do
+      if (Self.GetTextI(Point(x, y)) <> -1) then
+        Self.Delete(Point(x, y));
 end;
 
 procedure TText.MouseUp(Position: TPoint; Button: TMouseButton);
@@ -479,15 +456,13 @@ begin
     if (Self.Operations.addStep > gosNone) then
       Self.Adding(Position)
     else if (Self.Operations.moveStep > gosNone) then
-      Self.Moving(Position)
-    else if (Self.Operations.deleteStep > gosNone) then
-      Self.Deleting(Position);
+      Self.Moving(Position);
   end;
 
   if (Button = mbRight) then
   begin
     Self.MenuPosition := Position;
-    if (Self.GetPopisek(Position) <> -1) then
+    if (Self.GetTextI(Position) <> -1) then
       Self.TextMenu.Popup(Mouse.CursorPos.X, Mouse.CursorPos.Y);
   end;
 end;
@@ -521,7 +496,7 @@ begin
   end;
   if ((Self.Operations.moveStep = gosActive) or (Self.Operations.deleteStep = gosActive)) then
   begin
-    PopisekI := Self.GetPopisek(CursorPos);
+    PopisekI := Self.GetTextI(CursorPos);
     if (PopisekI = -1) then
     begin
       Result.color := TCursorColor.ccActiveOperation;
@@ -546,7 +521,7 @@ procedure TText.MITextPropertiesClick(Sender: TObject);
 var PIndex: Integer;
   aPopisek: TPopisek;
 begin
-  PIndex := Self.GetPopisek(MenuPosition);
+  PIndex := Self.GetTextI(MenuPosition);
 
   aPopisek := Self.GetPopisekData(PIndex);
   if Assigned(FOnChangeText) then
