@@ -60,8 +60,8 @@ type
 
   // pouzivao pri presunech OR apod.
   TORGraf = record
-    movingOR: Integer; // index or a moving or (-1 = no moving)
-    movingSymbol: TORGraphSymbol;
+    areai: Integer; // index or a moving or (-1 = no moving)
+    objType: TORGraphSymbol;
   end;
 
 implementation

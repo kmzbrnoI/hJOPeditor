@@ -5,7 +5,7 @@ object F_OREdit: TF_OREdit
   BorderStyle = bsToolWindow
   Caption = '[Editace oblasti '#345#237'zen'#237']'
   ClientHeight = 281
-  ClientWidth = 705
+  ClientWidth = 703
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

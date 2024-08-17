@@ -237,8 +237,8 @@ begin
   Self.Panel.FileState := fsUnsaved;
 
   Self.ORs.Clear();
-  Self.ORMove.movingOR := -1;
-  Self.ORClick.movingOR := -1;
+  Self.ORMove.areai := -1;
+  Self.ORClick.areai := -1;
   Self.FMove := false;
 
   Self.IL_Symbols := LoadIL(_RESOURCE_SYMBOLS, 8, 12);
@@ -372,7 +372,7 @@ begin
   if (Self.Grid) then
     Self.PaintGrid(Self.Colors.Grid);
 
-  if ((Self.ORMove.movingOR >= 0) or (Self.GetORGraf(CursorPos).movingOR > -1)) then
+  if ((Self.ORMove.areai >= 0) or (Self.GetORGraf(CursorPos).areai > -1)) then
   begin
     // prioritu ma posun OR
     Self.PaintCursor(Self.PaintORCursor(CursorPos));
@@ -495,9 +495,18 @@ procedure TRelief.DXDDoubleClick(Sender: TObject);
 begin
   case (Self.DrawMode) of
     dmBitmap, dmSepHor, dmSepVert:
+    begin
+      // Open DK window od DK double-click
+      var orGraf: TORGRaf := Self.GetORGraf(LastPos);
+      if ((orGraf.areai > -1) and (orGraf.objType = TORGraphSymbol.orsDK)) then
+        F_OREdit.EditOR(orGraf.areai);
+
       Self.BitmapDblClick(LastPos);
+    end;
     dmBloky, dmRoots:
+    begin
       Self.ObjectDblClick(LastPos);
+    end;
   end; // case
 
   Self.Show(LastPos);
@@ -796,8 +805,8 @@ end;
 procedure TRelief.AddOR(oblr: TOR);
 begin
   Self.ORs.Add(oblr);
-  Self.ORMove.MovingOR := Self.ORs.Count - 1;
-  Self.ORMove.movingSymbol := TORGraphSymbol.orsDK;
+  Self.ORMove.areai := Self.ORs.Count - 1;
+  Self.ORMove.objType := TORGraphSymbol.orsDK;
 end;
 
 procedure TRelief.DeleteOR(pos: TPoint);
@@ -816,9 +825,9 @@ begin
   for var i := 0 to Self.ORs.Count - 1 do
   begin
     var oblr := Self.ORs[i];
-    if (Self.ORMove.MovingOR = i) then
+    if (Self.ORMove.areai = i) then
     begin
-      case (Self.ORMove.movingSymbol) of
+      case (Self.ORMove.objType) of
         TORGraphSymbol.orsDK:
           oblr.Poss.DK := Self.LastPos;
         TORGraphSymbol.orsQueue:
@@ -840,35 +849,35 @@ end;
 // vykresluje kurzor pri pohybu
 function TRelief.PaintORCursor(CursorPos: TPoint): TCursorDraw;
 begin
-  if (Self.ORMove.movingOR < 0) then
+  if (Self.ORMove.areai < 0) then
   begin
     var tmp_or := Self.GetORGraf(CursorPos);
-    if (tmp_or.MovingOR = -1) then
+    if (tmp_or.areai = -1) then
       Exit();
 
     Result.color := TCursorColor.ccOnObject;
 
-    case (tmp_or.movingSymbol) of
+    case (tmp_or.objType) of
       TORGraphSymbol.orsDK:
         begin
-          Result.pos1.X := (Self.ORs[tmp_or.MovingOR].Poss.DK.X) * _SYMBOL_WIDTH;
-          Result.pos1.Y := (Self.ORs[tmp_or.MovingOR].Poss.DK.Y) * _SYMBOL_HEIGHT;
-          Result.pos2.X := (Self.ORs[tmp_or.MovingOR].Poss.DK.X+_OR_DK_SIZE.X-1) * _SYMBOL_WIDTH;
-          Result.Pos2.Y := (Self.ORs[tmp_or.MovingOR].Poss.DK.Y+_OR_DK_SIZE.Y-1) * _SYMBOL_HEIGHT;
+          Result.pos1.X := (Self.ORs[tmp_or.areai].Poss.DK.X) * _SYMBOL_WIDTH;
+          Result.pos1.Y := (Self.ORs[tmp_or.areai].Poss.DK.Y) * _SYMBOL_HEIGHT;
+          Result.pos2.X := (Self.ORs[tmp_or.areai].Poss.DK.X+_OR_DK_SIZE.X-1) * _SYMBOL_WIDTH;
+          Result.Pos2.Y := (Self.ORs[tmp_or.areai].Poss.DK.Y+_OR_DK_SIZE.Y-1) * _SYMBOL_HEIGHT;
         end;
       TORGraphSymbol.orsQueue:
         begin
-          Result.pos1.X := (Self.ORs[tmp_or.MovingOR].Poss.Queue.X) * _SYMBOL_WIDTH;
-          Result.pos1.Y := (Self.ORs[tmp_or.MovingOR].Poss.Queue.Y) * _SYMBOL_HEIGHT;
-          Result.pos2.X := (Self.ORs[tmp_or.MovingOR].Poss.Queue.X+_OR_QUEUE_SIZE.X-1) * _SYMBOL_WIDTH;
-          Result.Pos2.Y := (Self.ORs[tmp_or.MovingOR].Poss.Queue.Y+_OR_QUEUE_SIZE.Y-1) * _SYMBOL_HEIGHT;
+          Result.pos1.X := (Self.ORs[tmp_or.areai].Poss.Queue.X) * _SYMBOL_WIDTH;
+          Result.pos1.Y := (Self.ORs[tmp_or.areai].Poss.Queue.Y) * _SYMBOL_HEIGHT;
+          Result.pos2.X := (Self.ORs[tmp_or.areai].Poss.Queue.X+_OR_QUEUE_SIZE.X-1) * _SYMBOL_WIDTH;
+          Result.Pos2.Y := (Self.ORs[tmp_or.areai].Poss.Queue.Y+_OR_QUEUE_SIZE.Y-1) * _SYMBOL_HEIGHT;
         end;
       TORGraphSymbol.orsTime:
         begin
-          Result.pos1.X := (Self.ORs[tmp_or.MovingOR].Poss.Time.X) * _SYMBOL_WIDTH;
-          Result.pos1.Y := (Self.ORs[tmp_or.MovingOR].Poss.Time.Y) * _SYMBOL_HEIGHT;
-          Result.pos2.X := (Self.ORs[tmp_or.MovingOR].Poss.Time.X+_OR_TIME_SIZE.X-1) * _SYMBOL_WIDTH;
-          Result.pos2.Y := (Self.ORs[tmp_or.MovingOR].Poss.Time.Y+_OR_TIME_SIZE.Y-1) * _SYMBOL_HEIGHT;
+          Result.pos1.X := (Self.ORs[tmp_or.areai].Poss.Time.X) * _SYMBOL_WIDTH;
+          Result.pos1.Y := (Self.ORs[tmp_or.areai].Poss.Time.Y) * _SYMBOL_HEIGHT;
+          Result.pos2.X := (Self.ORs[tmp_or.areai].Poss.Time.X+_OR_TIME_SIZE.X-1) * _SYMBOL_WIDTH;
+          Result.pos2.Y := (Self.ORs[tmp_or.areai].Poss.Time.Y+_OR_TIME_SIZE.Y-1) * _SYMBOL_HEIGHT;
         end;
     end; // case
   end else begin
@@ -877,7 +886,7 @@ begin
     Result.pos1.X := CursorPos.X * _SYMBOL_WIDTH;
     Result.pos1.Y := CursorPos.Y * _SYMBOL_HEIGHT;
 
-    case (Self.ORMove.movingSymbol) of
+    case (Self.ORMove.objType) of
       TORGraphSymbol.orsDK:
         begin
           Result.pos2.X := (CursorPos.X+_OR_DK_SIZE.X-1) * _SYMBOL_WIDTH;
@@ -910,9 +919,9 @@ begin
     var tmp_or := Self.GetORGraf(Position);
     if (Self.PanelObjects.selected_obj = nil) then
       Exit();
-    if (tmp_or.MovingOR < 0) then
+    if (tmp_or.areai < 0) then
       Exit();
-    Self.PanelObjects.SetOR(tmp_or.MovingOR);
+    Self.PanelObjects.SetOR(tmp_or.areai);
     if (Assigned(Self.OnBlokEdit)) then
       Self.OnBlokEdit(Self, Self.PanelObjects.selected_obj);
     Result := 1;
@@ -922,10 +931,10 @@ begin
   begin
     if (Button = mbLeft) then
     begin
-      if (Self.ORMove.MovingOR > -1) then
+      if (Self.ORMove.areai > -1) then
       begin
         // ukonceni pohybu
-        Self.ORMove.MovingOR := -1;
+        Self.ORMove.areai := -1;
 
         Self.FMove := false;
         Self.Show(Self.LastPos);
@@ -934,8 +943,8 @@ begin
         Self.Show(Self.LastPos);
       end else begin
         var tmp_or := Self.GetORGraf(Position);
-        if (tmp_or.MovingOR > -1) then
-          Self.MessageEvent(Self, 'OŘ : ' + ORs[tmp_or.MovingOR].Name + ' (id = ' + ORs[tmp_or.MovingOR].id + ')');
+        if (tmp_or.areai > -1) then
+          Self.MessageEvent(Self, 'OŘ : ' + ORs[tmp_or.areai].Name + ' (id = ' + ORs[tmp_or.areai].id + ')');
 
         // zacatek pohybu
         if (Self.FMove) then
@@ -946,9 +955,9 @@ begin
     if (Button = mbRight) then
     begin
       Self.ORClick := Self.GetORGraf(Position);
-      if (Self.ORClick.MovingOR < 0) then
+      if (Self.ORClick.areai < 0) then
         Exit;
-      case (Self.ORClick.movingSymbol) of
+      case (Self.ORClick.objType) of
        TORGraphSymbol.orsDK:
           Self.DK_Menu.Popup(mouse.CursorPos.X, mouse.CursorPos.Y);
       end; // case
@@ -959,29 +968,29 @@ end;
 // vraci OR na dane pozici
 function TRelief.GetORGraf(pos: TPoint): TORGraf;
 begin
-  Result.MovingOR := -1;
+  Result.areai := -1;
 
   for var i := 0 to Self.ORs.Count - 1 do
   begin
     if ((pos.X >= Self.ORs[i].Poss.DK.X) and (pos.Y >= Self.ORs[i].Poss.DK.Y) and
       (Self.ORs[i].Poss.DK.X + _OR_DK_SIZE.X > pos.X) and (Self.ORs[i].Poss.DK.Y + _OR_DK_SIZE.Y > pos.Y)) then
     begin
-      Result.movingOR := i;
-      Result.movingSymbol := TORGraphSymbol.orsDK;
+      Result.areai := i;
+      Result.objType := TORGraphSymbol.orsDK;
       Exit();
     end;
     if ((pos.X >= Self.ORs[i].Poss.Queue.X) and (pos.Y >= Self.ORs[i].Poss.Queue.Y) and
       (Self.ORs[i].Poss.Queue.X + _OR_QUEUE_SIZE.X > pos.X) and (Self.ORs[i].Poss.Queue.Y + _OR_QUEUE_SIZE.Y > pos.Y)) then
     begin
-      Result.movingOR := i;
-      Result.movingSymbol := TORGraphSymbol.orsQueue;
+      Result.areai := i;
+      Result.objType := TORGraphSymbol.orsQueue;
       Exit();
     end;
     if ((pos.X >= Self.ORs[i].Poss.Time.X) and (pos.Y >= Self.ORs[i].Poss.Time.Y) and
       (Self.ORs[i].Poss.Time.X + _OR_TIME_SIZE.X > pos.X) and (Self.ORs[i].Poss.Time.Y + _OR_TIME_SIZE.Y > pos.Y)) then
     begin
-      Result.movingOR := i;
-      Result.movingSymbol := TORGraphSymbol.orsTime;
+      Result.areai := i;
+      Result.objType := TORGraphSymbol.orsTime;
       Exit();
     end;
   end;
@@ -1006,7 +1015,7 @@ end;
 
 procedure TRelief.DKPropClick(Sender: TObject);
 begin
-  F_OREdit.EditOR(Self.ORClick.MovingOR);
+  F_OREdit.EditOR(Self.ORClick.areai);
 end;
 
 procedure TRelief.DKDeleteClick(Sender: TObject);
@@ -1018,7 +1027,7 @@ begin
   end;
 
   if (Application.MessageBox('Opravdu smazat?', 'Otázka', MB_YESNO OR MB_ICONQUESTION) = mrYes) then
-    Self.ORs.Delete(Self.ORClick.MovingOR);
+    Self.ORs.Delete(Self.ORClick.areai);
 end;
 
 // na kazdem radku je ulozena jedna oblast rizeni ve formatu:
