@@ -3,18 +3,16 @@ object F_Popisek: TF_Popisek
   Top = 0
   BorderStyle = bsToolWindow
   Caption = '[operace]'
-  ClientHeight = 336
-  ClientWidth = 241
+  ClientHeight = 324
+  ClientWidth = 233
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
     Left = 8

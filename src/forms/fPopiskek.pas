@@ -44,7 +44,7 @@ type
     PopisekBlok: Boolean;
 
     procedure NewPopisek;
-    procedure OpenPopisek(aText: string; popisek: TPopisek);
+    procedure OpenPopisek(aText: string; popisek: TPanelLabel);
   end;
 
 var
@@ -117,7 +117,7 @@ begin
   Self.ShowModal();
 end;
 
-procedure TF_Popisek.OpenPopisek(aText: string; popisek: TPopisek);
+procedure TF_Popisek.OpenPopisek(aText: string; popisek: TPanelLabel);
 begin
   Self.PopisekText := popisek.Text;
   Self.PopisekColor := Integer(popisek.Color);

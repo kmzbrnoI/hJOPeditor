@@ -175,7 +175,7 @@ type
 
     procedure ReliefErrorEvent(Sender: TObject; err: string);
     procedure ReliefMoveEvent(Sender: TObject; Position: TPoint);
-    procedure ReliefChangeTextEvent(Sender: TObject; var popisek: TPopisek);
+    procedure ReliefChangeTextEvent(Sender: TObject; var popisek: TPanelLabel);
     procedure BlokEditEvent(Sender: TObject; Blok: TGraphBlok);
 
     procedure MessageEvent(Sender: TObject; Msg: string);
@@ -318,7 +318,7 @@ begin
         // delete
         if (not Assigned(Self.Relief)) then
           Exit;
-        if (Self.Relief.Mode = dmBitmap) then
+        if ((Self.Relief.Mode = dmBitmap) or (Self.Relief.Mode = dmSepVert) or (Self.Relief.Mode = dmSepHor)) then
           Self.B_DeleteClick(Self);
       end;
 
@@ -327,7 +327,7 @@ begin
         // move
         if (not Assigned(Self.Relief)) then
           Exit;
-        if (Self.Relief.Mode = dmBitmap) then
+        if ((Self.Relief.Mode = dmBitmap) or (Self.Relief.Mode = dmSepVert) or (Self.Relief.Mode = dmSepHor)) then
           Self.B_MoveClick(Self);
       end;
 
@@ -947,7 +947,7 @@ begin
   Self.SB_Main.Panels.Items[3].Text := '';
 end;
 
-procedure TF_Main.ReliefChangeTextEvent(Sender: TObject; var popisek: TPopisek);
+procedure TF_Main.ReliefChangeTextEvent(Sender: TObject; var popisek: TPanelLabel);
 begin
   F_Popisek.OpenPopisek(Text, popisek);
 

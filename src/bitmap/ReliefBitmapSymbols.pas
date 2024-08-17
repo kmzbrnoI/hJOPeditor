@@ -7,7 +7,6 @@ uses
   StrUtils, ReliefText, VektorBasedObject, Global, symbolHelper, Types, ReliefCommon;
 
 const
-  _MAX_MOVE = 64;
   _NO_SYMBOL = -1;
 
 type
@@ -19,6 +18,11 @@ type
 
   TBitmapSymbols = class
   private
+    mOnShow: TNEvent;
+    mIsConflict: TPosAskEvent;
+    mNullOperations: TNEvent;
+    mOPAsk: TOpAskEvent;
+
     Panel: record
       Width, Height: Integer;
     end;
@@ -28,17 +32,16 @@ type
       IL: TImageList;
     end;
 
+    MoveBuf: record
+      Width, Height: Cardinal;
+      Symbols: array of array of ShortInt;
+    end;
+
     Operations: record
       Add: record
         Step: TGOpStep;
         Symbol: Integer;
       end;
-
-      Move: record
-        Step: TGOpStep;
-        aWidth, aHeight: Byte;
-        Symbols: array [0 .. _MAX_MOVE - 1, 0 .. _MAX_MOVE - 1] of ShortInt;
-      end; // Move
 
       Group: record
         IsGroup: Boolean;
@@ -53,51 +56,44 @@ type
     procedure Delete(aPos: TPoint); overload;
 
     procedure Adding(Position: TPoint);
-    procedure Moving(Position: TPoint);
 
     function ControlCursorPos(Pos1, Pos2: TPoint): Boolean;
     procedure CheckOpInProgressAndExcept();
 
-  public
-    FOnShow: TNEvent;
-    FIsSymbol: TPosAskEvent;
-    FNullOperations: TNEvent;
-    FMoveActivate: TNEvent;
-    FOPAsk: TOpAskEvent;
+    function IsConflict(pos: TPoint): Boolean;
 
+  public
     Bitmap: array [0 .. _MAX_WIDTH - 1, 0 .. _MAX_HEIGHT - 1] of ShortInt;
 
     constructor Create(IL: TImageList; DrawCanvas: TCanvas; Width, Height: Integer);
 
     procedure SetRozmery(Width, Height: Integer);
-
     procedure MouseUp(Position: TPoint; Button: TMouseButton);
-
     function GetSymbol(Position: TPoint): ShortInt;
 
     procedure Escape(Group: Boolean);
     procedure Clear();
 
     procedure Paint();
-    procedure PaintBitmapMove(KurzorPos: TPoint);
+    procedure PaintMoveBuffer(pos: TPoint);
     function PaintCursor(CursorPos: TPoint): TCursorDraw;
 
     procedure Add(SymbolID: Integer); overload;
-    procedure Move();
+    function MoveDrag(pos1: TPoint; pos2: TPoint): Boolean; // returnbs if anything dragged
+    procedure MoveDrop(pos: TPoint);
+    function CanMoveDrop(pos: TPoint): Boolean;
     procedure Delete(pos1: TPoint; pos2: TPoint); overload;
 
     procedure LoadBpnl(var f: File; fileVersion: Byte; width: Integer; height: Integer);
     procedure WriteBpnl(var f: File);
 
     property addStep: TGOpStep read Operations.Add.Step;
-    property moveStep: TGOpStep read Operations.Move.Step;
     property Group: Boolean read Operations.Group.IsGroup write Operations.Group.IsGroup;
 
-    property OnShow: TNEvent read FOnShow write FOnShow;
-    property IsSymbol: TPosAskEvent read FIsSymbol write FIsSymbol;
-    property IsOp: TOpAskEvent read FOPAsk write FOPAsk;
-    property OnNullOperations: TNEvent read FNullOperations write FNullOperations;
-    property OnMoveActivate: TNEvent read FMoveActivate write FMoveActivate;
+    property OnShow: TNEvent read mOnShow write mOnShow;
+    property QIsConflict: TPosAskEvent read mIsConflict write mIsConflict;
+    property IsOp: TOpAskEvent read mOPAsk write mOPAsk;
+    property OnNullOperations: TNEvent read mNullOperations write mNullOperations;
   end; // class
 
 implementation
@@ -120,7 +116,6 @@ end;
 procedure TBitmapSymbols.Escape(Group: Boolean);
 begin
   Self.Operations.Add.Step := TGOpStep.gosNone;
-  Self.Operations.Move.Step := TGOpStep.gosNone;
 
   if (Group) then
   begin
@@ -173,6 +168,13 @@ begin
   for var i: Integer := 0 to Self.Panel.Width - 1 do
     for var j: Integer := 0 to Self.Panel.Height - 1 do
       Self.PaintSymbol(i, j, Self.Bitmap[i, j]);
+end;
+
+procedure TBitmapSymbols.PaintMoveBuffer(pos: TPoint);
+begin
+  for var x: Integer := 0 to Self.MoveBuf.Width - 1 do
+    for var y: Integer := 0 to Self.MoveBuf.Height - 1 do
+      Self.PaintSymbol(pos.X+x, pos.Y+y, Self.MoveBuf.Symbols[x, y]);
 end;
 
 procedure TBitmapSymbols.LoadBpnl(var f: File; fileVersion: Byte; width: Integer; height: Integer);
@@ -249,19 +251,9 @@ begin
 
           // kontrola obsazenosti
           for var x: Integer := Self.operations.group.start.X to Position.X do
-          begin
             for var y: Integer := Self.operations.group.start.Y to Position.Y do
-            begin
-              if (Assigned(Self.IsSymbol)) then
-              begin
-                if (Self.IsSymbol(Point(x, y))) then
-                  raise ENonemptyField.Create('Na pozici je již symbol!');
-              end else begin
-                if (Self.GetSymbol(Point(x, y)) <> _NO_SYMBOL) then
-                  raise ENonemptyField.Create('Na pozici je již symbol!');
-              end;
-            end;
-          end;
+              if (Self.IsConflict(Point(x, y))) then
+                raise ENonemptyField.Create('Na pozici je již symbol!');
 
           if (Assigned(Self.OnNullOperations)) then
             Self.OnNullOperations();
@@ -286,173 +278,23 @@ begin
   end else begin
     // pokud neni skupina
 
-    if (Assigned(Self.IsSymbol)) then
-    begin
-      if (Self.IsSymbol(Position)) then
-        raise ENonemptyField.Create('Na pozici je již symbol!');
-    end else begin
-      if (Self.GetSymbol(Position) <> _NO_SYMBOL) then
-        raise ENonemptyField.Create('Na pozici je již symbol!');
-    end; // else Assigned(FIsOperation)
+    if (Self.IsConflict(Position)) then
+      raise ENonemptyField.Create('Na pozici je již symbol!');
 
-    if (Assigned(FNullOperations)) then
-      FNullOperations;
+    if (Assigned(Self.OnNullOperations)) then
+      Self.OnNullOperations();
 
     Self.Add(Position, Self.operations.add.Symbol);
 
     // znovu pripraveni dosazeni objektu
     Self.operations.add.step := TGOpStep.gosNone;
-    if Assigned(FOnShow) then
+    if (Assigned(Self.OnShow)) then
     begin
-      FOnShow;
+      Self.OnShow();
       Sleep(50);
     end;
     Self.Add(Self.operations.add.Symbol);
   end; // else (Self.Group.IsGroup)
-end;
-
-procedure TBitmapSymbols.Moving(Position: TPoint);
-begin
-  // overovani skupiny - 2. cast podminky pridana, kdyby nekdo po 1. kroku vypl IsGroup
-  if ((Self.operations.Group.IsGroup) or ((Self.operations.Group.Start.X <> -1) and
-    (Self.operations.Group.Start.Y <> -1))) then
-  begin
-    // pokud je skupina
-    case (Self.operations.move.step) of
-      TGOpStep.gosActive:
-        begin
-          Self.operations.Group.Start.X := Position.X;
-          Self.operations.Group.Start.Y := Position.Y;
-
-          if (Assigned(FNullOperations)) then
-            FNullOperations;
-          Self.operations.move.step := TGOpStep.gosSelecting;
-        end; // case 1
-      TGOpStep.gosSelecting:
-        begin
-          // kontrola zapornych limitu vyberu
-          if (not Self.ControlCursorPos(Self.operations.Group.Start, Position)) then
-            raise EInvalidPosition.Create('Výběr musí být zleva doprava a shora dolů!');
-
-          // kontrola limitu pole
-          if (((Position.X - Self.operations.Group.Start.X + 1) > _MAX_MOVE) or
-            (Position.Y - Self.operations.Group.Start.Y + 1 > _MAX_MOVE)) then
-            raise EInvalidPosition.Create('Přesáhnuta maximální velikosti výběru!');
-
-          // prevzeti objektu do .Symbols[] a smazani puvodnich objektu
-          Self.operations.move.aWidth := Position.X - Self.operations.Group.Start.X + 1;
-          Self.operations.move.aHeight := Position.Y - Self.operations.Group.Start.Y + 1;
-
-          for var i := Self.operations.Group.Start.X to Position.X do
-          begin
-            for var j := Self.operations.Group.Start.Y to Position.Y do
-            begin
-              Self.operations.move.Symbols[i - Self.operations.Group.Start.X, j - Self.operations.Group.Start.Y] :=
-                Self.GetSymbol(Point(i, j));
-              if (Self.Bitmap[i, j] <> _NO_SYMBOL) then
-                Self.Delete(Point(i, j));
-            end;
-          end;
-
-          Self.operations.move.step := TGOpStep.gosMoving;
-        end; // case 2
-      TGOpStep.gosMoving:
-        begin
-          // kontrola obsazenosti
-          for var i := 0 to Self.operations.move.aWidth - 1 do
-          begin
-            for var j := 0 to Self.operations.move.aHeight - 1 do
-            begin
-              if (Assigned(FIsSymbol)) then
-              begin
-                if (FIsSymbol(Point(i + (Position.X - Self.operations.move.aWidth) + 1,
-                  j + (Position.Y - Self.operations.move.aHeight) + 1))) then
-                  raise ENonemptyField.Create('Na pozici je již symbol!');
-              end else begin
-                if ((Self.GetSymbol(Point(i + (Position.X - Self.operations.move.aWidth) + 1,
-                  j + (Position.Y - Self.operations.move.aHeight) + 1)) <> _NO_SYMBOL)) then
-                  raise ENonemptyField.Create('Na pozici je již symbol!');
-              end; // else (Assigned(FIsOperation))
-            end; // for j
-          end; // for i
-
-          for var i := 0 to Self.operations.move.aWidth - 1 do
-          begin
-            for var j := 0 to Self.operations.move.aHeight - 1 do
-            begin
-              Self.Add(Point(i + (Position.X - Self.operations.move.aWidth) + 1,
-                j + (Position.Y - Self.operations.move.aHeight) + 1), Self.operations.move.Symbols[i, j]);
-              Self.operations.move.Symbols[i, j] := 0;
-            end; // for j
-          end; // for i
-
-          Self.operations.Group.Start.X := -1;
-          Self.operations.Group.Start.Y := -1;
-
-          Self.operations.move.aWidth := 0;
-          Self.operations.move.aHeight := 0;
-          Self.operations.move.step := TGOpStep.gosNone;
-
-          // znovu pripraveni dosazeni objektu
-          if Assigned(FOnShow) then
-          begin
-            FOnShow;
-            Sleep(50);
-          end;
-          if (Assigned(Self.FMoveActivate)) then
-            Self.FMoveActivate;
-        end; // case 3
-    end; // case
-
-  end else begin
-    // pokud neni skupina
-    case (Self.operations.move.step) of
-      TGOpStep.gosActive:
-        begin
-          // prevzeti objektu do .Symbols[] a smazani puvodnich objektu
-          Self.operations.move.aWidth := 1;
-          Self.operations.move.aHeight := 1;
-
-          if (Self.GetSymbol(Position) = _NO_SYMBOL) then
-            Exit();
-
-          if (Assigned(FNullOperations)) then
-            FNullOperations;
-
-          Self.operations.move.Symbols[0, 0] := Self.GetSymbol(Position);
-          Self.Delete(Position);
-
-          Self.operations.move.step := TGOpStep.gosSelecting;
-        end; // case 1
-      TGOpStep.gosSelecting:
-        begin
-          // kontrola obsazenosti pozice
-          if (Assigned(FIsSymbol)) then
-          begin
-            if (FIsSymbol(Position)) then
-              raise ENonemptyField.Create('Na pozici je již symbol!');
-          end else begin
-            if (Self.GetSymbol(Position) <> _NO_SYMBOL) then
-              raise ENonemptyField.Create('Na pozici je již symbol!');
-          end;
-
-          Self.Add(Position, Self.operations.move.Symbols[0, 0]);
-
-          Self.operations.move.aWidth := 0;
-          Self.operations.move.aHeight := 0;
-          Self.operations.move.step := TGOpStep.gosNone;
-
-          // znovu pripraveni dosazeni objektu
-          if Assigned(FOnShow) then
-          begin
-            FOnShow;
-            Sleep(50);
-          end;
-          if (Assigned(Self.FMoveActivate)) then
-            Self.FMoveActivate;
-        end; // case 3
-    end; // case
-  end; // else ((Self.Group.IsGroup) or ((Self.Group.Start.X <> -1) and (Self.Group.Start.Y <> -1)))
 end;
 
 procedure TBitmapSymbols.MouseUp(Position: TPoint; Button: TMouseButton);
@@ -461,8 +303,6 @@ begin
   begin
     if (Self.operations.add.step > TGOpStep.gosNone) then
       Self.Adding(Position);
-    if (Self.operations.move.step > TGOpStep.gosNone) then
-      Self.Moving(Position);
   end;
 end;
 
@@ -477,10 +317,43 @@ begin
     Self.OnShow();
 end;
 
-procedure TBitmapSymbols.Move();
+function TBitmapSymbols.MoveDrag(pos1: TPoint; pos2: TPoint): Boolean;
 begin
-  Self.CheckOpInProgressAndExcept();
-  Self.operations.move.step := TGOpStep.gosActive;
+  Result := False;
+  Self.MoveBuf.Width := pos2.X-pos1.X+1;
+  Self.MoveBuf.Height := pos2.Y-pos1.Y+1;
+  SetLength(Self.MoveBuf.Symbols, Self.MoveBuf.Width, Self.MoveBuf.Height);
+  for var x := pos1.X to pos2.X do
+  begin
+    for var y := pos1.Y to pos2.Y do
+    begin
+      Self.MoveBuf.Symbols[x-pos1.X, y-pos1.Y] := Self.GetSymbol(Point(x, y));
+      if (Self.Bitmap[x, y] <> _NO_SYMBOL) then
+      begin
+        Self.Delete(Point(x, y));
+        Result := True;
+      end;
+    end;
+  end;
+end;
+
+procedure TBitmapSymbols.MoveDrop(pos: TPoint);
+begin
+  for var x: Integer := 0 to Self.MoveBuf.Width-1 do
+    for var y: Integer := 0 to Self.MoveBuf.Height-1 do
+      if (Self.MoveBuf.Symbols[x, y] <> _NO_SYMBOL) then
+        Self.Add(Point(pos.X + x, pos.Y + y), Self.MoveBuf.Symbols[x, y]);
+  Self.MoveBuf.Width := 0;
+  Self.MoveBuf.Height := 0;
+end;
+
+function TBitmapSymbols.CanMoveDrop(pos: TPoint): Boolean;
+begin
+  Result := True;
+  for var x: Integer := 0 to Self.MoveBuf.Width-1 do
+    for var y: Integer := 0 to Self.MoveBuf.Height-1 do
+      if ((Self.MoveBuf.Symbols[x, y] <> _NO_SYMBOL) and (Self.IsConflict(Point(pos.X+x, pos.Y+y)))) then
+        Exit(False);
 end;
 
 procedure TBitmapSymbols.Delete(pos1: TPoint; pos2: TPoint);
@@ -489,52 +362,6 @@ begin
     for var y := pos1.Y to pos2.Y do
       if (Self.Bitmap[x, y] <> _NO_SYMBOL) then
         Self.Delete(Point(x, y));
-end;
-
-// zabyva se vykreslovanim posouvanych objektu v bitmape
-procedure TBitmapSymbols.PaintBitmapMove(KurzorPos: TPoint);
-begin
-  // pohyb
-  if (Self.operations.move.step > TGOpStep.gosActive) then
-  begin
-    if ((Self.operations.Group.Start.X = -1) and (Self.operations.Group.Start.Y = -1)) then
-    begin
-      // presun 1 objektu
-      Self.PaintSymbol(KurzorPos.X, KurzorPos.Y, Self.operations.move.Symbols[0, 0]);
-    end else begin
-      // presun skupiny
-      if (Self.operations.move.step = TGOpStep.gosMoving) then
-      begin
-        for var i := 0 to Self.operations.move.aWidth - 1 do
-        begin
-          for var j := 0 to Self.operations.move.aHeight - 1 do
-          begin
-            var aPos: TPoint;
-            aPos.X := i + KurzorPos.X - Self.operations.move.aWidth + 1;
-            aPos.Y := j + KurzorPos.Y - Self.operations.move.aHeight + 1;
-            if (Self.GetSymbol(aPos) = _NO_SYMBOL) then
-              Self.PaintSymbol(aPos.X, aPos.Y, Self.operations.move.Symbols[i, j]);
-          end; // for j
-        end; // for i
-      end; // if (Self.move.Krok > 2)
-    end; // else ((Self.Group.Start.X = -1) and (Self.Group.Start.Y = -1))
-  end; // if Self.move.Krok > 0
-
-  // pridavani
-  if (Self.operations.add.step > TGOpStep.gosNone) then
-  begin
-    if ((Self.operations.Group.Start.X = -1) and (Self.operations.Group.Start.Y = -1)) then
-    begin
-      // presun 1 objektu
-      Self.PaintSymbol(KurzorPos.X, KurzorPos.Y, Self.operations.add.Symbol);
-    end else begin
-      // presun skupiny
-      for var i := Self.operations.Group.Start.X to KurzorPos.X do
-        for var j := Self.operations.Group.Start.Y to KurzorPos.Y do
-          if (Self.GetSymbol(Point(i, j)) = _NO_SYMBOL) then
-            Self.PaintSymbol(i, j, Self.operations.add.Symbol);
-    end; // else ((Self.Group.Start.X = -1) and (Self.Group.Start.Y = -1))
-  end; // if Self.Add > -1
 end;
 
 // vykresleni kurzoru - vraci data PIXELECH!
@@ -550,7 +377,7 @@ begin
   begin
     Result.color := TCursorColor.ccOnObject;
   end;
-  if (Self.operations.add.step = TGOpStep.gosSelecting) or (Self.operations.move.step = TGOpStep.gosSelecting) then
+  if (Self.operations.add.step = TGOpStep.gosSelecting) then
   begin
     if (Self.operations.group.isGroup) then
     begin
@@ -559,28 +386,6 @@ begin
     end; // else IsGroup
 
     Result.color := TCursorColor.ccOnObject;
-  end;
-  if (Self.operations.move.step = TGOpStep.gosActive) then
-  begin
-    var SymbolI := Self.GetSymbol(CursorPos);
-    Result.Pos2.X := CursorPos.X * _SYMBOL_WIDTH;
-    Result.Pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
-
-    if (SymbolI = _NO_SYMBOL) then
-      Result.color := TCursorColor.ccActiveOperation
-    else
-      Result.color := TCursorColor.ccOnObject;
-  end;
-  if (Self.operations.move.step = TGOpStep.gosMoving) then
-  begin
-    // zde uz musi byt skupina - jinak by nebylo mozne skocit do kroku 2
-    Result.color := TCursorColor.ccOnObject;
-
-    if (Self.operations.Group.IsGroup) then
-    begin
-      Result.Pos1.X := (CursorPos.X - Self.operations.move.aWidth + 1) * _SYMBOL_WIDTH;
-      Result.Pos1.Y := (CursorPos.Y - Self.operations.move.aHeight + 1) * _SYMBOL_HEIGHT;
-    end; // if (Self.operations.Group.IsGroup)
   end;
 end;
 
@@ -619,9 +424,17 @@ begin
     if (Self.IsOp()) then
       raise EOperationInProgress.Create('Právě probíhá operace!');
   end else begin
-    if ((Self.operations.add.step > TGOpStep.gosNone) or (Self.operations.move.step > TGOpStep.gosNone)) then
+    if (Self.operations.add.step > TGOpStep.gosNone) then
       raise EOperationInProgress.Create('Právě probíhá operace!');
   end;
+end;
+
+function TBitmapSymbols.IsConflict(pos: TPoint): Boolean;
+begin
+  if (Assigned(Self.mIsConflict)) then
+    Result := Self.mIsConflict(pos)
+  else
+    Result := True; // event must be assigned
 end;
 
 end.// unit

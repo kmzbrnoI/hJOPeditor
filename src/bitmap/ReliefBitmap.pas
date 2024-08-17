@@ -27,6 +27,8 @@ type
       disable: Boolean;
       opType: TBitmapOpType;
       deleteStep: TGOpStep;
+      moveStep: TGOpStep;
+      moveSize: TPoint;
       isGroup: Boolean;
       groupStart: TPoint;
     end;
@@ -43,27 +45,28 @@ type
     function GetGroup(): Boolean;
 
     function IsOperation(): Boolean;
-
     procedure CheckOperations();
 
     procedure Show();
-    function IsSymbolSymbolEvent(Pos: TPoint): Boolean;
-    function IsSymbolTextEvent(Pos: TPoint): Boolean;
-    function IsSymbolSeparVertEvent(Pos: TPoint): Boolean;
-    function IsSymbolSeparHorEvent(Pos: TPoint): Boolean;
-    function IsSymbolKPopiskyJCClickSoupravyEvent(Pos: TPoint): Boolean;
+    function IsConflictSymbolPlace(Pos: TPoint): Boolean;
+    function IsConflictTextPlace(Pos: TPoint): Boolean;
+    function IsConflictVectorPlace(Pos: TPoint): Boolean;
     procedure NullOperationsEvent();
-    procedure MoveActivateEvent();
     function IsOperationEvent(): Boolean;
-    procedure ChangeTextEvent(Sender: TObject; var popisek: TPopisek);
+    procedure ChangeTextEvent(Sender: TObject; var popisek: TPanelLabel);
     class procedure BpnlReadAndValidateSeparator(var f: File; where: string);
 
+    procedure MoveMouseUp(CursorPos: TPoint);
+    function CursorMove(CursorPos: TPoint): TCursorDraw;
+
     procedure DeleteMouseUp(CursorPos: TPoint);
+    function CursorDelete(CursorPos: TPoint): TCursorDraw;
+
+
     function CanPick(pos: TPoint): Boolean;
     function CompensateMode(pos: TPoint): TPoint;
 
   public
-
     Symbols: TBitmapSymbols;
     SeparatorsVert: TVBO;
     SeparatorsHor: TVBO;
@@ -83,7 +86,6 @@ type
 
     procedure Paint();
     function PaintCursor(CursorPos: TPoint): TCursorDraw;
-    function CursorDelete(CursorPos: TPoint): TCursorDraw;
     procedure PaintMove(CursorPos: TPoint);
 
     procedure SetSize(aWidth, aHeight: Byte);
@@ -107,7 +109,7 @@ type
 
     property OnShow: TNEvent read mOnShow write mOnShow;
     property OnTextEdit: TChangeTextEvent read mOnTextEdit write mOnTextEdit;
-    property OnORAsk: TORAskEvent read mORAskEvent write mORAskEvent;
+    property IsAreaStuffPresent: TORAskEvent read mORAskEvent write mORAskEvent;
     property ShowBlokPopisky: Boolean read fShowBlokPopisky write fShowBlokPopisky;
   end; // class
 
@@ -357,55 +359,48 @@ begin
 
   Self.Operations.disable := False;
   Self.Operations.opType := botNone;
+  Self.Operations.moveStep := gosNone;
   Self.Operations.deleteStep := gosNone;
+  Self.Operations.groupStart := _INACTIVE_POINT;
 
   Self.Symbols := TBitmapSymbols.Create(SymbolIL, DrawCanvas, Width, Height);
-  Self.Symbols.FOnShow := Self.Show;
-  Self.Symbols.FIsSymbol := Self.IsSymbolSymbolEvent;
-  Self.Symbols.FNullOperations := Self.NullOperationsEvent;
-  Self.Symbols.FMoveActivate := Self.MoveActivateEvent;
-  Self.Symbols.FOPAsk := Self.IsOperationEvent;
+  Self.Symbols.OnShow := Self.Show;
+  Self.Symbols.QIsConflict := Self.IsConflictSymbolPlace;
+  Self.Symbols.OnNullOperations := Self.NullOperationsEvent;
+  Self.Symbols.IsOp := Self.IsOperationEvent;
 
   Self.SeparatorsVert := TVBO.Create(DrawCanvas, SymbolIL, _S_SEPAR_VERT, scRed, stVert);
   Self.SeparatorsVert.OnShow := Self.Show;
-  Self.SeparatorsVert.IsSymbol := Self.IsSymbolSeparVertEvent;
   Self.SeparatorsVert.OnNullOperations := Self.NullOperationsEvent;
-  Self.SeparatorsVert.OnMoveActivate := Self.MoveActivateEvent;
   Self.SeparatorsVert.IsOp := Self.IsOperationEvent;
 
   Self.SeparatorsHor := TVBO.Create(DrawCanvas, SymbolIL, _S_SEPAR_HOR, scRed, stHor);
   Self.SeparatorsHor.OnShow := Self.Show;
-  Self.SeparatorsHor.IsSymbol := Self.IsSymbolSeparHorEvent;
   Self.SeparatorsHor.OnNullOperations := Self.NullOperationsEvent;
-  Self.SeparatorsHor.OnMoveActivate := Self.MoveActivateEvent;
   Self.SeparatorsHor.IsOp := Self.IsOperationEvent;
 
   Self.TrackNames := TVBO.Create(DrawCanvas, SymbolIL, _S_FULL, scYellow);
   Self.TrackNames.OnShow := Self.Show;
-  Self.TrackNames.IsSymbol := Self.IsSymbolKPopiskyJCClickSoupravyEvent;
+  Self.TrackNames.QIsConflict := Self.IsConflictVectorPlace;
   Self.TrackNames.OnNullOperations := Self.NullOperationsEvent;
-  Self.TrackNames.OnMoveActivate := Self.MoveActivateEvent;
   Self.TrackNames.IsOp := Self.IsOperationEvent;
 
   Self.JCClick := TVBO.Create(DrawCanvas, SymbolIL, _S_KC, scLime);
   Self.JCClick.OnShow := Self.Show;
-  Self.JCClick.IsSymbol := Self.IsSymbolKPopiskyJCClickSoupravyEvent;
+  Self.JCClick.QIsConflict := Self.IsConflictVectorPlace;
   Self.JCClick.OnNullOperations := Self.NullOperationsEvent;
-  Self.JCClick.OnMoveActivate := Self.MoveActivateEvent;
   Self.JCClick.IsOp := Self.IsOperationEvent;
 
   Self.TrainPoss := TVBO.Create(DrawCanvas, SymbolIL, _S_FULL, scBlue);
   Self.TrainPoss.OnShow := Self.Show;
-  Self.TrainPoss.IsSymbol := Self.IsSymbolKPopiskyJCClickSoupravyEvent;
+  Self.TrainPoss.QIsConflict := Self.IsConflictVectorPlace;
   Self.TrainPoss.OnNullOperations := Self.NullOperationsEvent;
-  Self.TrainPoss.OnMoveActivate := Self.MoveActivateEvent;
   Self.TrainPoss.IsOp := Self.IsOperationEvent;
 
   Self.Texts := TText.Create(DrawCanvas, TextIL, Parent, Graphics);
   Self.Texts.OnShow := Self.Show;
-  Self.Texts.IsSymbol := Self.IsSymbolTextEvent;
+  Self.Texts.QIsConflict := Self.IsConflictTextPlace;
   Self.Texts.OnNullOperations := Self.NullOperationsEvent;
-  Self.Texts.OnMoveActivate := Self.MoveActivateEvent;
   Self.Texts.IsOp := Self.IsOperationEvent;
   Self.Texts.OnChangeText := Self.ChangeTextEvent;
 
@@ -441,7 +436,9 @@ procedure TPanelBitmap.MouseUp(Position: TPoint; Button: TMouseButton);
 begin
   Self.operations.disable := true;
 
-  if ((Self.Operations.deleteStep > TGOpStep.gosNone) and (Button = TMouseButton.mbLeft)) then
+  if ((Self.Operations.moveStep > TGOpStep.gosNone) and (Button = TMouseButton.mbLeft)) then
+    Self.MoveMouseUp(Position)
+  else if ((Self.Operations.deleteStep > TGOpStep.gosNone) and (Button = TMouseButton.mbLeft)) then
     Self.DeleteMouseUp(Position);
 
   case (Self.Mode) of
@@ -475,20 +472,18 @@ begin
     Self.OnShow();
 end;
 
-function TPanelBitmap.IsSymbolSymbolEvent(Pos: TPoint): Boolean;
+function TPanelBitmap.IsConflictSymbolPlace(Pos: TPoint): Boolean;
 begin
-  Result := false;
-
-  if (Self.Symbols.GetSymbol(Pos) <> -1) then
-    Exit(true);
-  // Symbol (platform) could be placed over text
-  if (Assigned(Self.OnORAsk)) then
-    Exit(Self.OnORAsk(Pos));
+  Result := (Self.Symbols.GetSymbol(Pos) <> -1) or ((Assigned(Self.IsAreaStuffPresent)) and (Self.IsAreaStuffPresent(Pos)))
+    or (pos.X < 0) or (pos.Y < 0) or (pos.X >= Self.PanelWidth) or (pos.Y >= Self.PanelHeight);
 end;
 
-function TPanelBitmap.IsSymbolTextEvent(Pos: TPoint): Boolean;
+function TPanelBitmap.IsConflictTextPlace(Pos: TPoint): Boolean;
 begin
   Result := false;
+
+  if ((pos.X < 0) or (pos.Y < 0) or (pos.X >= Self.PanelWidth) or (pos.Y >= Self.PanelHeight)) then
+    Exit(True);
 
   // Text could be placed over platform
   var symbol := Self.Symbols.GetSymbol(Pos);
@@ -496,36 +491,19 @@ begin
     Exit(true);
   if (Self.texts.GetTextI(Pos) <> -1) then
     Exit(true);
-  if (Assigned(Self.OnORAsk)) then
-    Exit(Self.OnORAsk(Pos));
+  if (Assigned(Self.IsAreaStuffPresent)) then
+    Exit(Self.IsAreaStuffPresent(Pos));
 end;
 
-function TPanelBitmap.IsSymbolSeparVertEvent(Pos: TPoint): Boolean;
+function TPanelBitmap.IsConflictVectorPlace(Pos: TPoint): Boolean;
 begin
-  Result := (Self.SeparatorsVert.IsObject(Pos));
-end;
-
-function TPanelBitmap.IsSymbolSeparHorEvent(Pos: TPoint): Boolean;
-begin
-  Result := (Self.SeparatorsHor.IsObject(Pos));
-end;
-
-function TPanelBitmap.IsSymbolKPopiskyJCClickSoupravyEvent(Pos: TPoint): Boolean;
-begin
-  Result := (Self.trackNames.IsObject(Pos)) or (Self.JCClick.IsObject(Pos)) or (Self.trainPoss.IsObject(Pos));
+  Result := (Self.trackNames.IsObject(Pos)) or (Self.JCClick.IsObject(Pos)) or (Self.trainPoss.IsObject(Pos))
+    or (pos.X < 0) or (pos.Y < 0) or (pos.X >= Self.PanelWidth) or (pos.Y >= Self.PanelHeight);
 end;
 
 procedure TPanelBitmap.NullOperationsEvent();
 begin
   Self.Escape(false);
-end;
-
-procedure TPanelBitmap.MoveActivateEvent();
-begin
-  if (Self.operations.disable) then
-    Self.operations.opType := botMove
-  else
-    Self.Move();
 end;
 
 function TPanelBitmap.IsOperationEvent(): Boolean;
@@ -546,21 +524,34 @@ end;
 
 procedure TPanelBitmap.Escape(Group: Boolean);
 begin
+  if (Self.Operations.moveStep = gosMoving) then
+  begin
+    Self.Symbols.MoveDrop(Self.Operations.groupStart);
+    Self.SeparatorsVert.MoveDrop(Self.Operations.groupStart);
+    Self.SeparatorsHor.MoveDrop(Self.Operations.groupStart);
+    Self.TrackNames.MoveDrop(Self.Operations.groupStart);
+    Self.JCClick.MoveDrop(Self.Operations.groupStart);
+    Self.Texts.MoveDrop(Self.Operations.groupStart);
+    Self.TrainPoss.MoveDrop(Self.Operations.groupStart);
+  end;
+  Self.Operations.groupStart := _INACTIVE_POINT;
+  Self.Operations.moveStep := gosNone;
+  Self.Operations.deleteStep := gosNone;
+
   Self.Symbols.Escape(Group);
   Self.SeparatorsVert.Escape();
   Self.SeparatorsHor.Escape();
-  Self.trackNames.Escape();
+  Self.TrackNames.Escape();
   Self.JCClick.Escape();
-  Self.trainPoss.Escape();
-  Self.texts.Escape();
-
-  Self.Operations.groupStart := _INACTIVE_POINT;
-  Self.Operations.deleteStep := gosNone;
+  Self.TrainPoss.Escape();
+  Self.Texts.Escape();
 end;
 
 function TPanelBitmap.PaintCursor(CursorPos: TPoint): TCursorDraw;
 var Return: array [0 .. 6] of TCursorDraw;
 begin
+  if (Self.Operations.moveStep > TGOpStep.gosNone) then
+    Exit(Self.CursorMove(CursorPos));
   if (Self.Operations.deleteStep > TGOpStep.gosNone) then
     Exit(Self.CursorDelete(CursorPos));
 
@@ -608,37 +599,21 @@ end;
 
 function TPanelBitmap.IsOperation(): Boolean;
 begin
-  Result := ((Self.Symbols.addStep <> gosNone) or (Self.Symbols.moveStep > gosActive) or
-    (Self.SeparatorsVert.addStep <> gosNone) or (Self.SeparatorsVert.moveStep > gosActive) or
-    (Self.SeparatorsHor.addStep <> gosNone) or (Self.SeparatorsHor.moveStep > gosActive) or
-    (Self.trackNames.addStep <> gosNone) or (Self.trackNames.moveStep > gosActive) or
-    (Self.JCClick.addStep <> gosNone) or (Self.JCClick.moveStep > gosActive) or
-    (Self.trainPoss.addStep <> gosNone) or (Self.trainPoss.moveStep > gosActive) or
-    (Self.texts.addStep <> gosNone) or (Self.texts.moveStep > gosActive));
+  Result := (Self.Operations.moveStep > gosActive) or
+    (Self.Symbols.addStep <> gosNone) or
+    (Self.SeparatorsVert.addStep <> gosNone) or
+    (Self.SeparatorsHor.addStep <> gosNone) or
+    (Self.trackNames.addStep <> gosNone) or
+    (Self.JCClick.addStep <> gosNone) or
+    (Self.trainPoss.addStep <> gosNone) or
+    (Self.texts.addStep <> gosNone);
 end;
 
 procedure TPanelBitmap.Move();
 begin
   if (Self.IsOperation()) then
     raise EOperationInProgress.Create('Právě probíhá operace!');
-
-  case (Self.Mode) of
-    dmBitmap:
-      begin
-        Self.Symbols.Move();
-        Self.TrackNames.Move();
-        Self.JCClick.Move();
-        Self.TrainPoss.Move();
-        Self.Texts.Move();
-      end;
-
-    dmSepHor:
-      if (Assigned(Self.SeparatorsHor)) then
-        Self.SeparatorsHor.Move();
-    dmSepVert:
-      if (Assigned(Self.SeparatorsVert)) then
-        Self.SeparatorsVert.Move();
-  end;
+  Self.Operations.moveStep := TGOpStep.gosActive;
 end;
 
 procedure TPanelBitmap.Delete();
@@ -650,13 +625,16 @@ end;
 
 procedure TPanelBitmap.PaintMove(CursorPos: TPoint);
 begin
-  Self.Symbols.PaintBitmapMove(CursorPos);
-  Self.SeparatorsVert.PaintMove(CursorPos);
-  Self.SeparatorsHor.PaintMove(CursorPos);
-  Self.TrackNames.PaintMove(CursorPos);
-  Self.JCClick.PaintMove(CursorPos);
-  Self.TrainPoss.PaintMove(CursorPos);
-  Self.Texts.PaintTextMove(CursorPos);
+  if (Self.Operations.moveStep = TGOpStep.gosMoving) then
+  begin
+    Self.SeparatorsVert.PaintMoveBuffer(CursorPos);
+    Self.SeparatorsHor.PaintMoveBuffer(CursorPos);
+    Self.TrackNames.PaintMoveBuffer(CursorPos);
+    Self.JCClick.PaintMoveBuffer(CursorPos);
+    Self.TrainPoss.PaintMoveBuffer(CursorPos);
+    Self.Texts.PaintMoveBuffer(CursorPos);
+    Self.Symbols.PaintMoveBuffer(CursorPos);
+  end;
 end;
 
 procedure TPanelBitmap.CheckOperations();
@@ -671,7 +649,7 @@ begin
   end;
 end;
 
-procedure TPanelBitmap.ChangeTextEvent(Sender: TObject; var popisek: TPopisek);
+procedure TPanelBitmap.ChangeTextEvent(Sender: TObject; var popisek: TPanelLabel);
 begin
   if (Assigned(Self.OnTextEdit)) then
     Self.OnTextEdit(Self, popisek);
@@ -873,7 +851,6 @@ begin
       TGOpStep.gosActive: // upper left point selected
         begin
           Self.Operations.groupStart := CursorPos;
-          //Self.Escape(False);
           Self.Operations.deleteStep := TGOpStep.gosSelecting;
         end;
       TGOpStep.gosSelecting: // lower right point selected
@@ -886,7 +863,7 @@ begin
           Self.JCClick.Delete(Self.Operations.groupStart, CursorPos);
           Self.TrainPoss.Delete(Self.Operations.groupStart, CursorPos);
           Self.Texts.Delete(Self.Operations.groupStart, CursorPos);
-          // intentionally do delete seprators
+          // intentionally delete separators
           Self.SeparatorsVert.Delete(Self.Operations.groupStart, CursorPos);
           Self.SeparatorsHor.Delete(Self.Operations.groupStart, CursorPos);
 
@@ -986,6 +963,144 @@ begin
     Result.X := Result.X + (_SYMBOL_WIDTH div 2)
   else if (Self.Mode = dmSepHor) then
     Result.Y := Result.Y + (_SYMBOL_HEIGHT div 2);
+end;
+
+/// ////////////////////////////////////////////////////////////////////////////
+
+procedure TPanelBitmap.MoveMouseUp(CursorPos: TPoint);
+begin
+  if ((Self.Operations.isGroup) or ((Self.Operations.groupStart <> _INACTIVE_POINT))) then
+  begin
+    // group active
+    case (Self.Operations.moveStep) of
+      TGOpStep.gosActive: // upper left point selected
+        begin
+          Self.Operations.groupStart := CursorPos;
+          Self.Operations.moveStep := TGOpStep.gosSelecting;
+        end;
+      TGOpStep.gosSelecting: // lower right point selected
+        begin
+          if ((Self.Operations.groupStart.X > CursorPos.X) or (Self.Operations.groupStart.Y > CursorPos.Y)) then
+            raise EInvalidPosition.Create('Výběr musí být zleva doprava a shora dolů!');
+
+          Self.Symbols.MoveDrag(Self.Operations.groupStart, CursorPos);
+          Self.TrackNames.MoveDrag(Self.Operations.groupStart, CursorPos);
+          Self.JCClick.MoveDrag(Self.Operations.groupStart, CursorPos);
+          Self.TrainPoss.MoveDrag(Self.Operations.groupStart, CursorPos);
+          Self.Texts.MoveDrag(Self.Operations.groupStart, CursorPos);
+          // intentionally move separators
+          Self.SeparatorsVert.MoveDrag(Self.Operations.groupStart, CursorPos);
+          Self.SeparatorsHor.MoveDrag(Self.Operations.groupStart, CursorPos);
+
+          Self.Operations.moveSize := Point(CursorPos.X-Self.Operations.groupStart.X+1, CursorPos.Y-Self.Operations.groupStart.Y+1);
+          Self.Operations.moveStep := TGOpStep.gosMoving;
+
+          var mousePos: TPoint;
+          GetCursorPos(mousePos);
+          SetCursorPos(mousePos.X-((Self.Operations.moveSize.X-1)*_SYMBOL_WIDTH), mousePos.Y-((Self.Operations.moveSize.Y-1)*_SYMBOL_HEIGHT));
+        end;
+      TGOpStep.gosMoving: // target position reached
+        begin
+          if ((not Self.Symbols.CanMoveDrop(CursorPos)) or (not Self.TrackNames.CanMoveDrop(CursorPos)) or
+              (not Self.JCClick.CanMoveDrop(CursorPos)) or (not Self.TrainPoss.CanMoveDrop(CursorPos)) or
+              (not Self.SeparatorsVert.CanMoveDrop(CursorPos)) or (not Self.SeparatorsHor.CanMoveDrop(CursorPos)) or
+              (not Self.Texts.CanMoveDrop(CursorPos))) then
+            raise EInvalidPosition.Create('Pozice je již obsazená!');
+
+          Self.Symbols.MoveDrop(CursorPos);
+          Self.TrackNames.MoveDrop(CursorPos);
+          Self.JCClick.MoveDrop(CursorPos);
+          Self.TrainPoss.MoveDrop(CursorPos);
+          Self.Texts.MoveDrop(CursorPos);
+          Self.SeparatorsVert.MoveDrop(CursorPos);
+          Self.SeparatorsHor.MoveDrop(CursorPos);
+
+          // flick a little
+          Self.Operations.groupStart := _INACTIVE_POINT;
+          Self.Operations.moveStep := TGOpStep.gosNone;
+          Self.Show();
+          Sleep(50);
+          Self.Operations.moveStep := TGOpStep.gosActive;
+          Self.Show();
+        end; // case 2
+    end;
+
+  end else begin
+    // group not active
+
+    if (Self.Operations.moveStep = TGOpStep.gosActive) then
+    begin
+      var dragged: Boolean := False;
+      case (Self.Mode) of
+        dmBitmap:
+          begin
+            if (not dragged) then
+              dragged := dragged or Self.TrackNames.MoveDrag(CursorPos, CursorPos);
+            if (not dragged) then
+              dragged := dragged or Self.JCClick.MoveDrag(CursorPos, CursorPos);
+            if (not dragged) then
+              dragged := dragged or Self.TrainPoss.MoveDrag(CursorPos, CursorPos);
+            if (not dragged) then
+              dragged := dragged or Self.Texts.MoveDrag(CursorPos, CursorPos);
+            if (not dragged) then
+              dragged := dragged or Self.Symbols.MoveDrag(CursorPos, CursorPos);
+          end;
+        dmSepVert:
+          dragged := Self.SeparatorsVert.MoveDrag(CursorPos, CursorPos);
+        dmSepHor:
+          dragged := Self.SeparatorsHor.MoveDrag(CursorPos, CursorPos);
+      end;
+
+      if (not dragged) then
+        raise EEmptyField.Create('Na pozici nic není!');
+
+      Self.Operations.groupStart := CursorPos; // rest will be done in "group active branch"
+      Self.Operations.moveSize := Point(1, 1);
+      Self.Operations.moveStep := TGOpStep.gosMoving;
+    end;
+  end; // else (Self.Group.IsGroup)
+end;
+
+function TPanelBitmap.CursorMove(CursorPos: TPoint): TCursorDraw;
+begin
+  Result.color := TCursorColor.ccDefault;
+  Result.Pos1.X := CursorPos.X * _SYMBOL_WIDTH;
+  Result.Pos1.Y := CursorPos.Y * _SYMBOL_HEIGHT;
+  Result.Pos2.X := CursorPos.X * _SYMBOL_WIDTH;
+  Result.Pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
+
+  case (Self.Operations.moveStep) of
+    TGOpStep.gosActive:
+      begin
+        Result.Pos2.X := CursorPos.X * _SYMBOL_WIDTH;
+        Result.Pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
+        if (Self.CanPick(CursorPos)) then
+          Result.color := TCursorColor.ccOnObject
+        else
+          Result.color := TCursorColor.ccActiveOperation;
+      end;
+    TGOpStep.gosSelecting:
+      begin
+        if (Self.Operations.isGroup) then
+        begin
+          Result.pos1.X := Self.Operations.groupStart.X * _SYMBOL_WIDTH;
+          Result.pos1.Y := Self.Operations.groupStart.Y * _SYMBOL_HEIGHT;
+        end;
+        Result.color := TCursorColor.ccOnObject;
+      end;
+    TGOpStep.gosMoving:
+      begin
+        Result.color := TCursorColor.ccOnObject;
+        if (Self.operations.isGroup) then
+        begin
+          Result.Pos2.X := (CursorPos.X + Self.Operations.moveSize.X - 1) * _SYMBOL_WIDTH;
+          Result.Pos2.Y := (CursorPos.Y + Self.Operations.moveSize.Y - 1) * _SYMBOL_HEIGHT;
+        end;
+      end;
+  end;
+
+  Result.pos1 := Self.CompensateMode(Result.pos1);
+  Result.pos2 := Self.CompensateMode(Result.pos2);
 end;
 
 /// ////////////////////////////////////////////////////////////////////////////

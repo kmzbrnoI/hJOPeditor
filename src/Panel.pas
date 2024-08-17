@@ -124,7 +124,7 @@ type
     procedure MessageEvent(Sender: TObject; msg: string);
     procedure BlkFormCloseEvent(Sender: TObject);
 
-    function IsOREvent(pos: TPoint): Boolean;
+    function IsAreaStuffPresent(pos: TPoint): Boolean;
 
     procedure SetGroup(State: Boolean);
     function GetGroup(): Boolean;
@@ -364,9 +364,9 @@ begin
   // vykresleni objektu s ohledem na DrawMode
   case (Self.DrawMode) of
     dmBitmap, dmSepHor, dmSepVert:
-      Self.PanelBitmap.Paint;
+      Self.PanelBitmap.Paint();
     dmBloky, dmRoots:
-      Self.PanelObjects.Paint;
+      Self.PanelObjects.Paint();
   end;
   Self.PaintOR();
   if (Self.Grid) then
@@ -1155,7 +1155,7 @@ procedure TRelief.AssignBitmapEvents();
 begin
   Self.PanelBitmap.OnShow := Self.ShowEvent;
   Self.PanelBitmap.OnTextEdit := Self.OnChangeText;
-  Self.PanelBitmap.OnORAsk := Self.IsOREvent;
+  Self.PanelBitmap.IsAreaStuffPresent := Self.IsAreaStuffPresent;
 end;
 
 procedure TRelief.AssignObjectEvents();
@@ -1170,7 +1170,7 @@ end;
 
 // vola se z bitmapoveho modu
 // vraci true, pokud je na dane pozici DK, zasobnik, ci mereni casu
-function TRelief.IsOREvent(pos: TPoint): Boolean;
+function TRelief.IsAreaStuffPresent(pos: TPoint): Boolean;
 begin
   for var area in Self.ORs do
   begin
