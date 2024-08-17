@@ -56,8 +56,8 @@ type
     procedure Add(pos1: TPoint; pos2: TPoint; symbolID: Integer); overload;
     procedure Add(aPos: TPoint; SymbolID: Integer); overload;
     function MoveDrag(pos1: TPoint; pos2: TPoint): Boolean; // returns if anything dragged
-    procedure MoveDrop(pos: TPoint);
-    function CanMoveDrop(pos: TPoint): Boolean;
+    procedure MoveDrop(pos: TPoint); // pos = right bottom position
+    function CanMoveDrop(pos: TPoint): Boolean; // pos = right bottom position
     procedure Delete(aPos: TPoint); overload;
     procedure Delete(pos1: TPoint; pos2: TPoint); overload;
 
@@ -131,9 +131,10 @@ end;
 
 procedure TBitmapSymbols.PaintMoveBuffer(pos: TPoint);
 begin
+  // pos = right down position
   for var x: Integer := 0 to Self.MoveBuf.Width - 1 do
     for var y: Integer := 0 to Self.MoveBuf.Height - 1 do
-      Self.PaintSymbol(pos.X+x, pos.Y+y, Self.MoveBuf.Symbols[x, y]);
+      Self.PaintSymbol(pos.X+x-Self.MoveBuf.Width+1, pos.Y+y-Self.MoveBuf.Height+1, Self.MoveBuf.Symbols[x, y]);
 end;
 
 procedure TBitmapSymbols.PaintAddSymbol(pos1: TPoint; pos2: TPoint);
@@ -210,7 +211,7 @@ begin
   for var x: Integer := 0 to Self.MoveBuf.Width-1 do
     for var y: Integer := 0 to Self.MoveBuf.Height-1 do
       if (Self.MoveBuf.Symbols[x, y] <> _NO_SYMBOL) then
-        Self.Add(Point(pos.X + x, pos.Y + y), Self.MoveBuf.Symbols[x, y]);
+        Self.Add(Point(pos.X+x-Self.MoveBuf.Width+1, pos.Y+y-Self.MoveBuf.Height+1), Self.MoveBuf.Symbols[x, y]);
   Self.MoveBuf.Width := 0;
   Self.MoveBuf.Height := 0;
 end;
@@ -220,7 +221,8 @@ begin
   Result := True;
   for var x: Integer := 0 to Self.MoveBuf.Width-1 do
     for var y: Integer := 0 to Self.MoveBuf.Height-1 do
-      if ((Self.MoveBuf.Symbols[x, y] <> _NO_SYMBOL) and (Self.IsConflict(Point(pos.X+x, pos.Y+y)))) then
+      if ((Self.MoveBuf.Symbols[x, y] <> _NO_SYMBOL) and
+          (Self.IsConflict(Point(pos.X+x-Self.MoveBuf.Width+1, pos.Y+y-Self.MoveBuf.Height+1)))) then
         Exit(False);
 end;
 

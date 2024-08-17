@@ -47,8 +47,8 @@ type
     destructor Destroy(); override;
 
     function MoveDrag(pos1: TPoint; pos2: TPoint): Boolean; // returns if anything dragged
-    procedure MoveDrop(pos: TPoint);
-    function CanMoveDrop(pos: TPoint): Boolean;
+    procedure MoveDrop(pos: TPoint); // pos = right bottom position
+    function CanMoveDrop(pos: TPoint): Boolean; // pos = right bottom position
     procedure Delete(Position: TPoint); overload;
 
     function GetObjectI(Position: TPoint): Integer;
@@ -235,7 +235,7 @@ begin
       var i: Integer := Self.GetObjectI(Point(x, y));
       if (i > -1) then
       begin
-        Self.MoveBuf.Add(Point(x-pos1.X, y-pos1.Y));
+        Self.MoveBuf.Add(Point(x-pos2.X, y-pos2.Y));
         Self.Data.Delete(i);
         Result := True;
       end;

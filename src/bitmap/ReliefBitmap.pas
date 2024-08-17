@@ -14,7 +14,6 @@ const
 
 type
   TORAskEvent = function(Pos: TPoint): Boolean of object;
-  TBitmapOpType = (botNone = 0, botMove = 1, botDelete = 2);
   TAddType = (apSymbol, apJCClick, apTrackName, apTrainPos, apSeparVert, apSeparHor, apText);
 
   TPanelBitmap = class
@@ -24,8 +23,6 @@ type
     mFileName: string;
 
     Operations: record
-      disable: Boolean;
-      opType: TBitmapOpType;
       addStep: TGOpStep;
       addType: TAddType;
       moveSize: TPoint;
@@ -47,8 +44,7 @@ type
     function GetGroup(): Boolean;
 
     function IsOperation(): Boolean;
-    procedure CheckOperations();
-
+    
     procedure Show();
     function IsConflictSymbolPlace(Pos: TPoint): Boolean;
     function IsConflictTextPlace(Pos: TPoint): Boolean;
@@ -364,8 +360,6 @@ begin
   Self.Mode := Mode;
   Self.Graphics := Graphics;
 
-  Self.Operations.disable := False;
-  Self.Operations.opType := botNone;
   Self.Operations.addStep := gosNone;
   Self.Operations.moveStep := gosNone;
   Self.Operations.deleteStep := gosNone;
@@ -421,8 +415,6 @@ end;
 
 procedure TPanelBitmap.MouseUp(Position: TPoint; Button: TMouseButton);
 begin
-  Self.operations.disable := true;
-
   if ((Self.Operations.addStep > TGOpStep.gosNone) and (Button = TMouseButton.mbLeft)) then
     Self.AddMouseUp(Position)
   else if ((Self.Operations.moveStep > TGOpStep.gosNone) and (Button = TMouseButton.mbLeft)) then
@@ -436,9 +428,6 @@ begin
         Self.texts.MouseUp(Position, Button);
       end;
   end; // case
-
-  Self.operations.disable := false;
-  Self.CheckOperations();
 end;
 
 procedure TPanelBitmap.DblClick(Position: TPoint);
@@ -630,18 +619,6 @@ begin
     Self.TrainPoss.PaintMoveBuffer(CursorPos);
     Self.Texts.PaintMoveBuffer(CursorPos);
     Self.Symbols.PaintMoveBuffer(CursorPos);
-  end;
-end;
-
-procedure TPanelBitmap.CheckOperations();
-begin
-  if ((not Self.operations.disable) and (Self.operations.opType <> botNone)) then
-  begin
-    case (Self.operations.opType) of
-      botMove: Self.Move();
-      botDelete: Self.Delete();
-    end;
-    Self.operations.opType := botNone;
   end;
 end;
 
@@ -941,8 +918,8 @@ begin
 
   if ((Self.Operations.addStep = TGOpStep.gosActive) or (Self.Operations.moveStep = TGOpStep.gosActive) or (Self.Operations.deleteStep = TGOpStep.gosActive)) then
   begin
-    Result.Pos2.X := CursorPos.X * _SYMBOL_WIDTH;
-    Result.Pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
+    Result.pos2.X := CursorPos.X * _SYMBOL_WIDTH;
+    Result.pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
     if (Self.CanPick(CursorPos)) then
       Result.color := TCursorColor.ccOnObject
     else
@@ -962,8 +939,8 @@ begin
     Result.color := TCursorColor.ccOnObject;
     if (Self.operations.isGroup) then
     begin
-      Result.Pos2.X := (CursorPos.X + Self.Operations.moveSize.X - 1) * _SYMBOL_WIDTH;
-      Result.Pos2.Y := (CursorPos.Y + Self.Operations.moveSize.Y - 1) * _SYMBOL_HEIGHT;
+      Result.pos1.X := (CursorPos.X - Self.Operations.moveSize.X + 1) * _SYMBOL_WIDTH;
+      Result.pos1.Y := (CursorPos.Y - Self.Operations.moveSize.Y + 1) * _SYMBOL_HEIGHT;
     end;
   end;
 
@@ -1000,10 +977,6 @@ begin
 
           Self.Operations.moveSize := Point(CursorPos.X-Self.Operations.groupStart.X+1, CursorPos.Y-Self.Operations.groupStart.Y+1);
           Self.Operations.moveStep := TGOpStep.gosMoving;
-
-          var mousePos: TPoint;
-          GetCursorPos(mousePos);
-          SetCursorPos(mousePos.X-((Self.Operations.moveSize.X-1)*_SYMBOL_WIDTH), mousePos.Y-((Self.Operations.moveSize.Y-1)*_SYMBOL_HEIGHT));
         end;
       TGOpStep.gosMoving: // target position reached
         begin

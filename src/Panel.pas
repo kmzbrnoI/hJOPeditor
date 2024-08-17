@@ -26,7 +26,6 @@ type
 
   TRelief = class
   private const
-    _MAX_MOVE = 64;
     _MAX_TEXT_LENGTH = 32;
     _MIN_TEXT_LENGTH = 1;
 
@@ -715,18 +714,18 @@ begin
     Self.PanelBitmap.Group := State;
 end;
 
-function TRelief.GetGroup: Boolean;
+function TRelief.GetGroup(): Boolean;
 begin
   Result := false;
 
   if (Assigned(Self.PanelBitmap)) then
     Result := Self.PanelBitmap.Group;
-end; // fucntion
+end;
 
-procedure TRelief.MoveBitmapSymbol;
+procedure TRelief.MoveBitmapSymbol();
 begin
   if (Assigned(Self.PanelBitmap)) then
-    Self.PanelBitmap.Move;
+    Self.PanelBitmap.Move();
   Self.FMove := true;
   Self.Show(Self.LastPos);
 end;
