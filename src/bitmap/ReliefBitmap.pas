@@ -424,15 +424,19 @@ begin
 
   case (Self.Mode) of
     dmBitmap:
-      begin
-        Self.texts.MouseUp(Position, Button);
-      end;
-  end; // case
+      Self.texts.MouseUp(Position, Button);
+  end;
 end;
 
 procedure TPanelBitmap.DblClick(Position: TPoint);
 begin
-
+  var texti := Self.Texts.GetTextI(Position);
+  if (texti > -1) then
+  begin
+    var lbl: TPanelLabel := Self.Texts.GetText(texti);
+    Self.ChangeTextEvent(Self, lbl);
+    Self.Texts.SetText(texti, lbl);
+  end;
 end;
 
 procedure TPanelBitmap.Show();

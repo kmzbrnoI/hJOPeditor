@@ -129,7 +129,7 @@ begin
     var popisek_index: Integer := 0;
     for var x: Integer := 0 to Self.bitmap.texts.Count - 1 do
     begin
-      var PopData := Self.bitmap.texts.GetPopisekData(x);
+      var PopData := Self.bitmap.texts.GetText(x);
 
       var blk: TText;
       if (PopData.Description) then

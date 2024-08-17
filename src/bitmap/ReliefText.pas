@@ -69,8 +69,8 @@ type
     procedure Add(aPos: TPoint; aText: string; aColor: SymbolColor; aBlokDesc: boolean); overload;
     procedure Delete(aPos: TPoint); overload;
 
-    function GetPopisekData(Index: Integer): TPanelLabel;
-    function SetPopisekData(Index: Integer; Data: TPanelLabel): Byte;
+    function GetText(Index: Integer): TPanelLabel;
+    function SetText(Index: Integer; Data: TPanelLabel): Byte;
 
     procedure Paint(showPopisky: boolean);
     procedure PaintMoveBuffer(pos: TPoint);
@@ -282,18 +282,18 @@ begin
       Self.Graphics.TextOutputI(popisek.Position, popisek.Text, popisek.Color, clBlack, popisek.Description, true);
 end;
 
-function TText.GetPopisekData(Index: Integer): TPanelLabel;
+function TText.GetText(Index: Integer): TPanelLabel;
 begin
   if (Index >= _MAX_POPISKY) then
   begin
     Result.Color := scPurple;
-    Exit;
+    Exit();
   end;
 
   Result := Self.Data[Index];
 end;
 
-function TText.SetPopisekData(Index: Integer; Data: TPanelLabel): Byte;
+function TText.SetText(Index: Integer; Data: TPanelLabel): Byte;
 begin
   if (Index >= _MAX_POPISKY) then
   begin
@@ -398,10 +398,10 @@ var PIndex: Integer;
 begin
   PIndex := Self.GetTextI(MenuPosition);
 
-  var aPopisek := Self.GetPopisekData(PIndex);
+  var aLabel := Self.GetText(PIndex);
   if (Assigned(Self.OnChangeText)) then
-    Self.OnChangeText(Self, aPopisek);
-  Self.SetPopisekData(PIndex, aPopisek);
+    Self.OnChangeText(Self, aLabel);
+  Self.SetText(PIndex, aLabel);
 
   if (Assigned(Self.OnShow)) then
     Self.OnShow();
