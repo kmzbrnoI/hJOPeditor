@@ -121,7 +121,7 @@ procedure TF_Popisek.OpenPopisek(aText: string; popisek: TPanelLabel);
 begin
   Self.PopisekText := popisek.Text;
   Self.PopisekColor := Integer(popisek.Color);
-  Self.PopisekBlok := popisek.BlokPopisek;
+  Self.PopisekBlok := popisek.Description;
 
   Self.E_Text.Text := popisek.Text;
   case (popisek.Color) of
@@ -134,7 +134,7 @@ begin
     scBlue: Self.RB_Col6.Checked := true;
     scYellow: Self.RB_Col7.Checked := true;
   end;
-  Self.CHB_Blok_Popisek.Checked := popisek.BlokPopisek;
+  Self.CHB_Blok_Popisek.Checked := popisek.Description;
 
   Self.Caption := 'Editovat popisek';
   Self.ActiveControl := Self.E_Text;

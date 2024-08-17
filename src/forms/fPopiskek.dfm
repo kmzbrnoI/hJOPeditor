@@ -3,8 +3,8 @@ object F_Popisek: TF_Popisek
   Top = 0
   BorderStyle = bsToolWindow
   Caption = '[operace]'
-  ClientHeight = 324
-  ClientWidth = 233
+  ClientHeight = 337
+  ClientWidth = 241
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

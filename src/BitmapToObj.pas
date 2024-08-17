@@ -132,7 +132,7 @@ begin
       var PopData := Self.bitmap.texts.GetPopisekData(x);
 
       var blk: TText;
-      if (PopData.BlokPopisek) then
+      if (PopData.Description) then
         blk := TText.Create(popisek_index)
       else
         blk := TText.Create(index);
@@ -140,7 +140,7 @@ begin
       blk.Position := PopData.Position;
       blk.Color := PopData.Color;
 
-      if (PopData.BlokPopisek) then
+      if (PopData.Description) then
       begin
         blk.typ := TBlkType.description;
         blk.block := -2;

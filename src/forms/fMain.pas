@@ -955,7 +955,7 @@ begin
     Exit;
   popisek.Text := F_Popisek.PopisekText;
   popisek.Color := SymbolColor(F_Popisek.PopisekColor);
-  popisek.BlokPopisek := F_Popisek.PopisekBlok;
+  popisek.Description := F_Popisek.PopisekBlok;
 end;
 
 procedure TF_Main.BlokEditEvent(Sender: TObject; Blok: TGraphBlok);

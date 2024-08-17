@@ -741,19 +741,19 @@ end;
 procedure TRelief.AddSymbol(SymbolID: Integer);
 begin
   if (Assigned(Self.PanelBitmap)) then
-    Self.PanelBitmap.symbols.Add(SymbolID);
+    Self.PanelBitmap.AddSymbol(SymbolID);
 end;
 
 procedure TRelief.AddText(Text: string; Color: SymbolColor; popisekBlok: Boolean);
 begin
   if (Assigned(Self.PanelBitmap)) then
-    Self.PanelBitmap.texts.Add(Text, Color, popisekBlok);
+    Self.PanelBitmap.AddText(Text, Color, popisekBlok);
 end;
 
 procedure TRelief.AddJCClick();
 begin
   if (Assigned(Self.PanelBitmap)) then
-    Self.PanelBitmap.JCClick.Add();
+    Self.PanelBitmap.AddJCClick();
 end;
 
 procedure TRelief.AddSeparatorVert();
@@ -761,7 +761,7 @@ begin
   if (Self.Mode <> dmSepVert) then
     Self.SwitchMode(dmSepVert);
   if (Assigned(Self.PanelBitmap)) then
-    Self.PanelBitmap.separatorsVert.Add();
+    Self.PanelBitmap.AddSeparVert();
 end;
 
 procedure TRelief.AddSeparatorHor();
@@ -769,19 +769,19 @@ begin
   if (Self.Mode <> dmSepHor) then
     Self.SwitchMode(dmSepHor);
   if (Assigned(Self.PanelBitmap)) then
-    Self.PanelBitmap.separatorsHor.Add();
+    Self.PanelBitmap.AddSeparHor();
 end;
 
 procedure TRelief.AddTrackName();
 begin
   if (Assigned(Self.PanelBitmap)) then
-    Self.PanelBitmap.trackNames.Add();
+    Self.PanelBitmap.AddTrackName();
 end;
 
 procedure TRelief.AddTrainPos();
 begin
   if (Assigned(Self.PanelBitmap)) then
-    Self.PanelBitmap.trainPoss.Add();
+    Self.PanelBitmap.AddTrainPos();
 end;
 
 procedure TRelief.MessageEvent(Sender: TObject; msg: string);

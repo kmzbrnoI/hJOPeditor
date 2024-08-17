@@ -4,8 +4,8 @@ object F_ReliefProperties: TF_ReliefProperties
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'Zm'#283'nit vlastnosti reli'#233'fu'
-  ClientHeight = 103
-  ClientWidth = 243
+  ClientHeight = 111
+  ClientWidth = 248
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

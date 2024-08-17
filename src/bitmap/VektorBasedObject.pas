@@ -31,23 +31,13 @@ type
       SymColor: SymbolColor;
     end;
 
-    Operations: record
-      AddStep: TGOpStep;
-    end;
-
     Separ: TSeparType;
     MoveBuf: TList<TPoint>;
 
-    mOnShow: TNEvent;
     mIsConflict: TPosAskEvent;
-    mNullOperations: TNEvent;
-    mOPAsk: TOpAskEvent;
-
-    procedure Adding(Position: TPoint);
 
     function GetCount(): Integer;
-    procedure CheckOpInProgressAndExcept();
-
+    
     function IsConflict(pos: TPoint): Boolean;
     function SeparOffset(): TPoint;
 
@@ -56,7 +46,6 @@ type
                        SymColor: SymbolColor; separ: TSeparType = stNone);
     destructor Destroy(); override;
 
-    procedure Add(Position: TPoint); overload;
     function MoveDrag(pos1: TPoint; pos2: TPoint): Boolean; // returns if anything dragged
     procedure MoveDrop(pos: TPoint);
     function CanMoveDrop(pos: TPoint): Boolean;
@@ -67,26 +56,20 @@ type
 
     procedure Paint();
     procedure PaintMoveBuffer(pos: TPoint);
-    function PaintCursor(CursorPos: TPoint): TCursorDraw;
+    procedure PaintAddSymbol(pos1: TPoint; pos2: TPoint);
 
     procedure LoadBpnl(var f: File; fileVersion: Byte);
     procedure WriteBpnl(var f: File);
 
     procedure Clear();
-    procedure Escape();
 
-    procedure MouseUp(Position: TPoint; Button: TMouseButton);
-
-    procedure Add(); overload;
+    procedure Add(Position: TPoint); overload;
+    procedure Add(pos1: TPoint; pos2: TPoint); overload;
     function Delete(pos1: TPoint; pos2: TPoint): Boolean; overload; // returns if anything deleted
 
-    property addStep: TGOpStep read Operations.AddStep;
     property count: Integer read GetCount;
 
-    property OnShow: TNEvent read mOnShow write mOnShow;
     property QIsConflict: TPosAskEvent read mIsConflict write mIsConflict;
-    property IsOp: TOpAskEvent read mOPAsk write mOPAsk;
-    property OnNullOperations: TNEvent read mNullOperations write mNullOperations;
   end; // TVBO
 
 implementation
@@ -117,13 +100,6 @@ end;
 procedure TVBO.Clear();
 begin
   Self.Data.Clear();
-  Self.MoveBuf.Clear();
-  Self.Escape();
-end;
-
-procedure TVBO.Escape();
-begin
-  Self.Operations.AddStep := gosNone;
   Self.MoveBuf.Clear();
 end;
 
@@ -232,34 +208,20 @@ begin
       ((pos.Y+item.Y) * _SYMBOL_HEIGHT) + offset.Y, SymbolIndex(Self.DrawObject.symbolIndex, Self.DrawObject.symColor));
 end;
 
-procedure TVBO.Adding(Position: TPoint);
+procedure TVBO.PaintAddSymbol(pos1: TPoint; pos2: TPoint);
 begin
-  // kontrola obsazenosti
-  if (Self.IsConflict(Position)) then
-    raise ENonemptyField.Create('Na této pozici je již symbol!');
-
-  if (Assigned(mNullOperations)) then
-    mNullOperations();
-
-  Self.Add(Position);
-
-  // znovu pripraveni dosazeni objektu
-  Self.Operations.addStep := gosNone;
-  if (Assigned(mOnShow)) then
-  begin
-    mOnShow();
-    Sleep(50);
-  end;
-
-  Self.Add();
+  var offset: TPoint := Self.SeparOffset();
+  for var x: Integer := pos1.X to pos2.X do
+    for var y: Integer := pos1.Y to pos2.Y do
+      Self.DrawObject.SymbolIL.Draw(Self.DrawObject.canvas, (x * _SYMBOL_WIDTH) + offset.X,
+        (y * _SYMBOL_HEIGHT) + offset.Y, SymbolIndex(Self.DrawObject.symbolIndex, Self.DrawObject.symColor));
 end;
 
-procedure TVBO.Add();
+procedure TVBO.Add(pos1: TPoint; pos2: TPoint);
 begin
-  Self.CheckOpInProgressAndExcept();
-  Self.Operations.addStep := gosActive;
-  if Assigned(mOnShow) then
-    mOnShow();
+  for var x: Integer := pos1.X to pos2.X do
+    for var y: Integer := pos1.Y to pos2.Y do
+      Self.Add(Point(x, y));
 end;
 
 function TVBO.MoveDrag(pos1: TPoint; pos2: TPoint): Boolean;
@@ -312,44 +274,9 @@ begin
   end;
 end;
 
-procedure TVBO.MouseUp(Position: TPoint; Button: TMouseButton);
-begin
-  if (Button = mbLeft) then
-  begin
-    if (Self.Operations.addStep > gosNone) then
-      Self.Adding(Position)
-  end;
-end;
-
-// vykresleni kurzoru - vraci data PIXELECH!
-function TVBO.PaintCursor(CursorPos: TPoint): TCursorDraw;
-begin
-  Result.color := TCursorColor.ccDefault;
-
-  Result.Pos1.X := CursorPos.X * _SYMBOL_WIDTH;
-  Result.Pos1.Y := CursorPos.Y * _SYMBOL_HEIGHT;
-  Result.Pos2.X := CursorPos.X * _SYMBOL_WIDTH;
-  Result.Pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
-
-  if (Self.Operations.addStep = gosActive) then
-    Result.color := TCursorColor.ccOnObject;
-end;
-
 function TVBO.GetCount(): Integer;
 begin
   Result := Self.data.Count;
-end;
-
-procedure TVBO.CheckOpInProgressAndExcept();
-begin
-  if (Assigned(Self.IsOp)) then
-  begin
-    if (Self.IsOp) then
-      raise EOperationInProgress.Create('Právě probíhá operace!');
-  end else begin
-    if (Self.Operations.addStep > gosNone) then
-      raise EOperationInProgress.Create('Právě probíhá operace!');
-  end;
 end;
 
 function TVBO.IsConflict(pos: TPoint): Boolean;
