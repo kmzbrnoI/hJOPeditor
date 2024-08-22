@@ -231,7 +231,6 @@ end;
 // ziskani surovych dat zapisovanych do souboru z dat programu
 function TText.GetSaveData(): TBytes;
 var bytesBuf: TBytes;
-  len: Integer;
   currentLen: Integer;
 begin
   SetLength(Result, 1024);
@@ -239,7 +238,7 @@ begin
 
   for var p in Self.Data do
   begin
-    len := TEncoding.UTF8.GetByteCount(p.Text);
+    var len: Integer := TEncoding.UTF8.GetByteCount(p.Text);
     SetLength(bytesBuf, len);
     bytesBuf := TEncoding.UTF8.GetBytes(p.Text);
 

@@ -254,7 +254,7 @@ begin
           Rozmery.X, Rozmery.Y, dmBitmap, Self.ParentForm, Self.Graphics);
         Self.AssignBitmapEvents();
       end; // dmBitmap
-    dmBloky:
+    dmBlocks:
       begin
         Self.PanelObjects := TPanelObjects.Create(Self.IL_Symbols, Self.IL_Text, Self.DrawObject.Surface.Canvas,
           Rozmery.X, Rozmery.Y, Self.DrawObject, Self.Graphics);
@@ -285,7 +285,7 @@ begin
   if (RightStr(aFile, 5) = _FILESUFFIX_BPNL) then
     Mode := dmBitmap
   else if (RightStr(aFile, 5) = _FILESUFFIX_OBJ) then
-    Mode := dmBloky
+    Mode := dmBlocks
   else
     raise EGeneralFileOpen.Create('Soubor s nepodporovanou příponou!');
 
@@ -365,7 +365,7 @@ begin
   case (Self.DrawMode) of
     dmBitmap, dmSepHor, dmSepVert:
       Self.PanelBitmap.Paint();
-    dmBloky, dmRoots:
+    dmBlocks, dmRoots:
       Self.PanelObjects.Paint();
   end;
   Self.PaintOR();
@@ -381,7 +381,7 @@ begin
     case (Self.DrawMode) of
       dmBitmap, dmSepHor, dmSepVert:
         Self.PaintCursor(Self.PanelBitmap.PaintCursor(CursorPos));
-      dmBloky, dmRoots:
+      dmBlocks, dmRoots:
         Self.PaintCursor(Self.PanelObjects.PaintCursor(CursorPos));
     end; // case
   end;
@@ -464,7 +464,7 @@ begin
     case (Self.DrawMode) of
       dmBitmap, dmSepHor, dmSepVert:
         Self.BitmapMouseUp(LastPos, Button);
-      dmBloky, dmRoots:
+      dmBlocks, dmRoots:
         Self.ObjectMouseUp(LastPos, Button);
     end; // case
   end; // ORMouseUp = 0
@@ -481,7 +481,7 @@ begin
   LastPos.Y := Y div _SYMBOL_HEIGHT;
 
   case (Self.DrawMode) of
-    dmBloky, dmRoots:
+    dmBlocks, dmRoots:
       Self.PanelObjects.MouseMove(LastPos);
   end; // case
 
@@ -503,7 +503,7 @@ begin
 
       Self.BitmapDblClick(LastPos);
     end;
-    dmBloky, dmRoots:
+    dmBlocks, dmRoots:
     begin
       Self.ObjectDblClick(LastPos);
     end;
@@ -549,7 +549,7 @@ begin
     dmBitmap, dmSepVert, dmSepHor:
       if (Assigned(Self.PanelBitmap)) then
         Self.PanelBitmap.Escape(Group);
-    dmBloky, dmRoots:
+    dmBlocks, dmRoots:
       if (Assigned(Self.PanelObjects)) then
         Self.PanelObjects.Escape();
   end;
@@ -560,7 +560,7 @@ end;
 
 procedure TRelief.SwitchMode(aMode: TMode);
 begin
-  if (((Self.DrawMode = dmBitmap) or (Self.DrawMode = dmSepHor) or (Self.DrawMode = dmSepVert)) and (aMode = dmBloky))
+  if (((Self.DrawMode = dmBitmap) or (Self.DrawMode = dmSepHor) or (Self.DrawMode = dmSepVert)) and (aMode = dmBlocks))
   then
   begin
     // konverze z Bitmap na Objects
@@ -588,7 +588,7 @@ begin
       Self.PanelBitmap.Mode := aMode
 
       // konverze Bloky <-> Koreny
-    else if (((Self.DrawMode = dmBloky) and (aMode = dmRoots)) or ((Self.DrawMode = dmRoots) and (aMode = dmBloky)))
+    else if (((Self.DrawMode = dmBlocks) and (aMode = dmRoots)) or ((Self.DrawMode = dmRoots) and (aMode = dmBlocks)))
     then
       Self.PanelObjects.Mode := aMode;
 
@@ -675,7 +675,7 @@ begin
         Self.mPanelWidth := Self.PanelBitmap.PanelWidth;
         Self.mPanelHeight := Self.PanelBitmap.PanelHeight;
       end; // dmBitmap
-    dmBloky, dmRoots:
+    dmBlocks, dmRoots:
       begin
         var ORs: string;
         Self.PanelObjects.OpnlLoad(aFile, ORs);
@@ -683,7 +683,7 @@ begin
         Self.Panel.fileState := Self.PanelObjects.FileStav;
         Self.mPanelWidth := Self.PanelObjects.PanelWidth;
         Self.mPanelHeight := Self.PanelObjects.PanelHeight;
-      end; // dmBloky
+      end; // dmBlocks
   end; // case
 
   Self.DrawObject.Width := Self.PanelWidth * _SYMBOL_WIDTH;
@@ -701,11 +701,11 @@ begin
         Self.Panel.fileState := Self.PanelBitmap.fileState;
       end; // dmBitmap
 
-    dmBloky, dmRoots:
+    dmBlocks, dmRoots:
       begin
         Self.PanelObjects.OpnlSave(aFile, Self.ORSave());
         Self.Panel.fileState := Self.PanelObjects.FileStav;
-      end; // dmBloky
+      end; // dmBlocks
   end;
   /// case
 
@@ -910,7 +910,7 @@ function TRelief.ORMouseUp(Position: TPoint; Button: TMouseButton): Byte;
 begin
   Result := 0;
 
-  if (Self.Mode = dmBloky) then
+  if (Self.Mode = dmBlocks) then
   begin
     // tohleto umoznuje pripradit OR bloku tim, ze kliknu na prislusny baracek
     if (Button <> mbLeft) then
@@ -925,7 +925,7 @@ begin
     if (Assigned(Self.OnBlokEdit)) then
       Self.OnBlokEdit(Self, Self.PanelObjects.selected_obj);
     Result := 1;
-  end; // dmBloky
+  end; // dmBlocks
 
   if (Self.Mode = dmBitmap) then
   begin
@@ -1233,7 +1233,7 @@ begin
   case (Self.Mode) of
     dmBitmap, dmSepVert, dmSepHor:
       Result := Self.PanelBitmap.ShowBlokPopisky;
-    dmBloky, dmRoots:
+    dmBlocks, dmRoots:
       Result := Self.PanelObjects.ShowBlokPopisky;
   else
     Result := true;
@@ -1245,7 +1245,7 @@ begin
   case (Self.Mode) of
     dmBitmap, dmSepVert, dmSepHor:
       Self.PanelBitmap.ShowBlokPopisky := show;
-    dmBloky, dmRoots:
+    dmBlocks, dmRoots:
       Self.PanelObjects.ShowBlokPopisky := show;
   end;
   Self.Show(Point(-1, -1));
@@ -1255,7 +1255,7 @@ end;
 
 procedure TRelief.ImportOldOpnl(aFile: string);
 begin
-  if ((Self.Mode <> dmBloky) and (Self.Mode <> dmRoots)) then
+  if ((Self.Mode <> dmBlocks) and (Self.Mode <> dmRoots)) then
     raise Exception.Create('Panel musí být v režimu bloků nebo kořenů!');
   Self.PanelObjects.ImportOldOpnl(aFile);
 end;

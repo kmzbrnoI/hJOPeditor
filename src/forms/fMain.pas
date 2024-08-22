@@ -375,7 +375,7 @@ begin
         Self.PM_ORAdd.Enabled := true;
       end;
 
-    dmBloky:
+    dmBlocks:
       begin
         Self.PM_ORAdd.Enabled := false;
         Self.PM_BitmapClick(Self.PM_Bloky);
@@ -517,7 +517,7 @@ begin
       Relief.Save(Self.SD_Save.FileName);
   end; // bitmapovy mod
 
-  if (Relief.Mode = dmBloky) then
+  if (Relief.Mode = dmBlocks) then
   begin
     Self.SD_Save.Filter := 'Objektové soubory panelu (*.opnl)|*.opnl';
 
@@ -556,14 +556,14 @@ begin
       end; // else .Stav = 1
     end; // bitmapovy mod
 
-    if ((Relief.Mode = dmBloky) or (Relief.Mode = dmRoots)) then
+    if ((Relief.Mode = dmBlocks) or (Relief.Mode = dmRoots)) then
     begin
       Self.SD_Save.Filter := 'Objektové soubory panelu (*.opnl)|*.opnl';
 
       if (Relief.FileState = fsUnsaved) then
       begin
         if (not Self.SD_Save.Execute(Self.Handle)) then
-          Exit;
+          Exit();
         if (RightStr(Self.SD_Save.FileName, 5) <> '.opnl') then
           Relief.Save(Self.SD_Save.FileName + '.opnl')
         else
@@ -620,7 +620,7 @@ begin
   case (Sender as TMenuItem).Tag of
     0:
       begin
-        if (Relief.Mode = dmBloky) then
+        if (Relief.Mode = dmBlocks) then
         begin
           Application.MessageBox('Tato funkce zatím není dostupná', 'Nelze převést', MB_OK OR MB_ICONERROR);
           Self.PM_Bloky.Checked := true;
@@ -653,7 +653,7 @@ begin
 
     1, 2:
       begin
-        if (Relief.Mode = dmBloky) then
+        if (Relief.Mode = dmBlocks) then
         begin
           Application.MessageBox('Tato funkce zatím není dostupná', 'Nelze převést', MB_OK OR MB_ICONERROR);
           Self.PM_Bloky.Checked := true;
@@ -695,8 +695,8 @@ begin
         end;
 
         try
-          if (Relief.Mode <> dmBloky) then
-            Relief.SwitchMode(dmBloky);
+          if (Relief.Mode <> dmBlocks) then
+            Relief.SwitchMode(dmBlocks);
         except
           on E: Exception do
           begin
@@ -758,7 +758,7 @@ procedure TF_Main.MI_CheckDataClick(Sender: TObject);
 var error_cnt: Byte;
   LI: TListItem;
 begin
-  if ((Assigned(Self.Relief)) and ((Self.Relief.Mode = dmBloky) or (Self.Relief.Mode = dmRoots))) then
+  if ((Assigned(Self.Relief)) and ((Self.Relief.Mode = dmBlocks) or (Self.Relief.Mode = dmRoots))) then
   begin
     F_DataCheck.OpenForm(Self.Relief.CheckValid(error_cnt));
     LI := F_DataCheck.LV_Errors.Items.Add;
@@ -1016,7 +1016,7 @@ begin
         Self.PM_Roots.Enabled := false;
       end;
 
-    dmBloky, dmRoots:
+    dmBlocks, dmRoots:
       begin
         Self.PM_Bitmap.Enabled := false;
         Self.PM_Sep_Vert.Enabled := false;
@@ -1024,7 +1024,6 @@ begin
         Self.PM_Bloky.Enabled := true;
         Self.PM_Roots.Enabled := true;
       end;
-
   end; // case
 end;
 

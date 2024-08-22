@@ -7,9 +7,6 @@ interface
 uses Types, Generics.Collections;
 
 const
-  _MAX_OR = 8;
-  _MAX_OSV = 8;
-
   _OR_DK_SIZE: TPoint = (X: 5; Y: 3);
   _OR_QUEUE_SIZE: TPoint = (X: 14; Y: 1);
   _OR_TIME_SIZE: TPoint = (X: 16; Y: 1);

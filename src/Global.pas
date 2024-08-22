@@ -20,13 +20,12 @@ type
 
   TGlobalEvent = procedure(Sender: TObject) of object;
 
-  TMode = (dmBitmap = 0, dmSepVert = 1, dmSepHor = 2, dmBloky = 3, dmRoots = 4);
+  TMode = (dmBitmap = 0, dmSepVert = 1, dmSepHor = 2, dmBlocks = 3, dmRoots = 4);
 
   TCursorColor = (ccDefault = 0, ccActiveOperation = 1, ccOnObject = 2);
 
   TCursorDraw = record
     color: TCursorColor;
-    // 0 - vychozi;1 - operace;2 - OnObject
     pos1, pos2: TPoint;
   end;
 
@@ -52,25 +51,27 @@ uses ownStrUtils;
 
 function GetVersion(const FileName: string): string; // cteni verze z nastaveni
 var
-  size, len: longword;
+  size: longword;
   handle: Cardinal;
-  buffer: pchar;
   pinfo: ^VS_FIXEDFILEINFO;
-  Major, Minor, Release: word;
 begin
   Result := 'Verze není dostupná';
   size := GetFileVersionInfoSize(Pointer(FileName), handle);
-  if size > 0 then
+  if (size > 0) then
   begin
+    var buffer: pchar;
     GetMem(buffer, size);
-    if GetFileVersionInfo(Pointer(FileName), 0, size, buffer) then
-      if VerQueryValue(buffer, '\', Pointer(pinfo), len) then
+    if (GetFileVersionInfo(Pointer(FileName), 0, size, buffer)) then
+    begin
+      var len: longword;
+      if (VerQueryValue(buffer, '\', Pointer(pinfo), len)) then
       begin
-        Major := HiWord(pinfo.dwFileVersionMS);
-        Minor := LoWord(pinfo.dwFileVersionMS);
-        Release := HiWord(pinfo.dwFileVersionLS);
+        var Major: Word := HiWord(pinfo.dwFileVersionMS);
+        var Minor: Word := LoWord(pinfo.dwFileVersionMS);
+        var Release: Word := HiWord(pinfo.dwFileVersionLS);
         Result := Format('%d.%d.%d', [Major, Minor, Release]);
       end;
+    end;
     FreeMem(buffer);
   end;
 end;

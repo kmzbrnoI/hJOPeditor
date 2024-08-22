@@ -35,7 +35,7 @@ type
     const
     _Config_File = 'Config.ini';
   public
-    procedure OpenForm;
+    procedure OpenForm();
   end;
 
 var
@@ -86,7 +86,7 @@ end;
 
 procedure TF_ReliefOptions.B_StornoClick(Sender: TObject);
 begin
-  Self.Close;
+  Self.Close();
 end;
 
 procedure TF_ReliefOptions.CHB_RelativePathClick(Sender: TObject);
@@ -106,7 +106,7 @@ begin
   Self.CB_KurzorOperation.Selected := ReliefOptions.CursorOperationColor;
   Self.E_BlocksFileName.Text := ReliefOptions.BlockFile;
 
-  Self.ShowModal;
+  Self.ShowModal();
 end;
 
 end.// unit

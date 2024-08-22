@@ -308,7 +308,7 @@ begin
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_FULL, scBlue);
 
     var color: SymbolColor;
-    if (mode = TMode.dmBloky) then
+    if (mode = TMode.dmBlocks) then
     begin
       case (Self.block) of
         -1: color := colors.Alert;

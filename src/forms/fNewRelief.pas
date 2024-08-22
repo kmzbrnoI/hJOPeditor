@@ -91,7 +91,7 @@ begin
   if ((not Self.RB_OR1.Checked) and (not Self.RB_OR2.Checked)) then
   begin
     Application.MessageBox('Vyberte orientaci DK!', 'Nelze pokračovat', MB_OK OR MB_ICONERROR);
-    Exit;
+    Exit();
   end;
 
   var area: TOR;

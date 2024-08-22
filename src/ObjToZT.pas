@@ -22,7 +22,6 @@ implementation
 
 function TObjToZT.ObjToZT(ObjectData: TPanelObjects; ZT: TPanelZT): Byte;
 begin
-
   Result := 0;
 end;
 

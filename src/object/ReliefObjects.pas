@@ -148,7 +148,7 @@ begin
 
   Self.Selected := nil;
 
-  Self.FMode := dmBloky;
+  Self.FMode := dmBlocks;
 
   Self.Bloky := TObjectList<TGraphBlok>.Create();
 
@@ -273,7 +273,7 @@ end;
 procedure TPanelObjects.Paint();
 begin
   case (Self.FMode) of
-    dmBloky, dmRoots:
+    dmBlocks, dmRoots:
       Self.PaintBloky();
   end;
 end;
@@ -421,7 +421,7 @@ end;
 procedure TPanelObjects.MouseUp(Position: TPoint; Button: TMouseButton);
 begin
   case (Self.FMode) of
-    dmBloky:
+    dmBlocks:
       Self.BlokyMouseUp(Position, Button);
     dmRoots:
       Self.KorenyMouseUp(Position, Button);

@@ -61,12 +61,12 @@ begin
   if (Length(Self.E_Text.Text) < 1) then
   begin
     Application.MessageBox('Zadejte text!', 'Chyba', MB_OK OR MB_ICONWARNING);
-    Exit;
+    Exit();
   end;
   if (Self.PopisekColor = -1) then
   begin
     Application.MessageBox('Vyberte barvu!', 'Chyba', MB_OK OR MB_ICONWARNING);
-    Exit;
+    Exit();
   end;
 
   Self.PopisekText := Self.E_Text.Text;
