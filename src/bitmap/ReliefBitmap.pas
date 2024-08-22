@@ -58,7 +58,7 @@ type
     procedure MoveMouseUp(CursorPos: TPoint);
     procedure DeleteMouseUp(CursorPos: TPoint);
 
-    function CanPick(pos: TPoint): Boolean;
+    function IsObject(pos: TPoint): Boolean;
     function CompensateMode(pos: TPoint): TPoint;
 
   public
@@ -507,12 +507,15 @@ begin
   if ((Self.Operations.addStep > TGOpStep.gosNone) or (Self.Operations.moveStep > TGOpStep.gosNone) or (Self.Operations.deleteStep > TGOpStep.gosNone)) then
     Exit(Self.CursorAddMoveDelete(CursorPos));
 
-  // zde se zajistuje vytvoreni 1 barvy a pozice kurzoru z celkem 5 pozic a barev - osetreni priorit
-  Result.color := TCursorColor.ccDefault;
-  Result.Pos1.X := CursorPos.X * _SYMBOL_WIDTH;
-  Result.Pos1.Y := CursorPos.Y * _SYMBOL_HEIGHT;
-  Result.Pos2.X := CursorPos.X * _SYMBOL_WIDTH;
-  Result.Pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
+  if (Self.IsObject(CursorPos)) then
+    Result.color := TCursorColor.ccOnObject
+  else
+    Result.color := TCursorColor.ccDefault;
+
+  Result.pos1.X := CursorPos.X * _SYMBOL_WIDTH;
+  Result.pos1.Y := CursorPos.Y * _SYMBOL_HEIGHT;
+  Result.pos2.X := CursorPos.X * _SYMBOL_WIDTH;
+  Result.pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
 end;
 
 function TPanelBitmap.IsOperation(): Boolean;
@@ -886,7 +889,7 @@ end;
 
 /// ////////////////////////////////////////////////////////////////////////////
 
-function TPanelBitmap.CanPick(pos: TPoint): Boolean;
+function TPanelBitmap.IsObject(pos: TPoint): Boolean;
 begin
   case (Self.Mode) of
     dmBitmap:
@@ -924,7 +927,7 @@ begin
   begin
     Result.pos2.X := CursorPos.X * _SYMBOL_WIDTH;
     Result.pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
-    if (Self.CanPick(CursorPos)) then
+    if (Self.IsObject(CursorPos)) then
       Result.color := TCursorColor.ccOnObject
     else
       Result.color := TCursorColor.ccActiveOperation;
