@@ -921,11 +921,11 @@ begin
         var tmp_or := Self.GetORGraf(Position);
         if (tmp_or.areai > -1) then
         begin
-          Self.MessageEvent(Self, 'OŘ : ' + ORs[tmp_or.areai].Name + ' (id = ' + ORs[tmp_or.areai].id + ')');
-
           // zacatek pohybu
           if (Self.moveActive) then
-            Self.ORMoving := tmp_or;
+            Self.ORMoving := tmp_or
+          else
+            Self.MessageEvent(Self, 'OŘ : ' + ORs[tmp_or.areai].Name + ' (id = ' + ORs[tmp_or.areai].id + ')');
 
           Result := True;
         end;
