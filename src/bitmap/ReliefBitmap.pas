@@ -516,6 +516,9 @@ begin
   Result.pos1.Y := CursorPos.Y * _SYMBOL_HEIGHT;
   Result.pos2.X := CursorPos.X * _SYMBOL_WIDTH;
   Result.pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
+
+  Result.pos1 := Self.CompensateMode(Result.pos1);
+  Result.pos2 := Self.CompensateMode(Result.pos2);
 end;
 
 function TPanelBitmap.IsOperation(): Boolean;
