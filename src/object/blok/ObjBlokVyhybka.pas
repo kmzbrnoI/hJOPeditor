@@ -78,7 +78,7 @@ end;
 function TTurnout.GetEqTurnout(blocks: TList<TGraphBlok>): TTurnout;
 begin
   for var block: TGraphBlok in blocks do
-    if ((block.typ = TBlkType.turnout) and (TTurnout(block).Position = Self.Position)) then
+    if ((block.typ = TBlkType.turnout) and (TTurnout(block).Position = Self.Position) and (TTurnout(block).SymbolID = Self.SymbolID)) then
       Exit(TTurnout(block));
   Result := nil;
 end;

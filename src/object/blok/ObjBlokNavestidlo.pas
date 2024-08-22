@@ -76,7 +76,7 @@ end;
 function TSignal.GetEqSignal(blocks: TList<TGraphBlok>): TSignal;
 begin
   for var block: TGraphBlok in blocks do
-    if ((block.typ = TBlkType.signal) and (TSignal(block).Position = Self.Position)) then
+    if ((block.typ = TBlkType.signal) and (TSignal(block).Position = Self.Position) and (TSignal(block).SymbolID = Self.SymbolID)) then
       Exit(TSignal(block));
   Result := nil;
 end;

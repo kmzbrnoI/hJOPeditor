@@ -82,7 +82,7 @@ end;
 function TDerail.GetEqDerail(blocks: TList<TGraphBlok>): TDerail;
 begin
   for var block: TGraphBlok in blocks do
-    if ((block.typ = TBlkType.derail) and (TDerail(block).Pos = Self.Pos)) then
+    if ((block.typ = TBlkType.derail) and (TDerail(block).Pos = Self.Pos) and (TDerail(block).symbol = Self.symbol)) then
       Exit(TDerail(block));
   Result := nil;
 end;
