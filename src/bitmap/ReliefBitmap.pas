@@ -507,11 +507,7 @@ begin
   if ((Self.Operations.addStep > TGOpStep.gosNone) or (Self.Operations.moveStep > TGOpStep.gosNone) or (Self.Operations.deleteStep > TGOpStep.gosNone)) then
     Exit(Self.CursorAddMoveDelete(CursorPos));
 
-  if (Self.IsObject(CursorPos)) then
-    Result.color := TCursorColor.ccOnObject
-  else
-    Result.color := TCursorColor.ccDefault;
-
+  Result.color := TCursorColor.ccDefault;
   Result.pos1.X := CursorPos.X * _SYMBOL_WIDTH;
   Result.pos1.Y := CursorPos.Y * _SYMBOL_HEIGHT;
   Result.pos2.X := CursorPos.X * _SYMBOL_WIDTH;

@@ -392,7 +392,7 @@ begin
   cursorData.pos2 := Point(CursorPos.X * _SYMBOL_WIDTH, CursorPos.Y * _SYMBOL_HEIGHT);
   cursorData.color := TCursorColor.ccDefault;
 
-  if ((Self.ORMoving.areai > -1) or (Self.GetORGraf(CursorPos).areai > -1)) then
+  if ((Self.ORMoving.areai > -1) or ((Self.GetORGraf(CursorPos).areai > -1) and (Self.moveActive))) then
   begin
     // prioritu ma posun OR
     cursorData.color := TCursorColor.ccOnObject;
