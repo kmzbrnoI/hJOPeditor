@@ -422,11 +422,10 @@ begin
 end;
 
 procedure TF_BlockEdit.LoadOR();
-var oblr: TOR;
 begin
   Self.CB_OR.Clear();
-  for oblr in F_Main.Relief.ORs do
-    Self.CB_OR.Items.Add(oblr.Name);
+  for var area: TArea in F_Main.Relief.areas do
+    Self.CB_OR.Items.Add(area.Name);
 end;
 
 procedure TF_BlockEdit.SaveData();

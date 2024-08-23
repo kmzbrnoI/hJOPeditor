@@ -54,7 +54,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
-    lights: TList<TORLight>;
+    lights: TList<TAreaLight>;
 
   public
     procedure OpenForm;
@@ -94,8 +94,8 @@ begin
     Exit();
   end;
 
-  var area: TOR;
-  area := TOR.Create();
+  var area: TArea;
+  area := TArea.Create();
 
   area.Name := Self.E_Name.Text;
   area.ShortName := Self.E_NameShort.Text;
@@ -166,7 +166,7 @@ end;
 
 procedure TF_NewRelief.FormCreate(Sender: TObject);
 begin
-  Self.lights := TList<TORLight>.Create();
+  Self.lights := TList<TAreaLight>.Create();
 end;
 
 procedure TF_NewRelief.FormDestroy(Sender: TObject);
@@ -218,7 +218,7 @@ procedure TF_NewRelief.SE_OsvCntChange(Sender: TObject);
 begin
   while (Self.lights.Count < Self.SE_OsvCnt.Value) do
   begin
-    var empty: TORLight;
+    var empty: TAreaLight;
     empty.Board := 0;
     empty.Port := 0;
     empty.Name := '';

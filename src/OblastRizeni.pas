@@ -13,14 +13,14 @@ const
 
 type
   // 1 osvetleni
-  TORLight = record
+  TAreaLight = record
     Board: Cardinal;
     Port: Cardinal;
     Name: string; // max 5 characters
   end;
 
   // prava
-  TORRights = record
+  TAreaRights = record
     ModCasStart: Boolean;
     ModCasStop: Boolean;
     ModCasSet: Boolean;
@@ -39,14 +39,14 @@ type
   TOROddDirection = (ordLeftToRight = 0, ordRightToLeft = 1);
 
   // 1 OR
-  TOR = class
+  TArea = class
   public
     Name: string;
     ShortName: string;
     Id: string;
     OddDirection: TOROddDirection;
-    Rights: TORRights;
-    Lights: TList<TORLight>;
+    Rights: TAreaRights;
+    Lights: TList<TAreaLight>;
     Poss: TPoss;
 
     constructor Create();
@@ -63,13 +63,13 @@ type
 
 implementation
 
-constructor TOR.Create();
+constructor TArea.Create();
 begin
   inherited;
-  Self.Lights := TList<TORLight>.Create();
+  Self.Lights := TList<TAreaLight>.Create();
 end;
 
-destructor TOR.Destroy();
+destructor TArea.Destroy();
 begin
   Self.Lights.Free();
   inherited;

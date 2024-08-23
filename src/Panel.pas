@@ -135,12 +135,12 @@ type
     procedure SetShowBlokPopisky(show: Boolean);
 
   public
-    ORs: TObjectList<TOR>;
+    areas: TObjectList<TArea>;
 
     constructor Create(DDRaw: TDXDraw; aParentForm: TForm);
     destructor Destroy; override;
 
-    procedure New(size: TPoint; firstOR: TOR);
+    procedure New(size: TPoint; firstOR: TArea);
     procedure Open(aFile: string);
     procedure Save(aFile: string);
     function Import(aFile: string): string;
@@ -167,7 +167,7 @@ type
     procedure HideMouse();
 
     // OR
-    procedure AddOR(oblr: TOR);
+    procedure AddOR(area: TArea);
     procedure DeleteOR(pos: TPoint);
 
     function CheckValid(var error_cnt: Byte): TStrings; // overi validitu naeditovanych dat a vrati chybove hlasky
@@ -209,7 +209,7 @@ constructor TRelief.Create(DDRaw: TDXDraw; aParentForm: TForm);
 begin
   inherited Create;
 
-  Self.ORs := TObjectList<TOR>.Create();
+  Self.areas := TObjectList<TArea>.Create();
 
   Self.DrawObject := DDRaw;
   Self.ParentForm := aParentForm;
@@ -237,7 +237,7 @@ begin
   Self.mGrid := _DEF_GRID;
   Self.Panel.FileState := fsUnsaved;
 
-  Self.ORs.Clear();
+  Self.areas.Clear();
   Self.ORMoving.areai := -1;
   Self.ORClick.areai := -1;
   Self.moveActive := false;
@@ -274,7 +274,7 @@ begin
 end;
 
 // novy relief
-procedure TRelief.New(size: TPoint; firstOR: TOR);
+procedure TRelief.New(size: TPoint; firstOR: TArea);
 begin
   Self.Initialize(size, dmBitmap);
   Self.AddOR(firstOR);
@@ -302,7 +302,7 @@ begin
 
   log := FormatDateTime('yyyy-mm-dd hh:nn:ss', Now) + ': spouštím import souboru ' + aFile + ' ...' + #13#10;
   Self.Initialize(Point(0, 0), dmBitmap);
-  log := log + Self.PanelBitmap.ImportMyJOP(aFile, Self.ORs);
+  log := log + Self.PanelBitmap.ImportMyJOP(aFile, Self.areas);
 
   Self.Panel.FileState := Self.PanelBitmap.fileState;
   Self.mPanelWidth := Self.PanelBitmap.PanelWidth;
@@ -338,7 +338,7 @@ begin
   Self.Graphics.Free();
 
   Self.DK_Menu.Free();
-  Self.ORs.Free();
+  Self.areas.Free();
 
   inherited Destroy();
 end; // destructor
@@ -823,18 +823,18 @@ end;
 /// /////////////////////////////////////////////////////////////////////////////
 // operace s oblastmi rizeni:
 
-procedure TRelief.AddOR(oblr: TOR);
+procedure TRelief.AddOR(area: TArea);
 begin
-  Self.ORs.Add(oblr);
-  Self.ORMoving.areai := Self.ORs.Count - 1;
+  Self.areas.Add(area);
+  Self.ORMoving.areai := Self.areas.Count - 1;
   Self.ORMoving.objType := TORGraphSymbol.orsDK;
 end;
 
 procedure TRelief.DeleteOR(pos: TPoint);
 begin
-  for var i: Integer := Self.ORs.Count - 1 downto 0 do
-    if ((Self.ORs[i].Poss.DK.X = pos.X) and (Self.ORs[i].Poss.DK.Y = pos.Y)) then
-      Self.ORs.Delete(i);
+  for var i: Integer := Self.areas.Count - 1 downto 0 do
+    if ((Self.areas[i].Poss.DK.X = pos.X) and (Self.areas[i].Poss.DK.Y = pos.Y)) then
+      Self.areas.Delete(i);
 end;
 
 // vykresli vsechny oblasti rizeni
@@ -842,18 +842,18 @@ end;
 // bereme ohled na posun
 procedure TRelief.PaintOR();
 begin
-  for var i := 0 to Self.ORs.Count - 1 do
+  for var i := 0 to Self.areas.Count - 1 do
   begin
-    var oblr := Self.ORs[i];
+    var area := Self.areas[i];
 
     begin
       var pos: TPoint;
       if ((Self.ORMoving.areai = i) and (Self.ORMoving.objType = orsDK)) then
         pos := Self.LastPos
       else
-        pos := oblr.Poss.DK;
+        pos := area.Poss.DK;
       Self.IL_DK.Draw(Self.DrawObject.Surface.Canvas, pos.X * _SYMBOL_WIDTH, pos.Y * _SYMBOL_HEIGHT,
-        (Integer(oblr.Poss.DKOr) * 10) + 1);
+        (Integer(area.Poss.DKOr) * 10) + 1);
     end;
 
     begin
@@ -861,7 +861,7 @@ begin
       if ((Self.ORMoving.areai = i) and (Self.ORMoving.objType = orsQueue)) then
         pos := Self.LastPos
       else
-        pos := oblr.Poss.Queue;
+        pos := area.Poss.Queue;
       Self.Graphics.TextOutputI(pos, '00 VZ PV EZ 00', scGray, clBlack);
     end;
 
@@ -870,7 +870,7 @@ begin
       if ((Self.ORMoving.areai = i) and (Self.ORMoving.objType = orsTime)) then
         pos := Self.LastPos
       else
-        pos := oblr.Poss.Time;
+        pos := area.Poss.Time;
       Self.Graphics.TextOutputI(pos, 'MER CASU', scGray, clBlack);
       Self.Graphics.TextOutputI(Point(pos.X + 8, pos.Y), '        ', scBlack, clWhite);
     end;
@@ -906,9 +906,9 @@ begin
       begin
         // ukonceni pohybu
         case (Self.ORMoving.objType) of
-          orsDK: Self.ORs[Self.ORMoving.areai].Poss.DK := Self.LastPos;
-          orsQueue: Self.ORs[Self.ORMoving.areai].Poss.Queue := Self.LastPos;
-          orsTime: Self.ORs[Self.ORMoving.areai].Poss.Time := Self.LastPos;
+          orsDK: Self.areas[Self.ORMoving.areai].Poss.DK := Self.LastPos;
+          orsQueue: Self.areas[Self.ORMoving.areai].Poss.Queue := Self.LastPos;
+          orsTime: Self.areas[Self.ORMoving.areai].Poss.Time := Self.LastPos;
         end;
         Self.ORMoving.areai := -1;
         Self.moveActive := False;
@@ -925,7 +925,7 @@ begin
           if (Self.moveActive) then
             Self.ORMoving := tmp_or
           else
-            Self.MessageEvent(Self, 'OŘ : ' + ORs[tmp_or.areai].Name + ' (id = ' + ORs[tmp_or.areai].id + ')');
+            Self.MessageEvent(Self, 'OŘ : ' + Self.areas[tmp_or.areai].Name + ' (id = ' + Self.areas[tmp_or.areai].id + ')');
 
           Result := True;
         end;
@@ -953,24 +953,24 @@ function TRelief.GetORGraf(pos: TPoint): TORGraf;
 begin
   Result.areai := -1;
 
-  for var i := 0 to Self.ORs.Count - 1 do
+  for var i := 0 to Self.areas.Count - 1 do
   begin
-    if ((pos.X >= Self.ORs[i].Poss.DK.X) and (pos.Y >= Self.ORs[i].Poss.DK.Y) and
-      (Self.ORs[i].Poss.DK.X + _OR_DK_SIZE.X > pos.X) and (Self.ORs[i].Poss.DK.Y + _OR_DK_SIZE.Y > pos.Y)) then
+    if ((pos.X >= Self.areas[i].Poss.DK.X) and (pos.Y >= Self.areas[i].Poss.DK.Y) and
+      (Self.areas[i].Poss.DK.X + _OR_DK_SIZE.X > pos.X) and (Self.areas[i].Poss.DK.Y + _OR_DK_SIZE.Y > pos.Y)) then
     begin
       Result.areai := i;
       Result.objType := TORGraphSymbol.orsDK;
       Exit();
     end;
-    if ((pos.X >= Self.ORs[i].Poss.Queue.X) and (pos.Y >= Self.ORs[i].Poss.Queue.Y) and
-      (Self.ORs[i].Poss.Queue.X + _OR_QUEUE_SIZE.X > pos.X) and (Self.ORs[i].Poss.Queue.Y + _OR_QUEUE_SIZE.Y > pos.Y)) then
+    if ((pos.X >= Self.areas[i].Poss.Queue.X) and (pos.Y >= Self.areas[i].Poss.Queue.Y) and
+      (Self.areas[i].Poss.Queue.X + _OR_QUEUE_SIZE.X > pos.X) and (Self.areas[i].Poss.Queue.Y + _OR_QUEUE_SIZE.Y > pos.Y)) then
     begin
       Result.areai := i;
       Result.objType := TORGraphSymbol.orsQueue;
       Exit();
     end;
-    if ((pos.X >= Self.ORs[i].Poss.Time.X) and (pos.Y >= Self.ORs[i].Poss.Time.Y) and
-      (Self.ORs[i].Poss.Time.X + _OR_TIME_SIZE.X > pos.X) and (Self.ORs[i].Poss.Time.Y + _OR_TIME_SIZE.Y > pos.Y)) then
+    if ((pos.X >= Self.areas[i].Poss.Time.X) and (pos.Y >= Self.areas[i].Poss.Time.Y) and
+      (Self.areas[i].Poss.Time.X + _OR_TIME_SIZE.X > pos.X) and (Self.areas[i].Poss.Time.Y + _OR_TIME_SIZE.Y > pos.Y)) then
     begin
       Result.areai := i;
       Result.objType := TORGraphSymbol.orsTime;
@@ -1003,29 +1003,29 @@ end;
 
 procedure TRelief.DKDeleteClick(Sender: TObject);
 begin
-  if (Self.ORs.Count <= 1) then
+  if (Self.areas.Count <= 1) then
   begin
     Application.MessageBox('Poslední OŘ nelze smazat!', 'Nelze pokračovat', MB_OK OR MB_ICONSTOP);
     Exit;
   end;
 
   if (Application.MessageBox('Opravdu smazat?', 'Otázka', MB_YESNO OR MB_ICONQUESTION) = mrYes) then
-    Self.ORs.Delete(Self.ORClick.areai);
+    Self.areas.Delete(Self.ORClick.areai);
 end;
 
 // na kazdem radku je ulozena jedna oblast rizeni ve formatu:
 // nazev;nazev_zkratka;id;lichy_smer(0,1);orientace_DK(0,1);ModCasStart(0,1);ModCasStop(0,1);ModCasSet(0,1);dkposx;dkposy;qposx;qposy;timeposx;timeposy;osv_mtb|osv_port|osv_name;
 function TRelief.ORSave(): string;
 begin
-  for var oblr in Self.ORs do
+  for var area in Self.areas do
   begin
-    Result := Result + oblr.Name + ';' + oblr.ShortName + ';' + oblr.id + ';' + IntToStr(Integer(oblr.oddDirection)) + ';' +
-      IntToStr(Integer(oblr.Poss.DKOr)) + ';' + BoolToStr(oblr.Rights.ModCasStart) + ';' + BoolToStr(oblr.Rights.ModCasStop) +
-      ';' + BoolToStr(oblr.Rights.ModCasSet) + ';' + IntToStr(oblr.Poss.DK.X) + ';' + IntToStr(oblr.Poss.DK.Y) + ';' +
-      IntToStr(oblr.Poss.Queue.X) + ';' + IntToStr(oblr.Poss.Queue.Y) + ';' + IntToStr(oblr.Poss.Time.X) + ';' +
-      IntToStr(oblr.Poss.Time.Y) + ';';
+    Result := Result + area.Name + ';' + area.ShortName + ';' + area.id + ';' + IntToStr(Integer(area.oddDirection)) + ';' +
+      IntToStr(Integer(area.Poss.DKOr)) + ';' + BoolToStr(area.Rights.ModCasStart) + ';' + BoolToStr(area.Rights.ModCasStop) +
+      ';' + BoolToStr(area.Rights.ModCasSet) + ';' + IntToStr(area.Poss.DK.X) + ';' + IntToStr(area.Poss.DK.Y) + ';' +
+      IntToStr(area.Poss.Queue.X) + ';' + IntToStr(area.Poss.Queue.Y) + ';' + IntToStr(area.Poss.Time.X) + ';' +
+      IntToStr(area.Poss.Time.Y) + ';';
 
-    for var light in oblr.Lights do
+    for var light in area.Lights do
       Result := Result + IntToStr(light.board) + '#' + IntToStr(light.port) + '#' + light.Name + '|';
 
     Result := Result + #13;
@@ -1039,7 +1039,7 @@ end;
 procedure TRelief.ORLoad(data: string);
 var lines, data_main, data_osv, data_osv2: TStrings;
 begin
-  Self.ORs.Clear();
+  Self.areas.Clear();
 
   lines := TStringList.Create();
   data_main := TStringList.Create();
@@ -1060,8 +1060,8 @@ begin
       if (data_main.Count < 14) then
         raise EORLoad.Create('Málo položek definující OŘ!');
 
-      var area: TOR;
-      area := TOR.Create();
+      var area: TArea;
+      area := TArea.Create();
       area.Name := data_main[0];
       area.ShortName := data_main[1];
       area.id := data_main[2];
@@ -1107,7 +1107,7 @@ begin
           if (data_osv2.Count < 2) then
             raise EORLoad.Create('Málo položek definující osvětlení!');
 
-          var light: TORLight;
+          var light: TAreaLight;
           light.Board := StrToInt(data_osv2[0]);
           light.Port := StrToInt(data_osv2[1]);
           if (data_osv2.Count > 2) then
@@ -1118,7 +1118,7 @@ begin
         end;
       end;
 
-      Self.ORs.Add(area);
+      Self.areas.Add(area);
     end;
   finally
     FreeAndNil(lines);
@@ -1164,7 +1164,7 @@ end;
 // vraci true, pokud je na dane pozici DK, zasobnik, ci mereni casu
 function TRelief.IsAreaStuffPresent(pos: TPoint): Boolean;
 begin
-  for var area in Self.ORs do
+  for var area in Self.areas do
   begin
     if ((pos.X >= area.Poss.DK.X) and (pos.X <= area.Poss.DK.X + 4) and (pos.Y >= area.Poss.DK.Y) and
       (pos.Y <= area.Poss.DK.Y + 2)) then

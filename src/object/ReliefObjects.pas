@@ -92,7 +92,7 @@ type
 
     function GetObject(Pos: TPoint): Integer;
 
-    function SetOR(OblR: Integer): Byte; // nastavi oblast rizeni vybranemu bloku
+    function SetOR(areai: Integer): Byte; // nastavi oblast rizeni vybranemu bloku
 
     function CheckValid(var error_cnt: Byte): TStrings; // overi validitu naeditovanych dat a vrati chybove hlasky
 
@@ -554,11 +554,11 @@ end;
 
 // tato funkce prirazuje aktivnimu bloku obalst rizeni v paramtru
 // to je uzitecne k tomu, ze pri vybrani bloku a nesdlednemu kliku na baracek dojde k prirazeni teto oblasti rizeni
-function TPanelObjects.SetOR(OblR: Integer): Byte;
+function TPanelObjects.SetOR(areai: Integer): Byte;
 begin
   if (Self.Selected = nil) then
     Exit(1);
-  Self.Selected.area := OblR;
+  Self.Selected.area := areai;
   Result := 0;
 end;
 

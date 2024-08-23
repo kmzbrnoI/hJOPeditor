@@ -47,10 +47,10 @@ type
     procedure FormDestroy(Sender: TObject);
   private
     openindex: Integer;
-    area: TOR;
-    lights: TList<TORLight>;
+    area: TArea;
+    lights: TList<TAreaLight>;
 
-    procedure EditOR(oblRizeni: TOR); overload;
+    procedure EditOR(area: TArea); overload;
 
   public
 
@@ -89,7 +89,7 @@ begin
   end;
 
   if (Self.area = nil) then
-    Self.area := TOR.Create();
+    Self.area := TArea.Create();
 
   Self.area.Name := Self.E_Name.Text;
   Self.area.ShortName := Self.E_NameShort.Text;
@@ -146,7 +146,7 @@ end;
 
 procedure TF_OREdit.FormCreate(Sender: TObject);
 begin
-  Self.lights := TList<TORLight>.Create();
+  Self.lights := TList<TAreaLight>.Create();
   Self.openindex := -1;
 end;
 
@@ -177,12 +177,12 @@ end;
 procedure TF_OREdit.EditOR(orindex: Integer);
 begin
   Self.openindex := orindex;
-  Self.EditOR(F_Main.Relief.ORs[orindex]);
+  Self.EditOR(F_Main.Relief.areas[orindex]);
 end;
 
-procedure TF_OREdit.EditOR(oblRizeni: TOR);
+procedure TF_OREdit.EditOR(area: TArea);
 begin
-  Self.area := oblRizeni;
+  Self.area := area;
 
   Self.GB_OsvOne.Visible := false;
 
@@ -201,10 +201,10 @@ begin
   Self.CHB_ModCasSet.Checked := Self.area.Rights.ModCasSet;
 
   Self.lights.Clear();
-  Self.lights.AddRange(oblRizeni.Lights);
+  Self.lights.AddRange(area.Lights);
 
   Self.LB_Osv.Clear();
-  for var i: Integer := 0 to oblRizeni.Lights.Count-1 do
+  for var i: Integer := 0 to area.Lights.Count-1 do
     Self.LB_Osv.Items.Add(IntToStr(i+1));
 
   Self.SE_OsvCnt.Value := Self.area.Lights.Count;
@@ -244,7 +244,7 @@ procedure TF_OREdit.SE_OsvCntChange(Sender: TObject);
 begin
   while (Self.lights.Count < Self.SE_OsvCnt.Value) do
   begin
-    var empty: TORLight;
+    var empty: TAreaLight;
     empty.Board := 0;
     empty.Port := 0;
     empty.Name := '';

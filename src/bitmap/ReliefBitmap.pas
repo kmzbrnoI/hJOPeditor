@@ -101,7 +101,7 @@ type
     procedure MouseUp(Position: TPoint; Button: TMouseButton);
     procedure DblClick(Position: TPoint);
 
-    function ImportMyJOP(fn: string; ORs: TList<TOR>): string;
+    function ImportMyJOP(fn: string; ORs: TList<TArea>): string;
 
     property fileName: string read mFileName;
     property fileState: TReliefFileState read mFileState;
@@ -636,7 +636,7 @@ end;
 
 /// ////////////////////////////////////////////////////////////////////////////
 
-function TPanelBitmap.ImportMyJOP(fn: string; ORs: TList<TOR>): string;
+function TPanelBitmap.ImportMyJOP(fn: string; ORs: TList<TArea>): string;
 var f: TextFile;
   splitted, gsplitted: TStrings;
   linei, eloaded: Integer;
@@ -731,13 +731,13 @@ begin
           gsplitted.Clear();
           ExtractStringsEx([';'], [], g[gref], gsplitted);
 
-          var OblR: TOR := TOR.Create();
-          OblR.Name := gsplitted[7];
-          OblR.id := gsplitted[9];
-          OblR.ShortName := gsplitted[9];
-          OblR.Poss.DK := Point(X, Y);
-          OblR.Poss.Queue := Point(OblR.Poss.DK.X + 10, OblR.Poss.DK.Y);
-          OblR.Poss.Time := Point(OblR.Poss.DK.X + 10, OblR.Poss.DK.Y + 1);
+          var areai: TArea := TArea.Create();
+          areai.Name := gsplitted[7];
+          areai.id := gsplitted[9];
+          areai.ShortName := gsplitted[9];
+          areai.Poss.DK := Point(X, Y);
+          areai.Poss.Queue := Point(areai.Poss.DK.X + 10, areai.Poss.DK.Y);
+          areai.Poss.Time := Point(areai.Poss.DK.X + 10, areai.Poss.DK.Y + 1);
 
           if ((gsplitted[12] = '0') and (gsplitted[13] = '0')) then
           begin
@@ -749,11 +749,11 @@ begin
           end;
 
           try
-            Self.texts.Add(Point(popx, popy), OblR.Name, scWhite, false);
+            Self.texts.Add(Point(popx, popy), areai.Name, scWhite, false);
           except
-            Result := Result + 'WARN: nepodařilo se přidat název OŘ ' + OblR.Name + #13#10;
+            Result := Result + 'WARN: nepodařilo se přidat název OŘ ' + areai.Name + #13#10;
           end;
-          ORs.Add(OblR);
+          ORs.Add(areai);
         end else if (splitted[3] = '50') then
         begin
           var Height := StrToInt(splitted[15]);
