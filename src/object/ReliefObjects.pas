@@ -65,7 +65,7 @@ type
     class function OpnlLoadAreas(var ini: TMemIniFile): string;
 
   public
-    Bloky: TObjectList<TGraphBlok>;
+    blocks: TObjectList<TGraphBlok>;
 
     constructor Create(SymbolIL, TextIL: TImageList; DrawCanvas: TCanvas; Width, Height: Integer; Parent: TDXDraw;
       Graphics: TPanelGraphics);
@@ -150,7 +150,7 @@ begin
 
   Self.mMode := dmBlocks;
 
-  Self.Bloky := TObjectList<TGraphBlok>.Create();
+  Self.blocks := TObjectList<TGraphBlok>.Create();
 
   Self.CreatePM(Self.PM_Properties, Parent);
 end; // constructor
@@ -158,7 +158,7 @@ end; // constructor
 destructor TPanelObjects.Destroy();
 begin
   Self.ResetPanel();
-  Self.Bloky.Free();
+  Self.blocks.Free();
 
   if (Assigned(Self.PM_Properties) = true) then
   begin
@@ -170,7 +170,7 @@ end; // destructor
 // reset dat
 procedure TPanelObjects.ResetPanel();
 begin
-  Self.Bloky.Clear();
+  Self.blocks.Clear();
   Self.Selected := nil;
 end;
 
@@ -202,7 +202,7 @@ begin
     Self.DrawObject.Width := inifile.ReadInteger('P', 'W', 0);
 
     ORs := Self.OpnlLoadAreas(inifile);
-    Self.OpnlLoadBlocks(inifile, verWord, Self.Bloky);
+    Self.OpnlLoadBlocks(inifile, verWord, Self.blocks);
 
     Self.ComputeVyhybkaFlag();
     Self.Escape();
@@ -245,7 +245,7 @@ begin
     // ulozit bloky v kanonickem poradi
     for var blkTyp: TBlkType := Low(TBlkType) to High(TBlkType) do
     begin
-      for var blok: TGraphBlok in Self.Bloky do
+      for var blok: TGraphBlok in Self.blocks do
       begin
         if (blok.typ = blkTyp) then
         begin
@@ -278,7 +278,7 @@ end;
 procedure TPanelObjects.PaintBlocks();
 begin
   Self.DrawObject.Canvas.Pen.mode := pmMerge; // pruhlednost
-  for var block: TGraphBlok in Self.Bloky do
+  for var block: TGraphBlok in Self.blocks do
     if ((Self.ShowBlokPopisky) or (block.typ <> TBlkType.description)) then
       block.Paint(Self.DrawObject, Self.Graphics, Self.Colors, Self.Selected = block, Self.mode);
 end;
@@ -312,9 +312,9 @@ function TPanelObjects.GetObject(Pos: TPoint): Integer;
 var tmp: Integer;
 begin
   tmp := -1;
-  for var i := 0 to Self.Bloky.count - 1 do
+  for var i := 0 to Self.blocks.count - 1 do
   begin
-    var ObjBlok := Self.Bloky[i];
+    var ObjBlok := Self.blocks[i];
 
     case (ObjBlok.typ) of
       TBlkType.track:
@@ -402,13 +402,13 @@ begin
   if (Self.mMode = dmRoots) then
   begin
     var tmp := Self.GetObject(Position);
-    if ((tmp = -1) or (Self.Bloky[tmp].typ <> TBlkType.track)) then
+    if ((tmp = -1) or (Self.blocks[tmp].typ <> TBlkType.track)) then
     begin
       Self.Selected := nil;
       Exit;
     end;
-    if ((Self.Bloky[tmp] as TTrack).IsTurnout) then
-      Self.Selected := Self.Bloky[tmp];
+    if ((Self.blocks[tmp] as TTrack).IsTurnout) then
+      Self.Selected := Self.blocks[tmp];
   end;
 end;
 
@@ -434,7 +434,7 @@ begin
     Exit();
   end
   else
-    Self.Selected := Self.Bloky[blk];
+    Self.Selected := Self.blocks[blk];
 
   if (Assigned(Self.OnMsg)) then
   begin
@@ -498,14 +498,14 @@ begin
   var blk := Self.GetObject(Position);
   if (blk < 0) then
     Self.Selected := nil
-  else if (Self.Bloky[blk].typ = TBlkType.track) then
-    Self.Selected := Self.Bloky[blk]
-  else if (Self.Bloky[blk].typ = TBlkType.turnout) then
+  else if (Self.blocks[blk].typ = TBlkType.track) then
+    Self.Selected := Self.blocks[blk]
+  else if (Self.blocks[blk].typ = TBlkType.turnout) then
   begin
-    for var i := 0 to Self.Bloky.count - 1 do
-      if ((Self.Bloky[i].typ = TBlkType.track) and (Self.Bloky[i].index = (Self.Bloky[blk] as TTurnout).obj)) then
+    for var i := 0 to Self.blocks.count - 1 do
+      if ((Self.blocks[i].typ = TBlkType.track) and (Self.blocks[i].index = (Self.blocks[blk] as TTurnout).obj)) then
       begin
-        Self.Selected := Self.Bloky[i];
+        Self.Selected := Self.blocks[i];
         break;
       end;
   end
@@ -574,40 +574,40 @@ begin
   Result.Add('Ověřuji pojmenování kolejí...');
   Result.Add('Ověřuji kořeny...');
 
-  for var i := 0 to Self.Bloky.count - 1 do
+  for var i := 0 to Self.blocks.count - 1 do
   begin
-    if ((Self.Bloky[i].block = -1) and (Self.Bloky[i].typ <> TBlkType.other) and
-      ((Self.Bloky[i].typ <> TBlkType.text) or (Length((Self.Bloky[i] as TText).text) = 1))) then
+    if ((Self.blocks[i].block = -1) and (Self.blocks[i].typ <> TBlkType.other) and
+      ((Self.blocks[i].typ <> TBlkType.text) or (Length((Self.blocks[i] as TText).text) = 1))) then
     begin
       Result.Add('ERR: blok ' + IntToStr(i) + ': není návaznost na technologický blok');
       error_cnt := error_cnt + 1;
     end;
-    if ((Self.Bloky[i].area < 0) and ((Self.Bloky[i].typ <> TBlkType.other)
-      xor ((Self.Bloky[i].typ = TBlkType.text) and (Length((Self.Bloky[i] as TText).text) > 1)))) then
+    if ((Self.blocks[i].area < 0) and ((Self.blocks[i].typ <> TBlkType.other)
+      xor ((Self.blocks[i].typ = TBlkType.text) and (Length((Self.blocks[i] as TText).text) > 1)))) then
     begin
       Result.Add('ERR: blok ' + IntToStr(i) + ': není návaznost na oblast řízení');
       error_cnt := error_cnt + 1;
     end;
 
-    case (Self.Bloky[i].typ) of
+    case (Self.blocks[i].typ) of
       TBlkType.track:
         begin
-          if (((Self.Bloky[i] as TTrack).labels.count > 0) and ((Self.Bloky[i] as TTrack).caption = '')) then
+          if (((Self.blocks[i] as TTrack).labels.count > 0) and ((Self.blocks[i] as TTrack).caption = '')) then
           begin
             Result.Add('ERR: blok ' + IntToStr(i) + ' (úsek): kolej není pojmenována');
             error_cnt := error_cnt + 1;
           end;
 
-          if (((Self.Bloky[i] as TTrack).IsTurnout) and ((Self.Bloky[i] as TTrack).Root.X < 0)) then
+          if (((Self.blocks[i] as TTrack).IsTurnout) and ((Self.blocks[i] as TTrack).Root.X < 0)) then
           begin
             Result.Add('ERR: blok ' + IntToStr(i) + ' (úsek) : obsahuje výhybky a přesto nemá kořen');
             error_cnt := error_cnt + 1;
           end;
 
-          for var j := 0 to (Self.Bloky[i] as TTrack).branches.count - 1 do
+          for var j := 0 to (Self.blocks[i] as TTrack).branches.count - 1 do
           begin
-            var vetev := (Self.Bloky[i] as TTrack).branches[j];
-            if (((Self.Bloky[i] as TTrack).DKStype <> TDKSType.dksNone) and (j < 3)) then
+            var vetev := (Self.blocks[i] as TTrack).branches[j];
+            if (((Self.blocks[i] as TTrack).DKStype <> TDKSType.dksNone) and (j < 3)) then
               continue;
             if (((vetev.node1.vyh >= 0) and ((vetev.node1.ref_plus = -1) or (vetev.node1.ref_minus = -1))) or
               ((vetev.node2.vyh >= 0) and ((vetev.node2.ref_plus = -1) or (vetev.node2.ref_minus = -1)))) then
@@ -620,7 +620,7 @@ begin
 
       TBlkType.turnout:
         begin
-          if ((Self.Bloky[i] as TTurnout).obj < 0) then
+          if ((Self.blocks[i] as TTurnout).obj < 0) then
           begin
             Result.Add('ERR: blok ' + IntToStr(i) + ' (výhybka) : není návaznost na úsek');
             error_cnt := error_cnt + 1;
@@ -651,19 +651,19 @@ end;
 procedure TPanelObjects.ComputeVyhybkaFlag();
 begin
   // reset flagu
-  for var i := 0 to Self.Bloky.count - 1 do
-    if (Self.Bloky[i].typ = TBlkType.track) then
-      (Self.Bloky[i] as TTrack).IsTurnout := false;
+  for var i := 0 to Self.blocks.count - 1 do
+    if (Self.blocks[i].typ = TBlkType.track) then
+      (Self.blocks[i] as TTrack).IsTurnout := false;
 
   // zjistime, jestli na danych blocich jsou vyhybky
-  for var i := 0 to Self.Bloky.count - 1 do
-    if (Self.Bloky[i].typ = TBlkType.turnout) then
+  for var i := 0 to Self.blocks.count - 1 do
+    if (Self.blocks[i].typ = TBlkType.turnout) then
     begin
       // .obj referuje na index v seznamu useku -> musime vypocitat index v poli vsech bloku
-      for var j := 0 to Self.Bloky.count - 1 do
-        if ((Self.Bloky[j].typ = TBlkType.track) and (Self.Bloky[j].index = (Self.Bloky[i] as TTurnout).obj)) then
+      for var j := 0 to Self.blocks.count - 1 do
+        if ((Self.blocks[j].typ = TBlkType.track) and (Self.blocks[j].index = (Self.blocks[i] as TTurnout).obj)) then
         begin
-          (Self.Bloky[j] as TTrack).IsTurnout := true;
+          (Self.blocks[j] as TTrack).IsTurnout := true;
           break;
         end;
     end;
@@ -691,18 +691,18 @@ end;
 // tento usek se priradi na zaklade leveho useku prejezdu
 procedure TPanelObjects.ComputePrjPanelUsek();
 begin
-  for var i := 0 to Self.Bloky.count - 1 do
+  for var i := 0 to Self.blocks.count - 1 do
   begin
-    if (Self.Bloky[i].typ <> TBlkType.crossing) then
+    if (Self.blocks[i].typ <> TBlkType.crossing) then
       continue;
 
-    for var j := 0 to (Self.Bloky[i] as TCrossing).BlikPositions.count - 1 do
+    for var j := 0 to (Self.blocks[i] as TCrossing).BlikPositions.count - 1 do
     begin
-      var usek := Self.GetObject(Point((Self.Bloky[i] as TCrossing).BlikPositions[j].Pos.X - 1,
-        (Self.Bloky[i] as TCrossing).BlikPositions[j].Pos.Y));
-      var blik_point := (Self.Bloky[i] as TCrossing).BlikPositions[j];
-      blik_point.PanelUsek := Self.Bloky[usek].index;
-      (Self.Bloky[i] as TCrossing).BlikPositions[j] := blik_point;
+      var usek := Self.GetObject(Point((Self.blocks[i] as TCrossing).BlikPositions[j].Pos.X - 1,
+        (Self.blocks[i] as TCrossing).BlikPositions[j].Pos.Y));
+      var blik_point := (Self.blocks[i] as TCrossing).BlikPositions[j];
+      blik_point.PanelUsek := Self.blocks[usek].index;
+      (Self.blocks[i] as TCrossing).BlikPositions[j] := blik_point;
     end; // for j
   end; // for i
 end;
@@ -838,7 +838,7 @@ begin
       if (block.typ = TBlkType.track) then
         TTrack(block).FillSymbolsSorted();
 
-    for var block: TGraphBlok in Self.Bloky do
+    for var block: TGraphBlok in Self.blocks do
     begin
       case (block.typ) of
         TBlkType.track:

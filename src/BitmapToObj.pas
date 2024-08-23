@@ -48,7 +48,7 @@ begin
         begin
           var blk := TDisconnector.Create(index);
           blk.Pos := Point(x, y);
-          Self.objects.Bloky.Add(blk);
+          Self.objects.blocks.Add(blk);
 
           // na misto [i, j] dame rovnou kolej (bud detekovanou nebo nedetekovanou)
           if (((x > 0) and (Self.bitmap.Symbols.Bitmap[x - 1, y] >= _S_TRACK_NODET_B) and (Self.bitmap.Symbols.Bitmap[x - 1,
@@ -85,20 +85,20 @@ begin
   end;
 
   // KPopisek, JCClick, soupravy
-  for var x: Integer := 0 to Self.objects.Bloky.Count - 1 do
+  for var x: Integer := 0 to Self.objects.blocks.Count - 1 do
   begin
-    if (Self.objects.Bloky[x].typ <> TBlkType.track) then
+    if (Self.objects.blocks[x].typ <> TBlkType.track) then
       continue;
-    for var y: Integer := 0 to (Self.objects.Bloky[x] as TTrack).Symbols.Count - 1 do
+    for var y: Integer := 0 to (Self.objects.blocks[x] as TTrack).Symbols.Count - 1 do
     begin
-      if (Self.bitmap.trackNames.IsObject((Self.objects.Bloky[x] as TTrack).Symbols[y].Position)) then
-        (Self.objects.Bloky[x] as TTrack).labels.Add((Self.objects.Bloky[x] as TTrack).Symbols[y].Position);
+      if (Self.bitmap.trackNames.IsObject((Self.objects.blocks[x] as TTrack).Symbols[y].Position)) then
+        (Self.objects.blocks[x] as TTrack).labels.Add((Self.objects.blocks[x] as TTrack).Symbols[y].Position);
 
-      if (Self.bitmap.JCClick.IsObject((Self.objects.Bloky[x] as TTrack).Symbols[y].Position)) then
-        (Self.objects.Bloky[x] as TTrack).JCClick.Add((Self.objects.Bloky[x] as TTrack).Symbols[y].Position);
+      if (Self.bitmap.JCClick.IsObject((Self.objects.blocks[x] as TTrack).Symbols[y].Position)) then
+        (Self.objects.blocks[x] as TTrack).JCClick.Add((Self.objects.blocks[x] as TTrack).Symbols[y].Position);
 
-      if (Self.bitmap.trainPoss.IsObject((Self.objects.Bloky[x] as TTrack).Symbols[y].Position)) then
-        (Self.objects.Bloky[x] as TTrack).trains.Add((Self.objects.Bloky[x] as TTrack).Symbols[y].Position);
+      if (Self.bitmap.trainPoss.IsObject((Self.objects.blocks[x] as TTrack).Symbols[y].Position)) then
+        (Self.objects.blocks[x] as TTrack).trains.Add((Self.objects.blocks[x] as TTrack).Symbols[y].Position);
     end;
   end;
 
@@ -115,7 +115,7 @@ begin
           var blk := TSignal.Create(index);
           blk.Position := Point(x, y);
           blk.SymbolID := Symbol - _S_SIGNAL_B;
-          Self.objects.Bloky.Add(blk);
+          Self.objects.blocks.Add(blk);
           Self.processed[x, y] := true;
           Inc(Index);
         end; // ((Symbol >= _SCom_Start) and (Symbol <= _SCom_End))
@@ -149,7 +149,7 @@ begin
       else
         Inc(index);
 
-      Self.objects.Bloky.Add(blk);
+      Self.objects.blocks.Add(blk);
     end;
   end;
 
@@ -185,7 +185,7 @@ begin
           begin
             var blk := TLinker.Create(index);
             blk.Pos := Point(x, y);
-            Self.objects.Bloky.Add(blk);
+            Self.objects.blocks.Add(blk);
             Self.processed[x, y] := true;
             Inc(index);
           end;
@@ -207,7 +207,7 @@ begin
             var blk := TLinkerTrain.Create(index);
             blk.Pos := Point(x, y);
             blk.spr_cnt := 1;
-            Self.objects.Bloky.Add(blk);
+            Self.objects.blocks.Add(blk);
             Self.processed[x, y] := true;
             Inc(index);
           end;
@@ -228,7 +228,7 @@ begin
           begin
             var blk := TLock.Create(index);
             blk.Pos := Point(x, y);
-            Self.objects.Bloky.Add(blk);
+            Self.objects.blocks.Add(blk);
             Self.processed[x, y] := true;
             Inc(index);
           end;
@@ -249,7 +249,7 @@ begin
           begin
             var blk := TPst.Create(index);
             blk.Pos := Point(x, y);
-            Self.objects.Bloky.Add(blk);
+            Self.objects.blocks.Add(blk);
             Self.processed[x, y] := true;
             Inc(index);
           end;
@@ -288,7 +288,7 @@ begin
             (blk as TObjOther).Positions.Add(Point(x, y));
 
             indexMap.AddOrSetValue(Symbol, blk);
-            Self.objects.Bloky.Add(blk);
+            Self.objects.blocks.Add(blk);
             Inc(index);
           end;
 
@@ -333,7 +333,7 @@ begin
     vyhybka.Position := VychoziPos;
     vyhybka.SymbolID := symbol;
     vyhybka.obj := index - 1;
-    Self.objects.Bloky.Add(vyhybka);
+    Self.objects.blocks.Add(vyhybka);
   end else begin
     var sym: TReliefSym;
     sym.SymbolID := symbol;
@@ -341,7 +341,7 @@ begin
     track.Symbols.Add(sym);
   end;
 
-  Self.objects.Bloky.Add(track);
+  Self.objects.blocks.Add(track);
   var s: TStack<TPoint> := TStack<TPoint>.Create();
 
   try
@@ -405,7 +405,7 @@ begin
             derail.Pos := tempPos;
             derail.obj := index - 1;
             derail.branch := -1;
-            Self.objects.Bloky.Add(derail);
+            Self.objects.blocks.Add(derail);
 
             processed[tempPos.X, tempPos.Y] := true;
             s.Push(tempPos);
@@ -474,7 +474,7 @@ begin
                 vyhybka.Position := tempPos;
                 vyhybka.SymbolID := tempSym;
                 vyhybka.obj := index - 1;
-                Self.objects.Bloky.Add(vyhybka);
+                Self.objects.blocks.Add(vyhybka);
 
                 processed[tempPos.X, tempPos.Y] := true;
                 s.Push(tempPos);
@@ -530,7 +530,7 @@ begin
     end;
   end;
 
-  Self.objects.Bloky.Add(crossing);
+  Self.objects.blocks.Add(crossing);
 end;
 
 function TBitmapToObj.IsSeparator(from, dir: TPoint): Boolean;

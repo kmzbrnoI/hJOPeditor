@@ -47,65 +47,65 @@ begin
     for var row := 0 to po.PanelHeight - 1 do
       data[col, row] := -1;
 
-  for var i := 0 to po.Bloky.Count - 1 do
+  for var i := 0 to po.blocks.Count - 1 do
   begin
-    if (po.Bloky[i].typ <> TBlkType.track) then
+    if (po.blocks[i].typ <> TBlkType.track) then
       continue;
 
-    (po.Bloky[i] as TTrack).branches.Clear();
-    if (not(po.Bloky[i] as TTrack).IsTurnout) then
+    (po.blocks[i] as TTrack).branches.Clear();
+    if (not(po.blocks[i] as TTrack).IsTurnout) then
       continue;
 
-    if ((po.Bloky[i] as TTrack).Root.X < 0) then
+    if ((po.blocks[i] as TTrack).Root.X < 0) then
       continue;
 
     // inicializujeme pole symboly bloku
-    for var j := 0 to (po.Bloky[i] as TTrack).symbols.Count - 1 do
-      data[(po.Bloky[i] as TTrack).symbols[j].Position.X, (po.Bloky[i] as TTrack).symbols[j].Position.Y] :=
-        (po.Bloky[i] as TTrack).symbols[j].SymbolID;
+    for var j := 0 to (po.blocks[i] as TTrack).symbols.Count - 1 do
+      data[(po.blocks[i] as TTrack).symbols[j].Position.X, (po.blocks[i] as TTrack).symbols[j].Position.Y] :=
+        (po.blocks[i] as TTrack).symbols[j].SymbolID;
 
     // do tohoto pole take musime ulozit vyhybky a vykolejky
-    for var j := 0 to po.Bloky.Count - 1 do
+    for var j := 0 to po.blocks.Count - 1 do
     begin
-      if ((po.Bloky[j].typ = TBlkType.turnout) and ((po.Bloky[j] as TTurnout).obj = po.Bloky[i].index)) then
-        data[(po.Bloky[j] as TTurnout).Position.X, (po.Bloky[j] as TTurnout).Position.Y] :=
-          (po.Bloky[j] as TTurnout).SymbolID;
-      if ((po.Bloky[j].typ = TBlkType.derail) and ((po.Bloky[j] as TDerail).obj = po.Bloky[i].index)) then
-        data[(po.Bloky[j] as TDerail).Pos.X, (po.Bloky[j] as TDerail).Pos.Y] := (po.Bloky[j] as TDerail).symbol +
+      if ((po.blocks[j].typ = TBlkType.turnout) and ((po.blocks[j] as TTurnout).obj = po.blocks[i].index)) then
+        data[(po.blocks[j] as TTurnout).Position.X, (po.blocks[j] as TTurnout).Position.Y] :=
+          (po.blocks[j] as TTurnout).SymbolID;
+      if ((po.blocks[j].typ = TBlkType.derail) and ((po.blocks[j] as TDerail).obj = po.blocks[i].index)) then
+        data[(po.blocks[j] as TDerail).Pos.X, (po.blocks[j] as TDerail).Pos.Y] := (po.blocks[j] as TDerail).symbol +
           _S_DERAIL_B;
     end;
 
-    var symbol := data[TTrack(po.Bloky[i]).Root.X, TTrack(po.Bloky[i]).Root.Y];
+    var symbol := data[TTrack(po.blocks[i]).Root.X, TTrack(po.blocks[i]).Root.Y];
     if ((symbol = _S_DKS_DET_TOP) or (symbol = _S_DKS_NODET_TOP)) then
-      (po.Bloky[i] as TTrack).DKStype := dksTop
+      (po.blocks[i] as TTrack).DKStype := dksTop
     else if ((symbol = _S_DKS_DET_BOT) or (symbol = _S_DKS_NODET_BOT)) then
-      (po.Bloky[i] as TTrack).DKStype := dksBottom
+      (po.blocks[i] as TTrack).DKStype := dksBottom
     else
-      (po.Bloky[i] as TTrack).DKStype := dksNone;
+      (po.blocks[i] as TTrack).DKStype := dksNone;
 
     // provedeme algoritmus
-    if ((po.Bloky[i] as TTrack).DKStype <> dksNone) then
+    if ((po.blocks[i] as TTrack).DKStype <> dksNone) then
     begin
-      ComputeDKSBlockBranches(po, data, (po.Bloky[i] as TTrack).Root, (po.Bloky[i] as TTrack).branches);
-      if (TTrack(po.Bloky[i]).branches.Count < 3) then
+      ComputeDKSBlockBranches(po, data, (po.blocks[i] as TTrack).Root, (po.blocks[i] as TTrack).branches);
+      if (TTrack(po.blocks[i]).branches.Count < 3) then
       begin
-        (po.Bloky[i] as TTrack).DKStype := dksNone;
-        ComputeNormalBlockBranches(po, data, (po.Bloky[i] as TTrack).Root, (po.Bloky[i] as TTrack).branches);
+        (po.blocks[i] as TTrack).DKStype := dksNone;
+        ComputeNormalBlockBranches(po, data, (po.blocks[i] as TTrack).Root, (po.blocks[i] as TTrack).branches);
       end;
     end
     else
-      ComputeNormalBlockBranches(po, data, (po.Bloky[i] as TTrack).Root, (po.Bloky[i] as TTrack).branches);
+      ComputeNormalBlockBranches(po, data, (po.blocks[i] as TTrack).Root, (po.blocks[i] as TTrack).branches);
 
     // nastavime pole data opet na -1 (algortimus by to mel udelat sam, ale pro jistotu)
-    for var j := 0 to (po.Bloky[i] as TTrack).symbols.Count - 1 do
-      data[(po.Bloky[i] as TTrack).symbols[j].Position.X, (po.Bloky[i] as TTrack).symbols[j].Position.Y] := -1;
+    for var j := 0 to (po.blocks[i] as TTrack).symbols.Count - 1 do
+      data[(po.blocks[i] as TTrack).symbols[j].Position.X, (po.blocks[i] as TTrack).symbols[j].Position.Y] := -1;
 
     // odstranit vyhybky
-    for var j := 0 to po.Bloky.Count - 1 do
+    for var j := 0 to po.blocks.Count - 1 do
     begin
-      if ((po.Bloky[i].typ <> TBlkType.turnout) or ((po.Bloky[i] as TTurnout).obj <> i)) then
+      if ((po.blocks[i].typ <> TBlkType.turnout) or ((po.blocks[i] as TTurnout).obj <> i)) then
         continue;
-      data[(po.Bloky[i] as TTurnout).Position.X, (po.Bloky[i] as TTurnout).Position.Y] := -1;
+      data[(po.blocks[i] as TTurnout).Position.X, (po.blocks[i] as TTurnout).Position.Y] := -1;
     end;
   end;
 end;
@@ -177,7 +177,7 @@ begin
           // vypocitam prvni vedlejsi pole
           if ((data[new.X, new.Y] >= _S_DERAIL_B) and (data[new.X, new.Y] <= _S_DERAIL_E)) then
           begin
-            (po.Bloky[po.GetObject(new)] as TDerail).branch := branches.Count + future_offset;
+            (po.blocks[po.GetObject(new)] as TDerail).branch := branches.Count + future_offset;
             data[new.X, new.Y] := _S_TRACK_DET_B;
           end;
 
@@ -226,7 +226,7 @@ begin
           end;
 
           // zjistim index vyhybky a pridam dalsi vetve, pokud za vyhybkou existuji useky
-          node^.vyh := po.Bloky[po.GetObject(new)].index;
+          node^.vyh := po.blocks[po.GetObject(new)].index;
           node^.ref_plus := -1;
           node^.ref_minus := -1;
 
@@ -310,7 +310,7 @@ begin
 
     if ((data[r.next.X, r.next.Y] >= _S_TURNOUT_B) and (data[r.next.X, r.next.Y] <= _S_TURNOUT_E)) then
     begin
-      branch.node1.vyh := po.Bloky[po.GetObject(r.next)].index;
+      branch.node1.vyh := po.blocks[po.GetObject(r.next)].index;
       vlPos := r.next;
     end;
 
@@ -332,7 +332,7 @@ begin
 
     if ((data[r.next.X, r.next.Y] >= _S_TURNOUT_B) and (data[r.next.X, r.next.Y] <= _S_TURNOUT_E)) then
     begin
-      branch.node1.vyh := po.Bloky[po.GetObject(r.next)].index;
+      branch.node1.vyh := po.blocks[po.GetObject(r.next)].index;
       vrPos := r.next;
     end;
 
