@@ -53,18 +53,7 @@ procedure TPSt.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; col
   mode: TMode);
 var color: SymbolColor;
 begin
-  if (selected) then
-  begin
-    color := colors.selected;
-  end else begin
-    case (Self.block) of
-      -1: color := colors.Alert;
-      -2: color := colors.IntUnassigned;
-    else
-      color := colors.Normal;
-    end;
-  end;
-
+  color := Self.StandardColor(colors, selected, mode);
   DrawObject.Canvas.Brush.color := clBlack;
   SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _S_PST_TOP, color);
   SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos.X, Self.Pos.Y+1, _S_PST_BOT, color);

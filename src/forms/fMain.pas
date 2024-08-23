@@ -128,7 +128,7 @@ type
     procedure MI_SaveAsClick(Sender: TObject);
     procedure AE_MainMessage(var Msg: tagMSG; var Handled: Boolean);
     procedure ToolButton0Click(Sender: TObject);
-    procedure MI_BitmapClick(Sender: TObject);
+    procedure MI_ModeClick(Sender: TObject);
     procedure B_DeleteClick(Sender: TObject);
     procedure CHB_GroupClick(Sender: TObject);
     procedure B_MoveClick(Sender: TObject);
@@ -372,14 +372,14 @@ begin
   case (Self.Relief.Mode) of
     dmBitmap:
       begin
-        Self.MI_BitmapClick(Self.MI_Bitmap);
+        Self.MI_ModeClick(Self.MI_Bitmap);
         Self.MI_AreaAdd.Enabled := true;
       end;
 
     dmBlocks:
       begin
         Self.MI_AreaAdd.Enabled := false;
-        Self.MI_BitmapClick(Self.MI_Blocks);
+        Self.MI_ModeClick(Self.MI_Blocks);
       end;
   end;
 
@@ -593,8 +593,7 @@ begin
     'Vytvořil Jan Horáček 2011–2023'), 'Info', MB_OK OR MB_ICONINFORMATION);
 end;
 
-procedure TF_Main.MI_BitmapClick(Sender: TObject);
-var Return: Integer;
+procedure TF_Main.MI_ModeClick(Sender: TObject);
 begin
   (Sender as TMenuItem).Checked := true;
 
@@ -618,14 +617,14 @@ begin
   Self.MI_Data.Visible := false;
   Self.MI_OldOpnlImport.Visible := false;
 
-  case (Sender as TMenuItem).Tag of
+  case ((Sender as TMenuItem).Tag) of
     0:
       begin
         if (Relief.Mode = dmBlocks) then
         begin
           Application.MessageBox('Tato funkce zatím není dostupná', 'Nelze převést', MB_OK OR MB_ICONERROR);
           Self.MI_Blocks.Checked := true;
-          Exit;
+          Exit();
         end;
 
         try
@@ -650,7 +649,7 @@ begin
         Self.TB_Other.Visible := true;
         Self.MI_Relief.Visible := true;
         Self.TB_Derail.Visible := true;
-      end; // case 0
+      end;
 
     1, 2:
       begin
@@ -658,7 +657,7 @@ begin
         begin
           Application.MessageBox('Tato funkce zatím není dostupná', 'Nelze převést', MB_OK OR MB_ICONERROR);
           Self.MI_Blocks.Checked := true;
-          Exit;
+          Exit();
         end;
 
         try
@@ -681,7 +680,7 @@ begin
 
     3:
       begin
-        Return := 0;
+        var Return: Integer := 0;
 
         if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
         begin
@@ -690,7 +689,7 @@ begin
             + #13#10 + 'Pokračovat?'), 'Změna režimu projektu', MB_YESNO OR MB_ICONQUESTION OR MB_DEFBUTTON2) <> mrYes)
           then
           begin
-            Self.MI_BitmapClick(Self.MI_Bitmap);
+            Self.MI_ModeClick(Self.MI_Bitmap);
             Exit();
           end;
         end;
@@ -710,7 +709,7 @@ begin
         begin
           Application.MessageBox(PChar('Při změně módu se vyskytla chyba - chyba: ' + IntToStr(Return)), 'Chyba',
             MB_OK OR MB_ICONWARNING);
-          Exit;
+          Exit();
         end;
 
         if (not F_BlockEdit.Bloky.triedLoad) then
@@ -733,6 +732,24 @@ begin
         try
           if (Relief.Mode <> dmRoots) then
             Relief.SwitchMode(dmRoots);
+        except
+          on E: Exception do
+          begin
+            Application.MessageBox(PChar(E.message), 'Chyba', MB_OK OR MB_ICONWARNING);
+            Exit();
+          end;
+        end;
+
+        F_BlockEdit.Close();
+        Self.MI_Data.Visible := true;
+        Self.MI_OldOpnlImport.Visible := true;
+      end;
+
+    5:
+      begin
+        try
+          if (Relief.Mode <> dmAreas) then
+            Relief.SwitchMode(dmAreas);
         except
           on E: Exception do
           begin
@@ -803,7 +820,7 @@ end;
 procedure TF_Main.TB_Separator_HorizClick(Sender: TObject);
 begin
   if (Relief.Mode <> dmSepHor) then
-    Self.MI_BitmapClick(Self.MI_Sep_Hor);
+    Self.MI_ModeClick(Self.MI_Sep_Hor);
 
   try
     Relief.AddSeparatorHor();
@@ -817,7 +834,7 @@ end;
 procedure TF_Main.TB_Separator_VertClick(Sender: TObject);
 begin
   if (Relief.Mode <> dmSepVert) then
-    Self.MI_BitmapClick(Self.MI_Sep_Vert);
+    Self.MI_ModeClick(Self.MI_Sep_Vert);
 
   try
     Relief.AddSeparatorVert();

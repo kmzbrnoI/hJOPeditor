@@ -36,7 +36,7 @@ type
 
     mFileName: string;
     mFileState: TReliefFileState;
-    FMode: TMode;
+    mMode: TMode;
     Graphics: TPanelGraphics;
     fShowBlokPopisky: boolean;
 
@@ -46,10 +46,10 @@ type
 
     Selected: TGraphBlok;
 
-    FOnBlokEdit: TBlokAskEvent;
-    FOnShow: TNEvent;
-    FOnMsg: TMsgEvent;
-    FFormBlkClose: TGlobalEvent;
+    mOnBlokEdit: TBlokAskEvent;
+    mOnShow: TNEvent;
+    mOnMsg: TMsgEvent;
+    mFormBlkClose: TGlobalEvent;
 
     procedure CreatePM(var PM: TPopUpMenu; Parent: TDXDraw);
     procedure PMPropertiesClick(Sender: TObject);
@@ -78,7 +78,7 @@ type
     procedure OpnlSave(aFile: string; const ORs: string);
 
     procedure Paint(); // obecny paint
-    procedure PaintBloky(); // paint modu bloky
+    procedure PaintBlocks(); // paint modu bloky
     function PaintCursor(CursorPos: TPoint): TCursorDraw;
 
     procedure ResetPanel();
@@ -102,7 +102,7 @@ type
     property PanelHeight: Integer read DrawObject.Height;
     property fileName: string read mFileName;
     property FileStav: TReliefFileState read mFileState;
-    property mode: TMode read FMode write SetMode;
+    property mode: TMode read mMode write SetMode;
 
     property ColorSelected: SymbolColor read Colors.Selected write Colors.Selected;
     property ColorNormal: SymbolColor read Colors.Normal write Colors.Normal;
@@ -110,11 +110,11 @@ type
     property ColorIntUnassigned: SymbolColor read Colors.IntUnassigned write Colors.IntUnassigned;
     property selected_obj: TGraphBlok read Selected;
 
-    property OnBlokEdit: TBlokAskEvent read FOnBlokEdit write FOnBlokEdit;
+    property OnBlokEdit: TBlokAskEvent read mOnBlokEdit write mOnBlokEdit;
 
-    property OnShow: TNEvent read FOnShow write FOnShow;
-    property OnMsg: TMsgEvent read FOnMsg write FOnMsg;
-    property OnFormBlkClose: TGlobalEvent read FFormBlkClose write FFormBlkClose;
+    property OnShow: TNEvent read mOnShow write mOnShow;
+    property OnMsg: TMsgEvent read mOnMsg write mOnMsg;
+    property OnFormBlkClose: TGlobalEvent read mFormBlkClose write mFormBlkClose;
     property ShowBlokPopisky: boolean read fShowBlokPopisky write fShowBlokPopisky;
   end; // TPanelObjects
 
@@ -148,7 +148,7 @@ begin
 
   Self.Selected := nil;
 
-  Self.FMode := dmBlocks;
+  Self.mMode := dmBlocks;
 
   Self.Bloky := TObjectList<TGraphBlok>.Create();
 
@@ -272,19 +272,15 @@ end;
 
 procedure TPanelObjects.Paint();
 begin
-  case (Self.FMode) of
-    dmBlocks, dmRoots:
-      Self.PaintBloky();
-  end;
+  Self.PaintBlocks();
 end;
 
-procedure TPanelObjects.PaintBloky();
-var Blok: TGraphBlok;
+procedure TPanelObjects.PaintBlocks();
 begin
   Self.DrawObject.Canvas.Pen.mode := pmMerge; // pruhlednost
-  for Blok in Self.Bloky do
-    if ((Self.ShowBlokPopisky) or (Blok.typ <> TBlkType.description)) then
-      Blok.Paint(Self.DrawObject, Self.Graphics, Self.Colors, Self.Selected = Blok, Self.mode);
+  for var block: TGraphBlok in Self.Bloky do
+    if ((Self.ShowBlokPopisky) or (block.typ <> TBlkType.description)) then
+      block.Paint(Self.DrawObject, Self.Graphics, Self.Colors, Self.Selected = block, Self.mode);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -306,7 +302,7 @@ begin
   Result.Pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
 
   // vykreslit koren pod kurzorem
-  if (Self.FMode = dmRoots) then
+  if (Self.mMode = dmRoots) then
     SymbolDraw(Self.DrawObject.SymbolIL, Self.DrawObject.Canvas, CursorPos, _S_CIRCLE, scAqua);
 end;
 
@@ -403,7 +399,7 @@ end;
 
 procedure TPanelObjects.MouseMove(Position: TPoint);
 begin
-  if (Self.FMode = dmRoots) then
+  if (Self.mMode = dmRoots) then
   begin
     var tmp := Self.GetObject(Position);
     if ((tmp = -1) or (Self.Bloky[tmp].typ <> TBlkType.track)) then
@@ -420,7 +416,7 @@ end;
 
 procedure TPanelObjects.MouseUp(Position: TPoint; Button: TMouseButton);
 begin
-  case (Self.FMode) of
+  case (Self.mMode) of
     dmBlocks:
       Self.BlokyMouseUp(Position, Button);
     dmRoots:
@@ -440,37 +436,37 @@ begin
   else
     Self.Selected := Self.Bloky[blk];
 
-  if (Assigned(Self.FOnMsg)) then
+  if (Assigned(Self.OnMsg)) then
   begin
     case (Self.Selected.typ) of
       TBlkType.track:
-        Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (úsek ' + IntToStr(Self.Selected.index) + ')');
+        Self.OnMsg(Self, 'Blok ' + IntToStr(blk) + ' (úsek ' + IntToStr(Self.Selected.index) + ')');
       TBlkType.signal:
-        Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (návěstidlo ' + IntToStr(Self.Selected.index) + ')');
+        Self.OnMsg(Self, 'Blok ' + IntToStr(blk) + ' (návěstidlo ' + IntToStr(Self.Selected.index) + ')');
       TBlkType.turnout:
-        Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (výhybka ' + IntToStr(Self.Selected.index) + '), přiřazen úseku '
+        Self.OnMsg(Self, 'Blok ' + IntToStr(blk) + ' (výhybka ' + IntToStr(Self.Selected.index) + '), přiřazen úseku '
           + IntToStr((Self.Selected as TTurnout).obj));
       TBlkType.crossing:
-        Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (přejezd ' + IntToStr(Self.Selected.index) + ')');
+        Self.OnMsg(Self, 'Blok ' + IntToStr(blk) + ' (přejezd ' + IntToStr(Self.Selected.index) + ')');
       TBlkType.text:
-        Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (popisek ' + IntToStr(Self.Selected.index) + ')');
+        Self.OnMsg(Self, 'Blok ' + IntToStr(blk) + ' (popisek ' + IntToStr(Self.Selected.index) + ')');
       TBlkType.description:
-        Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (popisek bloku ' + IntToStr(Self.Selected.index) + ')');
+        Self.OnMsg(Self, 'Blok ' + IntToStr(blk) + ' (popisek bloku ' + IntToStr(Self.Selected.index) + ')');
       TBlkType.other:
-        Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (pomocný objekt ' + IntToStr(Self.Selected.index) + ')');
+        Self.OnMsg(Self, 'Blok ' + IntToStr(blk) + ' (pomocný objekt ' + IntToStr(Self.Selected.index) + ')');
       TBlkType.linker:
-        Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (úvazka ' + IntToStr(Self.Selected.index) + ')');
+        Self.OnMsg(Self, 'Blok ' + IntToStr(blk) + ' (úvazka ' + IntToStr(Self.Selected.index) + ')');
       TBlkType.linker_train:
-        Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (úvazka spr. ' + IntToStr(Self.Selected.index) + ')');
+        Self.OnMsg(Self, 'Blok ' + IntToStr(blk) + ' (úvazka spr. ' + IntToStr(Self.Selected.index) + ')');
       TBlkType.lock:
-        Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (zámek ' + IntToStr(Self.Selected.index) + ')');
+        Self.OnMsg(Self, 'Blok ' + IntToStr(blk) + ' (zámek ' + IntToStr(Self.Selected.index) + ')');
       TBlkType.derail:
-        Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (výkolejka ' + IntToStr(Self.Selected.index) +
+        Self.OnMsg(Self, 'Blok ' + IntToStr(blk) + ' (výkolejka ' + IntToStr(Self.Selected.index) +
           '), přiřazena úseku ' + IntToStr((Self.Selected as TDerail).obj));
       TBlkType.disconnector:
-        Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (rozpojovač ' + IntToStr(Self.Selected.index) + ')');
+        Self.OnMsg(Self, 'Blok ' + IntToStr(blk) + ' (rozpojovač ' + IntToStr(Self.Selected.index) + ')');
       TBlkType.pst:
-        Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (PSt ' + IntToStr(Self.Selected.index) + ')');
+        Self.OnMsg(Self, 'Blok ' + IntToStr(blk) + ' (PSt ' + IntToStr(Self.Selected.index) + ')');
     end; // case
   end; // if Assigned(FOnMsg)
 
@@ -516,8 +512,8 @@ begin
   else
     Self.Selected := nil;
 
-  if (Assigned(Self.FOnMsg)) then
-    Self.FOnMsg(Self, 'Blok ' + IntToStr(blk) + ' (úsek)');
+  if (Assigned(Self.OnMsg)) then
+    Self.OnMsg(Self, 'Blok ' + IntToStr(blk) + ' (úsek)');
   if ((not Assigned(Self.Selected)) or (not(Self.Selected as TTrack).IsTurnout)) then
     Exit;
   (Self.Selected as TTrack).Root := Position;
@@ -546,8 +542,8 @@ end;
 procedure TPanelObjects.PMPropertiesClick(Sender: TObject);
 begin
   if (Self.Selected <> nil) then
-    if (Assigned(Self.FOnBlokEdit)) then
-      Self.FOnBlokEdit(Self, Self.Selected);
+    if (Assigned(Self.mOnBlokEdit)) then
+      Self.mOnBlokEdit(Self, Self.Selected);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -643,7 +639,7 @@ end;
 
 procedure TPanelObjects.SetMode(mode: TMode);
 begin
-  Self.FMode := mode;
+  Self.mMode := mode;
   Self.Selected := nil;
   if (mode = TMode.dmRoots) then
     Self.ComputeVyhybkaFlag();

@@ -59,22 +59,10 @@ end;
 
 procedure TDerail.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
   mode: TMode);
-var color: SymbolColor;
 begin
-  if (selected) then
-  begin
-    color := colors.selected;
-  end else begin
-    case (Self.block) of
-      -1: color := colors.Alert;
-      -2: color := colors.IntUnassigned;
-    else
-      color := colors.Normal;
-    end;
-  end;
-
   DrawObject.Canvas.Brush.color := clBlack;
-  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _S_DERAIL_B + Self.symbol, color);
+  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _S_DERAIL_B + Self.symbol,
+    Self.StandardColor(colors, selected, mode));
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

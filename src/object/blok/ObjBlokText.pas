@@ -65,21 +65,11 @@ var color: SymbolColor;
 begin
   if ((Length(Self.Text) = 1) and (Self.typ = TBlkType.Text)) then
   begin
-    if (selected) then
-    begin
-      Color := colors.selected;
-    end else begin
-      case (Self.block) of
-        - 1:
-          Color := colors.Alert;
-        -2:
-          Color := colors.IntUnassigned;
-      else
-        Color := colors.Normal;
-      end;
-    end; // else (Self.Selected > 255)
+    color := Self.StandardColor(colors, selected, mode);
   end else begin
-    Color := Self.Color;
+    if (mode = dmAreas) then
+      Exit(); // not painting non-block texts in dmAreas
+    color := Self.Color;
   end;
 
   if (Self.typ = TBlkType.description) then

@@ -60,28 +60,12 @@ procedure TLinkerTrain.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraph
   selected: boolean; mode: TMode);
 var color: SymbolColor;
 begin
-  if (selected) then
-  begin
-    DrawObject.Canvas.Pen.color := clRed;
-    color := colors.Selected;
-  end else begin
-    case (Self.block) of
-      -1:
-        begin
-          color := colors.Alert;
-          DrawObject.Canvas.Pen.color := clAqua;
-        end;
-      -2:
-        begin
-          color := colors.IntUnassigned;
-          DrawObject.Canvas.Pen.color := clWhite;
-        end
-    else
-      color := scYellow;
-      DrawObject.Canvas.Pen.color := clYellow;
-    end;
-  end;
+  if ((mode in [dmBlocks, dmRoots]) and (Self.block > -1)) then
+    color := scYellow
+  else
+    color := Self.StandardColor(colors, selected, mode);
 
+  DrawObject.Canvas.Pen.color := SymbolColorToColor(color);
   DrawObject.Canvas.Brush.color := clBlack;
 
   case (Self.vertical_dir) of

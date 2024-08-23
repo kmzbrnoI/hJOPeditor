@@ -4,7 +4,7 @@ object F_NewRelief: TF_NewRelief
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'Nov'#253' reli'#233'f'
-  ClientHeight = 466
+  ClientHeight = 461
   ClientWidth = 721
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET

@@ -2,7 +2,7 @@ unit ObjBlok;
 
 interface
 
-uses IniFiles, Global, PGraphics;
+uses IniFiles, Global, PGraphics, symbolHelper;
 
 type
 
@@ -12,6 +12,10 @@ type
   );
 
   TGraphBlok = class
+  protected
+    function StandardColor(colors: TObjColors; selected: boolean; mode: TMode): SymbolColor;
+
+  public
     typ: TBlkType;
 
     block: Integer;
@@ -88,5 +92,25 @@ begin
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
+
+function TGraphBlok.StandardColor(colors: TObjColors; selected: boolean; mode: TMode): SymbolColor;
+begin
+  Result := colors.normal;
+
+  if (selected) then
+    Result := colors.selected
+  else if (mode = dmBlocks) then
+  begin
+    case (Self.block) of
+      -1: Result := colors.alert;
+      -2: Result := colors.intUnassigned;
+    else
+      Result := colors.normal;
+    end;
+  end else if (mode = dmAreas) then
+    Result := AreaColor(Self.area);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
 
 end.

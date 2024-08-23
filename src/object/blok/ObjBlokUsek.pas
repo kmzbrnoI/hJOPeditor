@@ -298,35 +298,34 @@ begin
 
     SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Root, _S_CIRCLE, colors.Selected);
   end else begin
-    for var pos: TPoint in Self.JCClick do
-      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_KC, scLime);
+    if (mode <> dmAreas) then
+    begin
+      for var pos: TPoint in Self.JCClick do
+        SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_KC, scLime);
 
-    for var pos: TPoint in Self.labels do
-      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_FULL, scYellow);
+      for var pos: TPoint in Self.labels do
+        SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_FULL, scYellow);
 
-    for var pos: TPoint in Self.trains do
-      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_FULL, scBlue);
+      for var pos: TPoint in Self.trains do
+        SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_FULL, scBlue);
+    end;
 
     var color: SymbolColor;
-    if (mode = TMode.dmBlocks) then
+    if (mode = dmRoots) then
     begin
-      case (Self.block) of
-        -1: color := colors.Alert;
-        -2: color := colors.IntUnassigned;
-      else
-        color := colors.Normal;
-      end;
-    end else begin
       if ((Self.IsTurnout) and (Self.Root.X = -1)) then
-        color := colors.Alert
+        color := colors.alert
       else
-        color := colors.Normal;
+        color := colors.normal;
+    end else begin
+      color := Self.StandardColor(colors, selected, mode);
     end;
 
     for var sym: TReliefSym in Self.Symbols do
       SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, sym.Position, sym.SymbolID, color);
 
-    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Root, _S_CIRCLE, scAqua);
+    if (mode <> dmAreas) then
+      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Root, _S_CIRCLE, scAqua);
   end; // else Selected = i
 end;
 

@@ -53,6 +53,14 @@ const
     clBlack
   );
 
+  _AREA_COLORS: array [0..4] of SymbolColor = (
+    scBlue,
+    scYellow,
+    scLime,
+    scWhite,
+    scGray
+  );
+
   // same for detected & undetected
   _TRACK_CONNECTIONS: array [0..9] of TSymbolConnection = (
     (a: (X: -1; Y: 0); b: (X: 1; Y: 0); c: (X: 0; Y: 0)),
@@ -135,6 +143,7 @@ function LoadIL(ResourceName: string; PartWidth, PartHeight: Byte; MaskColor: TC
 function GetTrackContinue(symbol: Integer; dir: TNavDir): TPoint;
 function SymbolDrawColor(symbol: Integer): SymbolColor;
 function ColorToSymbolColor(color: TColor): SymbolColor;
+function SymbolColorToColor(color: SymbolColor): TColor;
 function SymbolIndex(symbol: Integer; color: SymbolColor): Integer;
 procedure SymbolDraw(IL: TImageList; Canvas: TCanvas; X, Y: Integer; symbol: Integer; color: SymbolColor); overload;
 procedure SymbolDraw(IL: TImageList; Canvas: TCanvas; pos: TPoint; symbol: Integer; color: SymbolColor); overload;
@@ -142,6 +151,8 @@ function TranscodeSymbolFromBpnlV3(symbol: Integer): Integer;
 
 function CompareReliefSymPos(const left: TReliefSym; const right: TReliefSym): Integer;
 function ArePointListsEq(a: TList<TPoint>; b: TList<TPoint>): Boolean;
+
+function AreaColor(areai: Integer): SymbolColor;
 
 implementation
 
@@ -190,6 +201,11 @@ begin
     if (_SYMBOL_COLORS[i] = color) then
       Exit(SymbolColor(i));
   Result := scPurple;
+end;
+
+function SymbolColorToColor(color: SymbolColor): TColor;
+begin
+  Result := _SYMBOL_COLORS[Integer(color)];
 end;
 
 procedure SymbolDraw(IL: TImageList; Canvas: TCanvas; X, Y: Integer; symbol: Integer; color: SymbolColor); overload;
@@ -306,6 +322,15 @@ begin
     if (a[i] <> b[i]) then
       Exit(False);
   Result := True;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function AreaColor(areai: Integer): SymbolColor;
+begin
+  if (areai < 0) then
+    Exit(scAqua);
+  Result := _AREA_COLORS[areai mod Length(_AREA_COLORS)];
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

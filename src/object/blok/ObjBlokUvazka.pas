@@ -55,18 +55,7 @@ procedure TLinker.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; 
   mode: TMode);
 var color: SymbolColor;
 begin
-  if (selected) then
-  begin
-    color := colors.Selected;
-  end else begin
-    case (Self.block) of
-      -1: color := colors.Alert;
-      -2: color := colors.IntUnassigned;
-    else
-      color := colors.Normal;
-    end;
-  end;
-
+  color := Self.StandardColor(colors, selected, mode);
   SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _S_LINKER_B, color);
   SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos.X+1, Self.Pos.Y, _S_LINKER_B+1, color);
 end;

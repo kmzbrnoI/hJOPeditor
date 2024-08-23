@@ -5,7 +5,7 @@ object F_BlockEdit: TF_BlockEdit
   BorderStyle = bsToolWindow
   Caption = 'Editace bloku [blok]'
   ClientHeight = 645
-  ClientWidth = 202
+  ClientWidth = 200
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

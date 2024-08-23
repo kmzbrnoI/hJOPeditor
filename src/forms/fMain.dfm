@@ -3943,39 +3943,42 @@ object F_Main: TF_Main
         Caption = 'Symboly'
         GroupIndex = 1
         RadioItem = True
-        OnClick = MI_BitmapClick
+        OnClick = MI_ModeClick
       end
       object MI_Sep_Vert: TMenuItem
         Tag = 1
         Caption = 'Vertik'#225'ln'#237' odd'#283'lova'#269'e '#250'sek'#367
         GroupIndex = 1
         RadioItem = True
-        OnClick = MI_BitmapClick
+        OnClick = MI_ModeClick
       end
       object MI_Sep_Hor: TMenuItem
         Tag = 2
         Caption = 'Horizont'#225'ln'#237' odd'#283'lova'#269'e '#250'sek'#367
         GroupIndex = 1
         RadioItem = True
-        OnClick = MI_BitmapClick
+        OnClick = MI_ModeClick
       end
       object MI_Blocks: TMenuItem
         Tag = 3
         Caption = 'Bloky'
         GroupIndex = 1
         RadioItem = True
-        OnClick = MI_BitmapClick
+        OnClick = MI_ModeClick
       end
       object MI_Roots: TMenuItem
         Tag = 4
         Caption = 'Ko'#345'eny'
         GroupIndex = 1
         RadioItem = True
-        OnClick = MI_BitmapClick
+        OnClick = MI_ModeClick
       end
       object MI_Areas: TMenuItem
+        Tag = 5
         Caption = 'Oblasti '#345#237'zen'#237
         GroupIndex = 1
+        RadioItem = True
+        OnClick = MI_ModeClick
       end
     end
     object MI_Relief: TMenuItem

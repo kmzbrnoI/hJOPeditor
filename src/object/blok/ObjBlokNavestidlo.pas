@@ -58,17 +58,8 @@ end;
 procedure TSignal.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors;
   selected: boolean; mode: TMode);
 begin
-  if (selected) then
-  begin
-    SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _S_SIGNAL_B + Self.SymbolID, colors.Selected);
-  end else begin
-    case (Self.block) of
-      -1: SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _S_SIGNAL_B + Self.SymbolID, colors.Alert);
-      -2: SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _S_SIGNAL_B + Self.SymbolID, colors.IntUnassigned);
-    else
-      SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _S_SIGNAL_B + Self.SymbolID, colors.Normal);
-    end;
-  end;
+  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Position, _S_SIGNAL_B + Self.SymbolID,
+    Self.StandardColor(colors, selected, mode));
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

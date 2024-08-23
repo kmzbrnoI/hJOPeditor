@@ -94,7 +94,7 @@ type
     procedure PaintCursor(CursorPos: TPoint); overload;
     function PaintCursor(CursorData: TCursorDraw): Byte; overload;
 
-    procedure PaintOR();
+    procedure PaintAreas();
     function ORMouseUp(Position: TPoint; Button: TMouseButton): Boolean; // result = handled3
     function GetORGraf(pos: TPoint): TORGraf;
     procedure DKMenuInit();
@@ -163,7 +163,7 @@ type
     procedure DeleteBitmapSymbol();
     procedure KeyPress(Key: Integer); // accepts keys from ApplicationEvent component
 
-    procedure SwitchMode(aMode: TMode);
+    procedure SwitchMode(newMode: TMode);
     procedure HideMouse();
 
     // OR
@@ -371,10 +371,10 @@ begin
   case (Self.DrawMode) of
     dmBitmap, dmSepHor, dmSepVert:
       Self.PanelBitmap.Paint();
-    dmBlocks, dmRoots:
+    dmBlocks, dmRoots, dmAreas:
       Self.PanelObjects.Paint();
   end;
-  Self.PaintOR();
+  Self.PaintAreas();
   if (Self.Grid) then
     Self.PaintGrid(Self.Colors.Grid);
 
@@ -401,7 +401,7 @@ begin
     case (Self.DrawMode) of
       dmBitmap, dmSepHor, dmSepVert:
         cursorData := Self.PanelBitmap.PaintCursor(CursorPos);
-      dmBlocks, dmRoots:
+      dmBlocks, dmRoots, dmAreas:
         cursorData := Self.PanelObjects.PaintCursor(CursorPos);
     end; // case
   end;
@@ -483,7 +483,7 @@ begin
     case (Self.DrawMode) of
       dmBitmap, dmSepHor, dmSepVert:
         Self.BitmapMouseUp(LastPos, Button);
-      dmBlocks, dmRoots:
+      dmBlocks, dmRoots, dmAreas:
         Self.ObjectMouseUp(LastPos, Button);
     end; // case
   end; // ORMouseUp = 0
@@ -500,7 +500,7 @@ begin
   LastPos.Y := Y div _SYMBOL_HEIGHT;
 
   case (Self.DrawMode) of
-    dmBlocks, dmRoots:
+    dmBlocks, dmRoots, dmAreas:
       Self.PanelObjects.MouseMove(LastPos);
   end; // case
 
@@ -522,7 +522,7 @@ begin
 
       Self.BitmapDblClick(LastPos);
     end;
-    dmBlocks, dmRoots:
+    dmBlocks, dmRoots, dmAreas:
     begin
       Self.ObjectDblClick(LastPos);
     end;
@@ -568,7 +568,7 @@ begin
     dmBitmap, dmSepVert, dmSepHor:
       if (Assigned(Self.PanelBitmap)) then
         Self.PanelBitmap.Escape(Group);
-    dmBlocks, dmRoots:
+    dmBlocks, dmRoots, dmAreas:
       if (Assigned(Self.PanelObjects)) then
         Self.PanelObjects.Escape();
   end;
@@ -578,13 +578,11 @@ begin
   Self.Show();
 end;
 
-procedure TRelief.SwitchMode(aMode: TMode);
+procedure TRelief.SwitchMode(newMode: TMode);
 begin
-  if (((Self.DrawMode = dmBitmap) or (Self.DrawMode = dmSepHor) or (Self.DrawMode = dmSepVert)) and (aMode = dmBlocks))
-  then
+  if ((Self.DrawMode in [dmBitmap, dmSepHor, dmSepVert]) and (newMode = dmBlocks)) then
   begin
     // konverze z Bitmap na Objects
-
     Self.PanelObjects := TPanelObjects.Create(Self.IL_Symbols, Self.IL_Text, Self.DrawObject.Surface.Canvas,
       Self.PanelWidth, Self.PanelHeight, Self.DrawObject, Self.Graphics);
     Self.AssignObjectEvents();
@@ -600,19 +598,17 @@ begin
     FreeAndNil(Self.PanelBitmap);
     Self.Panel.fileState := fsUnsaved;
   end
-  else
 
-    // konverze Bitmap <-> oddelovac hor <-> oddelovac vert
-    if (((Self.DrawMode = dmBitmap) or (Self.DrawMode = dmSepHor) or (Self.DrawMode = dmSepVert)) and
-      ((aMode = dmBitmap) or (aMode = dmSepHor) or (aMode = dmSepVert))) then
-      Self.PanelBitmap.Mode := aMode
+  // konverze Bitmap <-> oddelovac hor <-> oddelovac vert
+  else if ((Self.DrawMode in [dmBitmap, dmSepHor, dmSepVert]) and (newMode in [dmBitmap, dmSepHor, dmSepVert])) then
+    Self.PanelBitmap.Mode := newMode
 
-      // konverze Bloky <-> Koreny
-    else if (((Self.DrawMode = dmBlocks) and (aMode = dmRoots)) or ((Self.DrawMode = dmRoots) and (aMode = dmBlocks)))
-    then
-      Self.PanelObjects.Mode := aMode;
+  // konverze Bloky <-> Koreny <-> Oblasti rizeni
+  else if ((Self.DrawMode in [dmBlocks, dmRoots, dmAreas]) and (newMode in [dmBlocks, dmRoots, dmAreas]))
+  then
+    Self.PanelObjects.Mode := newMode;
 
-  DrawMode := aMode;
+  DrawMode := newMode;
 
   Self.Show(Point(-1, -1));
 end;
@@ -695,7 +691,7 @@ begin
         Self.mPanelWidth := Self.PanelBitmap.PanelWidth;
         Self.mPanelHeight := Self.PanelBitmap.PanelHeight;
       end; // dmBitmap
-    dmBlocks, dmRoots:
+    dmBlocks, dmRoots, dmAreas:
       begin
         var ORs: string;
         Self.PanelObjects.OpnlLoad(aFile, ORs);
@@ -721,7 +717,7 @@ begin
         Self.Panel.fileState := Self.PanelBitmap.fileState;
       end; // dmBitmap
 
-    dmBlocks, dmRoots:
+    dmBlocks, dmRoots, dmAreas:
       begin
         Self.PanelObjects.OpnlSave(aFile, Self.ORSave());
         Self.Panel.fileState := Self.PanelObjects.FileStav;
@@ -840,11 +836,15 @@ end;
 // vykresli vsechny oblasti rizeni
 // zatim jen baracky
 // bereme ohled na posun
-procedure TRelief.PaintOR();
+procedure TRelief.PaintAreas();
 begin
   for var i := 0 to Self.areas.Count - 1 do
   begin
     var area := Self.areas[i];
+
+    var color := scGray;
+    if (Self.Mode = dmAreas) then
+      color := AreaColor(i);
 
     begin
       var pos: TPoint;
@@ -853,7 +853,7 @@ begin
       else
         pos := area.Poss.DK;
       Self.IL_DK.Draw(Self.DrawObject.Surface.Canvas, pos.X * _SYMBOL_WIDTH, pos.Y * _SYMBOL_HEIGHT,
-        (Integer(area.Poss.DKOr) * 10) + 1);
+        (Integer(area.Poss.DKOr) * 10) + Integer(color));
     end;
 
     begin
@@ -862,7 +862,7 @@ begin
         pos := Self.LastPos
       else
         pos := area.Poss.Queue;
-      Self.Graphics.TextOutputI(pos, '00 VZ PV EZ 00', scGray, clBlack);
+      Self.Graphics.TextOutputI(pos, '00 VZ PV EZ 00', color, clBlack);
     end;
 
     begin
@@ -871,7 +871,7 @@ begin
         pos := Self.LastPos
       else
         pos := area.Poss.Time;
-      Self.Graphics.TextOutputI(pos, 'MER CASU', scGray, clBlack);
+      Self.Graphics.TextOutputI(pos, 'MER CASU', color, clBlack);
       Self.Graphics.TextOutputI(Point(pos.X + 8, pos.Y), '        ', scBlack, clWhite);
     end;
   end; // for i
@@ -1216,7 +1216,7 @@ begin
   case (Self.Mode) of
     dmBitmap, dmSepVert, dmSepHor:
       Result := Self.PanelBitmap.ShowBlokPopisky;
-    dmBlocks, dmRoots:
+    dmBlocks, dmRoots, dmAreas:
       Result := Self.PanelObjects.ShowBlokPopisky;
   else
     Result := true;
@@ -1228,7 +1228,7 @@ begin
   case (Self.Mode) of
     dmBitmap, dmSepVert, dmSepHor:
       Self.PanelBitmap.ShowBlokPopisky := show;
-    dmBlocks, dmRoots:
+    dmBlocks, dmRoots, dmAreas:
       Self.PanelObjects.ShowBlokPopisky := show;
   end;
   Self.Show(Point(-1, -1));
@@ -1238,7 +1238,7 @@ end;
 
 procedure TRelief.ImportOldOpnl(aFile: string);
 begin
-  if ((Self.Mode <> dmBlocks) and (Self.Mode <> dmRoots)) then
+  if (not (Self.Mode in [dmBlocks, dmRoots, dmAreas])) then
     raise Exception.Create('Panel musí být v režimu bloků nebo kořenů!');
   Self.PanelObjects.ImportOldOpnl(aFile);
 end;

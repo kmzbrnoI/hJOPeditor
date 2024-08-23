@@ -20,7 +20,7 @@ type
 
   TGlobalEvent = procedure(Sender: TObject) of object;
 
-  TMode = (dmBitmap = 0, dmSepVert = 1, dmSepHor = 2, dmBlocks = 3, dmRoots = 4);
+  TMode = (dmBitmap = 0, dmSepVert = 1, dmSepHor = 2, dmBlocks = 3, dmRoots = 4, dmAreas = 5);
 
   TCursorColor = (ccDefault = 0, ccActiveOperation = 1, ccOnObject = 2);
 

@@ -19,8 +19,6 @@ type
     procedure Save(ini: TMemIniFile; key: string); override;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
-
-    function GetEqOther(blocks: TList<TGraphBlok>): TObjOther;
   end;
 
 implementation
@@ -83,41 +81,19 @@ end;
 
 procedure TObjOther.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors;
   selected: boolean; mode: TMode);
-var pos: TPoint;
-    color: SymbolColor;
+var color: SymbolColor;
 begin
   if (Self.Symbol in BLK_ASSIGN_SYMBOLS) then
   begin
-    if (selected) then
-    begin
-      color := colors.Selected;
-    end else begin
-      case (Self.block) of
-        - 1:
-          color := colors.Alert;
-        -2:
-          color := colors.IntUnassigned;
-      else
-        color := colors.Normal;
-      end;
-    end;
+    color := Self.StandardColor(colors, selected, mode);
   end else begin
     color := SymbolDrawColor(Self.Symbol);
+    if (mode = dmAreas) then
+      Exit(); // not painting in areas mode
   end;
 
-  for pos in Self.Positions do
+  for var pos: TPoint in Self.Positions do
     SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, Self.Symbol, color);
-end;
-
-/// /////////////////////////////////////////////////////////////////////////////
-
-function TObjOther.GetEqOther(blocks: TList<TGraphBlok>): TObjOther;
-begin
-  // TODO
-//  for var block: TGraphBlok in blocks do
-//    if ((block.typ = TBlkType.linker_train) and (TObjOther(block).Pos = Self.Pos)) then
-//      Exit(TLinkerTrain(block));
-  Result := nil;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

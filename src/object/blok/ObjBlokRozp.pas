@@ -51,21 +51,9 @@ end;
 
 procedure TDisconnector.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
   mode: TMode);
-var color: SymbolColor;
 begin
-  if (selected) then
-  begin
-    color := colors.selected;
-  end else begin
-    case (Self.block) of
-      -1: color := colors.Alert;
-      -2: color := colors.IntUnassigned;
-    else
-      color := colors.Normal;
-    end;
-  end; // else (Self.Selected > 255)
-
-  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _S_DISC_ALONE, color);
+  SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, Self.Pos, _S_DISC_ALONE,
+    Self.StandardColor(colors, selected, mode));
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

@@ -114,17 +114,7 @@ procedure TCrossing.Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics
   mode: TMode);
 var color: SymbolColor;
 begin
-  if (selected) then
-  begin
-    color := colors.selected;
-  end else begin
-    case (Self.block) of
-      -1: color := colors.Alert;
-      -2: color := colors.IntUnassigned;
-    else
-      color := colors.Normal;
-    end;
-  end;
+  color := Self.StandardColor(colors, selected, mode);
 
   for var pos: TPoint in Self.StaticPositions do
     SymbolDraw(DrawObject.SymbolIL, DrawObject.Canvas, pos, _S_CROSSING, color);

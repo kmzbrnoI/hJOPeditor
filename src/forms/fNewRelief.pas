@@ -134,7 +134,7 @@ begin
   end;
 
   Self.Close();
-  F_Main.MI_BitmapClick(F_Main.MI_Bitmap);
+  F_Main.MI_ModeClick(F_Main.MI_Bitmap);
   ReliefOptions.UseData(F_Main.Relief);
   F_Main.DesignOpen('Nový projekt');
 end;
