@@ -51,6 +51,8 @@ type
 
     constructor Create();
     destructor Destroy(); override;
+
+    function IsDK(pos: TPoint): Boolean;
   end;
 
   TORGraphSymbol = (orsDK = 0, orsQueue = 1, orsTime = 2);
@@ -73,6 +75,12 @@ destructor TArea.Destroy();
 begin
   Self.Lights.Free();
   inherited;
+end;
+
+function TArea.IsDK(pos: TPoint): Boolean;
+begin
+  Result := (pos.X >= Self.Poss.DK.X) and (pos.X <= (Self.Poss.DK.X+_OR_DK_SIZE.X)) and
+    (pos.Y >= Self.Poss.DK.Y) and (pos.Y <= (Self.Poss.DK.Y+_OR_DK_SIZE.Y))
 end;
 
 end.// unit

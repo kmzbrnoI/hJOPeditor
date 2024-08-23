@@ -26,8 +26,10 @@ const
 type
 
   EFileLoad = class(Exception);
+  ENoArea = class(Exception);
 
   TBlokAskEvent = procedure(Sender: TObject; Blok: TGraphBlok) of object;
+  TAreaAskEvent = function(lefttop: TPoint; rightbot: TPoint): Integer of object;
   TMsgEvent = procedure(Sender: TObject; msg: string) of object;
 
   TPanelObjects = class
@@ -38,24 +40,28 @@ type
     mFileState: TReliefFileState;
     mMode: TMode;
     Graphics: TPanelGraphics;
-    fShowBlokPopisky: boolean;
+    fShowBlokPopisky: Boolean;
 
     PopUpPos: TPoint;
     DrawObject: TDrawObject;
     Colors: TObjColors;
 
     Selected: TGraphBlok;
+    AreaOpStep: TGOpStep;
+    AreaOpStart: TPoint;
 
     mOnBlokEdit: TBlokAskEvent;
     mOnShow: TNEvent;
     mOnMsg: TMsgEvent;
     mFormBlkClose: TGlobalEvent;
+    mOnAreaAsk: TAreaAskEvent;
 
     procedure CreatePM(var PM: TPopUpMenu; Parent: TDXDraw);
     procedure PMPropertiesClick(Sender: TObject);
 
     procedure SetMode(mode: TMode);
     procedure ComputeVyhybkaFlag(); // volano pri prechodu z Bloky do Koreny
+    function FindAreaI(lefttop: TPoint; rightbot: TPoint): Integer;
 
     class function FileSupportedVersionsStr(): string;
     class function BlockCreate(typ: TBlkType; i: Integer): TGraphBlok;
@@ -80,19 +86,21 @@ type
     procedure Paint(); // obecny paint
     procedure PaintBlocks(); // paint modu bloky
     function PaintCursor(CursorPos: TPoint): TCursorDraw;
+    function PaintCursorAreas(CursorPos: TPoint): TCursorDraw;
 
     procedure ResetPanel();
     procedure Escape();
 
     procedure MouseUp(Position: TPoint; Button: TMouseButton);
     procedure MouseMove(Position: TPoint);
-    procedure BlokyMouseUp(Position: TPoint; Button: TMouseButton);
-    procedure KorenyMouseUp(Position: TPoint; Button: TMouseButton);
+    procedure BlocksMouseUp(Position: TPoint; Button: TMouseButton);
+    procedure RootsMouseUp(Position: TPoint; Button: TMouseButton);
+    procedure AreasMouseUp(Position: TPoint; Button: TMouseButton);
     procedure DblClick(Position: TPoint);
 
     function GetObject(Pos: TPoint): Integer;
 
-    function SetOR(areai: Integer): Byte; // nastavi oblast rizeni vybranemu bloku
+    function SetArea(areai: Integer): Byte; // nastavi oblast rizeni vybranemu bloku
 
     function CheckValid(var error_cnt: Byte): TStrings; // overi validitu naeditovanych dat a vrati chybove hlasky
 
@@ -116,6 +124,7 @@ type
     property OnMsg: TMsgEvent read mOnMsg write mOnMsg;
     property OnFormBlkClose: TGlobalEvent read mFormBlkClose write mFormBlkClose;
     property ShowBlokPopisky: boolean read fShowBlokPopisky write fShowBlokPopisky;
+    property OnAreaAsk: TAreaAskEvent read mOnAreaAsk write mOnAreaAsk;
   end; // TPanelObjects
 
 implementation
@@ -147,8 +156,8 @@ begin
   Self.Colors.IntUnassigned := _Def_Color_IntUnassigned;
 
   Self.Selected := nil;
-
   Self.mMode := dmBlocks;
+  Self.AreaOpStep := gosNone;
 
   Self.blocks := TObjectList<TGraphBlok>.Create();
 
@@ -162,7 +171,7 @@ begin
 
   if (Assigned(Self.PM_Properties) = true) then
   begin
-    Self.PM_Properties.Free;
+    Self.PM_Properties.Free();
     Self.PM_Properties := nil;
   end;
 end; // destructor
@@ -289,21 +298,43 @@ end;
 procedure TPanelObjects.Escape();
 begin
   Self.Selected := nil;
+  Self.AreaOpStep := gosNone;
 end;
 
 // vykresleni kurzoru - vraci data v PIXELECH!
 function TPanelObjects.PaintCursor(CursorPos: TPoint): TCursorDraw;
 begin
+  if (Self.mode = dmAreas) then
+    Exit(Self.PaintCursorAreas(CursorPos));
+
   // vykreslit kurzor
-  Result.Color := TCursorColor.ccDefault;
-  Result.Pos1.X := CursorPos.X * _SYMBOL_WIDTH;
-  Result.Pos1.Y := CursorPos.Y * _SYMBOL_HEIGHT;
-  Result.Pos2.X := CursorPos.X * _SYMBOL_WIDTH;
-  Result.Pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
+  Result.color := TCursorColor.ccDefault;
+  Result.pos1.X := CursorPos.X * _SYMBOL_WIDTH;
+  Result.pos1.Y := CursorPos.Y * _SYMBOL_HEIGHT;
+  Result.pos2.X := CursorPos.X * _SYMBOL_WIDTH;
+  Result.pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
 
   // vykreslit koren pod kurzorem
   if (Self.mMode = dmRoots) then
     SymbolDraw(Self.DrawObject.SymbolIL, Self.DrawObject.Canvas, CursorPos, _S_CIRCLE, scAqua);
+end;
+
+function TPanelObjects.PaintCursorAreas(CursorPos: TPoint): TCursorDraw;
+begin
+  if (Self.AreaOpStep = gosSelecting) then
+  begin
+    Result.color := TCursorColor.ccOnObject;
+    Result.pos1.X := Self.AreaOpStart.X * _SYMBOL_WIDTH;
+    Result.pos1.Y := Self.AreaOpStart.Y * _SYMBOL_HEIGHT;
+    Result.pos2.X := CursorPos.X * _SYMBOL_WIDTH;
+    Result.pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
+  end else begin
+    Result.color := TCursorColor.ccActiveOperation;
+    Result.pos1.X := CursorPos.X * _SYMBOL_WIDTH;
+    Result.pos1.Y := CursorPos.Y * _SYMBOL_HEIGHT;
+    Result.pos2.X := CursorPos.X * _SYMBOL_WIDTH;
+    Result.pos2.Y := CursorPos.Y * _SYMBOL_HEIGHT;
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -418,13 +449,15 @@ procedure TPanelObjects.MouseUp(Position: TPoint; Button: TMouseButton);
 begin
   case (Self.mMode) of
     dmBlocks:
-      Self.BlokyMouseUp(Position, Button);
+      Self.BlocksMouseUp(Position, Button);
     dmRoots:
-      Self.KorenyMouseUp(Position, Button);
+      Self.RootsMouseUp(Position, Button);
+    dmAreas:
+      Self.AreasMouseUp(Position, Button);
   end;
 end;
 
-procedure TPanelObjects.BlokyMouseUp(Position: TPoint; Button: TMouseButton);
+procedure TPanelObjects.BlocksMouseUp(Position: TPoint; Button: TMouseButton);
 var blk: Integer;
 begin
   blk := Self.GetObject(Position);
@@ -489,7 +522,7 @@ begin
       Self.PMPropertiesClick(Self);
 end;
 
-procedure TPanelObjects.KorenyMouseUp(Position: TPoint; Button: TMouseButton);
+procedure TPanelObjects.RootsMouseUp(Position: TPoint; Button: TMouseButton);
 begin
   // leve tlacitko mysi
   if (Button <> mbLeft) then
@@ -517,6 +550,38 @@ begin
   if ((not Assigned(Self.Selected)) or (not(Self.Selected as TTrack).IsTurnout)) then
     Exit;
   (Self.Selected as TTrack).Root := Position;
+end;
+
+procedure TPanelObjects.AreasMouseUp(Position: TPoint; Button: TMouseButton);
+begin
+  if (Self.AreaOpStep = gosNone) then
+  begin
+    Self.AreaOpStart := Position;
+    Self.AreaOpStep := gosSelecting;
+
+  end else if (Self.AreaOpStep = gosSelecting) then
+  begin
+    // Assign selected area to selected blocks
+    Self.AreaOpStep := gosNone;
+
+    var areai := Self.FindAreaI(Self.AreaOpStart, Position);
+    if (areai < 0) then
+    begin
+      raise ENoArea.Create('Ve výběru nenalezena žádná oblast řízení!');
+      //Application.MessageBox('Ve výběru nenalezena žádná oblast řízení!', 'Chyba', MB_OK OR MB_ICONWARNING);
+      //Exit();
+    end;
+
+    for var x: Integer := Self.AreaOpStart.X to Position.X do
+    begin
+      for var y: Integer := Self.AreaOpStart.Y to Position.Y do
+      begin
+        var blki := Self.GetObject(Point(x, y));
+        if (blki > -1) then
+          Self.blocks[blki].area := areai;
+      end;
+    end;
+  end;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -550,7 +615,7 @@ end;
 
 // tato funkce prirazuje aktivnimu bloku obalst rizeni v paramtru
 // to je uzitecne k tomu, ze pri vybrani bloku a nesdlednemu kliku na baracek dojde k prirazeni teto oblasti rizeni
-function TPanelObjects.SetOR(areai: Integer): Byte;
+function TPanelObjects.SetArea(areai: Integer): Byte;
 begin
   if (Self.Selected = nil) then
     Exit(1);
@@ -641,7 +706,7 @@ procedure TPanelObjects.SetMode(mode: TMode);
 begin
   Self.mMode := mode;
   Self.Selected := nil;
-  if (mode = TMode.dmRoots) then
+  if (mode = dmRoots) then
     Self.ComputeVyhybkaFlag();
 end;
 
@@ -966,6 +1031,15 @@ begin
   finally
     oldBlocks.Free();
   end;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+function TPanelObjects.FindAreaI(lefttop: TPoint; rightbot: TPoint): Integer;
+begin
+  if (not Assigned(Self.OnAreaAsk)) then
+    raise Exception.Create('OnAreaAsk není přiřazeno!');
+  Result := Self.OnAreaAsk(lefttop, rightbot);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

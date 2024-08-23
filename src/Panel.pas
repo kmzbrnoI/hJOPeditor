@@ -134,6 +134,8 @@ type
     function GetShowBlokPopisky(): Boolean;
     procedure SetShowBlokPopisky(show: Boolean);
 
+    function GetAreaI(lefttop: TPoint; rightbot: TPoint): Integer;
+
   public
     areas: TObjectList<TArea>;
 
@@ -318,16 +320,9 @@ end;
 destructor TRelief.Destroy();
 begin
   if (Assigned(Self.PanelBitmap)) then
-  begin
-    Self.PanelBitmap.Destroy;
-    Self.PanelBitmap := nil;
-  end;
-
+    FreeAndNil(Self.PanelBitmap);
   if (Assigned(Self.PanelObjects)) then
-  begin
-    Self.PanelObjects.Destroy;
-    Self.PanelObjects := nil;
-  end;
+    FreeAndNil(Self.PanelObjects);
 
   Self.DrawObject.Visible := false;
 
@@ -892,7 +887,7 @@ begin
       Exit();
     if (tmp_or.areai < 0) then
       Exit();
-    Self.PanelObjects.SetOR(tmp_or.areai);
+    Self.PanelObjects.SetArea(tmp_or.areai);
     if (Assigned(Self.OnBlokEdit)) then
       Self.OnBlokEdit(Self, Self.PanelObjects.selected_obj);
     Result := True;
@@ -1156,6 +1151,7 @@ begin
   Self.PanelObjects.OnMsg := Self.MessageEvent;
   Self.PanelObjects.OnShow := Self.ShowEvent;
   Self.PanelObjects.OnFormBlkClose := Self.BlkFormCloseEvent;
+  Self.PanelObjects.OnAreaAsk := Self.GetAreaI;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -1244,5 +1240,15 @@ begin
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
+
+function TRelief.GetAreaI(lefttop: TPoint; rightbot: TPoint): Integer;
+begin
+  Result := -1;
+  for var i: Integer := 0 to Self.areas.Count-1 do
+    for var x: Integer := lefttop.X to rightbot.X do
+      for var y: Integer := lefttop.Y to rightbot.Y do
+        if (Self.areas[i].IsDK(Point(x, y))) then
+          Exit(i);
+end;
 
 end.// unit
