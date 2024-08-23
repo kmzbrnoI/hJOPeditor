@@ -3844,26 +3844,24 @@ object F_Main: TF_Main
       item
         Width = 400
       end>
-    ExplicitTop = 564
-    ExplicitWidth = 1090
   end
   object MM_Hlavni: TMainMenu
     Left = 16
     Top = 504
     object MI_File: TMenuItem
       Caption = 'Soubor'
-      object PM_New: TMenuItem
+      object MI_New: TMenuItem
         Caption = 'Nov'#253
         ShortCut = 16462
-        OnClick = PM_NewClick
+        OnClick = MI_NewClick
       end
       object N1: TMenuItem
         Caption = '-'
       end
-      object PM_Open: TMenuItem
+      object MI_Open: TMenuItem
         Caption = 'Otev'#345#237't'
         ShortCut = 16463
-        OnClick = PM_OpenClick
+        OnClick = MI_OpenClick
       end
       object MI_Import: TMenuItem
         Caption = 'Importovat'
@@ -3878,17 +3876,17 @@ object F_Main: TF_Main
       object N2: TMenuItem
         Caption = '-'
       end
-      object PM_Save: TMenuItem
+      object MI_Save: TMenuItem
         Caption = 'Ulo'#382'it'
         Enabled = False
         ShortCut = 16467
-        OnClick = PM_SaveClick
+        OnClick = MI_SaveClick
       end
-      object PM_SaveAs: TMenuItem
+      object MI_SaveAs: TMenuItem
         Caption = 'Ulo'#382'it jako'
         Enabled = False
         ShortCut = 24659
-        OnClick = PM_SaveAsClick
+        OnClick = MI_SaveAsClick
       end
       object N3: TMenuItem
         Caption = '-'
@@ -3901,18 +3899,18 @@ object F_Main: TF_Main
       object N4: TMenuItem
         Caption = '-'
       end
-      object PM_CloseApp: TMenuItem
+      object MI_CloseApp: TMenuItem
         Caption = 'Ukon'#269'it aplikaci'
-        OnClick = PM_CloseAppClick
+        OnClick = MI_CloseAppClick
       end
     end
     object MI_Zobrazit: TMenuItem
       Caption = 'Nastaven'#237
-      object MI_Mrizka: TMenuItem
+      object MI_Grid: TMenuItem
         Caption = 'Zobrazit m'#345#237#382'ku'
         Checked = True
         ShortCut = 16461
-        OnClick = MI_MrizkaClick
+        OnClick = MI_GridClick
       end
       object PM_Show_Blk_Descriptions: TMenuItem
         Caption = 'Zobrazit popisky blok'#367
@@ -3932,63 +3930,67 @@ object F_Main: TF_Main
       object N6: TMenuItem
         Caption = '-'
       end
-      object PM_Reload_Blocks: TMenuItem
+      object PM_ReloadBlocks: TMenuItem
         Caption = 'Znovu na'#269#237'st bloky'
         ShortCut = 16466
-        OnClick = PM_Reload_BlocksClick
+        OnClick = PM_ReloadBlocksClick
       end
     end
     object MI_Draw: TMenuItem
       Caption = 'Re'#382'im'
       Visible = False
-      object PM_Bitmap: TMenuItem
+      object MI_Bitmap: TMenuItem
         Caption = 'Symboly'
         GroupIndex = 1
         RadioItem = True
-        OnClick = PM_BitmapClick
+        OnClick = MI_BitmapClick
       end
-      object PM_Sep_Vert: TMenuItem
+      object MI_Sep_Vert: TMenuItem
         Tag = 1
         Caption = 'Vertik'#225'ln'#237' odd'#283'lova'#269'e '#250'sek'#367
         GroupIndex = 1
         RadioItem = True
-        OnClick = PM_BitmapClick
+        OnClick = MI_BitmapClick
       end
-      object PM_Sep_Hor: TMenuItem
+      object MI_Sep_Hor: TMenuItem
         Tag = 2
         Caption = 'Horizont'#225'ln'#237' odd'#283'lova'#269'e '#250'sek'#367
         GroupIndex = 1
         RadioItem = True
-        OnClick = PM_BitmapClick
+        OnClick = MI_BitmapClick
       end
-      object PM_Bloky: TMenuItem
+      object MI_Blocks: TMenuItem
         Tag = 3
         Caption = 'Bloky'
         GroupIndex = 1
         RadioItem = True
-        OnClick = PM_BitmapClick
+        OnClick = MI_BitmapClick
       end
-      object PM_Roots: TMenuItem
+      object MI_Roots: TMenuItem
         Tag = 4
         Caption = 'Ko'#345'eny'
         GroupIndex = 1
         RadioItem = True
-        OnClick = PM_BitmapClick
+        OnClick = MI_BitmapClick
+      end
+      object MI_Areas: TMenuItem
+        Caption = 'Oblasti '#345#237'zen'#237
+        GroupIndex = 1
       end
     end
     object MI_Relief: TMenuItem
       Caption = 'Reli'#233'f'
       Visible = False
-      object PM_ChangeRozmery: TMenuItem
+      object MI_ChangeSize: TMenuItem
         Caption = 'Zm'#283'nit rozm'#283'ry'
-        OnClick = PM_ChangeRozmeryClick
+        OnClick = MI_ChangeSizeClick
       end
       object N5: TMenuItem
         Caption = '-'
       end
-      object PM_ORAdd: TMenuItem
+      object MI_AreaAdd: TMenuItem
         Caption = 'P'#345'idat oblast '#345#237'zen'#237
-        OnClick = PM_ORAddClick
+        OnClick = MI_AreaAddClick
       end
     end
     object MI_Data: TMenuItem
@@ -4002,10 +4004,10 @@ object F_Main: TF_Main
     end
     object MI_Help: TMenuItem
       Caption = 'N'#225'pov'#283'da'
-      object PM_About: TMenuItem
+      object MI_About: TMenuItem
         Caption = 'O programu'
         ShortCut = 112
-        OnClick = PM_AboutClick
+        OnClick = MI_AboutClick
       end
     end
   end

@@ -13,14 +13,14 @@ type
   TF_Main = class(TForm)
     MM_Hlavni: TMainMenu;
     MI_File: TMenuItem;
-    PM_Open: TMenuItem;
-    PM_New: TMenuItem;
-    PM_Save: TMenuItem;
-    PM_SaveAs: TMenuItem;
+    MI_Open: TMenuItem;
+    MI_New: TMenuItem;
+    MI_Save: TMenuItem;
+    MI_SaveAs: TMenuItem;
     N1: TMenuItem;
     N2: TMenuItem;
     MI_Help: TMenuItem;
-    PM_About: TMenuItem;
+    MI_About: TMenuItem;
     OD_Open: TOpenDialog;
     SD_Save: TSaveDialog;
     IL_Menu: TImageList;
@@ -45,9 +45,9 @@ type
     TB_Signal: TToolBar;
     AE_Main: TApplicationEvents;
     MI_Draw: TMenuItem;
-    PM_Bitmap: TMenuItem;
-    PM_Sep_Vert: TMenuItem;
-    PM_Bloky: TMenuItem;
+    MI_Bitmap: TMenuItem;
+    MI_Sep_Vert: TMenuItem;
+    MI_Blocks: TMenuItem;
     P_Menu: TPanel;
     TB_BitmapTools: TToolBar;
     B_Move: TButton;
@@ -58,7 +58,7 @@ type
     TB_Separator: TToolBar;
     TB_Separator_Vert: TToolButton;
     MI_Relief: TMenuItem;
-    PM_ChangeRozmery: TMenuItem;
+    MI_ChangeSize: TMenuItem;
     TB_Bitmap_Other: TToolBar;
     ToolButton30: TToolButton;
     ToolButton31: TToolButton;
@@ -66,11 +66,11 @@ type
     ToolButton33: TToolButton;
     ToolButton34: TToolButton;
     MI_Zobrazit: TMenuItem;
-    MI_Mrizka: TMenuItem;
+    MI_Grid: TMenuItem;
     N3: TMenuItem;
     MI_CloseFile: TMenuItem;
     N4: TMenuItem;
-    PM_CloseApp: TMenuItem;
+    MI_CloseApp: TMenuItem;
     PM_ReliefOptions: TMenuItem;
     MI_SaveShowOptions: TMenuItem;
     TB_Other: TToolBar;
@@ -78,10 +78,10 @@ type
     TB_EndJC: TToolButton;
     TB_KCislo: TToolButton;
     N5: TMenuItem;
-    PM_ORAdd: TMenuItem;
+    MI_AreaAdd: TMenuItem;
     MI_Data: TMenuItem;
     MI_CheckData: TMenuItem;
-    PM_Roots: TMenuItem;
+    MI_Roots: TMenuItem;
     ToolButton35: TToolButton;
     TB_Railway: TToolBar;
     TB_Uvazka: TToolButton;
@@ -93,10 +93,10 @@ type
     ToolButton50: TToolButton;
     ToolButton55: TToolButton;
     TB_Separator_Horiz: TToolButton;
-    PM_Sep_Hor: TMenuItem;
+    MI_Sep_Hor: TMenuItem;
     TB_SoupravaPos: TToolButton;
     N6: TMenuItem;
-    PM_Reload_Blocks: TMenuItem;
+    PM_ReloadBlocks: TMenuItem;
     PM_Show_Blk_Descriptions: TMenuItem;
     OD_Import: TOpenDialog;
     MI_Import: TMenuItem;
@@ -119,36 +119,37 @@ type
     ToolButton20: TToolButton;
     MI_OldOpnlImport: TMenuItem;
     OD_OpnlImport: TOpenDialog;
+    MI_Areas: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure PM_NewClick(Sender: TObject);
-    procedure PM_OpenClick(Sender: TObject);
-    procedure PM_SaveClick(Sender: TObject);
-    procedure PM_SaveAsClick(Sender: TObject);
+    procedure MI_NewClick(Sender: TObject);
+    procedure MI_OpenClick(Sender: TObject);
+    procedure MI_SaveClick(Sender: TObject);
+    procedure MI_SaveAsClick(Sender: TObject);
     procedure AE_MainMessage(var Msg: tagMSG; var Handled: Boolean);
     procedure ToolButton0Click(Sender: TObject);
-    procedure PM_BitmapClick(Sender: TObject);
+    procedure MI_BitmapClick(Sender: TObject);
     procedure B_DeleteClick(Sender: TObject);
     procedure CHB_GroupClick(Sender: TObject);
     procedure B_MoveClick(Sender: TObject);
-    procedure PM_ChangeRozmeryClick(Sender: TObject);
+    procedure MI_ChangeSizeClick(Sender: TObject);
     procedure TB_Separator_VertClick(Sender: TObject);
-    procedure MI_MrizkaClick(Sender: TObject);
+    procedure MI_GridClick(Sender: TObject);
     procedure MI_CloseFileClick(Sender: TObject);
-    procedure PM_CloseAppClick(Sender: TObject);
+    procedure MI_CloseAppClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure PM_ReliefOptionsClick(Sender: TObject);
     procedure MI_SaveShowOptionsClick(Sender: TObject);
-    procedure PM_AboutClick(Sender: TObject);
+    procedure MI_AboutClick(Sender: TObject);
     procedure TB_TextClick(Sender: TObject);
     procedure TB_EndJCClick(Sender: TObject);
     procedure TB_KCisloClick(Sender: TObject);
-    procedure PM_ORAddClick(Sender: TObject);
+    procedure MI_AreaAddClick(Sender: TObject);
     procedure MI_CheckDataClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure TB_Separator_HorizClick(Sender: TObject);
     procedure TB_SoupravaPosClick(Sender: TObject);
-    procedure PM_Reload_BlocksClick(Sender: TObject);
+    procedure PM_ReloadBlocksClick(Sender: TObject);
     procedure PM_Show_Blk_DescriptionsClick(Sender: TObject);
     procedure MI_ImportClick(Sender: TObject);
     procedure MI_OldOpnlImportClick(Sender: TObject);
@@ -294,7 +295,7 @@ begin
   Self.DXD_main.Initialize(); // tohleto tady musi byt, jinak nefunguje nacitani souboru jako argumentu !!
 
   ReliefOptions.LoadData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + 'Config.ini');
-  Self.MI_Mrizka.Checked := ReliefOptions.Grid;
+  Self.MI_Grid.Checked := ReliefOptions.Grid;
 
   Self.DXD_main.Cursor := crNone;
   Self.Caption := _Caption + ' – v' + GetVersion(Application.ExeName);
@@ -348,7 +349,7 @@ begin
 end;
 
 // novy soubor
-procedure TF_Main.PM_NewClick(Sender: TObject);
+procedure TF_Main.MI_NewClick(Sender: TObject);
 begin
   if (Assigned(Relief)) then
   begin
@@ -371,14 +372,14 @@ begin
   case (Self.Relief.Mode) of
     dmBitmap:
       begin
-        Self.PM_BitmapClick(Self.PM_Bitmap);
-        Self.PM_ORAdd.Enabled := true;
+        Self.MI_BitmapClick(Self.MI_Bitmap);
+        Self.MI_AreaAdd.Enabled := true;
       end;
 
     dmBlocks:
       begin
-        Self.PM_ORAdd.Enabled := false;
-        Self.PM_BitmapClick(Self.PM_Bloky);
+        Self.MI_AreaAdd.Enabled := false;
+        Self.MI_BitmapClick(Self.MI_Blocks);
       end;
   end;
 
@@ -458,7 +459,7 @@ begin
 end;
 
 
-procedure TF_Main.PM_OpenClick(Sender: TObject);
+procedure TF_Main.MI_OpenClick(Sender: TObject);
 begin
   if (Assigned(Relief)) then
     if (Application.MessageBox('Otevřením nového projektu ztratíte všechna neuložená data, pokračovat?', 'Pokračovat?',
@@ -477,7 +478,7 @@ begin
   end;
 end;
 
-procedure TF_Main.PM_ORAddClick(Sender: TObject);
+procedure TF_Main.MI_AreaAddClick(Sender: TObject);
 begin
   F_OREdit.NewOR();
 end;
@@ -487,7 +488,7 @@ begin
   F_ReliefOptions.OpenForm();
 end;
 
-procedure TF_Main.PM_Reload_BlocksClick(Sender: TObject);
+procedure TF_Main.PM_ReloadBlocksClick(Sender: TObject);
 begin
   try
     F_BlockEdit.Bloky.LoadData(ReliefOptions.BlockFile);
@@ -503,7 +504,7 @@ begin
 end;
 
 // ukladani souboru jako
-procedure TF_Main.PM_SaveAsClick(Sender: TObject);
+procedure TF_Main.MI_SaveAsClick(Sender: TObject);
 begin
   if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
   begin
@@ -535,7 +536,7 @@ begin
 end;
 
 // ukladani souboru
-procedure TF_Main.PM_SaveClick(Sender: TObject);
+procedure TF_Main.MI_SaveClick(Sender: TObject);
 begin
   try
     if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
@@ -586,13 +587,13 @@ begin
   Self.Caption := ExtractFileName(Relief.FilePath) + ' - ' + _Caption + '     v' + GetVersion(Application.ExeName);
 end;
 
-procedure TF_Main.PM_AboutClick(Sender: TObject);
+procedure TF_Main.MI_AboutClick(Sender: TObject);
 begin
   Application.MessageBox(PChar('hJOPeditor' + #13#10 + 'v' + GetVersion(Application.ExeName) + #13#10 +
     'Vytvořil Jan Horáček 2011–2023'), 'Info', MB_OK OR MB_ICONINFORMATION);
 end;
 
-procedure TF_Main.PM_BitmapClick(Sender: TObject);
+procedure TF_Main.MI_BitmapClick(Sender: TObject);
 var Return: Integer;
 begin
   (Sender as TMenuItem).Checked := true;
@@ -623,7 +624,7 @@ begin
         if (Relief.Mode = dmBlocks) then
         begin
           Application.MessageBox('Tato funkce zatím není dostupná', 'Nelze převést', MB_OK OR MB_ICONERROR);
-          Self.PM_Bloky.Checked := true;
+          Self.MI_Blocks.Checked := true;
           Exit;
         end;
 
@@ -656,7 +657,7 @@ begin
         if (Relief.Mode = dmBlocks) then
         begin
           Application.MessageBox('Tato funkce zatím není dostupná', 'Nelze převést', MB_OK OR MB_ICONERROR);
-          Self.PM_Bloky.Checked := true;
+          Self.MI_Blocks.Checked := true;
           Exit;
         end;
 
@@ -689,7 +690,7 @@ begin
             + #13#10 + 'Pokračovat?'), 'Změna režimu projektu', MB_YESNO OR MB_ICONQUESTION OR MB_DEFBUTTON2) <> mrYes)
           then
           begin
-            Self.PM_BitmapClick(Self.PM_Bitmap);
+            Self.MI_BitmapClick(Self.MI_Bitmap);
             Exit();
           end;
         end;
@@ -749,7 +750,7 @@ begin
   Self.RepaintModes(Relief.Mode);
 end;
 
-procedure TF_Main.PM_ChangeRozmeryClick(Sender: TObject);
+procedure TF_Main.MI_ChangeSizeClick(Sender: TObject);
 begin
   F_ReliefProperties.OpenForm;
 end;
@@ -770,12 +771,12 @@ begin
   end;
 end;
 
-procedure TF_Main.PM_CloseAppClick(Sender: TObject);
+procedure TF_Main.MI_CloseAppClick(Sender: TObject);
 begin
   Self.Close;
 end;
 
-procedure TF_Main.MI_MrizkaClick(Sender: TObject);
+procedure TF_Main.MI_GridClick(Sender: TObject);
 begin
   (Sender as TMenuItem).Checked := not(Sender as TMenuItem).Checked;
 
@@ -802,7 +803,7 @@ end;
 procedure TF_Main.TB_Separator_HorizClick(Sender: TObject);
 begin
   if (Relief.Mode <> dmSepHor) then
-    Self.PM_BitmapClick(Self.PM_Sep_Hor);
+    Self.MI_BitmapClick(Self.MI_Sep_Hor);
 
   try
     Relief.AddSeparatorHor();
@@ -816,7 +817,7 @@ end;
 procedure TF_Main.TB_Separator_VertClick(Sender: TObject);
 begin
   if (Relief.Mode <> dmSepVert) then
-    Self.PM_BitmapClick(Self.PM_Sep_Vert);
+    Self.MI_BitmapClick(Self.MI_Sep_Vert);
 
   try
     Relief.AddSeparatorVert();
@@ -925,8 +926,8 @@ end;
 
 procedure TF_Main.DesignOpen(fname: string);
 begin
-  Self.PM_Save.Enabled := true;
-  Self.PM_SaveAs.Enabled := true;
+  Self.MI_Save.Enabled := true;
+  Self.MI_SaveAs.Enabled := true;
   Self.MI_Draw.Visible := true;
   Self.MI_CloseFile.Enabled := true;
   Self.SB_Main.Panels.Items[0].Text := 'Soubor otevřen';
@@ -941,8 +942,8 @@ end;
 
 procedure TF_Main.DesignClose();
 begin
-  Self.PM_Save.Enabled := false;
-  Self.PM_SaveAs.Enabled := false;
+  Self.MI_Save.Enabled := false;
+  Self.MI_SaveAs.Enabled := false;
   Self.MI_Draw.Visible := false;
   Self.MI_Relief.Visible := false;
   Self.MI_CloseFile.Enabled := false;
@@ -1009,20 +1010,20 @@ begin
   case (cur) of
     dmBitmap, dmSepVert, dmSepHor:
       begin
-        Self.PM_Bitmap.Enabled := true;
-        Self.PM_Sep_Vert.Enabled := true;
-        Self.PM_Sep_Hor.Enabled := true;
-        Self.PM_Bloky.Enabled := true;
-        Self.PM_Roots.Enabled := false;
+        Self.MI_Bitmap.Enabled := true;
+        Self.MI_Sep_Vert.Enabled := true;
+        Self.MI_Sep_Hor.Enabled := true;
+        Self.MI_Blocks.Enabled := true;
+        Self.MI_Roots.Enabled := false;
       end;
 
     dmBlocks, dmRoots:
       begin
-        Self.PM_Bitmap.Enabled := false;
-        Self.PM_Sep_Vert.Enabled := false;
-        Self.PM_Sep_Hor.Enabled := false;
-        Self.PM_Bloky.Enabled := true;
-        Self.PM_Roots.Enabled := true;
+        Self.MI_Bitmap.Enabled := false;
+        Self.MI_Sep_Vert.Enabled := false;
+        Self.MI_Sep_Hor.Enabled := false;
+        Self.MI_Blocks.Enabled := true;
+        Self.MI_Roots.Enabled := true;
       end;
   end; // case
 end;
