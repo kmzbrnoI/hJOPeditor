@@ -23,8 +23,6 @@ uses
   OblastRizeni in 'OblastRizeni.pas',
   fOREdit in 'forms\fOREdit.pas' {F_OREdit},
   fDataCheck in 'forms\fDataCheck.pas' {F_DataCheck},
-  ReliefZT in 'zt\ReliefZT.pas',
-  ObjToZT in 'ObjToZT.pas',
   PGraphics in 'PGraphics.pas',
   VetveComputer in 'object\VetveComputer.pas',
   symbolHelper in 'symbolHelper.pas',
