@@ -674,7 +674,7 @@ begin
         Self.Panel.fileState := Self.PanelBitmap.fileState;
         Self.mPanelWidth := Self.PanelBitmap.PanelWidth;
         Self.mPanelHeight := Self.PanelBitmap.PanelHeight;
-      end; // dmBitmap
+      end;
     dmBlocks, dmRoots, dmAreas:
       begin
         var ORs: string;
@@ -683,7 +683,7 @@ begin
         Self.Panel.fileState := Self.PanelObjects.FileStav;
         Self.mPanelWidth := Self.PanelObjects.PanelWidth;
         Self.mPanelHeight := Self.PanelObjects.PanelHeight;
-      end; // dmBlocks
+      end;
   end; // case
 
   Self.DrawObject.Width := Self.PanelWidth * _SYMBOL_WIDTH;
@@ -699,15 +699,14 @@ begin
       begin
         Self.PanelBitmap.BpnlSave(aFile, Self.ORSave());
         Self.Panel.fileState := Self.PanelBitmap.fileState;
-      end; // dmBitmap
+      end;
 
     dmBlocks, dmRoots, dmAreas:
       begin
         Self.PanelObjects.OpnlSave(aFile, Self.ORSave());
         Self.Panel.fileState := Self.PanelObjects.FileStav;
-      end; // dmBlocks
+      end;
   end;
-  /// case
 
   Self.Panel.filePath := aFile;
 end;

@@ -506,24 +506,24 @@ end;
 // ukladani souboru jako
 procedure TF_Main.MI_SaveAsClick(Sender: TObject);
 begin
-  if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
+  if (Relief.Mode in [dmBitmap, dmSepVert, dmSepHor]) then
   begin
     Self.SD_Save.Filter := 'Bitmapové soubory panelu (*.bpnl)|*.bpnl';
 
     if (not Self.SD_Save.Execute(Self.Handle)) then
-      Exit;
+      Exit();
     if (RightStr(Self.SD_Save.FileName, 5) <> '.bpnl') then
       Relief.Save(Self.SD_Save.FileName + '.bpnl')
     else
       Relief.Save(Self.SD_Save.FileName);
   end; // bitmapovy mod
 
-  if (Relief.Mode = dmBlocks) then
+  if (Relief.Mode in [dmBlocks, dmRoots, dmAreas]) then
   begin
     Self.SD_Save.Filter := 'Objektové soubory panelu (*.opnl)|*.opnl';
 
     if (not Self.SD_Save.Execute(Self.Handle)) then
-      Exit;
+      Exit();
     if (RightStr(Self.SD_Save.FileName, 5) <> '.opnl') then
       Relief.Save(Self.SD_Save.FileName + '.opnl')
     else
@@ -539,7 +539,7 @@ end;
 procedure TF_Main.MI_SaveClick(Sender: TObject);
 begin
   try
-    if ((Relief.Mode = dmBitmap) or (Relief.Mode = dmSepVert) or (Relief.Mode = dmSepHor)) then
+    if (Relief.Mode in [dmBitmap, dmSepVert, dmSepHor]) then
     begin
       Self.SD_Save.Filter := 'Bitmapové soubory panelu (*.bpnl)|*.bpnl';
 
@@ -557,7 +557,7 @@ begin
       end; // else .Stav = 1
     end; // bitmapovy mod
 
-    if ((Relief.Mode = dmBlocks) or (Relief.Mode = dmRoots)) then
+    if (Relief.Mode in [dmBlocks, dmRoots, dmAreas]) then
     begin
       Self.SD_Save.Filter := 'Objektové soubory panelu (*.opnl)|*.opnl';
 
