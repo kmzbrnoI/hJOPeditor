@@ -8,16 +8,6 @@ uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes, Types,
   ObjBlok, symbolHelper, Generics.Collections, ReliefCommon;
 
 type
-  TObjectPointer = record
-    SymbolID, ObjID: Integer;
-  end;
-
-  // error ID:
-  // 0 - pretahovat lze pouze zleva doprava a zhora dolu
-  // 1 - prazdne pole (neni s cim operovat)
-  // 2 - chyba externi funkce
-  // 3 - obsazeno
-  // 4 - presazeny limity
   TErrorEvent = procedure(Sender: TObject; err: string) of object;
   TMoveEvent = procedure(Sender: TObject; Position: TPoint) of object;
   EORLoad = class(Exception);
@@ -27,7 +17,6 @@ type
   TRelief = class
   private const
     _MAX_TEXT_LENGTH = 32;
-    _MIN_TEXT_LENGTH = 1;
 
     _RESOURCE_SYMBOLS = 'All8';
     _RESOURCE_TEXT = 'Text8';
@@ -88,7 +77,7 @@ type
     mOnMsg: TMsgEvent;
     mFormBlkClose: TGlobalEvent;
 
-    procedure Initialize(Rozmery: TPoint; Mode: TMode);
+    procedure Initialize(Dimensions: TPoint; Mode: TMode);
 
     procedure PaintGrid(MrizkaColor: TColor);
     procedure PaintCursor(CursorPos: TPoint); overload;
@@ -140,7 +129,7 @@ type
     areas: TObjectList<TArea>;
 
     constructor Create(DDRaw: TDXDraw; aParentForm: TForm);
-    destructor Destroy; override;
+    destructor Destroy(); override;
 
     procedure New(size: TPoint; firstOR: TArea);
     procedure Open(aFile: string);
@@ -209,7 +198,7 @@ uses fOREdit, fMain, ownStrUtils;
 
 constructor TRelief.Create(DDRaw: TDXDraw; aParentForm: TForm);
 begin
-  inherited Create;
+  inherited Create();
 
   Self.areas := TObjectList<TArea>.Create();
 
@@ -219,10 +208,10 @@ begin
   Self.DrawMode := dmBitmap;
 
   Self.DKMenuInit();
-end; // contructor
+end; // constructor
 
 // inicializace objektu Relief
-procedure TRelief.Initialize(Rozmery: TPoint; Mode: TMode);
+procedure TRelief.Initialize(Dimensions: TPoint; Mode: TMode);
 begin
   Self.DrawObject.OnMouseUp := Self.DXDMouseUp;
   Self.DrawObject.OnMouseMove := Self.DXDMouseMove;
@@ -254,19 +243,19 @@ begin
     dmBitmap:
       begin
         Self.PanelBitmap := TPanelBitmap.Create(Self.IL_Symbols, Self.IL_Text, Self.DrawObject.Surface.Canvas,
-          Rozmery.X, Rozmery.Y, dmBitmap, Self.ParentForm, Self.Graphics);
+          Dimensions.X, Dimensions.Y, dmBitmap, Self.ParentForm, Self.Graphics);
         Self.AssignBitmapEvents();
-      end; // dmBitmap
+      end;
     dmBlocks:
       begin
         Self.PanelObjects := TPanelObjects.Create(Self.IL_Symbols, Self.IL_Text, Self.DrawObject.Surface.Canvas,
-          Rozmery.X, Rozmery.Y, Self.DrawObject, Self.Graphics);
+          Dimensions.X, Dimensions.Y, Self.DrawObject, Self.Graphics);
         Self.AssignObjectEvents();
-      end; // dmBitmap
-  end; // case
+      end;
+  end;
 
-  Self.mPanelWidth := Rozmery.X;
-  Self.mPanelHeight := Rozmery.Y;
+  Self.mPanelWidth := Dimensions.X;
+  Self.mPanelHeight := Dimensions.Y;
   Self.DrawObject.Width := Self.mPanelWidth * _SYMBOL_WIDTH;
   Self.DrawObject.Height := Self.mPanelHeight * _SYMBOL_HEIGHT;
 
