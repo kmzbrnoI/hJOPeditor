@@ -292,8 +292,7 @@ begin
 
     // -------------------------------------------
     // popisky
-    var bytesBuf := Self.texts.GetSaveData;
-    BlockWrite(f, bytesBuf[0], Length(bytesBuf));
+    Self.texts.WriteBpnl(f);
     BlockWrite(f, separator, 2);
 
     // -------------------------------------------
@@ -323,6 +322,7 @@ begin
 
     // -------------------------------------------
     var len := TEncoding.UTF8.GetByteCount(ORs);
+    var bytesBuf: TBytes;
     SetLength(bytesBuf, len);
 
     // delka zpravy

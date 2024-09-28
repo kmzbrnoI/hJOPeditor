@@ -8,7 +8,7 @@ uses
   Types, ReliefCommon;
 
 const
-  _MAX_POPISKY = 256;
+  _MAX_POPISKY = 1024;
   _MAX_TEXT_LENGTH = 32;
   _Block_Length = 35;
 
@@ -69,14 +69,14 @@ type
     procedure Add(aPos: TPoint; aText: string; aColor: SymbolColor; aBlokDesc: boolean); overload;
     procedure Delete(aPos: TPoint); overload;
 
-    function GetText(Index: Integer): TPanelLabel;
-    function SetText(Index: Integer; Data: TPanelLabel): Byte;
+    function GetText(Index: Cardinal): TPanelLabel;
+    procedure SetText(Index: Cardinal; Data: TPanelLabel);
 
     procedure Paint(showPopisky: boolean);
     procedure PaintMoveBuffer(pos: TPoint);
     procedure PaintAddText(pos: TPoint);
 
-    function GetTextI(aPos: TPoint): SmallInt;
+    function GetTextI(aPos: TPoint): Integer;
     function IsOccupied(Pos1, Pos2: TPoint): boolean;
 
     procedure Add(pos: TPoint); overload;
@@ -87,7 +87,7 @@ type
 
     procedure SetLoadedData(LoadData: TBytes);
     procedure SetLoadedDataV32(LoadData: TBytes);
-    function GetSaveData: TBytes;
+    procedure WriteBpnl(var f: File);
     procedure Clear();
 
     procedure MouseUp(Position: TPoint; Button: TMouseButton);
@@ -161,7 +161,7 @@ begin
 end;
 
 // zjisteni, zda-li je na dane pozici popisek, popr jeho index v poli separatoru
-function TText.GetTextI(aPos: TPoint): SmallInt;
+function TText.GetTextI(aPos: TPoint): Integer;
 begin
   Result := -1;
 
@@ -229,44 +229,50 @@ begin
 end;
 
 // ziskani surovych dat zapisovanych do souboru z dat programu
-function TText.GetSaveData(): TBytes;
-var bytesBuf: TBytes;
-  currentLen: Integer;
+procedure TText.WriteBpnl(var f: File);
+var length: Cardinal;
+    buf: array [0..5] of Byte;
 begin
-  SetLength(Result, 1024);
-  currentLen := 2;
+  var originPos: Integer := FilePos(f);
+  Seek(f, originPos+2);
+  length := 0;
 
   for var p in Self.Data do
   begin
-    var len: Integer := TEncoding.UTF8.GetByteCount(p.Text);
-    SetLength(bytesBuf, len);
+    buf[0] := p.Position.X;
+    buf[1] := p.Position.Y;
+    buf[2] := Byte(p.Color);
+
+    var textLength: Cardinal := TEncoding.UTF8.GetByteCount(p.Text);
+    var bytesBuf: TBytes;
+    SetLength(bytesBuf, textLength);
     bytesBuf := TEncoding.UTF8.GetBytes(p.Text);
 
-    if (Length(Result) < currentLen + len + 4) then
-      SetLength(Result, Length(Result) * 2);
-
-    Result[currentLen] := p.Position.X;
-    Result[currentLen + 1] := p.Position.Y;
-    Result[currentLen + 2] := Byte(p.Color);
-
-    var offset: Integer;
+    var headerLen: Cardinal;
     if (p.Description) then
     begin
-      Result[currentLen + 3] := len + 1;
-      Result[currentLen + 4] := _POPISEK_MAGIC_CODE;
-      offset := currentLen + 5;
+      buf[3] := textLength + 1;
+      buf[4] := _POPISEK_MAGIC_CODE;
+      headerLen := 5;
     end else begin
-      Result[currentLen + 3] := len;
-      offset := currentLen + 4;
+      buf[3] := textLength;
+      headerLen := 4;
     end;
 
-    CopyMemory(@Result[offset], bytesBuf, len);
-    currentLen := offset + len;
+    if ((length + headerLen + textLength) > $FFFF) then
+      break; // just to be sure
+
+    BlockWrite(f, buf, headerLen);
+    BlockWrite(f, bytesBuf[0], textLength);
+    length := length + headerLen + textLength;
   end;
 
-  SetLength(Result, currentLen);
-  Result[0] := hi(currentLen - 2);
-  Result[1] := lo(currentLen - 2);
+  var endPos := FilePos(f);
+  Seek(f, originPos);
+  buf[0] := Hi(length);
+  buf[1] := Lo(length);
+  BlockWrite(f, buf, 2);
+  Seek(f, endPos);
 end;
 
 procedure TText.Clear();
@@ -281,28 +287,18 @@ begin
       Self.Graphics.TextOutputI(popisek.Position, popisek.Text, popisek.Color, clBlack, popisek.Description, true);
 end;
 
-function TText.GetText(Index: Integer): TPanelLabel;
+function TText.GetText(Index: Cardinal): TPanelLabel;
 begin
-  if (Index >= _MAX_POPISKY) then
-  begin
-    Result.Color := scPurple;
-    Exit();
-  end;
-
+  if (Index >= Cardinal(Self.Data.Count)) then
+    raise EArgumentOutOfRangeException.Create('Text index is out of range!');
   Result := Self.Data[Index];
 end;
 
-function TText.SetText(Index: Integer; Data: TPanelLabel): Byte;
+procedure TText.SetText(Index: Cardinal; Data: TPanelLabel);
 begin
-  if (Index >= _MAX_POPISKY) then
-  begin
-    Result := 1;
-    Exit;
-  end; // if (Index => _MAX_POPISKY)
-
+  if (Index >= Cardinal(Self.Data.Count)) then
+    raise EArgumentOutOfRangeException.Create('Text index is out of range!');
   Self.Data[Index] := Data;
-
-  Result := 0;
 end;
 
 function TText.IsOccupied(Pos1, Pos2: TPoint): boolean;
@@ -396,8 +392,9 @@ procedure TText.MITextPropertiesClick(Sender: TObject);
 var PIndex: Integer;
 begin
   PIndex := Self.GetTextI(MenuPosition);
-
-  var aLabel := Self.GetText(PIndex);
+  if (PIndex < 0) then
+    Exit();
+  var aLabel := Self.GetText(Cardinal(PIndex));
   if (Assigned(Self.OnChangeText)) then
     Self.OnChangeText(Self, aLabel);
   Self.SetText(PIndex, aLabel);
