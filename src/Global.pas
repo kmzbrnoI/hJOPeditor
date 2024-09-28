@@ -13,6 +13,8 @@ const
   _MAX_WIDTH = 256;
   _MAX_HEIGHT = 256;
 
+  _RELEASE: Boolean = False;
+
 type
   TNEvent = procedure of object;
   TPosAskEvent = function(Pos: TPoint): boolean of object;
@@ -39,23 +41,24 @@ type
     selected, normal, alert, intUnassigned: SymbolColor;
   end;
 
-function GetVersion(const FileName: string): string; // cteni verze z nastaveni
+function VersionStr(const FileName: string): string; // cteni verze z nastaveni
+function BuildDateTime(): TDateTime;
 function GetPos(data: string): TPoint; overload; // format: -1;-1, 5;10 = x;y
 function GetPos(data: TPoint): string; overload;
 
 implementation
 
-uses ownStrUtils;
+uses ownStrUtils, DateUtils;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-function GetVersion(const FileName: string): string; // cteni verze z nastaveni
+function VersionStr(const FileName: string): string; // cteni verze z nastaveni
 var
   size: longword;
   handle: Cardinal;
   pinfo: ^VS_FIXEDFILEINFO;
 begin
-  Result := 'Verze není dostupná';
+  Result := '???';
   size := GetFileVersionInfoSize(Pointer(FileName), handle);
   if (size > 0) then
   begin
@@ -70,10 +73,19 @@ begin
         var Minor: Word := LoWord(pinfo.dwFileVersionMS);
         var Release: Word := HiWord(pinfo.dwFileVersionLS);
         Result := Format('%d.%d.%d', [Major, Minor, Release]);
+        if (not _RELEASE) then
+          Result := Result + '-dev';
       end;
     end;
     FreeMem(buffer);
   end;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+function BuildDateTime(): TDateTime;
+begin
+  Result := (TTimeZone.Local.ToLocalTime(PImageNtHeaders(HInstance + Cardinal(PImageDosHeader(HInstance)^._lfanew))^.FileHeader.TimeDateStamp / SecsPerDay) + UnixDateDelta);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

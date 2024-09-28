@@ -163,6 +163,8 @@ type
     _Caption = 'hJOPeditor';
     _Config_File = 'Config.ini';
 
+    procedure UpdateCaptionFileName(filename: String);
+
   public
     DXD_main: TDXDraw;
     Relief: TRelief;
@@ -298,7 +300,7 @@ begin
   Self.MI_Grid.Checked := ReliefOptions.Grid;
 
   Self.DXD_main.Cursor := crNone;
-  Self.Caption := _Caption + ' – v' + GetVersion(Application.ExeName);
+  Self.UpdateCaptionFileName('');
 
   Self.pushedButton := nil;
 end;
@@ -531,8 +533,7 @@ begin
   end; // objektovy mod
 
   Self.SB_Main.Panels.Items[1].Text := 'Soubor uložen';
-  Self.Caption := ExtractFileName(Self.SD_Save.FileName) + ' - ' + _Caption + '     v' +
-    GetVersion(Application.ExeName);
+  Self.UpdateCaptionFileName(ExtractFileName(Relief.FilePath));
 end;
 
 // ukladani souboru
@@ -584,13 +585,17 @@ begin
   end;
 
   Self.SB_Main.Panels.Items[1].Text := 'Soubor uložen';
-  Self.Caption := ExtractFileName(Relief.FilePath) + ' - ' + _Caption + '     v' + GetVersion(Application.ExeName);
+  Self.UpdateCaptionFileName(ExtractFileName(Relief.FilePath));
 end;
 
 procedure TF_Main.MI_AboutClick(Sender: TObject);
 begin
-  Application.MessageBox(PChar('hJOPeditor' + #13#10 + 'v' + GetVersion(Application.ExeName) + #13#10 +
-    'Vytvořil Jan Horáček 2011–2023'), 'Info', MB_OK OR MB_ICONINFORMATION);
+  Application.MessageBox(PChar(
+    'hJOPeditor' + #13#10 +
+    'v' + VersionStr(Application.ExeName) + #13#10 +
+    'Build ' + FormatDateTime('dd.mm.yyyy hh:nn:ss', BuildDateTime()) + #13#10 +
+    'Vytvořil Jan Horáček 2011–2024'
+  ), 'Info', MB_OK OR MB_ICONINFORMATION);
 end;
 
 procedure TF_Main.MI_ModeClick(Sender: TObject);
@@ -958,7 +963,7 @@ begin
   Self.SB_Main.Panels.Items[0].Text := 'Soubor otevřen';
   Self.SB_Main.Panels.Items[1].Text := 'Soubor není uložen';
 
-  Self.Caption := fname + ' – ' + _Caption + '     v' + GetVersion(Application.ExeName);
+  Self.UpdateCaptionFileName(fname);
 
   Self.Constraints.MinWidth := Max(Self.DXD_main.Width + 2 * Self.DXD_main.Left + 20,
     Self.TB_BitmapTools.Left + Self.TB_BitmapTools.Width + 30);
@@ -993,7 +998,7 @@ begin
 
   Self.SB_Main.Panels.Items[0].Text := 'Soubor uzavřen';
   Self.SB_Main.Panels.Items[1].Text := '';
-  Self.Caption := _Caption + '     v' + GetVersion(Application.ExeName);
+  Self.UpdateCaptionFileName('');
 
   F_BlockEdit.Close();
 end;
@@ -1067,6 +1072,14 @@ end;
 procedure TF_Main.FormBlkCloseEvent(Sender: TObject);
 begin
   F_BlockEdit.Close();
+end;
+
+procedure TF_Main.UpdateCaptionFileName(filename: String);
+begin
+  var prefix: string := '';
+  if (filename <> '') then
+    prefix := filename + ' – ';
+  Self.Caption := prefix + _Caption + ' – v' + VersionStr(Application.ExeName);
 end;
 
 end.// unit
