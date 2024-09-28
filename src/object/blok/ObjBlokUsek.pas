@@ -35,6 +35,7 @@ type
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
     procedure FillSymbolsSorted();
+    procedure Move(d: TPoint); override;
 
     function IsSymbolsSortedEq(symbolsSorted: TList<TReliefSym>): Boolean;
     function GetEqTrack(blocks: TList<TGraphBlok>): TTrack;
@@ -357,5 +358,35 @@ begin
       Exit(TTrack(block));
   Result := nil;
 end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+procedure TTrack.Move(d: TPoint);
+begin
+  if (Self.Root <> Point(-1, -1)) then
+    Self.Root := Self.Root + d;
+  for var i: Integer := 0 to Self.Symbols.Count-1 do
+  begin
+    var rs: TReliefSym := Self.Symbols[i];
+    rs.Position := rs.Position + d;
+    Self.Symbols[i] := rs;
+  end;
+  for var i: Integer := 0 to Self.SymbolsSorted.Count-1 do
+  begin
+    var rs: TReliefSym := Self.SymbolsSorted[i];
+    rs.Position := rs.Position + d;
+    Self.SymbolsSorted[i] := rs;
+  end;
+
+  MoveList(Self.JCClick, d);
+  MoveList(Self.labels, d);
+  MoveList(Self.trains, d);
+
+  for var i: Integer := 0 to Self.branches.Count-1 do
+    for var j: Integer := 0 to Length(Self.branches[i].Symbols)-1 do
+      Self.branches[i].Symbols[j].Position := Self.branches[i].Symbols[j].Position + d;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
 
 end.

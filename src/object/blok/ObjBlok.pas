@@ -2,7 +2,7 @@ unit ObjBlok;
 
 interface
 
-uses IniFiles, Global, PGraphics, symbolHelper;
+uses IniFiles, Global, PGraphics, symbolHelper, Types, Generics.Collections;
 
 type
 
@@ -27,9 +27,12 @@ type
     procedure Save(ini: TMemIniFile; key: string); virtual;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); virtual; abstract;
+    procedure Move(d: TPoint); virtual; // for opnl import
 
     class function TypeToFileStr(typ: TBlkType): string;
   end;
+
+  procedure MoveList(var lst: TList<TPoint>; offset: TPoint);
 
 implementation
 
@@ -109,6 +112,21 @@ begin
     end;
   end else if (mode = dmAreas) then
     Result := AreaColor(Self.area);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TGraphBlok.Move(d: TPoint);
+begin
+
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure MoveList(var lst: TList<TPoint>; offset: TPoint);
+begin
+  for var i: Integer := 0 to lst.Count-1 do
+    lst[i] := lst[i] + offset;
 end;
 
 ////////////////////////////////////////////////////////////////////////////////

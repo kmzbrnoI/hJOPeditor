@@ -135,7 +135,7 @@ type
     procedure Open(aFile: string);
     procedure Save(aFile: string);
     function Import(aFile: string): string;
-    procedure ImportOldOpnl(aFile: string);
+    procedure ImportOldOpnl(aFile: string; offset: TPoint);
 
     procedure Show(); overload;
     procedure Show(CursorPos: TPoint); overload;
@@ -1220,11 +1220,11 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TRelief.ImportOldOpnl(aFile: string);
+procedure TRelief.ImportOldOpnl(aFile: string; offset: TPoint);
 begin
   if (not (Self.Mode in [dmBlocks, dmRoots, dmAreas])) then
     raise Exception.Create('Panel musí být v režimu bloků nebo kořenů!');
-  Self.PanelObjects.ImportOldOpnl(aFile);
+  Self.PanelObjects.ImportOldOpnl(aFile, offset);
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

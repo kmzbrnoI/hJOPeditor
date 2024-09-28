@@ -17,6 +17,7 @@ type
     procedure Save(ini: TMemIniFile; key: string); override;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
+    procedure Move(d: TPoint); override;
 
     function GetEqTurnout(blocks: TList<TGraphBlok>): TTurnout;
   end;
@@ -72,6 +73,13 @@ begin
     if ((block.typ = TBlkType.turnout) and (TTurnout(block).Position = Self.Position) and (TTurnout(block).SymbolID = Self.SymbolID)) then
       Exit(TTurnout(block));
   Result := nil;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+procedure TTurnout.Move(d: TPoint);
+begin
+  Self.Position := Self.Position + d;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

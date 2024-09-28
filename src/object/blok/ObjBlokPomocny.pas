@@ -19,6 +19,7 @@ type
     procedure Save(ini: TMemIniFile; key: string); override;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
+    procedure Move(d: TPoint); override;
   end;
 
 implementation
@@ -97,5 +98,10 @@ begin
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
+
+procedure TObjOther.Move(d: TPoint);
+begin
+  MoveList(Self.Positions, d);
+end;
 
 end.

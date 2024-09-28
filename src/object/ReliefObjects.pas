@@ -78,7 +78,7 @@ type
     destructor Destroy(); override;
 
     procedure Import(Data: TObject); // import dat zatim z PanelBitmap
-    procedure ImportOldOpnl(aFile: string);
+    procedure ImportOldOpnl(aFile: string; offset: TPoint);
 
     procedure OpnlLoad(aFile: string; var ORs: string);
     procedure OpnlSave(aFile: string; const ORs: string);
@@ -848,9 +848,9 @@ begin
     for var i: Integer := 0 to count - 1 do
     begin
       try
-        var blok: TGraphBlok := Self.BlockCreate(blkTyp, i);
-        blok.Load(ini, TGraphBlok.TypeToFileStr(blkTyp) + IntToStr(i), verWord);
-        blocks.Add(blok);
+        var block: TGraphBlok := Self.BlockCreate(blkTyp, i);
+        block.Load(ini, TGraphBlok.TypeToFileStr(blkTyp) + IntToStr(i), verWord);
+        blocks.Add(block);
       except
 
       end;
@@ -874,7 +874,7 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-procedure TPanelObjects.ImportOldOpnl(aFile: string);
+procedure TPanelObjects.ImportOldOpnl(aFile: string; offset: TPoint);
 var inifile: TMemIniFile;
     oldBlocks: TObjectList<TGraphBlok>;
 begin
@@ -895,6 +895,8 @@ begin
 
       var verWord: Word := OpnlVersionToWord(ver);
       Self.OpnlLoadBlocks(inifile, verWord, oldBlocks);
+      for var block: TGraphBlok in oldBlocks do
+        block.Move(offset);
     finally
       inifile.Free();
     end;

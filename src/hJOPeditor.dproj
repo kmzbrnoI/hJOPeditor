@@ -142,8 +142,7 @@
         <SanitizedProjectName>hJOPeditor</SanitizedProjectName>
         <VerInfo_MinorVer>14</VerInfo_MinorVer>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=;FileDescription=Editor panelů hJOP;FileVersion=2.14.0.0;InternalName=hJOPeditor;LegalCopyright=Jan Horáček;LegalTrademarks=Jan Horáček;OriginalFilename=hJOPeditor.exe;ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=;ProgramID=</VerInfo_Keys>
-        <VerInfo_Release>0</VerInfo_Release>
+        <VerInfo_Keys>CompanyName=;FileDescription=Editor panelů hJOP;FileVersion=2.14.1.0;InternalName=hJOPeditor;LegalCopyright=Jan Horáček;LegalTrademarks=Jan Horáček;OriginalFilename=hJOPeditor.exe;ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=;ProgramID=</VerInfo_Keys>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
@@ -210,6 +209,10 @@
         </DCCReference>
         <DCCReference Include="object\blok\ObjBlokZamek.pas"/>
         <DCCReference Include="ReliefCommon.pas"/>
+        <DCCReference Include="forms\fOffset.pas">
+            <Form>F_Offset</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

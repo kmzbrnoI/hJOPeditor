@@ -16,6 +16,7 @@ type
     procedure Save(ini: TMemIniFile; key: string); override;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
+    procedure Move(d: TPoint); override;
   end;
 
 implementation
@@ -76,6 +77,13 @@ begin
     panelGraphics.TextOutputI(Self.Position, Self.Text, Self.Color, clBlack, true)
   else
     panelGraphics.TextOutputI(Self.Position, Self.Text, Color, clBlack);
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+procedure TText.Move(d: TPoint);
+begin
+  Self.Position := Self.Position + d;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

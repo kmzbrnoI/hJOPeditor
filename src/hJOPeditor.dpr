@@ -42,7 +42,8 @@ uses
   ownStrUtils in 'helpers\ownStrUtils.pas',
   fImportLog in 'forms\fImportLog.pas' {F_ImportLog},
   ObjBlokZamek in 'object\blok\ObjBlokZamek.pas',
-  ReliefCommon in 'ReliefCommon.pas';
+  ReliefCommon in 'ReliefCommon.pas',
+  fOffset in 'forms\fOffset.pas' {F_Offset};
 
 {$R *.res}
 
@@ -59,6 +60,7 @@ begin
   Application.CreateForm(TF_OREdit, F_OREdit);
   Application.CreateForm(TF_DataCheck, F_DataCheck);
   Application.CreateForm(TF_ImportLog, F_ImportLog);
+  Application.CreateForm(TF_Offset, F_Offset);
   if (ParamCount = 1) then
    begin
     //open the file

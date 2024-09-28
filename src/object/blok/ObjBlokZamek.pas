@@ -14,6 +14,7 @@ type
     procedure Save(ini: TMemIniFile; key: string); override;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
+    procedure Move(d: TPoint); override;
 
     function GetEqLock(blocks: TList<TGraphBlok>): TLock;
   end;
@@ -64,6 +65,13 @@ begin
     if ((block.typ = TBlkType.lock) and (TLock(block).Pos = Self.Pos)) then
       Exit(TLock(block));
   Result := nil;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+procedure TLock.Move(d: TPoint);
+begin
+  Self.Pos := Self.Pos + d;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

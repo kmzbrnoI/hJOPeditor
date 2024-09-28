@@ -22,6 +22,7 @@ type
     procedure Save(ini: TMemIniFile; key: string); override;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
+    procedure Move(d: TPoint); override;
 
     class function AreBlikPointListsEq(a: TList<TBlikPoint>; b: TList<TBlikPoint>): Boolean;
     function GetEqCrossing(blocks: TList<TGraphBlok>): TCrossing;
@@ -145,5 +146,17 @@ begin
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
+
+procedure TCrossing.Move(d: TPoint);
+begin
+  for var i: Integer := 0 to Self.StaticPositions.Count-1 do
+    Self.StaticPositions[i] := Self.StaticPositions[i] + d;
+  for var i: Integer := 0 to Self.BlikPositions.Count-1 do
+  begin
+    var bpos: TBlikPoint := Self.BlikPositions[i];
+    bpos.Pos := bpos.Pos + d;
+    Self.BlikPositions[i] := bpos;
+  end;
+end;
 
 end.

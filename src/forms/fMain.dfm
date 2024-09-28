@@ -3844,6 +3844,8 @@ object F_Main: TF_Main
       item
         Width = 400
       end>
+    ExplicitTop = 564
+    ExplicitWidth = 1090
   end
   object MM_Hlavni: TMainMenu
     Left = 16

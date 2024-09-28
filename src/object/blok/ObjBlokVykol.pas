@@ -17,6 +17,7 @@ type
     procedure Save(ini: TMemIniFile; key: string); override;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
+    procedure Move(d: TPoint); override;
 
     function GetEqDerail(blocks: TList<TGraphBlok>): TDerail;
   end;
@@ -73,6 +74,13 @@ begin
     if ((block.typ = TBlkType.derail) and (TDerail(block).Pos = Self.Pos) and (TDerail(block).symbol = Self.symbol)) then
       Exit(TDerail(block));
   Result := nil;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+procedure TDerail.Move(d: TPoint);
+begin
+  Self.Pos := Self.Pos + d;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

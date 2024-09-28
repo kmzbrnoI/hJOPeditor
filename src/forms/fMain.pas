@@ -172,7 +172,7 @@ type
     procedure ImportFile(fname: string);
     procedure DesignOpen(fname: string);
     procedure DesignClose();
-    procedure ImportOldOpnl(fname: string);
+    procedure ImportOldOpnl(fname: string; offset: TPoint);
 
     procedure RepaintModes(cur: TMode);
 
@@ -193,7 +193,7 @@ var
 implementation
 
 uses fNewRelief, fChangeRelief, fReliefSettings, fPopiskek, OblastRizeni,
-  fOREdit, fDataCheck, fImportLog;
+  fOREdit, fDataCheck, fImportLog, fOffset;
 
 {$R *.dfm}
 
@@ -438,11 +438,11 @@ begin
   F_ImportLog.Open(log);
 end;
 
-procedure TF_Main.ImportOldOpnl(fname: string);
+procedure TF_Main.ImportOldOpnl(fname: string; offset: TPoint);
 begin
   Screen.Cursor := crHourGlass;
   try
-    Relief.ImportOldOpnl(fname);
+    Relief.ImportOldOpnl(fname, offset);
   except
     on E: Exception do
     begin
@@ -808,8 +808,16 @@ procedure TF_Main.MI_OldOpnlImportClick(Sender: TObject);
 begin
   if (not Assigned(Relief)) then
     Exit();
-  if (Self.OD_OpnlImport.Execute(Self.Handle)) then
-    Self.ImportOldOpnl(Self.OD_OpnlImport.FileName);
+  if (not Self.OD_OpnlImport.Execute(Self.Handle)) then
+    Exit();
+  var offsetResult: TFormOffsetResult := F_Offset.Offset();
+  if (not offsetResult.success) then
+  begin
+    Application.MessageBox('Import zrušen uživatelem!', 'Import zrušen', MB_OK OR MB_ICONWARNING);
+    Exit();
+  end;
+
+  Self.ImportOldOpnl(Self.OD_OpnlImport.FileName, offsetResult.offset);
 end;
 
 procedure TF_Main.MI_SaveShowOptionsClick(Sender: TObject);

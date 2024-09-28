@@ -15,6 +15,7 @@ type
     procedure Save(ini: TMemIniFile; key: string); override;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
+    procedure Move(d: TPoint); override;
 
     function GetEqSignal(blocks: TList<TGraphBlok>): TSignal;
   end;
@@ -70,6 +71,13 @@ begin
     if ((block.typ = TBlkType.signal) and (TSignal(block).Position = Self.Position) and (TSignal(block).SymbolID = Self.SymbolID)) then
       Exit(TSignal(block));
   Result := nil;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+procedure TSignal.Move(d: TPoint);
+begin
+  Self.Position := Self.Position + d;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

@@ -15,6 +15,7 @@ type
     procedure Save(ini: TMemIniFile; key: string); override;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
+    procedure Move(d: TPoint); override;
 
     function GetEqDisconnector(blocks: TList<TGraphBlok>): TDisconnector;
   end;
@@ -64,6 +65,13 @@ begin
     if ((block.typ = TBlkType.disconnector) and (TDisconnector(block).Pos = Self.Pos)) then
       Exit(TDisconnector(block));
   Result := nil;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+procedure TDisconnector.Move(d: TPoint);
+begin
+  Self.Pos := Self.Pos + d;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

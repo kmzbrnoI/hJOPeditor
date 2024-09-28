@@ -18,6 +18,7 @@ type
     procedure Save(ini: TMemIniFile; key: string); override;
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
+    procedure Move(d: TPoint); override;
 
     function GetEqLinkerTrain(blocks: TList<TGraphBlok>): TLinkerTrain;
   end;
@@ -93,6 +94,13 @@ begin
     if ((block.typ = TBlkType.linker_train) and (TLinkerTrain(block).Pos = Self.Pos)) then
       Exit(TLinkerTrain(block));
   Result := nil;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+procedure TLinkerTrain.Move(d: TPoint);
+begin
+  Self.Pos := Self.Pos + d;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
