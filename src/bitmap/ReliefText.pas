@@ -80,7 +80,7 @@ type
     function IsOccupied(Pos1, Pos2: TPoint): boolean;
 
     procedure Add(pos: TPoint); overload;
-    function MoveDrag(pos1: TPoint; pos2: TPoint): Boolean; // returnbs if anything dragged
+    function MoveDrag(pos1: TPoint; pos2: TPoint): Boolean; // returns if anything dragged
     procedure MoveDrop(pos: TPoint);
     function CanMoveDrop(pos: TPoint): Boolean;
     procedure Delete(pos1: TPoint; pos2: TPoint); overload;
@@ -333,7 +333,7 @@ begin
       if (i > -1) then
       begin
         var lbl: TPanelLabel := Self.Data[i];
-        lbl.Position := Point(lbl.Position.X-pos1.X, lbl.Position.Y-pos1.Y);
+        lbl.Position := Point(lbl.Position.X-pos2.X, lbl.Position.Y-pos2.Y);
         Self.Operations.MoveBuf.Add(lbl);
         Self.Data.Delete(i);
         Result := True;
