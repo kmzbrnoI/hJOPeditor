@@ -4,8 +4,8 @@ object F_ReliefOptions: TF_ReliefOptions
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'Nastaven'#237
-  ClientHeight = 265
-  ClientWidth = 310
+  ClientHeight = 266
+  ClientWidth = 313
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
