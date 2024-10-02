@@ -239,7 +239,7 @@ begin
 
   case (Relief.Mode) of
     dmBitmap, dmSepVert, dmSepHor:
-      Relief.DeleteBitmapSymbol;
+      Relief.DeleteBitmapSymbol();
   end; // case
 end;
 
@@ -251,7 +251,7 @@ begin
 
   case (Relief.Mode) of
     dmBitmap, dmSepVert, dmSepHor:
-      Relief.MoveBitmapSymbol;
+      Relief.MoveBitmapSymbol();
   end; // case
 end;
 

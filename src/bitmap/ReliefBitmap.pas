@@ -60,6 +60,7 @@ type
 
     function IsObject(pos: TPoint): Boolean;
     function CompensateMode(pos: TPoint): TPoint;
+    procedure StopOperations();
 
   public
     Symbols: TBitmapSymbols;
@@ -526,6 +527,7 @@ procedure TPanelBitmap.AddSymbol(symbolID: Integer);
 begin
   if (Self.IsOperation()) then
     raise EOperationInProgress.Create('Právě probíhá operace!');
+  Self.StopOperations();
   Self.Operations.addType := apSymbol;
   Self.Operations.addStep := TGOpStep.gosActive;
   Self.Symbols.addSymbol := symbolID;
@@ -535,6 +537,7 @@ procedure TPanelBitmap.AddSeparVert();
 begin
   if (Self.IsOperation()) then
     raise EOperationInProgress.Create('Právě probíhá operace!');
+  Self.StopOperations();
   Self.Operations.addType := apSeparVert;
   Self.Operations.addStep := TGOpStep.gosActive;
 end;
@@ -543,6 +546,7 @@ procedure TPanelBitmap.AddSeparHor();
 begin
   if (Self.IsOperation()) then
     raise EOperationInProgress.Create('Právě probíhá operace!');
+  Self.StopOperations();
   Self.Operations.addType := apSeparHor;
   Self.Operations.addStep := TGOpStep.gosActive;
 end;
@@ -551,6 +555,7 @@ procedure TPanelBitmap.AddTrackName();
 begin
   if (Self.IsOperation()) then
     raise EOperationInProgress.Create('Právě probíhá operace!');
+  Self.StopOperations();
   Self.Operations.addType := apTrackName;
   Self.Operations.addStep := TGOpStep.gosActive;
 end;
@@ -559,6 +564,7 @@ procedure TPanelBitmap.AddJCClick();
 begin
   if (Self.IsOperation()) then
     raise EOperationInProgress.Create('Právě probíhá operace!');
+  Self.StopOperations();
   Self.Operations.addType := apJCClick;
   Self.Operations.addStep := TGOpStep.gosActive;
 end;
@@ -567,6 +573,7 @@ procedure TPanelBitmap.AddTrainPos();
 begin
   if (Self.IsOperation()) then
     raise EOperationInProgress.Create('Právě probíhá operace!');
+  Self.StopOperations();
   Self.Operations.addType := apTrainPos;
   Self.Operations.addStep := TGOpStep.gosActive;
 end;
@@ -575,6 +582,7 @@ procedure TPanelBitmap.AddText(text: string; color: SymbolColor; description: Bo
 begin
   if (Self.IsOperation()) then
     raise EOperationInProgress.Create('Právě probíhá operace!');
+  Self.StopOperations();
   Self.Operations.addType := apText;
   Self.Operations.addStep := TGOpStep.gosActive;
   Self.Texts.addText.Text := text;
@@ -586,6 +594,7 @@ procedure TPanelBitmap.Move();
 begin
   if (Self.IsOperation()) then
     raise EOperationInProgress.Create('Právě probíhá operace!');
+  Self.StopOperations();
   Self.Operations.moveStep := TGOpStep.gosActive;
 end;
 
@@ -593,6 +602,7 @@ procedure TPanelBitmap.Delete();
 begin
   if (Self.IsOperation()) then
     raise EOperationInProgress.Create('Právě probíhá operace!');
+  Self.StopOperations();
   Self.Operations.deleteStep := TGOpStep.gosActive;
 end;
 
@@ -1142,5 +1152,12 @@ begin
 end;
 
 /// ////////////////////////////////////////////////////////////////////////////
+
+procedure TPanelBitmap.StopOperations();
+begin
+  Self.Operations.addStep := TGOpStep.gosNone;
+  Self.Operations.moveStep := TGOpStep.gosNone;
+  Self.Operations.deleteStep := TGOpStep.gosNone;
+end;
 
 end.// unit

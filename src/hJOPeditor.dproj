@@ -3,7 +3,7 @@
         <ProjectGuid>{D62727A2-FA55-4183-B19C-FEA5C15FFDC5}</ProjectGuid>
         <ProjectVersion>19.5</ProjectVersion>
         <MainSource>hJOPeditor.dpr</MainSource>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">Release</Config>
         <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
         <FrameworkType>VCL</FrameworkType>
         <Base>True</Base>
@@ -123,9 +123,7 @@
         <DCC_E>false</DCC_E>
         <DCC_F>false</DCC_F>
         <VerInfo_MinorVer>14</VerInfo_MinorVer>
-        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.14.0.0;InternalName=hJOPeditor;LegalCopyright=;LegalTrademarks=;OriginalFilename=hJOPeditor.exe;ProductName=$(MSBuildProjectName);ProductVersion=1.13.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>
-        <VerInfo_MajorVer>1</VerInfo_MajorVer>
-        <VerInfo_Release>0</VerInfo_Release>
+        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=2.14.1.0;InternalName=hJOPeditor;LegalCopyright=;LegalTrademarks=;OriginalFilename=hJOPeditor.exe;ProductName=$(MSBuildProjectName);ProductVersion=1.13.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
