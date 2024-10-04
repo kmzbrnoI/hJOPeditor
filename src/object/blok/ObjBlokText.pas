@@ -2,7 +2,8 @@ unit ObjBlokText;
 
 interface
 
-uses ObjBlok, IniFiles, Types, Global, PGraphics, Graphics, symbolHelper;
+uses ObjBlok, IniFiles, Types, Global, PGraphics, Graphics, symbolHelper,
+  Generics.Collections;
 
 type
 
@@ -17,6 +18,8 @@ type
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
     procedure Move(d: TPoint); override;
+
+    function GetEqText(blocks: TList<TGraphBlok>): TText;
   end;
 
 implementation
@@ -84,6 +87,17 @@ end;
 procedure TText.Move(d: TPoint);
 begin
   Self.Position := Self.Position + d;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+function TText.GetEqText(blocks: TList<TGraphBlok>): TText;
+begin
+  for var block: TGraphBlok in blocks do
+    if ((block.typ = TBlkType.text) and (TText(block).Position = Self.Position) and (TText(block).Text = Self.Text)
+        and (Length(Self.Text) = 1)) then
+      Exit(TText(block));
+  Result := nil;
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////

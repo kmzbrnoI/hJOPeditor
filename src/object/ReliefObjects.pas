@@ -1040,7 +1040,14 @@ begin
         end;
         TBlkType.text:
         begin
-
+          var current: TText := TText(block);
+          var old := current.GetEqText(oldBlocks);
+          if (old <> nil) then
+          begin
+            current.area := old.area;
+            if (current.block = -1) then
+              current.block := old.block;
+          end;
         end;
       end;
     end;
