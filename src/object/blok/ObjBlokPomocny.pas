@@ -20,6 +20,8 @@ type
     procedure Paint(DrawObject: TDrawObject; panelGraphics: TPanelGraphics; colors: TObjColors; selected: boolean;
       mode: TMode); override;
     procedure Move(d: TPoint); override;
+
+    function GetEqOther(blocks: TList<TGraphBlok>): TObjOther;
   end;
 
 implementation
@@ -103,5 +105,18 @@ procedure TObjOther.Move(d: TPoint);
 begin
   MoveList(Self.Positions, d);
 end;
+
+/// /////////////////////////////////////////////////////////////////////////////
+
+function TObjOther.GetEqOther(blocks: TList<TGraphBlok>): TObjOther;
+begin
+  for var block: TGraphBlok in blocks do
+    if ((block.typ = TBlkType.other) and (TObjOther(block).Positions.Count = 1) and (Self.Positions.Count = 1) and
+        (TObjOther(block).Positions[0] = Self.Positions[0])) then
+      Exit(TObjOther(block));
+  Result := nil;
+end;
+
+/// /////////////////////////////////////////////////////////////////////////////
 
 end.

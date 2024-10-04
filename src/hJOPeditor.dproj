@@ -3,7 +3,7 @@
         <ProjectGuid>{D62727A2-FA55-4183-B19C-FEA5C15FFDC5}</ProjectGuid>
         <ProjectVersion>19.5</ProjectVersion>
         <MainSource>hJOPeditor.dpr</MainSource>
-        <Config Condition="'$(Config)'==''">Release</Config>
+        <Config Condition="'$(Config)'==''">Debug</Config>
         <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
         <FrameworkType>VCL</FrameworkType>
         <Base>True</Base>

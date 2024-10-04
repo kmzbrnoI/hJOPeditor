@@ -1018,7 +1018,7 @@ begin
         end;
         TBlkType.pst:
         begin
-          var current: TPst := TPst(block);
+          var current: TPst := TPSt(block);
           var old := current.GetEqPst(oldBlocks);
           if (old <> nil) then
           begin
@@ -1026,6 +1026,21 @@ begin
             if (current.block = -1) then
               current.block := old.block;
           end;
+        end;
+        TBlkType.other:
+        begin
+          var current: TObjOther := TObjOther(block);
+          var old := current.GetEqOther(oldBlocks);
+          if (old <> nil) then
+          begin
+            current.area := old.area;
+            if (current.block = -1) then
+              current.block := old.block;
+          end;
+        end;
+        TBlkType.text:
+        begin
+
         end;
       end;
     end;
