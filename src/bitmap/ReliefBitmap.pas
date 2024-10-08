@@ -1144,9 +1144,12 @@ begin
       Self.Operations.groupStart := _INACTIVE_POINT;
       Self.Operations.addStep := TGOpStep.gosNone;
       Self.Show();
-      Sleep(50);
-      Self.Operations.addStep := TGOpStep.gosActive;
-      Self.Show();
+      if (Self.Operations.addType <> apText) then
+      begin
+        Sleep(50);
+        Self.Operations.addStep := TGOpStep.gosActive;
+        Self.Show();
+      end;
     end;
   end; // else (Self.Group.IsGroup)
 end;
