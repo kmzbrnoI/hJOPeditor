@@ -162,6 +162,7 @@ type
       'Překročeny maximální limity');
     _Caption = 'hJOPeditor';
     _Config_File = 'Config.ini';
+    _DXD_MAIN_MARGIN_PX: Integer = 8;
 
     procedure UpdateCaptionFileName(filename: String);
 
@@ -187,6 +188,7 @@ type
 
     procedure MessageEvent(Sender: TObject; Msg: string);
     procedure FormBlkCloseEvent(Sender: TObject);
+    procedure OnPanelResize();
   end;
 
 var
@@ -291,8 +293,8 @@ begin
 
   Self.DXD_main := TDXDraw.Create(Self);
   Self.DXD_main.Parent := Self;
-  Self.DXD_main.Left := 8;
-  Self.DXD_main.Top := 80;
+  Self.DXD_main.Left := _DXD_MAIN_MARGIN_PX;
+  Self.DXD_main.Top := Self.P_Menu.Height + _DXD_MAIN_MARGIN_PX;
   Self.DXD_main.Visible := false;
   Self.DXD_main.Options := [doAllowReboot, doSelectDriver, doHardware];
   Self.DXD_main.Initialize(); // tohleto tady musi byt, jinak nefunguje nacitani souboru jako argumentu !!
@@ -974,10 +976,7 @@ begin
   Self.SB_Main.Panels.Items[1].Text := 'Soubor není uložen';
 
   Self.UpdateCaptionFileName(fname);
-
-  Self.Constraints.MinWidth := Max(Self.DXD_main.Width + 2 * Self.DXD_main.Left + 20,
-    Self.TB_BitmapTools.Left + Self.TB_BitmapTools.Width + 30);
-  Self.Constraints.MinHeight := Self.DXD_main.Height + Self.DXD_main.Top + Self.SB_Main.Height + 70;
+  Self.OnPanelResize();
 end;
 
 procedure TF_Main.DesignClose();
@@ -1090,6 +1089,14 @@ begin
   if (filename <> '') then
     prefix := filename + ' – ';
   Self.Caption := prefix + _Caption + ' – v' + VersionStr(Application.ExeName);
+end;
+
+procedure TF_Main.OnPanelResize();
+begin
+  const widthMargin = Self.Width - Self.ClientWidth;
+  const heightMargin = Self.Height - Self.ClientHeight;
+  Self.Constraints.MinWidth := Max(Self.DXD_main.Width + 2*Self.DXD_main.Left, 2*Self.TB_BitmapTools.Left + Self.TB_BitmapTools.Width) + widthMargin;
+  Self.Constraints.MinHeight := Self.DXD_main.Height + Self.DXD_main.Top + Self.SB_Main.Height + _DXD_MAIN_MARGIN_PX + heightMargin;
 end;
 
 end.// unit

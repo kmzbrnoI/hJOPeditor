@@ -53,6 +53,7 @@ begin
 
   try
     F_Main.Relief.SetSize(SE_Width.Value, SE_Height.Value);
+    F_Main.OnPanelResize();
     Self.Close();
   except
     on E: Exception do
