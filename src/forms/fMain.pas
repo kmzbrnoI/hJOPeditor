@@ -294,6 +294,7 @@ begin
   Self.DXD_main.Left := 8;
   Self.DXD_main.Top := 80;
   Self.DXD_main.Visible := false;
+  Self.DXD_main.Options := [doAllowReboot, doSelectDriver, doHardware];
   Self.DXD_main.Initialize(); // tohleto tady musi byt, jinak nefunguje nacitani souboru jako argumentu !!
 
   ReliefOptions.LoadData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + 'Config.ini');
@@ -508,29 +509,38 @@ end;
 // ukladani souboru jako
 procedure TF_Main.MI_SaveAsClick(Sender: TObject);
 begin
-  if (Relief.Mode in [dmBitmap, dmSepVert, dmSepHor]) then
-  begin
-    Self.SD_Save.Filter := 'Bitmapové soubory panelu (*.bpnl)|*.bpnl';
+  try
+    if (Relief.Mode in [dmBitmap, dmSepVert, dmSepHor]) then
+    begin
+      Self.SD_Save.Filter := 'Bitmapové soubory panelu (*.bpnl)|*.bpnl';
 
-    if (not Self.SD_Save.Execute(Self.Handle)) then
+      if (not Self.SD_Save.Execute(Self.Handle)) then
+        Exit();
+      if (RightStr(Self.SD_Save.FileName, 5) <> '.bpnl') then
+        Relief.Save(Self.SD_Save.FileName + '.bpnl')
+      else
+        Relief.Save(Self.SD_Save.FileName);
+    end; // bitmapovy mod
+
+    if (Relief.Mode in [dmBlocks, dmRoots, dmAreas]) then
+    begin
+      Self.SD_Save.Filter := 'Objektové soubory panelu (*.opnl)|*.opnl';
+
+      if (not Self.SD_Save.Execute(Self.Handle)) then
+        Exit();
+      if (RightStr(Self.SD_Save.FileName, 5) <> '.opnl') then
+        Relief.Save(Self.SD_Save.FileName + '.opnl')
+      else
+        Relief.Save(Self.SD_Save.FileName);
+    end; // objektovy mod
+  except
+    on E: Exception do
+    begin
+      Application.MessageBox(PChar('Uložení souboru skončilo s chybou:' + #13#10 + E.message), 'Chyba',
+        MB_OK OR MB_ICONERROR);
       Exit();
-    if (RightStr(Self.SD_Save.FileName, 5) <> '.bpnl') then
-      Relief.Save(Self.SD_Save.FileName + '.bpnl')
-    else
-      Relief.Save(Self.SD_Save.FileName);
-  end; // bitmapovy mod
-
-  if (Relief.Mode in [dmBlocks, dmRoots, dmAreas]) then
-  begin
-    Self.SD_Save.Filter := 'Objektové soubory panelu (*.opnl)|*.opnl';
-
-    if (not Self.SD_Save.Execute(Self.Handle)) then
-      Exit();
-    if (RightStr(Self.SD_Save.FileName, 5) <> '.opnl') then
-      Relief.Save(Self.SD_Save.FileName + '.opnl')
-    else
-      Relief.Save(Self.SD_Save.FileName);
-  end; // objektovy mod
+    end;
+  end;
 
   Self.SB_Main.Panels.Items[1].Text := 'Soubor uložen';
   Self.UpdateCaptionFileName(ExtractFileName(Relief.FilePath));
@@ -594,7 +604,7 @@ begin
     'hJOPeditor' + #13#10 +
     'v' + VersionStr(Application.ExeName) + #13#10 +
     'Build ' + FormatDateTime('dd.mm.yyyy hh:nn:ss', BuildDateTime()) + #13#10 +
-    'Vytvořil Jan Horáček 2011–2024'
+    'Vytvořil Jan Horáček 2011–2025'
   ), 'Info', MB_OK OR MB_ICONINFORMATION);
 end;
 
@@ -778,7 +788,7 @@ begin
 end;
 
 procedure TF_Main.MI_CheckDataClick(Sender: TObject);
-var error_cnt: Byte;
+var error_cnt: Cardinal;
   LI: TListItem;
 begin
   if ((Assigned(Self.Relief)) and ((Self.Relief.Mode = dmBlocks) or (Self.Relief.Mode = dmRoots))) then

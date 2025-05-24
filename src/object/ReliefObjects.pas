@@ -26,6 +26,7 @@ const
 type
 
   EFileLoad = class(Exception);
+  EFileSave = class(Exception);
   ENoArea = class(Exception);
 
   TBlokAskEvent = procedure(Sender: TObject; Blok: TGraphBlok) of object;
@@ -100,9 +101,9 @@ type
 
     function GetObject(Pos: TPoint): Integer;
 
-    function SetArea(areai: Integer): Byte; // nastavi oblast rizeni vybranemu bloku
+    procedure SetArea(areai: Integer); // nastavi oblast rizeni vybranemu bloku
 
-    function CheckValid(var error_cnt: Byte): TStrings; // overi validitu naeditovanych dat a vrati chybove hlasky
+    function CheckValid(var error_cnt: Cardinal): TStrings; // overi validitu naeditovanych dat a vrati chybove hlasky
 
     procedure ComputePrjPanelUsek();
 
@@ -615,16 +616,15 @@ end;
 
 // tato funkce prirazuje aktivnimu bloku obalst rizeni v paramtru
 // to je uzitecne k tomu, ze pri vybrani bloku a nesdlednemu kliku na baracek dojde k prirazeni teto oblasti rizeni
-function TPanelObjects.SetArea(areai: Integer): Byte;
+procedure TPanelObjects.SetArea(areai: Integer);
 begin
   if (Self.Selected = nil) then
-    Exit(1);
+    Exit();
   Self.Selected.area := areai;
-  Result := 0;
 end;
 
 // checking data valid
-function TPanelObjects.CheckValid(var error_cnt: Byte): TStrings;
+function TPanelObjects.CheckValid(var error_cnt: Cardinal): TStrings;
 begin
   Result := TStringList.Create();
 

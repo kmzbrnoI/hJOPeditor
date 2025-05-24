@@ -228,7 +228,6 @@ end;
 function LoadIL(ResourceName: string; PartWidth, PartHeight: Byte;
   MaskColor: TColor = clPurple): TImageList;
 var AllImages, ColouredImages: TBitmap;
-  i, j, k, symbol: Byte;
   IL: TImageList;
 const
   _Symbols_DefColor: TColor = clBlack;
@@ -244,15 +243,15 @@ begin
       IL.SetSize(PartWidth, PartHeight);
       ColouredImages.SetSize(PartWidth * Length(_SYMBOL_COLORS), PartHeight);
 
-      for symbol := 0 to (AllImages.Width div PartWidth) - 1 do
+      for var symbol: Integer := 0 to (AllImages.Width div PartWidth) - 1 do
       begin
-        for i := 0 to Length(_SYMBOL_COLORS) - 1 do
+        for var i: Integer := 0 to Length(_SYMBOL_COLORS) - 1 do
         begin
           ColouredImages.Canvas.CopyRect(Rect(i * PartWidth, 0, (i * PartWidth) + PartWidth, PartHeight), AllImages.Canvas,
             Rect(symbol * PartWidth, 0, (symbol * PartWidth) + PartWidth, PartHeight));
 
-          for j := 0 to PartWidth - 1 do
-            for k := 0 to PartHeight - 1 do
+          for var j: Integer := 0 to PartWidth - 1 do
+            for var k: Integer := 0 to PartHeight - 1 do
               if (ColouredImages.Canvas.Pixels[j + (i * PartWidth), k] = _Symbols_DefColor) then
                 ColouredImages.Canvas.Pixels[j + (i * PartWidth), k] := _Symbol_Colors[i];
         end; // for i

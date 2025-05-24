@@ -69,6 +69,8 @@ type
 
 implementation
 
+uses ReliefBitmap;
+
 constructor TBitmapSymbols.Create(IL: TImageList; DrawCanvas: TCanvas; Width, Height: Integer);
 begin
   Self.DrawObject.Canvas := DrawCanvas;
@@ -145,15 +147,11 @@ begin
 end;
 
 procedure TBitmapSymbols.LoadBpnl(var f: File; fileVersion: Byte; width: Integer; height: Integer);
-var count: Integer;
-    buf: array [0 .. (_MAX_WIDTH*_MAX_HEIGHT)] of Byte;
+var buf: array [0 .. (_MAX_WIDTH*_MAX_HEIGHT)] of Byte;
 begin
   const total: Integer = width*height;
 
-  BlockRead(f, buf, width*height, count);
-  if (count < total) then
-    raise EFileLoad.Create('Málo bitmapových dat!');
-
+  TPanelBitmap.BlockReadOrException(f, buf, width*height, 'bitmapová data');
   for var i: Integer := 0 to total-1 do
     buf[i] := buf[i]-1;
 

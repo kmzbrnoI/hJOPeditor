@@ -49,7 +49,7 @@ type
     DrawMode: TMode;
     Graphics: TPanelGraphics;
 
-    mPanelWidth, mPanelHeight: SmallInt;
+    mPanelWidth, mPanelHeight: Cardinal;
     mGrid: Boolean;
 
     Colors: record
@@ -81,7 +81,7 @@ type
 
     procedure PaintGrid(MrizkaColor: TColor);
     procedure PaintCursor(CursorPos: TPoint); overload;
-    function PaintCursor(CursorData: TCursorDraw): Byte; overload;
+    procedure PaintCursor(CursorData: TCursorDraw); overload;
 
     procedure PaintAreas();
     function ORMouseUp(Position: TPoint; Button: TMouseButton): Boolean; // result = handled3
@@ -140,7 +140,7 @@ type
     procedure Show(); overload;
     procedure Show(CursorPos: TPoint); overload;
     procedure Escape(Group: Boolean);
-    procedure SetSize(aWidth, aHeight: Byte);
+    procedure SetSize(aWidth, aHeight: Cardinal);
 
     procedure AddSymbol(SymbolID: Integer);
     procedure AddText(Text: string; Color: SymbolColor; popisekBlok: Boolean);
@@ -161,7 +161,7 @@ type
     procedure AddOR(area: TArea);
     procedure DeleteOR(pos: TPoint);
 
-    function CheckValid(var error_cnt: Byte): TStrings; // overi validitu naeditovanych dat a vrati chybove hlasky
+    function CheckValid(var error_cnt: Cardinal): TStrings; // overi validitu naeditovanych dat a vrati chybove hlasky
 
     property GridColor: TColor read Colors.Grid write Colors.Grid;
     property BackColor: TColor read Colors.Back write Colors.Back;
@@ -174,8 +174,8 @@ type
     property Group: Boolean read GetGroup write SetGroup;
     property Grid: Boolean read mGrid write SetGrid;
 
-    property PanelWidth: SmallInt read mPanelWidth;
-    property PanelHeight: SmallInt read mPanelHeight;
+    property PanelWidth: Cardinal read mPanelWidth;
+    property PanelHeight: Cardinal read mPanelHeight;
 
     property FileState: TReliefFileState read Panel.FileState;
     property FilePath: string read Panel.FilePath;
@@ -411,10 +411,10 @@ begin
 end;
 
 // vykresluje kurzor
-function TRelief.PaintCursor(CursorData: TCursorDraw): Byte;
+procedure TRelief.PaintCursor(CursorData: TCursorDraw);
 begin
   if ((CursorData.pos1.X < 0) and (CursorData.pos1.Y < 0) and (CursorData.pos2.X < 0) and (CursorData.pos2.Y < 0)) then
-    Exit(1);
+    Exit();
 
   CursorData.Pos1.X := CursorData.Pos1.X - 1;
   CursorData.Pos1.Y := CursorData.Pos1.Y - 1;
@@ -452,8 +452,6 @@ begin
       Self.DrawObject.Surface.Canvas.LineTo(CursorData.Pos1.X + 8, CursorData.Pos1.Y);
     end;
   end; // else ((KurzorPos2.X > KurzorPos1.X) and (KurzorPos2.Y > KurzorPos1.Y))
-
-  Result := 0;
 end;
 
 procedure TRelief.DXDMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -641,7 +639,7 @@ begin
   end;
 end;
 
-procedure TRelief.SetSize(aWidth, aHeight: Byte);
+procedure TRelief.SetSize(aWidth, aHeight: Cardinal);
 begin
   if (Self.Mode <> dmBitmap) then
     raise Exception.Create('Rozměny lze měnit jen v režimu bitmapy!');
@@ -1114,7 +1112,7 @@ end;
 // konec operaci s oblastmi rizeni
 /// /////////////////////////////////////////////////////////////////////////////
 
-function TRelief.CheckValid(var error_cnt: Byte): TStrings;
+function TRelief.CheckValid(var error_cnt: Cardinal): TStrings;
 begin
   if (Integer(Self.Mode) < 2) then
   begin

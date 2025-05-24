@@ -13,6 +13,7 @@ object F_ReliefProperties: TF_ReliefProperties
   Font.Name = 'Tahoma'
   Font.Style = []
   Position = poScreenCenter
+  OnCreate = FormCreate
   TextHeight = 13
   object Label2: TLabel
     Left = 8

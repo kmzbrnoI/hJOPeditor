@@ -10,7 +10,7 @@ uses
 const
   _Uvazka_Spr_Sirka = 9;
 
-  _MAX_WIDTH = 256;
+  _MAX_WIDTH = 1000;
   _MAX_HEIGHT = 256;
 
   _RELEASE: Boolean = False;

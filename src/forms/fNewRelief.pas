@@ -71,9 +71,14 @@ uses fMain, ReliefObjects, ReliefBitmap;
 
 procedure TF_NewRelief.B_CreateClick(Sender: TObject);
 begin
-  if ((Self.SE_Height.Value > 255) or (Self.SE_Width.Value > 255)) then
+  if (Self.SE_Width.Value > _MAX_WIDTH) then
   begin
-    Application.MessageBox('Maximální rozměry panelu jsou 255x255', 'Nelze pokračovat', MB_OK OR MB_ICONERROR);
+    Application.MessageBox(PChar('Maximální šířka panelu je '+IntToStr(_MAX_WIDTH)+' symbolů'), 'Nelze pokračovat', MB_OK OR MB_ICONERROR);
+    Exit();
+  end;
+  if (Self.SE_Height.Value > _MAX_HEIGHT) then
+  begin
+    Application.MessageBox(PChar('Maximální výška panelu je '+IntToStr(_MAX_HEIGHT)+' symbolů'), 'Nelze pokračovat', MB_OK OR MB_ICONERROR);
     Exit();
   end;
   if ((Self.E_Name.Text = '') or (Self.E_NameShort.Text = '') or (Self.E_NameUniq.Text = '')) then
@@ -167,6 +172,8 @@ end;
 procedure TF_NewRelief.FormCreate(Sender: TObject);
 begin
   Self.lights := TList<TAreaLight>.Create();
+  Self.SE_Width.MaxValue := _MAX_WIDTH;
+  Self.SE_Height.MaxValue := _MAX_HEIGHT;
 end;
 
 procedure TF_NewRelief.FormDestroy(Sender: TObject);

@@ -74,6 +74,8 @@ type
 
 implementation
 
+uses ReliefBitmap;
+
 constructor TVBO.Create(DrawCanvas: TCanvas; SymbolIL: TImageList; symbolIndex: Integer; symColor: SymbolColor; separ: TSeparType);
 begin
   inherited Create();
@@ -142,8 +144,7 @@ begin
 end;
 
 procedure TVBO.LoadBpnl(var f: File; fileVersion: Byte);
-var buf: array [0 .. 1] of Byte;
-    readCount: Integer;
+var buf: array [0 .. 3] of Byte;
 begin
   Self.data.Clear();
 
@@ -151,34 +152,37 @@ begin
   if (fileVersion >= $41) then
     countSize := 2;
 
-  BlockRead(f, buf, countSize, readCount);
-  if (readCount <> countSize) then
-    raise EFileLoad.Create('Chybí velikost bloku!');
-
+  TPanelBitmap.BlockReadOrException(f, buf, countSize, 'hlavička vektorového bloku');
   var count: Integer := buf[0];
   if (countSize = 2) then
     count := (count shl 8) or buf[1];
 
   for var i: Integer := 0 to count-1 do
   begin
-    BlockRead(f, buf, 2, readCount);
-    if (readCount <> 2) then
-      raise EFileLoad.Create('Chybí data!');
-    Self.data.Add(Point(buf[0], buf[1]));
+    if (fileVersion >= $42) then
+    begin
+      TPanelBitmap.BlockReadOrException(f, buf, 4, 'data vektorového bloku');
+      Self.data.Add(Point((buf[0] shl 8) or buf[1], (buf[2] shl 8) or buf[3]));
+    end else begin
+      TPanelBitmap.BlockReadOrException(f, buf, 2, 'data vektorového bloku');
+      Self.data.Add(Point(buf[0], buf[1]));
+    end;
   end;
 end;
 
 procedure TVBO.WriteBpnl(var f: File);
-var buf: array [0 .. 1] of Byte;
+var buf: array [0 .. 3] of Byte;
 begin
-  buf[0] := Self.data.Count shr 8;
-  buf[1] := Self.data.Count and $FF;
+  buf[0] := Hi(Self.data.Count);
+  buf[1] := Lo(Self.data.Count);
   BlockWrite(f, buf, 2);
   for var point: TPoint in Self.data do
   begin
-    buf[0] := point.X;
-    buf[1] := point.Y;
-    BlockWrite(f, buf, 2);
+    buf[0] := Hi(point.X);
+    buf[1] := Lo(point.X);
+    buf[2] := Hi(point.Y);
+    buf[3] := Lo(point.Y);
+    BlockWrite(f, buf, 4);
   end;
 end;
 

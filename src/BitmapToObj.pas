@@ -39,9 +39,9 @@ begin
   // nejdriv si najdeme vsechny rozpojovace a nahradime je beznymi rovnymi kolejemi
   begin
     var index: Integer := 0;
-    for var x: Integer := 0 to Self.bitmap.PanelWidth - 1 do
+    for var x: Cardinal := 0 to Self.bitmap.PanelWidth - 1 do
     begin
-      for var y: Integer := 0 to Self.bitmap.PanelHeight - 1 do
+      for var y: Cardinal := 0 to Self.bitmap.PanelHeight - 1 do
       begin
         var Symbol := Self.bitmap.Symbols.GetSymbol(Point(x, y));
         if (Symbol = _S_DISC_TRACK) then

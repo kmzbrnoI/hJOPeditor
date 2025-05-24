@@ -11,6 +11,8 @@ uses
 const
   _IMPORT_MYJOP_SUFFIX = '.pnj';
   _INACTIVE_POINT: TPoint = (X: -1; Y: -1);
+  _BPNL_OPEN_SUPPORTED_VERSIONS: array [0..6] of Byte = ($21, $30, $31, $32, $40, $41, $42);
+  _BPNL_SAVE_VERSION = $42;
 
 type
   TORAskEvent = function(Pos: TPoint): Boolean of object;
@@ -18,7 +20,7 @@ type
 
   TPanelBitmap = class
   private
-    mPanelWidth, mPanelHeight: Integer;
+    mPanelWidth, mPanelHeight: Cardinal;
     mMode: TMode;
     mFileName: string;
 
@@ -62,6 +64,9 @@ type
     function CompensateMode(pos: TPoint): TPoint;
     procedure StopOperations();
 
+    class function BpnlOpenIsVersionSupported(version: Byte): Boolean;
+    class procedure WriteSeparator(var f: file);
+
   public
     Symbols: TBitmapSymbols;
     SeparatorsVert: TVBO;
@@ -84,7 +89,7 @@ type
     function PaintCursor(CursorPos: TPoint): TCursorDraw;
     procedure PaintMove(CursorPos: TPoint);
 
-    procedure SetSize(aWidth, aHeight: Byte);
+    procedure SetSize(aWidth, aHeight: Cardinal);
 
     procedure Escape(Group: Boolean);
 
@@ -103,11 +108,13 @@ type
     procedure DblClick(Position: TPoint);
 
     function ImportMyJOP(fn: string; ORs: TList<TArea>): string;
+    class function BlockReadOrException(var f: file; var buf: array of Byte; count: Integer; where: string): Integer;
+    class procedure BlockWriteOrException(var f: file; var buf: array of Byte; count: Integer);
 
     property fileName: string read mFileName;
     property fileState: TReliefFileState read mFileState;
-    property PanelWidth: Integer read mPanelWidth;
-    property PanelHeight: Integer read mPanelHeight;
+    property PanelWidth: Cardinal read mPanelWidth;
+    property PanelHeight: Cardinal read mPanelHeight;
     property Group: Boolean read GetGroup write SetGroup;
     property Mode: TMode read mMode write mMode;
 
@@ -124,7 +131,6 @@ uses ReliefObjects, ownStrUtils;
 // nacitani souboru s bitmapovymi daty
 procedure TPanelBitmap.BpnlLoad(filename: string; var ORs: string);
 var buffer: array [0 .. 5] of Byte;
-  aCount: Integer;
 begin
   Self.mFileState := fsSaved;
   Self.mFileName := filename;
@@ -139,23 +145,29 @@ begin
   Reset(f, 1);
 
   try
-    BlockRead(f, buffer, 5, aCount);
-    if (aCount < 5) then
-      raise EFileLoad.Create('Nesprávná délka hlavičky!');
+    BlockReadOrException(f, buffer, 3, 'hlavička');
 
     // --- hlavicka zacatek ---
     // kontrola identifikace
     if ((buffer[0] <> ord('b')) or (buffer[1] <> ord('r'))) then
-      raise EFileLoad.Create('Nesprávná identifikace v hlavičce!');
+      raise EFileLoad.Create('Nesprávná identifikace souboru v hlavičce, pravděpodobně neotevíráte bpnl soubor!');
 
     // kontrola verze
-    var version: Byte := buffer[2];
-    if ((version <> $21) and (version <> $30) and (version <> $31) and (version <> $32) and (version <> $40) and (version <> $41)) then
+    const version = buffer[2];
+    if (not BpnlOpenIsVersionSupported(version)) then
       Application.MessageBox(PChar('Otevíráte soubor s verzí ' + IntToHex(version,
         2) + ', která není aplikací plně podporována!'), 'Varování', MB_OK OR MB_ICONWARNING);
 
-    Self.mPanelWidth := buffer[3];
-    Self.mPanelHeight := buffer[4];
+    if (version >= $42) then
+    begin
+      BlockReadOrException(f, buffer, 4, 'velikost reliéfu');
+      Self.mPanelWidth := (buffer[0] shl 8) or buffer[1];
+      Self.mPanelHeight := (buffer[2] shl 8) or buffer[3];
+    end else begin
+      BlockReadOrException(f, buffer, 2, 'velikost reliéfu');
+      Self.mPanelWidth := buffer[0];
+      Self.mPanelHeight := buffer[1];
+    end;
 
     Self.BpnlReadAndValidateSeparator(f, 'mezi hlavičkou a bitmapovými daty');
 
@@ -168,29 +180,7 @@ begin
 
     // -------------------------------------------
 
-    if (version >= $32) then
-    begin
-      // nacteni poctu popisku
-      BlockRead(f, buffer, 2, aCount);
-      var len := (buffer[0] shl 8) + buffer[1];
-
-      // nacitani popisku
-      var bytesBuf: TBytes;
-      SetLength(bytesBuf, len);
-      BlockRead(f, bytesBuf[0], len, aCount);
-      Self.texts.SetLoadedDataV32(bytesBuf);
-    end else begin
-      // nacteni poctu popisku
-      BlockRead(f, buffer, 1, aCount);
-      var len := buffer[0] * ReliefText._Block_Length;
-
-      // nacitani popisku
-      var bytesBuf: TBytes;
-      SetLength(bytesBuf, len);
-      BlockRead(f, bytesBuf[0], len, aCount);
-      Self.texts.SetLoadedData(bytesBuf);
-    end;
-
+    Self.texts.LoadBpnl(f, version);
     Self.BpnlReadAndValidateSeparator(f, 'mezi popisky a separátory');
 
     // -------------------------------------------
@@ -232,41 +222,57 @@ begin
     ORs := '';
 
     // precteme delku
-    BlockRead(f, buffer, 2, aCount);
-
-    // pokud je delka 0, je neco spatne
-    if (aCount = 0) then
-      raise EFileLoad.Create('Prázdné oblasti řízení!');
-
+    BlockReadOrException(f, buffer, 2, 'délka oblastí řízení');
     var len := (buffer[0] shl 8) + buffer[1];
-
     var bytesBuf: TBytes;
     SetLength(bytesBuf, len);
-    BlockRead(f, bytesBuf[0], len, aCount);
-    ORs := TEncoding.UTF8.GetString(bytesBuf, 0, aCount);
+    var areasLen := BlockReadOrException(f, bytesBuf, len, 'oblasti řízení');
+    ORs := TEncoding.UTF8.GetString(bytesBuf, 0, areasLen);
   finally
     CloseFile(f);
   end;
 end;
 
+class function TPanelBitmap.BlockReadOrException(var f: File; var buf: array of Byte; count: Integer; where: string): Integer;
+var reallyRead: Integer;
+begin
+  if (count > Length(buf)) then
+    raise EFileLoad.Create('Příliš malý buffer: '+where);
+  BlockRead(f, buf, count, reallyRead);
+  if (count <> reallyRead) then
+    raise EFileLoad.Create('Předčasný konec souboru při čtení: '+where);
+  Result := reallyRead;
+end;
+
+class procedure TPanelBitmap.BlockWriteOrException(var f: file; var buf: array of Byte; count: Integer);
+var reallyWritten: Integer;
+begin
+  BlockWrite(f, buf, count, reallyWritten);
+  if (reallyWritten <> count) then
+    raise EFileSave.Create('Nepodařilo se zapsat všechny byty!');
+end;
+
+class function TPanelBitmap.BpnlOpenIsVersionSupported(version: Byte): Boolean;
+begin
+  for var supported: Byte in _BPNL_OPEN_SUPPORTED_VERSIONS do
+    if (supported = version) then
+      Exit(True);
+  Result := False;
+end;
+
 class procedure TPanelBitmap.BpnlReadAndValidateSeparator(var f: File; where: string);
 var buf: array [0..1] of Byte;
-    count: Integer;
 begin
-  BlockRead(f, buf, 2, count);
-  if ((count < 2) or (buf[0] <> $FF) or (buf[1] <> $FF)) then
+  BlockReadOrException(f, buf, 2, 'oddělovací sekvence '+where);
+  if ((buf[0] <> $FF) or (buf[1] <> $FF)) then
     raise EFileLoad.Create('Chybí oddělovací sekvence '+where+'!');
 end;
 
 procedure TPanelBitmap.BpnlSave(filename: string; const ORs: string);
-var buffer: array [0 .. 4] of Byte;
-  separator: array [0 .. 1] of Byte;
+var buffer: array [0 .. 6] of Byte;
 begin
   Self.mFileState := fsSaved;
   Self.mFileName := filename;
-
-  separator[0] := $FF;
-  separator[1] := $FF;
 
   var f: File;
   AssignFile(f, filename);
@@ -278,48 +284,50 @@ begin
     buffer[0] := ord('b');
     buffer[1] := ord('r');
     // verze
-    buffer[2] := $41;
+    buffer[2] := _BPNL_SAVE_VERSION;
     // sirka a vyska
-    buffer[3] := Self.PanelWidth;
-    buffer[4] := Self.PanelHeight;
+    buffer[3] := Hi(Self.PanelWidth);
+    buffer[4] := Lo(Self.PanelWidth);
+    buffer[5] := Hi(Self.PanelHeight);
+    buffer[6] := Lo(Self.PanelHeight);
 
-    BlockWrite(f, buffer, 5);
-    BlockWrite(f, separator, 2);
+    BlockWrite(f, buffer, 7);
+    WriteSeparator(f);
 
     // -------------------------------------------
     // bitmapova data
     Self.Symbols.WriteBpnl(f);
-    BlockWrite(f, separator, 2);
+    WriteSeparator(f);
 
     // -------------------------------------------
     // popisky
     Self.texts.WriteBpnl(f);
-    BlockWrite(f, separator, 2);
+    WriteSeparator(f);
 
     // -------------------------------------------
     // vertikalni oddelovace
     Self.SeparatorsVert.WriteBpnl(f);
-    BlockWrite(f, separator, 2);
+    WriteSeparator(f);
 
     // -------------------------------------------
     // horizontalni oddelovace
     Self.SeparatorsHor.WriteBpnl(f);
-    BlockWrite(f, separator, 2);
+    WriteSeparator(f);
 
     // -------------------------------------------
     // KPopisky
     Self.trackNames.WriteBpnl(f);
-    BlockWrite(f, separator, 2);
+    WriteSeparator(f);
 
     // -------------------------------------------
     // JCClick
     Self.JCClick.WriteBpnl(f);
-    BlockWrite(f, separator, 2);
+    WriteSeparator(f);
 
     // -------------------------------------------
     // soupravy
     Self.trainPoss.WriteBpnl(f);
-    BlockWrite(f, separator, 2);
+    WriteSeparator(f);
 
     // -------------------------------------------
     var len := TEncoding.UTF8.GetByteCount(ORs);
@@ -333,7 +341,7 @@ begin
 
     bytesBuf := TEncoding.UTF8.GetBytes(ORs);
     BlockWrite(f, bytesBuf[0], len);
-    BlockWrite(f, separator, 2);
+    WriteSeparator(f);
 
     // -------------------------------------------
   finally
@@ -341,7 +349,15 @@ begin
   end;
 end;
 
-procedure TPanelBitmap.SetSize(aWidth, aHeight: Byte);
+class procedure TPanelBitmap.WriteSeparator(var f: file);
+var separator: array [0 .. 1] of Byte;
+begin
+  separator[0] := $FF;
+  separator[1] := $FF;
+  BlockWriteOrException(f, separator, 2);
+end;
+
+procedure TPanelBitmap.SetSize(aWidth, aHeight: Cardinal);
 begin
   if (Self.IsOperation) then
     raise Exception.Create('Právě probíhá jiná operace!');
@@ -449,14 +465,14 @@ end;
 function TPanelBitmap.IsConflictSymbolPlace(Pos: TPoint): Boolean;
 begin
   Result := (Self.Symbols.GetSymbol(Pos) <> -1) or ((Assigned(Self.IsAreaStuffPresent)) and (Self.IsAreaStuffPresent(Pos)))
-    or (pos.X < 0) or (pos.Y < 0) or (pos.X >= Self.PanelWidth) or (pos.Y >= Self.PanelHeight);
+    or (pos.X < 0) or (pos.Y < 0) or (Cardinal(pos.X) >= Self.PanelWidth) or (Cardinal(pos.Y) >= Self.PanelHeight);
 end;
 
 function TPanelBitmap.IsConflictTextPlace(Pos: TPoint): Boolean;
 begin
   Result := false;
 
-  if ((pos.X < 0) or (pos.Y < 0) or (pos.X >= Self.PanelWidth) or (pos.Y >= Self.PanelHeight)) then
+  if ((pos.X < 0) or (pos.Y < 0) or (Cardinal(pos.X) >= Self.PanelWidth) or (Cardinal(pos.Y) >= Self.PanelHeight)) then
     Exit(True);
 
   // Text could be placed over platform
@@ -472,7 +488,7 @@ end;
 function TPanelBitmap.IsConflictVectorPlace(Pos: TPoint): Boolean;
 begin
   Result := (Self.trackNames.IsObject(Pos)) or (Self.JCClick.IsObject(Pos)) or (Self.trainPoss.IsObject(Pos))
-    or (pos.X < 0) or (pos.Y < 0) or (pos.X >= Self.PanelWidth) or (pos.Y >= Self.PanelHeight);
+    or (pos.X < 0) or (pos.Y < 0) or (Cardinal(pos.X) >= Self.PanelWidth) or (Cardinal(pos.Y) >= Self.PanelHeight);
 end;
 
 procedure TPanelBitmap.SetGroup(State: Boolean);

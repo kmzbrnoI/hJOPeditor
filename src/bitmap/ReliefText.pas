@@ -57,8 +57,10 @@ type
     procedure InitializeTextMenu(var Menu: TPopupMenu; Parent: TForm);
 
     function GetCount(): Integer;
-
     function IsConflict(pos: TPoint): Boolean;
+    procedure LoadBpnlV31OrOlder(var f: File; fileVersion: Byte);
+    procedure LoadBpnlV32OrNewer(var f: File; fileVersion: Byte);
+
 
   public
     addText: TPanelLabel;
@@ -85,8 +87,7 @@ type
     function CanMoveDrop(pos: TPoint): Boolean;
     procedure Delete(pos1: TPoint; pos2: TPoint); overload;
 
-    procedure SetLoadedData(LoadData: TBytes);
-    procedure SetLoadedDataV32(LoadData: TBytes);
+    procedure LoadBpnl(var f: File; fileVersion: Byte);
     procedure WriteBpnl(var f: File);
     procedure Clear();
 
@@ -100,6 +101,8 @@ type
   end; // TText
 
 implementation
+
+uses ReliefBitmap;
 
 constructor TText.Create(DrawCanvas: TCanvas; TextIL: TImageList; Parent: TForm; Graphics: TPanelGraphics);
 begin
@@ -171,58 +174,87 @@ begin
       Exit(i);
 end;
 
-// nacteni surovych dat do struktur
-procedure TText.SetLoadedData(LoadData: TBytes);
-var
-  Count: Integer;
+procedure TText.LoadBpnl(var f: File; fileVersion: Byte);
 begin
-  Self.Data.Clear();
-  Count := Length(LoadData) div _Block_Length;
+  if (fileVersion >= $32) then
+    Self.LoadBpnlV32OrNewer(f, fileVersion)
+  else
+    Self.LoadBpnlV31OrOlder(f, fileVersion);
+end;
 
-  for var i := 0 to Count - 1 do
+procedure TText.LoadBpnlV31OrOlder(var f: File; fileVersion: Byte);
+var buffer: array [0 .. 255] of Byte;
+begin
+  TPanelBitmap.BlockReadOrException(f, buffer, 1, 'délka bloku textů');
+  const count = buffer[0];
+  TPanelBitmap.BlockReadOrException(f, buffer, count*_Block_Length, 'texty');
+
+  Self.Data.Clear();
+
+  for var i := 0 to count-1 do
   begin
     var p: TPanelLabel;
-    p.Position.X := LoadData[(i * _Block_Length)];
-    p.Position.Y := LoadData[(i * _Block_Length) + 1];
-    p.Color := SymbolColor(LoadData[(i * _Block_Length) + 2]);
+    p.Position.X := buffer[(i * _Block_Length)];
+    p.Position.Y := buffer[(i * _Block_Length) + 1];
+    p.Color := SymbolColor(buffer[(i * _Block_Length) + 2]);
     p.Text := '';
     p.Description := false;
 
     for var j := 0 to _MAX_TEXT_LENGTH do
     begin
-      if ((LoadData[(i * _Block_Length) + 3 + (j * 2)] = 0) and (LoadData[(i * _Block_Length) + 3 + (j * 2) + 1] = 0))
-      then
+      if ((buffer[(i * _Block_Length) + 3 + (j * 2)] = 0) and (buffer[(i * _Block_Length) + 3 + (j * 2) + 1] = 0)) then
         Break;
-      p.Text := p.Text + chr(((LoadData[(i * _Block_Length) + 3 + (j * 2)]) shl 8) +
-        LoadData[(i * _Block_Length) + 3 + (j * 2) + 1]);
+      p.Text := p.Text + chr(((buffer[(i * _Block_Length) + 3 + (j * 2)]) shl 8) + buffer[(i * _Block_Length) + 3 + (j * 2) + 1]);
     end; // for j
 
     Self.Data.Add(p);
   end; // for i
 end;
 
-procedure TText.SetLoadedDataV32(LoadData: TBytes);
+procedure TText.LoadBpnlV32OrNewer(var f: File; fileVersion: Byte);
+var buffer: TBytes;
+    totalLength: Integer;
 begin
+  SetLength(buffer, 256);
+
+  TPanelBitmap.BlockReadOrException(f, buffer, 2, 'délka bloku textů');
+  totalLength := (buffer[0] shl 8) or buffer[1];
+
   Self.Data.Clear();
   var pos: Integer := 0;
   var i: Integer := 0;
 
-  while pos < Length(LoadData) do
+  while (pos < totalLength) do
   begin
     var p: TPanelLabel;
-    p.Position.X := LoadData[pos];
-    p.Position.Y := LoadData[pos + 1];
-    p.Color := SymbolColor(LoadData[pos + 2]);
-    var len: Integer := LoadData[pos + 3];
-    p.Description := (LoadData[pos + 4] = _POPISEK_MAGIC_CODE);
+    var offset: Integer;
+
+    if (fileVersion >= $42) then
+    begin
+      TPanelBitmap.BlockReadOrException(f, buffer, 6, 'hlavička textu');
+      p.Position.X := (buffer[0] shl 8) or buffer[1];
+      p.Position.Y := (buffer[2] shl 8) or buffer[3];
+      offset := 4;
+    end else begin
+      TPanelBitmap.BlockReadOrException(f, buffer, 4, 'hlavička textu');
+      p.Position.X := buffer[0];
+      p.Position.Y := buffer[1];
+      offset := 2;
+    end;
+
+    p.Color := SymbolColor(buffer[offset+0]);
+    const textLen = buffer[offset+1];
+
+    TPanelBitmap.BlockReadOrException(f, buffer, textLen, 'text');
+    p.Description := (buffer[0] = _POPISEK_MAGIC_CODE);
     if (p.Description) then
-      p.Text := TEncoding.UTF8.GetString(LoadData, pos + 5, len - 1)
+      p.Text := TEncoding.UTF8.GetString(buffer, 1, textLen - 1)
     else
-      p.Text := TEncoding.UTF8.GetString(LoadData, pos + 4, len);
+      p.Text := TEncoding.UTF8.GetString(buffer, 0, textLen);
 
     Self.Data.Add(p);
     i := i + 1;
-    pos := pos + 4 + len;
+    pos := pos + offset + 2 + textLen;
   end; // for i
 
   Self.Data.Count := i;
@@ -231,7 +263,7 @@ end;
 // ziskani surovych dat zapisovanych do souboru z dat programu
 procedure TText.WriteBpnl(var f: File);
 var length: Cardinal;
-    buf: array [0..5] of Byte;
+    buf: array [0..7] of Byte;
 begin
   var originPos: Integer := FilePos(f);
   Seek(f, originPos+2);
@@ -239,9 +271,11 @@ begin
 
   for var p in Self.Data do
   begin
-    buf[0] := p.Position.X;
-    buf[1] := p.Position.Y;
-    buf[2] := Byte(p.Color);
+    buf[0] := Hi(p.Position.X);
+    buf[1] := Lo(p.Position.X);
+    buf[2] := Hi(p.Position.Y);
+    buf[3] := Lo(p.Position.Y);
+    buf[4] := Byte(p.Color);
 
     var textLength: Cardinal := TEncoding.UTF8.GetByteCount(p.Text);
     var bytesBuf: TBytes;
@@ -251,12 +285,12 @@ begin
     var headerLen: Cardinal;
     if (p.Description) then
     begin
-      buf[3] := textLength + 1;
-      buf[4] := _POPISEK_MAGIC_CODE;
-      headerLen := 5;
+      buf[5] := textLength + 1;
+      buf[6] := _POPISEK_MAGIC_CODE;
+      headerLen := 7;
     end else begin
-      buf[3] := textLength;
-      headerLen := 4;
+      buf[5] := textLength;
+      headerLen := 6;
     end;
 
     if ((length + headerLen + textLength) > $FFFF) then

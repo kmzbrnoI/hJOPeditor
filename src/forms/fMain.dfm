@@ -3145,7 +3145,6 @@ object F_Main: TF_Main
     Color = clScrollBar
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 1090
     object TB_Separator: TToolBar
       Left = 8
       Top = 10
@@ -3844,8 +3843,6 @@ object F_Main: TF_Main
       item
         Width = 400
       end>
-    ExplicitTop = 564
-    ExplicitWidth = 1090
   end
   object MM_Hlavni: TMainMenu
     Left = 16
