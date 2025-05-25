@@ -120,6 +120,8 @@ type
     MI_OldOpnlImport: TMenuItem;
     OD_OpnlImport: TOpenDialog;
     MI_Areas: TMenuItem;
+    SB_hor: TScrollBar;
+    SB_vert: TScrollBar;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure MI_NewClick(Sender: TObject);
@@ -153,6 +155,13 @@ type
     procedure PM_Show_Blk_DescriptionsClick(Sender: TObject);
     procedure MI_ImportClick(Sender: TObject);
     procedure MI_OldOpnlImportClick(Sender: TObject);
+    procedure FormResize(Sender: TObject);
+    procedure SB_horChange(Sender: TObject);
+    procedure SB_vertChange(Sender: TObject);
+    procedure FormMouseWheel(Sender: TObject; Shift: TShiftState;
+      WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+    procedure FormMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
   private
     pushedButton: TToolButton; // last pushed button
 
@@ -163,8 +172,10 @@ type
     _Caption = 'hJOPeditor';
     _Config_File = 'Config.ini';
     _DXD_MAIN_MARGIN_PX: Integer = 8;
+    _MOUSE_FORWARD_BACK_MOVE_PX = 128;
 
     procedure UpdateCaptionFileName(filename: String);
+    procedure UpdateScrollBars();
 
   public
     DXD_main: TDXDraw;
@@ -205,7 +216,7 @@ procedure TF_Main.AE_MainMessage(var Msg: tagMSG; var Handled: Boolean);
 begin
   if (Msg.message = WM_KeyDown) then // pokud je stisknuta klavesa
   begin
-    case Msg.wParam of // case moznosti stisknutych klaves
+    case (Msg.wParam) of // case moznosti stisknutych klaves
       VK_ESCAPE:
         begin
           Self.CHB_Group.Checked := false;
@@ -230,6 +241,27 @@ begin
       Self.SB_Main.Panels.Items[2].Text := '---;---';
       if (Assigned(Self.Relief)) then
         Self.Relief.HideMouse();
+    end;
+  end else if (Msg.message = WM_XBUTTONUP) then
+  begin
+    case (HiWord(Msg.wParam)) of
+      1: // previous mouse key
+        begin
+          if (Self.SB_hor.Visible) then
+          begin
+            Self.SB_hor.Position := Self.SB_hor.Position - _MOUSE_FORWARD_BACK_MOVE_PX;
+            Handled := True;
+          end;
+        end;
+
+      2: // next mouse key
+        begin
+          if (Self.SB_hor.Visible) then
+          begin
+            Self.SB_hor.Position := Self.SB_hor.Position + _MOUSE_FORWARD_BACK_MOVE_PX;
+            Handled := True;
+          end;
+        end;
     end;
   end;
 end;
@@ -298,6 +330,7 @@ begin
   Self.DXD_main.Visible := false;
   Self.DXD_main.Options := [doAllowReboot, doSelectDriver, doHardware];
   Self.DXD_main.Initialize(); // tohleto tady musi byt, jinak nefunguje nacitani souboru jako argumentu !!
+  Self.DXD_main.SendToBack();
 
   ReliefOptions.LoadData(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + 'Config.ini');
   Self.MI_Grid.Checked := ReliefOptions.Grid;
@@ -1093,10 +1126,91 @@ end;
 
 procedure TF_Main.OnPanelResize();
 begin
-  const widthMargin = Self.Width - Self.ClientWidth;
-  const heightMargin = Self.Height - Self.ClientHeight;
-  Self.Constraints.MinWidth := Max(Self.DXD_main.Width + 2*Self.DXD_main.Left, 2*Self.TB_BitmapTools.Left + Self.TB_BitmapTools.Width) + widthMargin;
-  Self.Constraints.MinHeight := Self.DXD_main.Height + Self.DXD_main.Top + Self.SB_Main.Height + _DXD_MAIN_MARGIN_PX + heightMargin;
+  Self.DXD_main.Left := _DXD_MAIN_MARGIN_PX;
+  Self.DXD_main.Top := Self.P_Menu.Height + _DXD_MAIN_MARGIN_PX;
+  Self.SB_hor.Position := 0;
+  Self.SB_vert.Position := 0;
+
+  // In case panel is bugger than current screen, Self.Width & Self.Height are automaticcaly set to screen size (windows feature)
+  if (Self.WindowState <> wsMaximized) then
+  begin
+    Self.ClientWidth := Max(Self.DXD_main.Width + 2*_DXD_MAIN_MARGIN_PX + Self.SB_vert.Width, 2*Self.TB_BitmapTools.Left + Self.TB_BitmapTools.Width);
+    Self.ClientHeight := Self.DXD_main.Height + Self.P_Menu.Height + Self.SB_Main.Height + 2*_DXD_MAIN_MARGIN_PX + Self.SB_hor.Height;
+  end;
+
+  Self.UpdateScrollBars();
+end;
+
+procedure TF_Main.FormResize(Sender: TObject);
+begin
+  Self.UpdateScrollBars();
+
+  if (Assigned(Self.Relief)) then
+    Self.Relief.Show();
+end;
+
+procedure TF_Main.UpdateScrollBars();
+begin
+  if (not Assigned(Self.DXD_main)) then
+    Exit();
+
+  const requiredWidth = (Self.DXD_main.Width + 2*_DXD_MAIN_MARGIN_PX + Self.SB_vert.Width);
+  if (Self.ClientWidth < requiredWidth) then
+  begin
+    Self.SB_hor.Visible := True;
+    Self.SB_hor.PageSize := 1; // must always be lower than max
+    Self.SB_hor.Top := 0; // align on top of SB_Main
+    Self.SB_hor.Max := (requiredWidth - Self.ClientWidth);
+    Self.SB_hor.PageSize := Min(8, Self.SB_hor.Max);
+  end else begin
+    Self.SB_hor.Visible := False;
+    Self.DXD_main.Left := _DXD_MAIN_MARGIN_PX;
+  end;
+
+  const requiredHeight = (Self.DXD_main.Height + Self.P_Menu.Height + 2*_DXD_MAIN_MARGIN_PX + Self.SB_hor.Height + Self.SB_Main.Height);
+  if (Self.ClientHeight < requiredHeight) then
+  begin
+    Self.SB_vert.Visible := True;
+    Self.SB_vert.PageSize := 1; // must always be lower than max
+    Self.SB_vert.Max := (requiredHeight - Self.ClientHeight);
+    Self.SB_vert.PageSize := Min(8, Self.SB_vert.Max);
+  end else begin
+    Self.SB_vert.Visible := False;
+    Self.DXD_main.Top := Self.P_Menu.Height + _DXD_MAIN_MARGIN_PX;
+  end;
+end;
+
+procedure TF_Main.SB_horChange(Sender: TObject);
+begin
+  if (not Assigned(Self.DXD_main)) then
+    Exit();
+  Self.DXD_main.Left := _DXD_MAIN_MARGIN_PX - Self.SB_hor.Position;
+end;
+
+procedure TF_Main.SB_vertChange(Sender: TObject);
+begin
+  if (not Assigned(Self.DXD_main)) then
+    Exit();
+  Self.DXD_main.Top := (Self.P_Menu.Height + _DXD_MAIN_MARGIN_PX) - Self.SB_vert.Position;
+end;
+
+procedure TF_Main.FormMouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  if (Self.SB_hor.Visible) then
+  begin
+
+  end;
+end;
+
+procedure TF_Main.FormMouseWheel(Sender: TObject; Shift: TShiftState;
+  WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+begin
+  if (Self.SB_vert.Visible) then
+  begin
+    Self.SB_vert.Position := Self.SB_vert.Position + (-WheelDelta);
+    Handled := True;
+  end;
 end;
 
 end.// unit

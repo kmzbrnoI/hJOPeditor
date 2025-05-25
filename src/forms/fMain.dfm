@@ -3,7 +3,7 @@ object F_Main: TF_Main
   Top = 0
   Caption = 'hJOPeditor'
   ClientHeight = 584
-  ClientWidth = 1094
+  ClientWidth = 1115
   Color = clBtnFace
   Constraints.MinHeight = 400
   Constraints.MinWidth = 800
@@ -3134,17 +3134,21 @@ object F_Main: TF_Main
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
+  OnMouseUp = FormMouseUp
+  OnMouseWheel = FormMouseWheel
+  OnResize = FormResize
   TextHeight = 13
   object P_Menu: TPanel
     Left = 0
     Top = 0
-    Width = 1094
+    Width = 1115
     Height = 65
     Align = alTop
     BevelOuter = bvNone
     Color = clScrollBar
     ParentBackground = False
     TabOrder = 0
+    ExplicitWidth = 1094
     object TB_Separator: TToolBar
       Left = 8
       Top = 10
@@ -3826,7 +3830,7 @@ object F_Main: TF_Main
   object SB_Main: TStatusBar
     Left = 0
     Top = 565
-    Width = 1094
+    Width = 1115
     Height = 19
     Panels = <
       item
@@ -3843,6 +3847,36 @@ object F_Main: TF_Main
       item
         Width = 400
       end>
+    ExplicitTop = 571
+  end
+  object SB_hor: TScrollBar
+    Left = 0
+    Top = 548
+    Width = 1115
+    Height = 17
+    Align = alBottom
+    PageSize = 1
+    TabOrder = 2
+    Visible = False
+    OnChange = SB_horChange
+    ExplicitLeft = 704
+    ExplicitTop = 472
+    ExplicitWidth = 121
+  end
+  object SB_vert: TScrollBar
+    Left = 1098
+    Top = 65
+    Width = 17
+    Height = 483
+    Align = alRight
+    Kind = sbVertical
+    PageSize = 1
+    TabOrder = 3
+    Visible = False
+    OnChange = SB_vertChange
+    ExplicitLeft = 696
+    ExplicitTop = 304
+    ExplicitHeight = 121
   end
   object MM_Hlavni: TMainMenu
     Left = 16
