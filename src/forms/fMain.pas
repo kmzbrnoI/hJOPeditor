@@ -1087,6 +1087,7 @@ begin
         Self.MI_Sep_Hor.Enabled := true;
         Self.MI_Blocks.Enabled := true;
         Self.MI_Roots.Enabled := false;
+        Self.MI_Areas.Enabled := false;
       end;
 
     dmBlocks, dmRoots:
@@ -1096,6 +1097,7 @@ begin
         Self.MI_Sep_Hor.Enabled := false;
         Self.MI_Blocks.Enabled := true;
         Self.MI_Roots.Enabled := true;
+        Self.MI_Areas.Enabled := true;
       end;
   end; // case
 end;
