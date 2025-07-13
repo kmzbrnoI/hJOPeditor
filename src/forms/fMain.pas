@@ -1090,7 +1090,7 @@ begin
         Self.MI_Areas.Enabled := false;
       end;
 
-    dmBlocks, dmRoots:
+    dmBlocks, dmRoots, dmAreas:
       begin
         Self.MI_Bitmap.Enabled := false;
         Self.MI_Sep_Vert.Enabled := false;
