@@ -78,7 +78,7 @@
         <VerInfo_MinorVer>11</VerInfo_MinorVer>
         <VerInfo_Release>1</VerInfo_Release>
         <VerInfo_Locale>1029</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=2.11.1.0;InternalName=hJOPeditor;LegalCopyright=Jan Horáček;LegalTrademarks=Jan Horáček;OriginalFilename=hJOPeditor.exe;ProductName=hJOPeditor;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=2.11.1.0;InternalName=hJOPeditor;LegalCopyright=Jan Malina;LegalTrademarks=Jan Malina;OriginalFilename=hJOPeditor.exe;ProductName=hJOPeditor;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <DCC_UnitSearchPath>C:\vlak\delphi\components\DelphiX_1.22\Source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
@@ -124,7 +124,7 @@
         <DCC_E>false</DCC_E>
         <DCC_F>false</DCC_F>
         <VerInfo_MinorVer>15</VerInfo_MinorVer>
-        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=2.15.0.0;InternalName=hJOPeditor;LegalCopyright=;LegalTrademarks=;OriginalFilename=hJOPeditor.exe;ProductName=$(MSBuildProjectName);ProductVersion=1.13.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=2.15.1.0;InternalName=hJOPeditor;LegalCopyright=;LegalTrademarks=;OriginalFilename=hJOPeditor.exe;ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>
         <VerInfo_Release>0</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
@@ -142,11 +142,9 @@
         <SanitizedProjectName>hJOPeditor</SanitizedProjectName>
         <VerInfo_MinorVer>15</VerInfo_MinorVer>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=;FileDescription=Editor panelů hJOP;FileVersion=1.15.0.0;InternalName=hJOPeditor;LegalCopyright=Jan Horáček;LegalTrademarks=Jan Horáček;OriginalFilename=hJOPeditor.exe;ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=;ProgramID=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=;FileDescription=Editor panelů hJOP;FileVersion=2.15.1.0;InternalName=hJOPeditor;LegalCopyright=Jan Malina;LegalTrademarks=Jan Malina;OriginalFilename=hJOPeditor.exe;ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=;ProgramID=</VerInfo_Keys>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
-        <VerInfo_Release>0</VerInfo_Release>
         <DCC_UnitSearchPath>C:\vlak\delphi\components\DelphiX_1.22\Source</DCC_UnitSearchPath>
-        <VerInfo_MajorVer>1</VerInfo_MajorVer>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
@@ -262,8 +260,8 @@
                     <VersionInfoKeys Name="FileDescription"/>
                     <VersionInfoKeys Name="FileVersion">2.11.1.0</VersionInfoKeys>
                     <VersionInfoKeys Name="InternalName">hJOPeditor</VersionInfoKeys>
-                    <VersionInfoKeys Name="LegalCopyright">Jan Horáček</VersionInfoKeys>
-                    <VersionInfoKeys Name="LegalTrademarks">Jan Horáček</VersionInfoKeys>
+                    <VersionInfoKeys Name="LegalCopyright">Jan Malina</VersionInfoKeys>
+                    <VersionInfoKeys Name="LegalTrademarks">Jan Malina</VersionInfoKeys>
                     <VersionInfoKeys Name="OriginalFilename">hJOPeditor.exe</VersionInfoKeys>
                     <VersionInfoKeys Name="ProductName">hJOPeditor</VersionInfoKeys>
                     <VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>

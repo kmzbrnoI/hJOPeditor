@@ -639,7 +639,7 @@ begin
     'hJOPeditor' + #13#10 +
     'v' + VersionStr(Application.ExeName) + #13#10 +
     'Build ' + FormatDateTime('dd.mm.yyyy hh:nn:ss', BuildDateTime()) + #13#10 +
-    'Vytvořil Jan Horáček 2011–2025'
+    'Vytvořil Jan Malina (Horáček) 2011–2025'
   ), 'Info', MB_OK OR MB_ICONINFORMATION);
 end;
 
