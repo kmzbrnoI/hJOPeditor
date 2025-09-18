@@ -105,6 +105,7 @@ end;
 procedure TF_Popisek.FormCreate(Sender: TObject);
 begin
   Self.PopisekColor := 1;
+  Self.E_Text.MaxLength := ReliefText._MAX_TEXT_LENGTH;
 end;
 
 procedure TF_Popisek.NewPopisek();
