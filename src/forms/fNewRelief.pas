@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, Panel, Global, ReliefSettings, OblastRizeni, Spin, ExtCtrls,
+  Dialogs, StdCtrls, Panel, Global, ReliefSettings, Area, Spin, ExtCtrls,
   Types, Generics.Collections;
 
 type
@@ -83,7 +83,7 @@ begin
   end;
   if ((Self.E_Name.Text = '') or (Self.E_NameShort.Text = '') or (Self.E_NameUniq.Text = '')) then
   begin
-    Application.MessageBox('Název, zkratka názvu a unikátní název (ID) oblasti řízení musí být vyplněno!',
+    Application.MessageBox('Název, zkratka názvu a unikátní název (ID) dopravny musí být vyplněny!',
       'Nelze pokračovat', MB_OK OR MB_ICONERROR);
     Exit();
   end;

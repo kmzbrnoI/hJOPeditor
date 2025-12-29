@@ -99,7 +99,7 @@ var
 
 implementation
 
-uses fMain, OblastRizeni, ObjBLokUvazkaSpr, ObjBlokVyhybka, ObjBlokUsek,
+uses fMain, Area, ObjBLokUvazkaSpr, ObjBlokVyhybka, ObjBlokUsek,
   ObjBlokUvazka;
 
 {$R *.dfm}

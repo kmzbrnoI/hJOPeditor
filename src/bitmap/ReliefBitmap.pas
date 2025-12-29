@@ -6,7 +6,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
   StrUtils, ReliefText, VektorBasedObject, ReliefBitmapSymbols, Global, Forms,
-  OblastRizeni, PGraphics, symbolHelper, Generics.Collections, Types, ReliefCommon;
+  Area, PGraphics, symbolHelper, Generics.Collections, Types, ReliefCommon;
 
 const
   _IMPORT_MYJOP_SUFFIX = '.pnj';
@@ -82,8 +82,8 @@ type
       Parent: TForm; Graphics: TPanelGraphics);
     destructor Destroy(); override;
 
-    procedure BpnlLoad(filename: string; var ORs: string);
-    procedure BpnlSave(filename: string; const ORs: string);
+    procedure BpnlLoad(filename: string; var areas: string);
+    procedure BpnlSave(filename: string; const areas: string);
 
     procedure Paint();
     function PaintCursor(CursorPos: TPoint): TCursorDraw;
@@ -129,7 +129,7 @@ implementation
 uses ReliefObjects, ownStrUtils;
 
 // nacitani souboru s bitmapovymi daty
-procedure TPanelBitmap.BpnlLoad(filename: string; var ORs: string);
+procedure TPanelBitmap.BpnlLoad(filename: string; var areas: string);
 var buffer: array [0 .. 5] of Byte;
 begin
   Self.mFileState := fsSaved;
@@ -213,21 +213,21 @@ begin
     if (version >= $31) then
     begin
       Self.trainPoss.LoadBpnl(f, version);
-      Self.BpnlReadAndValidateSeparator(f, 'mezi pozicemi pro soupravy a oblastmi řízení');
+      Self.BpnlReadAndValidateSeparator(f, 'mezi pozicemi pro soupravy a dopravny');
     end;
 
     // -------------------------------------------
 
-    // nacitani oblasti rizeni
-    ORs := '';
+    // nacitani dopraven
+    areas := '';
 
     // precteme delku
-    BlockReadOrException(f, buffer, 2, 'délka oblastí řízení');
+    BlockReadOrException(f, buffer, 2, 'délka dopraven');
     var len := (buffer[0] shl 8) + buffer[1];
     var bytesBuf: TBytes;
     SetLength(bytesBuf, len);
-    var areasLen := BlockReadOrException(f, bytesBuf, len, 'oblasti řízení');
-    ORs := TEncoding.UTF8.GetString(bytesBuf, 0, areasLen);
+    var areasLen := BlockReadOrException(f, bytesBuf, len, 'dopravny');
+    areas := TEncoding.UTF8.GetString(bytesBuf, 0, areasLen);
   finally
     CloseFile(f);
   end;
@@ -268,7 +268,7 @@ begin
     raise EFileLoad.Create('Chybí oddělovací sekvence '+where+'!');
 end;
 
-procedure TPanelBitmap.BpnlSave(filename: string; const ORs: string);
+procedure TPanelBitmap.BpnlSave(filename: string; const areas: string);
 var buffer: array [0 .. 6] of Byte;
 begin
   Self.mFileState := fsSaved;
@@ -330,7 +330,7 @@ begin
     WriteSeparator(f);
 
     // -------------------------------------------
-    var len := TEncoding.UTF8.GetByteCount(ORs);
+    var len := TEncoding.UTF8.GetByteCount(areas);
     var bytesBuf: TBytes;
     SetLength(bytesBuf, len);
 
@@ -339,7 +339,7 @@ begin
     buffer[1] := lo(len);
     BlockWrite(f, buffer, 2);
 
-    bytesBuf := TEncoding.UTF8.GetBytes(ORs);
+    bytesBuf := TEncoding.UTF8.GetBytes(areas);
     BlockWrite(f, bytesBuf[0], len);
     WriteSeparator(f);
 

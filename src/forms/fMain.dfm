@@ -4000,7 +4000,7 @@ object F_Main: TF_Main
       end
       object MI_Areas: TMenuItem
         Tag = 5
-        Caption = 'Oblasti '#345#237'zen'#237
+        Caption = 'Dopravny'
         GroupIndex = 1
         RadioItem = True
         OnClick = MI_ModeClick
@@ -4017,7 +4017,7 @@ object F_Main: TF_Main
         Caption = '-'
       end
       object MI_AreaAdd: TMenuItem
-        Caption = 'P'#345'idat oblast '#345#237'zen'#237
+        Caption = 'P'#345'idat dopravnu'
         OnClick = MI_AreaAddClick
       end
     end

@@ -40,32 +40,32 @@ object F_NewRelief: TF_NewRelief
     Top = 103
     Width = 705
     Height = 321
-    Caption = ' Prvn'#237' oblast '#345#237'zen'#237' '
+    Caption = ' Prvn'#237' dopravna '
     TabOrder = 1
     object Label3: TLabel
       Left = 16
-      Top = 88
-      Width = 34
+      Top = 85
+      Width = 56
       Height = 13
-      Caption = 'N'#225'zev:'
+      Caption = 'Pln'#253' n'#225'zev:'
     end
     object Label4: TLabel
       Left = 16
-      Top = 115
+      Top = 112
       Width = 143
       Height = 13
       Caption = 'Zkratka n'#225'zvu (max 6 znak'#367'):'
     end
     object Label5: TLabel
-      Left = 16
-      Top = 142
-      Width = 96
+      Left = 17
+      Top = 139
+      Width = 56
       Height = 13
-      Caption = 'Unik'#225'tn'#237' n'#225'zev (ID):'
+      Caption = 'Unik'#225'tn'#237' ID:'
     end
     object Label10: TLabel
       Left = 16
-      Top = 169
+      Top = 166
       Width = 54
       Height = 13
       Caption = 'Lich'#253' sm'#283'r:'
@@ -73,9 +73,9 @@ object F_NewRelief: TF_NewRelief
     object Label11: TLabel
       Left = 16
       Top = 196
-      Width = 67
+      Width = 169
       Height = 13
-      Caption = 'Orientace DK:'
+      Caption = 'Orientace dopravn'#237' kancel'#225#345'e (DK):'
     end
     object Image1: TImage
       Left = 213
@@ -389,15 +389,15 @@ object F_NewRelief: TF_NewRelief
       OnKeyPress = E_NameKeyPress
     end
     object CHB_ModCasStart: TCheckBox
-      Left = 17
-      Top = 253
+      Left = 16
+      Top = 246
       Width = 218
       Height = 17
       Caption = 'Opr'#225'vn'#283'n'#237' k zapnut'#237' modelov'#233'ho '#269'asu'
       TabOrder = 6
     end
     object CHB_ModCasStop: TCheckBox
-      Left = 17
+      Left = 16
       Top = 269
       Width = 218
       Height = 17
@@ -405,8 +405,8 @@ object F_NewRelief: TF_NewRelief
       TabOrder = 7
     end
     object CHB_ModCasSet: TCheckBox
-      Left = 17
-      Top = 284
+      Left = 16
+      Top = 292
       Width = 218
       Height = 17
       Caption = 'Opr'#225'vn'#283'n'#237' k nastaven'#237' modelov'#233'ho '#269'asu'
@@ -457,16 +457,16 @@ object F_NewRelief: TF_NewRelief
         object Label7: TLabel
           Left = 16
           Top = 24
-          Width = 60
+          Width = 55
           Height = 13
-          Caption = 'MTB adresa:'
+          Caption = 'RCS modul:'
         end
         object Label8: TLabel
           Left = 16
           Top = 51
           Width = 47
           Height = 13
-          Caption = 'MTB port:'
+          Caption = 'RCS port:'
         end
         object Label9: TLabel
           Left = 16
@@ -541,8 +541,8 @@ object F_NewRelief: TF_NewRelief
       Height = 17
       AutoSize = False
       Caption = 
-        'P'#345'ed zapo'#269'at'#237'm vlastn'#237' editace je d'#367'le'#382'it'#233' vytvo'#345'it prvotn'#237' obla' +
-        'st '#345#237'zen'#237'. V budoucnu budete moci p'#345'idat dal'#353#237' oblasti '#345#237'zen'#237'.'
+        'P'#345'ed zapo'#269'at'#237'm vlastn'#237' editace je d'#367'le'#382'it'#233' vytvo'#345'it prvn'#237' doprav' +
+        'nu. N'#225'sledn'#283' budete moci p'#345'idat dal'#353#237' dopravnu.'
       TabOrder = 10
     end
     object StaticText2: TStaticText
@@ -552,10 +552,9 @@ object F_NewRelief: TF_NewRelief
       Height = 33
       AutoSize = False
       Caption = 
-        'Je d'#367'le'#382'it'#233', aby byl unik'#225'tn'#237' n'#225'zev unik'#225'tn'#237' pouze pro danou obl' +
-        'ast '#345#237'zen'#237'. Pokud tedy budete vytv'#225#345'et reli'#233'f s ji'#382' naeditovanou' +
-        ' oblast'#237' '#345#237'zen'#237', p'#345'i'#345'a'#271'te t'#233'to oblasti '#345#237'zen'#237' stejn'#253' unik'#225'tn'#237' n'#225 +
-        'zev.'
+        'Je d'#367'le'#382'it'#233', aby bylo ID unik'#225'tn'#237' nap'#345#237#269' v'#353'emi dopravnami. Pokud' +
+        ' tedy budete vytv'#225#345'et reli'#233'f s ji'#382' naeditovanou dopravnou, p'#345'i'#345'a' +
+        #271'te t'#233'to dopravn'#283' stejn'#233' Unik'#225'tn'#237' ID.'
       TabOrder = 11
     end
   end

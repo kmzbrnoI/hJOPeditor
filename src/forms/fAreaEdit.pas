@@ -1,13 +1,13 @@
-﻿unit fOREdit;
+﻿unit fAreaEdit;
 
 interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, Spin, OblastRizeni, Generics.Collections;
+  Dialogs, StdCtrls, ExtCtrls, Spin, Area, Generics.Collections;
 
 type
-  TF_OREdit = class(TForm)
+  TF_AreaEdit = class(TForm)
     GB_Osv: TGroupBox;
     Label6: TLabel;
     SE_OsvCnt: TSpinEdit;
@@ -50,16 +50,16 @@ type
     area: TArea;
     lights: TList<TAreaLight>;
 
-    procedure EditOR(area: TArea); overload;
+    procedure EditArea(area: TArea); overload;
 
   public
 
-    procedure NewOR();
-    procedure EditOR(orindex: Integer); overload;
+    procedure NewArea();
+    procedure EditArea(orindex: Integer); overload;
   end;
 
 var
-  F_OREdit: TF_OREdit;
+  F_AreaEdit: TF_AreaEdit;
 
 implementation
 
@@ -68,11 +68,11 @@ uses fMain;
 {$R *.dfm}
 
 // ulozi vsechna data
-procedure TF_OREdit.B_ApplyClick(Sender: TObject);
+procedure TF_AreaEdit.B_ApplyClick(Sender: TObject);
 begin
   if ((Self.E_Name.Text = '') or (Self.E_NameShort.Text = '') or (Self.E_NameUniq.Text = '')) then
   begin
-    Application.MessageBox('Název, zkratka názvu a unikátní název (ID) oblasti řízení musí být vyplněno!',
+    Application.MessageBox('Název, zkratka názvu a unikátní název (ID) dopravny musí být vyplněny!',
       'Nelze pokračovat', MB_OK OR MB_ICONERROR);
     Exit();
   end;
@@ -114,19 +114,19 @@ begin
   Self.Close();
 end;
 
-procedure TF_OREdit.B_StornoClick(Sender: TObject);
+procedure TF_AreaEdit.B_StornoClick(Sender: TObject);
 begin
   Self.Close();
 end;
 
-procedure TF_OREdit.E_NameUniqKeyPress(Sender: TObject; var Key: Char);
+procedure TF_AreaEdit.E_NameUniqKeyPress(Sender: TObject; var Key: Char);
 begin
   // obrana proti injection do souboru
   if (Key = ';') then
     Key := #0;
 end;
 
-procedure TF_OREdit.E_OsvAddrExit(Sender: TObject);
+procedure TF_AreaEdit.E_OsvAddrExit(Sender: TObject);
 begin
   var i := Self.LB_Osv.ItemIndex;
   if ((i >= 0) and (i < Self.lights.Count)) then
@@ -139,23 +139,23 @@ begin
   end;
 end;
 
-procedure TF_OREdit.FormClose(Sender: TObject; var Action: TCloseAction);
+procedure TF_AreaEdit.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Self.openindex := -1;
 end;
 
-procedure TF_OREdit.FormCreate(Sender: TObject);
+procedure TF_AreaEdit.FormCreate(Sender: TObject);
 begin
   Self.lights := TList<TAreaLight>.Create();
   Self.openindex := -1;
 end;
 
-procedure TF_OREdit.FormDestroy(Sender: TObject);
+procedure TF_AreaEdit.FormDestroy(Sender: TObject);
 begin
   Self.lights.Free();
 end;
 
-procedure TF_OREdit.LB_OsvClick(Sender: TObject);
+procedure TF_AreaEdit.LB_OsvClick(Sender: TObject);
 begin
   if ((Sender as TListBox).ItemIndex = -1) then
   begin
@@ -174,13 +174,13 @@ begin
   Self.GB_OsvOne.Visible := true;
 end;
 
-procedure TF_OREdit.EditOR(orindex: Integer);
+procedure TF_AreaEdit.EditArea(orindex: Integer);
 begin
   Self.openindex := orindex;
-  Self.EditOR(F_Main.Relief.areas[orindex]);
+  Self.EditArea(F_Main.Relief.areas[orindex]);
 end;
 
-procedure TF_OREdit.EditOR(area: TArea);
+procedure TF_AreaEdit.EditArea(area: TArea);
 begin
   Self.area := area;
 
@@ -209,12 +209,12 @@ begin
 
   Self.SE_OsvCnt.Value := Self.area.Lights.Count;
 
-  Self.Caption := 'Oblast řízení ' + Self.area.Id;
+  Self.Caption := 'Dopravna ' + Self.area.Id;
   Self.ActiveControl := Self.E_Name;
   Self.ShowModal();
 end;
 
-procedure TF_OREdit.NewOR();
+procedure TF_AreaEdit.NewArea();
 begin
   Self.area := nil;
   Self.GB_OsvOne.Visible := false;
@@ -235,12 +235,12 @@ begin
   Self.LB_Osv.Clear();
   Self.SE_OsvCnt.Value := 0;
 
-  Self.Caption := 'Nová oblast řízení';
+  Self.Caption := 'Nová dopravna';
   Self.ActiveControl := Self.E_Name;
   Self.ShowModal();
 end;
 
-procedure TF_OREdit.SE_OsvCntChange(Sender: TObject);
+procedure TF_AreaEdit.SE_OsvCntChange(Sender: TObject);
 begin
   while (Self.lights.Count < Self.SE_OsvCnt.Value) do
   begin

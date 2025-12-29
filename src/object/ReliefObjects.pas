@@ -5,7 +5,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, IniFiles,
-  StrUtils, Global, Menus, Forms, DXDraws, OblastRizeni, PGraphics, Types,
+  StrUtils, Global, Menus, Forms, DXDraws, Area, PGraphics, Types,
   Generics.Collections, symbolHelper, vetev, ObjBlok, ReliefCommon;
 
 const
@@ -101,7 +101,7 @@ type
 
     function GetObject(Pos: TPoint): Integer;
 
-    procedure SetArea(areai: Integer); // nastavi oblast rizeni vybranemu bloku
+    procedure SetArea(areai: Integer); // nastavi dopravnu vybranemu bloku
 
     function CheckValid(var error_cnt: Cardinal): TStrings; // overi validitu naeditovanych dat a vrati chybove hlasky
 
@@ -242,7 +242,7 @@ begin
 
     Self.ComputePrjPanelUsek();
 
-    // oblasti rizeni
+    // dopravny
     var str_list: TStrings := TStringList.Create();
     try
       ExtractStringsEx([#13], [], LeftStr(ORs, Length(ORs) - 1), str_list);
@@ -567,11 +567,7 @@ begin
 
     var areai := Self.FindAreaI(Self.AreaOpStart, Position);
     if (areai < 0) then
-    begin
-      raise ENoArea.Create('Ve výběru nenalezena žádná oblast řízení!');
-      //Application.MessageBox('Ve výběru nenalezena žádná oblast řízení!', 'Chyba', MB_OK OR MB_ICONWARNING);
-      //Exit();
-    end;
+      raise ENoArea.Create('Ve výběru nenalezena žádná dopravna!');
 
     for var x: Integer := Self.AreaOpStart.X to Position.X do
     begin
@@ -614,8 +610,8 @@ end;
 
 /// /////////////////////////////////////////////////////////////////////////////
 
-// tato funkce prirazuje aktivnimu bloku obalst rizeni v paramtru
-// to je uzitecne k tomu, ze pri vybrani bloku a nesdlednemu kliku na baracek dojde k prirazeni teto oblasti rizeni
+// tato funkce prirazuje aktivnimu bloku dopravnu v paramtru
+// to je uzitecne k tomu, ze pri vybrani bloku a nesdlednemu kliku na baracek dojde k prirazeni teto dopravny
 procedure TPanelObjects.SetArea(areai: Integer);
 begin
   if (Self.Selected = nil) then
@@ -634,7 +630,7 @@ begin
     Result.Add('Validace objektů: ' + str);
   end;
 
-  Result.Add('Ověřuji návaznost úseku na technologické bloky, návaznost na oblasti řízeni...');
+  Result.Add('Ověřuji návaznost úseku na technologické bloky, návaznost na dopravny...');
   Result.Add('Ověřuji návaznost výhybek na úseky...');
   Result.Add('Ověřuji pojmenování kolejí...');
   Result.Add('Ověřuji kořeny...');
@@ -650,7 +646,7 @@ begin
     if ((Self.blocks[i].area < 0) and ((Self.blocks[i].typ <> TBlkType.other)
       xor ((Self.blocks[i].typ = TBlkType.text) and (Length((Self.blocks[i] as TText).text) > 1)))) then
     begin
-      Result.Add('ERR: blok ' + IntToStr(i) + ': není návaznost na oblast řízení');
+      Result.Add('ERR: blok ' + IntToStr(i) + ': není návaznost na dopravnu');
       error_cnt := error_cnt + 1;
     end;
 

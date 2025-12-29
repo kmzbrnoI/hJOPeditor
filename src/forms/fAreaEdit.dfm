@@ -1,9 +1,9 @@
-object F_OREdit: TF_OREdit
+object F_AreaEdit: TF_AreaEdit
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsToolWindow
-  Caption = '[Editace oblasti '#345#237'zen'#237']'
+  Caption = 'F_AreaEdit'
   ClientHeight = 281
   ClientWidth = 703
   Color = clBtnFace
@@ -300,9 +300,9 @@ object F_OREdit: TF_OREdit
   object Label3: TLabel
     Left = 16
     Top = 16
-    Width = 34
+    Width = 105
     Height = 13
-    Caption = 'N'#225'zev:'
+    Caption = 'Pln'#253' n'#225'zev dopravny:'
   end
   object Label4: TLabel
     Left = 16
@@ -314,9 +314,9 @@ object F_OREdit: TF_OREdit
   object Label5: TLabel
     Left = 16
     Top = 70
-    Width = 96
+    Width = 56
     Height = 13
-    Caption = 'Unik'#225'tn'#237' n'#225'zev (ID):'
+    Caption = 'Unik'#225'tn'#237' ID:'
   end
   object Label10: TLabel
     Left = 16
@@ -328,9 +328,9 @@ object F_OREdit: TF_OREdit
   object Label11: TLabel
     Left = 16
     Top = 124
-    Width = 67
+    Width = 169
     Height = 13
-    Caption = 'Orientace DK:'
+    Caption = 'Orientace dopravn'#237' kancel'#225#345'e (DK):'
   end
   object GB_Osv: TGroupBox
     Left = 317
@@ -377,16 +377,16 @@ object F_OREdit: TF_OREdit
       object Label7: TLabel
         Left = 16
         Top = 24
-        Width = 60
+        Width = 55
         Height = 13
-        Caption = 'MTB adresa:'
+        Caption = 'RCS modul:'
       end
       object Label8: TLabel
         Left = 16
         Top = 51
         Width = 47
         Height = 13
-        Caption = 'MTB port:'
+        Caption = 'RCS port:'
       end
       object Label9: TLabel
         Left = 16
@@ -431,7 +431,7 @@ object F_OREdit: TF_OREdit
   end
   object CHB_ModCasSet: TCheckBox
     Left = 17
-    Top = 212
+    Top = 227
     Width = 218
     Height = 17
     Caption = 'Opr'#225'vn'#283'n'#237' k nastaven'#237' modelov'#233'ho '#269'asu'
@@ -439,7 +439,7 @@ object F_OREdit: TF_OREdit
   end
   object CHB_ModCasStop: TCheckBox
     Left = 17
-    Top = 197
+    Top = 204
     Width = 218
     Height = 17
     Caption = 'Opr'#225'vn'#283'n'#237' k vypnut'#237' modelov'#233'ho '#269'asu'

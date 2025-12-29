@@ -4,7 +4,7 @@ interface
 
 uses DXDraws, ImgList, Controls, Windows, SysUtils, Graphics, Classes, Types,
   ReliefObjects, Forms, StdCtrls, ExtCtrls, ReliefBitmap, Menus, ReliefText,
-  Global, BitmapToObj, OblastRizeni, StrUtils, DirectX, PGraphics,
+  Global, BitmapToObj, Area, StrUtils, DirectX, PGraphics,
   ObjBlok, symbolHelper, Generics.Collections, ReliefCommon;
 
 type
@@ -194,7 +194,7 @@ implementation
 
 {$R Resource.res}
 
-uses fOREdit, fMain, ownStrUtils;
+uses fAreaEdit, fMain, ownStrUtils;
 
 constructor TRelief.Create(DDRaw: TDXDraw; aParentForm: TForm);
 begin
@@ -500,7 +500,7 @@ begin
       // Open DK window od DK double-click
       var orGraf: TORGRaf := Self.GetORGraf(LastPos);
       if ((orGraf.areai > -1) and (orGraf.objType = TORGraphSymbol.orsDK)) then
-        F_OREdit.EditOR(orGraf.areai);
+        F_AreaEdit.EditArea(orGraf.areai);
 
       Self.BitmapDblClick(LastPos);
     end;
@@ -585,7 +585,7 @@ begin
   else if ((Self.DrawMode in [dmBitmap, dmSepHor, dmSepVert]) and (newMode in [dmBitmap, dmSepHor, dmSepVert])) then
     Self.PanelBitmap.Mode := newMode
 
-  // konverze Bloky <-> Koreny <-> Oblasti rizeni
+  // konverze Bloky <-> Koreny <-> Dopravny
   else if ((Self.DrawMode in [dmBlocks, dmRoots, dmAreas]) and (newMode in [dmBlocks, dmRoots, dmAreas]))
   then
     Self.PanelObjects.Mode := newMode;
@@ -798,7 +798,7 @@ begin
 end;
 
 /// /////////////////////////////////////////////////////////////////////////////
-// operace s oblastmi rizeni:
+// operace s dopravnami:
 
 procedure TRelief.AddOR(area: TArea);
 begin
@@ -814,7 +814,7 @@ begin
       Self.areas.Delete(i);
 end;
 
-// vykresli vsechny oblasti rizeni
+// vykresli vsechny dopravny
 // zatim jen baracky
 // bereme ohled na posun
 procedure TRelief.PaintAreas();
@@ -979,7 +979,7 @@ end;
 
 procedure TRelief.DKPropClick(Sender: TObject);
 begin
-  F_OREdit.EditOR(Self.ORClick.areai);
+  F_AreaEdit.EditArea(Self.ORClick.areai);
 end;
 
 procedure TRelief.DKDeleteClick(Sender: TObject);
@@ -994,7 +994,7 @@ begin
     Self.areas.Delete(Self.ORClick.areai);
 end;
 
-// na kazdem radku je ulozena jedna oblast rizeni ve formatu:
+// na kazdem radku je ulozena jedna dopravna ve formatu:
 // nazev;nazev_zkratka;id;lichy_smer(0,1);orientace_DK(0,1);ModCasStart(0,1);ModCasStop(0,1);ModCasSet(0,1);dkposx;dkposy;qposx;qposy;timeposx;timeposy;osv_mtb|osv_port|osv_name;
 function TRelief.ORSave(): string;
 begin
@@ -1015,7 +1015,7 @@ begin
   Result := Result + #13;
 end;
 
-// na kazdem radku je ulozena jedna oblast rizeni ve formatu:
+// na kazdem radku je ulozena jedna dopravna ve formatu:
 // nazev;nazev_zkratka;id;lichy_smer(0,1);orientace_DK(0,1);ModCasStart(0,1);ModCasStop(0,1);ModCasSet(0,1);dkposx;dkposy;qposx;qposy;timeposx;timeposy;osv_mtb|osv_port|osv_name;
 procedure TRelief.ORLoad(data: string);
 var lines, data_main, data_osv, data_osv2: TStrings;
@@ -1109,7 +1109,7 @@ begin
   end;
 end;
 
-// konec operaci s oblastmi rizeni
+// konec operaci s dopravnami
 /// /////////////////////////////////////////////////////////////////////////////
 
 function TRelief.CheckValid(var error_cnt: Cardinal): TStrings;

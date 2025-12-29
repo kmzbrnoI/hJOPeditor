@@ -1,6 +1,6 @@
-unit OblastRizeni;
+unit Area;
 
-// delkarace struktur Oblasti rizeni
+// Dopravna
 
 interface
 
@@ -12,14 +12,14 @@ const
   _OR_TIME_SIZE: TPoint = (X: 16; Y: 1);
 
 type
-  // 1 osvetleni
+  // 1 osvetleni dopravny
   TAreaLight = record
     Board: Cardinal;
     Port: Cardinal;
     Name: string; // max 5 characters
   end;
 
-  // prava
+  // prava dopravny
   TAreaRights = record
     ModCasStart: Boolean;
     ModCasStop: Boolean;
@@ -28,7 +28,7 @@ type
 
   TDKOrientation = (dkoDown = 0, dkoUp = 1);
 
-  // pozice symbolu OR
+  // pozice symbolu domecku dopravny
   TPoss = record
     DK: TPoint;
     DKOr: TDKOrientation;
@@ -38,7 +38,7 @@ type
 
   TOROddDirection = (ordLeftToRight = 0, ordRightToLeft = 1);
 
-  // 1 OR
+  // Dopravna
   TArea = class
   public
     Name: string;
@@ -57,9 +57,9 @@ type
 
   TORGraphSymbol = (orsDK = 0, orsQueue = 1, orsTime = 2);
 
-  // pouzivao pri presunech OR apod.
+  // pouzivao pri presunech dopraven apod.
   TORGraf = record
-    areai: Integer; // index or a moving or (-1 = no moving)
+    areai: Integer; // index of a moving area (-1 = no moving)
     objType: TORGraphSymbol;
   end;
 

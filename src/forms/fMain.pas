@@ -207,8 +207,8 @@ var
 
 implementation
 
-uses fNewRelief, fChangeRelief, fReliefSettings, fPopiskek, OblastRizeni,
-  fOREdit, fDataCheck, fImportLog, fOffset;
+uses fNewRelief, fChangeRelief, fReliefSettings, fPopiskek, Area,
+  fAreaEdit, fDataCheck, fImportLog, fOffset;
 
 {$R *.dfm}
 
@@ -518,7 +518,7 @@ end;
 
 procedure TF_Main.MI_AreaAddClick(Sender: TObject);
 begin
-  F_OREdit.NewOR();
+  F_AreaEdit.NewArea();
 end;
 
 procedure TF_Main.PM_ReliefOptionsClick(Sender: TObject);
