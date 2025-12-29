@@ -181,9 +181,9 @@
         <DCCReference Include="forms\fBlockEdit.pas">
             <Form>F_BlockEdit</Form>
         </DCCReference>
-        <DCCReference Include="OblastRizeni.pas"/>
-        <DCCReference Include="forms\fOREdit.pas">
-            <Form>F_OREdit</Form>
+        <DCCReference Include="Area.pas"/>
+        <DCCReference Include="forms\fAreaEdit.pas">
+            <Form>F_AreaEdit</Form>
         </DCCReference>
         <DCCReference Include="forms\fDataCheck.pas">
             <Form>F_DataCheck</Form>

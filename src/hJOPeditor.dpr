@@ -20,8 +20,8 @@ uses
   ReliefBitmapSymbols in 'bitmap\ReliefBitmapSymbols.pas',
   BitmapToObj in 'BitmapToObj.pas',
   fBlockEdit in 'forms\fBlockEdit.pas' {F_BlockEdit},
-  OblastRizeni in 'OblastRizeni.pas',
-  fOREdit in 'forms\fOREdit.pas' {F_OREdit},
+  Area in 'Area.pas',
+  fAreaEdit in 'forms\fAreaEdit.pas' {F_AreaEdit},
   fDataCheck in 'forms\fDataCheck.pas' {F_DataCheck},
   PGraphics in 'PGraphics.pas',
   VetveComputer in 'object\VetveComputer.pas',
@@ -57,7 +57,7 @@ begin
   Application.CreateForm(TF_ReliefOptions, F_ReliefOptions);
   Application.CreateForm(TF_Popisek, F_Popisek);
   Application.CreateForm(TF_BlockEdit, F_BlockEdit);
-  Application.CreateForm(TF_OREdit, F_OREdit);
+  Application.CreateForm(TF_AreaEdit, F_AreaEdit);
   Application.CreateForm(TF_DataCheck, F_DataCheck);
   Application.CreateForm(TF_ImportLog, F_ImportLog);
   Application.CreateForm(TF_Offset, F_Offset);
